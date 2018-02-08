@@ -1,0 +1,220 @@
+MODULE m_orbinteg
+
+
+! ----------------------------------------------------------------------
+! MODULE: m_orbinteg.f03
+! ----------------------------------------------------------------------
+! Purpose:
+!  Module for orbit integration
+!  Numerical integration of Equation of Motion and Variational Equations 
+! ----------------------------------------------------------------------
+! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
+! Created:	5 October 2017
+! ----------------------------------------------------------------------
+
+
+      IMPLICIT NONE
+      !SAVE 			
+  
+	  
+Contains
+	  
+	  
+SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqC)
+
+
+! ----------------------------------------------------------------------
+! SUBROUTINE: orbinteg.f03
+! ----------------------------------------------------------------------
+! Purpose:
+!  Orbit Integration: Numerical integration of Equation of Motion and Variational Equations
+! ----------------------------------------------------------------------
+! Input arguments:
+! - INfname: 	Input cofiguration file name for the orbit parameterization 
+! - VEQmode:	VEQmode = 0 :: Variational Equations integration is not performed
+! 				VEQmode = 1 :: Variational Equations integration is performed
+!
+! Output arguments:
+! - orbC: 		Satellite orbit array in ICRF including the following per epoch:
+!               - Modified Julian Day number (including the fraction of the day) 
+!				- Seconds since 00h 
+!				- Position vector (m)
+!				- Velocity vector (m/sec)
+! - veqC:		Variational Equations solution based on numerical integration methods
+! ----------------------------------------------------------------------
+! Note 1:
+! The time scale of the 2 first collumns of the orbit arrays (MJD and Seoncds since 00h) 
+! refer to the time system defined by the global variable TIME_SCALE in the module mdl_param.f03
+! according to the input parameterization file 
+! ----------------------------------------------------------------------
+! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
+! Created:	5 October 2017
+! ----------------------------------------------------------------------
+	  
+	  
+      USE mdl_precision
+      USE mdl_num
+      USE m_integrEQM
+      USE mdl_param
+      IMPLICIT NONE
+
+	  
+! ----------------------------------------------------------------------
+! Dummy arguments declaration
+! ----------------------------------------------------------------------
+! IN
+      CHARACTER (LEN=100), INTENT(IN)  :: INfname				
+      INTEGER (KIND = prec_int2), INTENT(IN) :: VEQmode 
+! ----------------------------------------------------------------------
+! OUT
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbC, veqC  
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Local variables declaration
+! ----------------------------------------------------------------------
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Smatrix, Pmatrix 
+      REAL (KIND = prec_d) :: MJDo
+      REAL (KIND = prec_d), DIMENSION(3) :: ro, vo
+      REAL (KIND = prec_d), DIMENSION(6) :: Zo_icrf
+      REAL (KIND = prec_d) :: arc
+      INTEGER (KIND = prec_int2) :: integID
+      REAL (KIND = prec_d) :: step
+! ----------------------------------------------------------------------
+      REAL (KIND = prec_d) :: to_sec     
+      REAL (KIND = prec_d) :: t_sec     
+      INTEGER (KIND = prec_int8) :: Nepochs, i, j
+      INTEGER (KIND = prec_int8) :: sz1, sz2 
+      INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
+	  REAL (KIND = prec_d) :: mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
+      DOUBLE PRECISION EOP_cr(7)
+      DOUBLE PRECISION CRS2TRS(3,3), TRS2CRS(3,3), d_CRS2TRS(3,3), d_TRS2CRS(3,3)
+      REAL (KIND = prec_d) :: r_TRS(3), v_TRS(3)
+      REAL (KIND = prec_d) :: r_CRS(3), v_CRS(3)
+      REAL (KIND = prec_d) :: v_TRS_1(3), v_TRS_2(3), v_CRS_1(3), v_CRS_2(3)	  
+! ----------------------------------------------------------------------
+      INTEGER IY, IM, ID, J_flag
+      DOUBLE PRECISION DJM0, sec, FD, Sec0
+
+
+
+
+
+! ----------------------------------------------------------------------
+! Read orbit parameterization
+Call prm_main (INfname)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Orbit integrator input parameters
+! ----------------------------------------------------------------------
+MJDo = MJD_to
+ro(1:3) = SVEC_Zo(1:3)
+vo(1:3) = SVEC_Zo(4:6)
+integID = integmeth
+step = integstep
+arc = orbarc
+! ----------------------------------------------------------------------
+
+
+
+! ----------------------------------------------------------------------
+! Orbit integration
+! ----------------------------------------------------------------------
+
+if (VEQmode == 0) then
+
+! ----------------------------------------------------------------------
+! Orbit propagation based on numerical integration methods 
+! ----------------------------------------------------------------------
+! Numerical integration of the Equation of Motion
+Call integr_EQM (MJDo, ro, vo, arc, integID, step, orbC)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+sz1 = size(orbC, DIM = 1)
+sz2 = size(orbC, DIM = 2)
+ALLOCATE (veqC(sz1,sz2), STAT = AllocateStatus)
+veqC = orbC
+! ----------------------------------------------------------------------
+
+
+Else if (VEQmode == 1) then
+
+! ----------------------------------------------------------------------
+! Variational Equations solution based on numerical integration
+! ----------------------------------------------------------------------
+! Call integr_veq (MJDo, ro, vo, arc, integID, step, orbC, veqC )
+!Call integr_VEQ (MJDo, ro, vo, arc, integID, step, orbc, Smatrix, Pmatrix)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+sz1 = size(Pmatrix, DIM = 1)
+sz2 = size(Pmatrix, DIM = 2)
+ALLOCATE (veqC(sz1,6+sz2), STAT = AllocateStatus)
+veqC(1:sz1,1:6)     = Smatrix
+veqC(1:sz1,7:6+sz2) = Pmatrix
+! ----------------------------------------------------------------------
+
+
+End If
+! ----------------------------------------------------------------------
+
+
+
+
+
+
+! ----------------------------------------------------------------------
+! Time Scale transformation in orbC matrix
+! ----------------------------------------------------------------------
+! Time scale change is applied in case that TIME_SCALE .NOT. Terrestrial Time
+! TIME_SCALE: global variable in module mdl_param.f03
+! ----------------------------------------------------------------------
+If (TIME_SCALE /= 'TT') Then
+
+sz1 = size(orbC, DIM = 1)
+sz2 = size(orbC, DIM = 2)
+Nepochs = sz1
+
+Do i = 1 , Nepochs
+
+! MJD in TT Time
+mjd = orbC(i,1)
+
+! Time scale: TT to GPS time
+CALL time_TT (mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC)
+
+! Test the TIME_SCALE global variable in mdl_param.f03	
+If (TIME_SCALE == 'GPS') then
+	mjd = mjd_GPS		
+Else if (TIME_SCALE == 'UTC') then
+	mjd = mjd_UTC		
+Else if (TIME_SCALE == 'TAI') then
+	mjd = mjd_TAI		
+End If	
+
+! Seconds since 00h
+t_sec = (mjd - INT(mjd)) * (24.D0 * 3600.D0)
+! Seconds since 00h
+If (t_sec >= 86400.D0) Then
+	t_sec = t_sec - INT(t_sec / 86400.D0) * 86400.D0
+End IF
+
+! Time scale change in orbC
+orbC(i,1) = mjd
+orbC(i,2) = t_sec
+
+End Do
+
+End If
+! ----------------------------------------------------------------------
+
+
+
+
+END SUBROUTINE
+
+
+End
+
