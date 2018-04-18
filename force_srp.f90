@@ -1,5 +1,5 @@
 
-SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
+SUBROUTINE force_srp (GM,prnnum,BLKNUM,eclpf,srpid,r,v,r_sun,beta,del_u,fx,fy,fz )
 
 
 ! ----------------------------------------------------------------------
@@ -20,9 +20,11 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! - r            : satellite position vector (m)
 ! - v            : satellite velocity vector
 ! - r_sun        : Sun position vector
+! - beta         : Sun elevation wrt satellite orbit plane
 ! 
 ! Output arguments:
-! - fx,fy,fz:		Acceleration's cartesian components (m)
+! - del_u        : satellite-Sun argument of lattitude       
+! - fx,fy,fz:	 : Acceleration's cartesian components (m)
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Tzupang Tseng
 !
@@ -40,9 +42,7 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
       INTEGER                           :: eclpf,srpid
-      INTEGER                           :: prnnum
-!      REAL (KIND = prec_q), INTENT(IN), DIMENSION(3) :: r,v,r_sun
-!      REAL (KIND = prec_q), INTENT(OUT) :: fx,fy,fz
+      INTEGER                           :: prnnum,BLKNUM
       REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
       REAL (KIND = prec_q)               :: fx,fy,fz
 
@@ -54,13 +54,16 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       REAL (KIND = prec_q) :: ANG,GM
       REAL (KIND = prec_q) :: Ds,sclfa
 
-      REAL (KIND = prec_q) :: R1(3,3),R3(3,3)
-      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb
+      REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
+      REAL (KIND = prec_q) :: surforce(4,3)
+      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex
       REAL (KIND = prec_q), DIMENSION(3) :: fsrp
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
-      REAL (KIND = prec_q), DIMENSION(9) :: srpcoef 
+      REAL (KIND = prec_q), DIMENSION(9) :: srpcoef
+      REAL (KIND = prec_q), DIMENSION(4) :: cosang
+      REAL (KIND = prec_q), DIMENSION(4) :: AREA1,REFL1,DIFU1,ABSP1
       INTEGER              :: zta
-      INTEGER              :: i,j
+      INTEGER              :: i,j,k
 ! ----------------------------------------------------------------------
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
@@ -80,9 +83,13 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! Numerical Constants
       Ps = 4.56D-6 ! (Nm^-2)
       Cr = 1.4 ! SRP coefficient ranges from 1.3 to 1.5
-      AU = 1.496d11 ! (m)
+      AU = 1.4959787066d11 ! (m)
       Pi = 4*atan(1.0d0)
 ! ---------------------------------------------------------------------
+
+!
+
+eclpf=0
 
 
 ! The unit vector er SAT->EARTH
@@ -124,49 +131,74 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 
 ! compute the sun position in the satellite orbit plane by rotating omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
-      do i=1,3
-         do j=1,3
-          R3(i,j)=1.0d0
-         end do
-      end do
-      R3(1,3)=0.0d0
-      R3(2,3)=0.0d0
-      R3(3,1)=0.0d0
-      R3(3,2)=0.0d0
-      R3(3,3)=1.0d0
+!   sun                 sun
+!  r    = R(big_w,i) x r
+!   kep                 ICF
+!
 
-      do i=1,3
-         do j=1,3
-          R1(i,j)=1.0d0
-         end do
-      end do
-      R1(1,1)=1.0d0
-      R1(1,2)=0.0d0
-      R1(1,3)=0.0d0
-      R1(2,1)=0.0d0
-      R1(2,3)=0.0d0
+!      do i=1,3
+!         do j=1,3
+!          R3(i,j)=1.0d0
+!         end do
+!      end do
+      R33(1,1)=1.0d0
+      R33(1,2)=1.0d0
+      R33(1,3)=0.0d0
+      R33(2,1)=1.0d0
+      R33(2,2)=1.0d0
+      R33(2,3)=0.0d0
+      R33(3,1)=0.0d0
+      R33(3,2)=0.0d0
+      R33(3,3)=1.0d0
 
 
-      CALL iau_RZ(omega_sat,R3)
-      CALL iau_RX(i_sat,R1)
-      CALL matrix_Rr(R3,r_sun,r_sun1)
-      CALL matrix_Rr(R1,r_sun1,r_sun2)
+!      do i=1,3
+!         do j=1,3
+!          R1(i,j)=1.0d0
+!         end do
+!      end do
+      R11(1,1)=1.0d0
+      R11(1,2)=0.0d0
+      R11(1,3)=0.0d0
+      R11(2,1)=0.0d0
+      R11(2,2)=1.0d0
+      R11(2,3)=1.0d0
+      R11(3,1)=0.0d0
+      R11(3,2)=1.0d0
+      R11(3,3)=1.0d0
 
+! rotate big omega to make the X-axis of the celestial frame consistent with the
+! direction of right ascension of ascending node
+      CALL R3(omega_sat,R33)
+
+! rotate inclination to make the XY plane of the celestial frame consistent with
+! the orbit plane
+      CALL R1(i_sat,R11)
+
+! convert the sun position in the celestial frame to the orbit plane
+      CALL matrix_Rr(R33,r_sun,r_sun1)
+      CALL matrix_Rr(R11,r_sun1,r_sun2)
+
+!compute the sun argument of lattitude and beta angle
       u_sun = atan2(r_sun2(2),r_sun2(1)) ! in rad
+!      beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2)) ! in rad
+      del_u = u_sat - u_sun ! in rad
 
-!      if (u_sun*180/Pi .lt. 0.0d0) then
-!      u_sun=u_sun+2*Pi
-!      end if  
+      if (del_u*180/Pi .gt.360.0d0) then
+      del_u=del_u-2*Pi
+      else if(del_u*180/Pi .lt.0.0d0) then
+      del_u=del_u+2*Pi
+      end if
 
-      beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2)) ! in rad
-      del_u = u_sat - u_sun
+!write (*,*) beta*180.0d0/Pi, del_u*180.0d0/Pi
+
 
 
       if (srpid .eq. 1) then
 ! A simply cannonball model
-! *********************************
+! =================================================================
 !  a=-zta*Cr*(A/m)P(1AU/r)^2*Dr(i)
-! ********************************
+! ==================================================================
 
 ! GPS satellites 
       if (prnnum.ge.1 .and. prnnum.le.32) then
@@ -204,7 +236,6 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       MASS   = 1900.0D0
       end if
 
-! ----------------------------------------------------------------------
 
 ! The main surface area face toward to the Sun using the SAT->SUN and SAT->EARTH
 ! vectors
@@ -216,33 +247,147 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
      AREA=X_SIDE+A_SOLAR
      end if 
 
-! Cartesian counterparts (fx,fy,fz) of acceleration fr
+! Cartesian counterparts (fx,fy,fz) of acceleration fsrP
       fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
       fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
       fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
 
 !write(*,*) fx,fy,fz
 ! end of the cannonball model
-!--------------------------------------------------------------------------
+! =================================================================================
 
+
+
+else if (srpid .eq. 2) then
 
 ! Box-wing model
-! **************
-     else if (srpid .eq. 2) then
+! ================================
 ! initialize the SRP force
 ! -------------------------
+     do i=1,3
+     fsrp(i)=0.0d0
+     end do
+
+
+! GPS Block IIR types
+      if (prnnum.ge.11 .and. prnnum.le.23 .or. prnnum.eq.2 .or. &
+       prnnum.eq.5 .or. prnnum.eq.7 .or. prnnum.eq.28 .or. &
+       prnnum.eq.29 .or. prnnum.eq.31) then
+      MASS   = 1100.0D0
+! Block IIF types
+      else
+      MASS   = 1555.3D0
+      end if
+
+
+! The unit vector of x side (ex = ey x er), which is always illuminated by the
+! sun, parallel to the satellite flight/velocity direction
+
+!     CALL cross_product (ey,er,ex)
+
+! The unit vector ex
+      ex(1)=v(1)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+      ex(2)=v(2)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+      ex(3)=v(3)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+
+
+! angles between ed and each surface(k)
+! k=1: +X
+!   2: +Y
+!   3: +Z
+!   4: solar panels
+
+     cosang(1)=ed(1)*ex(1)+ed(2)*ex(2)+ed(3)*ex(3)
+     cosang(2)=ed(1)*ey(1)+ed(2)*ey(2)+ed(3)*ey(3)
+     cosang(3)=ed(1)*er(1)+ed(2)*er(2)+ed(3)*er(3)
+     cosang(4)=ed(1)*ed(1)+ed(2)*ed(2)+ed(3)*ed(3)
+
+!write(*,*) cosang(1),cosang(2),cosang(3),cosang(4)
+
+      CALL surfprop(BLKNUM,AREA1,REFL1,DIFU1,ABSP1)
+!write(*,*) BLKNUM,AREA1,REFL1,DIFU1,ABSP1 
+
+! Forces caused by different interactions between optical properties and the
+! satellite surface
+
+!write(*,*)Ps/MASS
+     do k=1,4
+     if (k .eq. 1) then
+! Judge the positive surface or negative surface facing to the Sun
+        IF(cosang(k).GE.0D0)THEN
+      do i=1,3
+     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*ex(i))+2*cosang(k)**2*REFL1(k)*ex(i)
+      end do
+        ELSEIF(cosang(k).LT.0D0)THEN
+      do i=1,3
+     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*(-ex(i)))+2*cosang(k)**2*REFL1(k)*(-ex(i))
+      end do
+        END IF
+
+     elseif (k .eq. 2) then
+        IF(cosang(k).GE.0D0)THEN
+      do i=1,3
+     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*ey(i))+2*cosang(k)**2*REFL1(k)*ey(i)
+      end do
+        ELSEIF(cosang(k).LT.0D0)THEN
+      do i=1,3
+     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*(-ey(i)))+2*cosang(k)**2*REFL1(k)*(-ey(i))
+      end do
+        END IF
+
+     elseif (k .eq. 3) then
+        IF(cosang(k).GE.0D0)THEN
+      do i=1,3
+     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*er(i))+2*cosang(k)**2*REFL1(k)*er(i)
+      end do
+        ELSEIF(cosang(k).LT.0D0)THEN
+      do i=1,3
+     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*(-er(i)))+2*cosang(k)**2*REFL1(k)*(-er(i))
+      end do
+        END IF
+
+     elseif (k .eq. 4) then
+      do i=1,3
+! Here the normal of the soalr panels is assumed to be parallel to ed
+      surforce(k,i)=AREA1(k)*ed(i)+REFL1(k)*ed(i)+(2/3)*DIFU1(k)*ed(i)
+      end do
+
+
+     end if
+     end do
+
+! Compute the total forces
+!
+     do i=1,3
+     fsrp(i)=0.0d0
+     end do
+
+     do i=1,3
+        do k=1,4
+     fsrp(i)=fsrp(i)+(Ps/MASS)*surforce(k,i) 
+        end do
+     end do
+
+     fx=-fsrp(1)
+     fy=-fsrp(2)
+     fz=-fsrp(3)
+
+!write(*,*) fx,fy,fz
+! end of the box-wing model
+! =======================================================================
+
 
      else if (srpid .eq. 3) then
 ! ECOM (D2B1) model
 ! ***************************************
 ! a=D(u)*ed+Y(u)*ey+B(u)*eb
 !
-! D(u)=D0+Dc*cos2*(del_u)+Ds*sin2*(del_u)
-!        +Dc*cos4*(del_u)+Ds*sin4*(del_u)
+! D(u)=D0+D2c*cos2*(del_u)+D2s*sin2*(del_u)
+!        +D4c*cos4*(del_u)+D4s*sin4*(del_u)
 !
 ! Y(u)=Y0
 !
-! B(u)=B0+Bc*cos1*(del_u)+Bs*sin1*(del_u)
+! B(u)=B0+B1c*cos1*(del_u)+B1s*sin1*(del_u)
 ! ***************************************
 ! srpcoef(1) = D0
 ! srpcoef(2) = Y0
@@ -251,9 +396,9 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! srpcoef(5) = D4_c
 ! srpcoef(6) = D2_s
 ! srpcoef(7) = D4_s
-! srpcoef(8) = D1_c 
-! srpcoef(9) = D1_c
-
+! srpcoef(8) = B1_c 
+! srpcoef(9) = B1_s
+!=========================================
 
 ! GPS satellites
       if (prnnum.ge.1 .and. prnnum.le.32) then
@@ -275,15 +420,15 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 
 ! Block IIF types
       else
-      srpcoef(1) = -1.0070d-7
-      srpcoef(2) =  0.0015d-7
-      srpcoef(3) = -0.0050d-7
-      srpcoef(4) = -0.0050d-7
-      srpcoef(5) =  0.0030d-7
-      srpcoef(6) = -0.0030d-7
-      srpcoef(7) = -0.0050d-7
-      srpcoef(8) = -0.0090d-7 
-      srpcoef(9) = -0.0050d-7
+      srpcoef(1) = -0.01223d-7
+      srpcoef(2) =  0.00014d-7
+      srpcoef(3) = -0.00248d-7
+      srpcoef(4) =  0.00055d-7
+      srpcoef(5) = -0.00043d-7
+      srpcoef(6) =  0.00094d-7
+      srpcoef(7) = -0.00002d-7
+      srpcoef(8) =  0.01063d-7
+      srpcoef(9) = -0.00010d-7
 
       end if
       end if
@@ -344,16 +489,16 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
  
      end do
 
-     fx=fsrp(1)
-     fy=fsrp(2)
-     fz=fsrp(3)
+     fx=-fsrp(1)
+     fy=-fsrp(2)
+     fz=-fsrp(3)
 
 
-!write(*,*) fx,fy,fz
+write(*,*) fx,fy,fz
 
      end if
 
 ! end of ECOM (D2B1) model
-! ---------------------------------------------------------
+! ==================================================================
 
 END
