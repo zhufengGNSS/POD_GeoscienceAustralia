@@ -298,43 +298,6 @@ END IF
 ! ----------------------------------------------------------------------
 
 
-
-																				!!!777- In-progress -777!!!
-																				!!!777- In-progress -777!!!
-																				!!!777- In-progress -777!!!
-! ----------------------------------------------------------------------	
-! Relativistic effects
-! ----------------------------------------------------------------------	
-! FMOD_RELATIV setting (global variable in the module mdl_param.f03)
-! 
-! FMOD_RELATIV(1) : Schwarzschild term
-! FMOD_RELATIV(2) : Lense-Thirring effect
-! FMOD_RELATIV(3) : de Sitter effect
-! 
-! 1. FMOD_RELATIV(i)=1 : Effect is considered
-! 2. FMOD_RELATIV(i)=0 : Effect is neglected 
-
-IF (word1_ln == "rel_Schwarzschild") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ForceMod 
-	!FMOD_RELATIV(1) = ForceMod
-END IF
-
-IF (word1_ln == "rel_Lense-Thirring") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ForceMod 
-	!FMOD_RELATIV(2) = ForceMod
-END IF
-
-IF (word1_ln == "rel_deSitter") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ForceMod 
-	!FMOD_RELATIV(3) = ForceMod
-END IF
-! ----------------------------------------------------------------------
-																				!!!777- In-progress -777!!!
-																				!!!777- In-progress -777!!!
-																				!!!777- In-progress -777!!!
-					
-					
-					
 END DO
 CLOSE (UNIT=UNIT_IN)
 ! Close of input parameterization file
@@ -343,7 +306,7 @@ CLOSE (UNIT=UNIT_IN)
 
 
 
-
+if (1<0) then
 ! ----------------------------------------------------------------------
 ! Earth Gravity Field
 ! ----------------------------------------------------------------------
@@ -390,7 +353,6 @@ END IF
 ! Mmax
 GFM_Mmax = GFM_Nmax
 
-
 ALLOCATE (GFM_Cnm(GFM_Nmax+1,GFM_Nmax+1), STAT = AllocateStatus)
 ALLOCATE (GFM_Snm(GFM_Nmax+1,GFM_Nmax+1), STAT = AllocateStatus)
 GFM_Cnm  = Cnm
@@ -403,47 +365,44 @@ IF (sigma_shc /= 0) THEN
 	GFM_sSnm = sSnm
 END IF
 
-
 END IF
 ! End of parameters setting for Gravity Field
 ! ----------------------------------------------------------------------
 !print *,"gfmfilename: ",gfmfilename
 
 
-
-
 ! ----------------------------------------------------------------------
 ! Planetary/Lunar orbit data
 ! ---------------------------------------------------------------------- 
+If (FMOD_GRAV(2) == 1) Then
+
 ! Planetary/Lunar precise ephemeris DE: Data files merging
+fname_out = 'DE.430' 
 CALL CATfile (fname_header,fname_data,fname_out)
 
 ! DE ephemeris data processing
 ! Store selected DE data to global variables via the module mdl_planets.f90 
-fname_out = 'DE.430' 
 CALL asc2eph (fname_out)
 
 ! Set the GM gravity constants of the solar system bodies as global variables via the module mdl_planets.f90
 CALL GM_de
 
+End If
 ! End of parameters setting for Planetary/Lunar orbit data
 ! ----------------------------------------------------------------------
-
-
 
 
 
 ! ----------------------------------------------------------------------
 !  Tidal effects to orbits: Solid Earth Tides, Ocean Tides and Pole Tide
 ! ----------------------------------------------------------------------
-
+If (FMOD_GRAV(3) == 1) Then
 
 ! ----------------------------------------------------------------------
 ! Ocean Tides
-! ----------------------------------------------------------------------
-! Ocean Tides model
 IF (FMOD_TIDES(3) == 1) Then
 
+! Ocean Tides model
 ! Read ocean tides model data: Spherical harmonic coefficients corrections
 ! The spherical harmoncis corrections are stored in dynamic allocatable arrays through the module mdl_tides.f90
 CALL tides_fes2004(FESxxfname)
@@ -451,11 +410,12 @@ CALL tides_fes2004(FESxxfname)
 End IF 
 ! ----------------------------------------------------------------------
 
-
+End IF
 ! End of parameters setting for Tidal effects
 ! ----------------------------------------------------------------------
 
 
+END IF
 
 ! ----------------------------------------------------------------------
 ! Relativity parameters: beta and gama

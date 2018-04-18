@@ -73,6 +73,21 @@ SUBROUTINE legendre2 (phi, nmax, d2Pnm_norm)
       REAL (KIND = prec_q) :: pi
       REAL (KIND = prec_q) :: theta, c, s
       REAL (KIND = prec_q) :: dPoo, dP10,dP11, dP_f1,dP_f2,dP_f3, SQRT_nm_prod
+      REAL (KIND = prec_q) :: d2Poo, d2P10, d2P11, d2P_f1, d2P_sum, d2P_f2, d2P_f3
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Allocatable arrays
+! ----------------------------------------------------------------------
+      ALLOCATE (d2Pnm_norm(nmax+1,nmax+1), STAT = AllocateStatus)
+!      print *,"dPnm_norm AllocateStatus=", AllocateStatus
+      IF (AllocateStatus /= 0) THEN
+         PRINT *, "Error: Not enough memory"
+         PRINT *, "Error: SUBROUTINE legendre_drv1.f"
+         PRINT *, "Error: Allocatable Array: Pnm_norm, Nmax =", nmax
+!         STOP "*** Not enough memory ***"
+      END IF
 ! ----------------------------------------------------------------------
 
 
@@ -80,10 +95,10 @@ SUBROUTINE legendre2 (phi, nmax, d2Pnm_norm)
 pi = PI_global
 
 ! Normalized associated Legendre functions
-CALL legendre (phi, n_max, Pnm_norm)
+CALL legendre (phi, nmax, Pnm_norm)
 
 ! First-order derivatives of the normalized associated Legendre functions
-CALL legendre_drv1 (phi, n_max, dPnm_norm)
+CALL legendre_drv1 (phi, nmax, dPnm_norm)
 
 
 theta = pi/2D0 - phi
@@ -135,7 +150,13 @@ Do n = 1 , nmax
             d2P_f2 = c * d2Pnm_norm(n-1+1,m+1) - 2.D0 * s * dPnm_norm(n-1+1,m+1) - c * Pnm_norm(n-1+1,m+1) 
             d2P_f3 = sqrt(  ( (n-1+m)*(n-1-m) ) / (2.D0*n-3.D0)  ) * d2Pnm_norm(n-2+1,m+1) 
   !% ATTENTION! correction: sqrt(2*n+1) / sqrt( (n+m)*(n-m) )       %7777777777777777777777777777777777777777777777777777777777777777777         
-            dPnm_norm(n+1,m+1) = ( sqrt(2.D0*n+1) / sqrt( (n+m)*(n-m) ) ) * ( sqrt(2.D0*n-1) * d2P_f2 - d2P_f3 )
+            dPnm_norm(n+1,m+1) = ( sqrt(2.D0*n+1) / sqrt(1.D0*(n+m)*(n-m)) ) * ( sqrt(2.D0*n-1) * d2P_f2 - d2P_f3 )
         end If
     end Do
 end Do
+
+
+END Subroutine
+
+
+END MODULE

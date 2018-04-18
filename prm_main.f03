@@ -5,7 +5,7 @@ SUBROUTINE prm_main (PRMfname)
 ! SUBROUTINE: prm_main.f03
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Read of the orbit parameterization based on the input configuration file 
+!  Read the orbit parameterization based on the input configuration file 
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
 ! Created:	04 October 2017

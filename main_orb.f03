@@ -15,10 +15,13 @@
       USE mdl_precision
       USE mdl_num
       USE mdl_param
+      USE mdl_planets
+      USE mdl_tides
 !      USE mdl_orbinteg
 !      USE mdl_statdelta
 !      USE mdl_writearray
       USE m_orbinteg
+      USE m_orb_estimator
       USE m_statdelta
       USE m_statorbit
       USE m_writearray
@@ -38,14 +41,18 @@
       INTEGER (KIND = prec_int8) :: sz1, sz2 
       INTEGER (KIND = prec_int8) :: Nepochs	  
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf, orb_itrf, veqC, veqT  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf, orb_itrf, veqZ, veqP  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Xmatrix, Wmatrix, Amatrix  
+      !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqC, veqT  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb0, veq0, veq1  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb, dorb_icrf, dorb_itrf 
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_XYZ, dorb_RTN, dorb_Kepler
 	  REAL (KIND = prec_d), DIMENSION(5,6) :: stat_XYZ, stat_RTN, stat_Kepler
       REAL (KIND = prec_d), DIMENSION(:), ALLOCATABLE :: RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr 	  
       INTEGER (KIND = prec_int2) :: AllocateStatus,DeAllocateStatus
 ! ----------------------------------------------------------------------
-      CHARACTER (LEN=3) :: time_sys
+      CHARACTER (LEN=3) :: time_sys, time 
+      REAL (KIND = prec_d), DIMENSION(6) :: Zest0_icrf, Zest0_itrf, Xo_estim
 
 
 
@@ -57,54 +64,151 @@ CALL cpu_time (CPU_t0)
 
 
 ! ----------------------------------------------------------------------
-! Configuration file for Orbit parameterization:
+! Configuration files of Orbit parameterization:
+! ----------------------------------------------------------------------
 EQMfname = 'EQM.in'
 VEQfname = 'VEQ.in'
+! ----------------------------------------------------------------------
 
-!EQMfname = 'Kepler.in'
+
+! ----------------------------------------------------------------------
+! Read orbit parameterization											
+! ----------------------------------------------------------------------
+Call prm_main (EQMfname)
+
+! ESTmode =
+! Niter =
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Temp																		! ----------------------------------------------------------------------
+SVEC_Zo_ESTIM = SVEC_Zo
+print *,"main_orb.f03 | SVEC_Zo", SVEC_Zo
+print *,"main_orb.f03 | SVEC_Zo_ESTIM", SVEC_Zo_ESTIM
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Data reading: Gravitational Effects
+! ----------------------------------------------------------------------
+PRINT *,"Data reading"
+! Earth Gravity Field model
+CALL prm_gravity (EQMfname)												
+! Planetary/Lunar DE data 
+CALL prm_planets (EQMfname)												
+! Ocean Tides model
+CALL prm_ocean (EQMfname)												
+! ----------------------------------------------------------------------
+! Pseudo-Observations: External precise orbit 
+CALL prm_pseudobs (EQMfname)
+! ----------------------------------------------------------------------
+! External Orbit comparison
+CALL prm_orbext (EQMfname)												
 ! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
 ! Dynamic Orbit Determination 
 ! ----------------------------------------------------------------------
-ESTmode = 0
-
-If (ESTmode > 0) then
+! Orbit estimation or propagation
+ESTmode = 1
 
 ! ----------------------------------------------------------------------
-! Iterations number of parameter estimation algorithm
-Niter = 3
+If (ESTmode > 0) then
+! Orbit Estimation
 
-Do i = 1 , Niter
+! Iterations number of parameter estimation algorithm
+Niter = 1
 
 ! Orbit Numerical Integration: Equation of Motion and Variational Equations
-VEQmode = 1
-!Call orbinteg (VEQfname, VEQmode, orb_icrf, orb_itrf, veqC, veqT)
-Call orbinteg (VEQfname, VEQmode, orb_icrf, veqC)
+Do i = 0 , Niter
 
+PRINT *," "
+PRINT *,"Iteration:", i
+
+! ----------------------------------------------------------------------
+! Variational Equations numerical integration
+! ----------------------------------------------------------------------
+VEQmode = 1
+PRINT *,"VEQ Integration:"
+Call orbinteg (VEQfname, VEQmode, orb0, veqZ, veqP)
 PRINT *,"VEQ Integration: Completed"
 
-! Orbit Numerical Integration: Equation of Motion
-!Call orbinteg (EQMfname, VEQmode, orb_icrf, orb_itrf, veqC, veqT)
-Call orbinteg (EQMfname, VEQmode, orb_icrf, veqC)
+! Store VEQ matrices to ouput files 
+filename = "orbVEQ_icrf.out"
+Call writearray (orb0, filename)
+filename = "VEQ_Zmatrix.out"
+Call writearray (veqZ, filename)
+filename = "VEQ_Pmatrix.out"
+Call writearray (veqP, filename)
+! ----------------------------------------------------------------------
 
-! Orbit comparison; residuals; statistics
 
+! ----------------------------------------------------------------------
+! Equation of Motion numerical integration
+! ----------------------------------------------------------------------
+VEQmode = 0
+PRINT *,"EQM Integration:"
+Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
+PRINT *,"EQM Integration: Completed"
+! ----------------------------------------------------------------------
+
+
+if (1<0) Then
+! ----------------------------------------------------------------------
+! Orbit residuals; statistics ! ICRF
+!CALL statorbit (orbext_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
+
+!Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr)
+
+PRINT *," "
+print *,"Orbit residuals in ICRF | Iteration:", i
+print *,"RMS r     ", stat_XYZ(1, 1:3)
+print *,"RMS RTN r", stat_RTN(1, 1:3)
+!print *,"RMS RTN v", stat_RTN(1, 4:6)
+PRINT *," "
+! ----------------------------------------------------------------------
+end if
+
+
+! ----------------------------------------------------------------------
 ! Parameter estimation: Initial Conditions and orbit parameters
-!Call orbestim
+! ----------------------------------------------------------------------
+!Call orb_estimator(orb_icrf, veqZ, veqP, orbext_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
+Call orb_estimator(orb_icrf, veqZ, veqP, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
+
+filename = "Amatrix.out"
+Call writearray (Amatrix, filename)
+filename = "Wmatrix.out"
+Call writearray (Wmatrix, filename)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Temp: to be replaced by writing prm_in files (EQM + VEQ)
+! ----------------------------------------------------------------------
+print *, "Xmatrix", Xmatrix
+print *,"SVEC_Zo", SVEC_Zo
+Xo_estim(1:6) = Xmatrix(1:6,1)
+SVEC_Zo_ESTIM = SVEC_Zo + Xo_estim
+print *, "SVEC_Zo_ESTIM Zo+Xmatrix", SVEC_Zo_ESTIM
+! ----------------------------------------------------------------------
+! ----------------------------------------------------------------------
+
 
 End Do
 ! ----------------------------------------------------------------------
 
-End If
+Else
 
-
+! ----------------------------------------------------------------------
 ! Orbit integration (Equation of Motion)
 VEQmode = 0
 PRINT *,"Orbit Integration :: EQM :: in-progress"
-Call orbinteg (EQMfname, VEQmode, orb_icrf, veqC)
+Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
 ! ----------------------------------------------------------------------
+
+End If
+
 
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
@@ -137,13 +241,10 @@ CALL orbC2T (orb_icrf, time_sys, orb_itrf)
 ! External Orbit comparison
 ! ----------------------------------------------------------------------
 PRINT *,"External Orbit: Forming orbit arrays"
-
 ! External Orbit: Read configuration file of orbit parameterization
-CALL prm_orbext (EQMfname)
-
+!CALL prm_orbext (EQMfname)
 PRINT *,"External Orbit: Completed"
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Orbit comparison statistics
@@ -216,19 +317,6 @@ filename = "Snm.out"
 !Call writearray (GFM_Snm, filename)  
 ! ----------------------------------------------------------------------
 
-
-
-PRINT *,"GFM_Nmax, GFM_Mmax", GFM_Nmax, GFM_Mmax
-
-
-
-
-sz1 = size(dorb, DIM = 1)
-sz2 = size(dorb, DIM = 2)
-!print *,"dorb DIM", sz1, sz2
-Do i = 1 , sz1
-!print *,"dorb", dorb(i,3:5), dorb(i,6:8)
-End Do
 
 
 
