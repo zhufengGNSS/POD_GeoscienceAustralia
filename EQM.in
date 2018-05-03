@@ -115,13 +115,14 @@ pseudobs_interp_points    12 					! Number of data points used in Lagrange inter
 %% Variational Equations                                                   
 VEQ_integration           0
 
-
 ---------------------------------------------------------------------------
 %% Parameter Estimation               
-
+Estimator_procedure      1
+Estimator_Iterations     1
  
 ---------------------------------------------------------------------------
 %% External Orbit Comparison  
+! 0. Exclude external orbit comparison 
 ! 1. RSO orbit data; GPS Position and Veloctiy vectors per 30 sec
 ! 2. Interpolated orbit based on Lagrange interpolation of daily sp3 data
 ! 3. Keplerian orbit 

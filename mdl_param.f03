@@ -53,6 +53,7 @@ MODULE mdl_param
 ! Allocatable Arrays	  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbext_kepler, orbext_ICRF, orbext_ITRF
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF, pseudobs_ICRF
+      INTEGER (KIND = prec_int2) :: ORBEXT_glb
 ! ---------------------------------------------------------------------------
 
 
@@ -117,5 +118,10 @@ INTEGER (KIND = prec_int2) :: SRP_MOD_glb
 INTEGER (KIND = prec_int8), PARAMETER :: N_PARAM = 0 						! 777 Temp
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Estimator method
+      INTEGER (KIND = prec_int2) :: ESTIM_mode_glb 
+      INTEGER (KIND = prec_int2) :: ESTIM_iter_glb 
+! ----------------------------------------------------------------------
 
 END
