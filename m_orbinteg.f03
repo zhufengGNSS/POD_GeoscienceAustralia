@@ -20,7 +20,6 @@ MODULE m_orbinteg
 Contains
 	  
 	  
-!SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqC)
 SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqSmatrix, veqPmatrix)
 
 
@@ -110,8 +109,12 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqSmatrix, veqPmatrix)
 Call prm_main (INfname)
 !Call prm_read (INfname)
 ! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Temp																		! ----------------------------------------------------------------------
 SVEC_Zo = SVEC_Zo_ESTIM
-print *,"orbinteg.f03 | SVEC_Zo", SVEC_Zo
+!print *,"orbinteg.f03 | SVEC_Zo", SVEC_Zo
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Orbit integrator input parameters
@@ -146,11 +149,6 @@ ALLOCATE (veqSmatrix(sz1,sz2), STAT = AllocateStatus)
 veqSmatrix = orbC
 ALLOCATE (veqPmatrix(sz1,sz2), STAT = AllocateStatus)
 veqPmatrix = orbC
-
-!ALLOCATE (veqSmatrix(1,1), STAT = AllocateStatus)
-!veqSmatrix(1,1) = 0.0D0
-!ALLOCATE (veqPmatrix(1,1), STAT = AllocateStatus)
-!veqPmatrix(1,1) = 0.0D0
 ! ----------------------------------------------------------------------
 
 
@@ -159,7 +157,6 @@ Else if (VEQmode == 1) then
 ! ----------------------------------------------------------------------
 ! Variational Equations solution based on numerical integration
 ! ----------------------------------------------------------------------
-! Call integr_veq (MJDo, ro, vo, arc, integID, step, orbC, veqC )
 ! Number of estimated parameters (module mdl_param)
 Nparam = N_PARAM
 Call integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
@@ -173,14 +170,9 @@ sz1 = size(Pmatrix, DIM = 1)
 sz2 = size(Pmatrix, DIM = 2)
 ALLOCATE (veqPmatrix(sz1,sz2), STAT = AllocateStatus)
 veqPmatrix = Pmatrix
-
-!ALLOCATE (veqC(sz1,6+sz2), STAT = AllocateStatus)
-!veqC(1:sz1,1:6)     = Smatrix
-!veqC(1:sz1,7:6+sz2) = Pmatrix
 ! ----------------------------------------------------------------------
+
 End If
-! ----------------------------------------------------------------------
-
 
 
 ! ----------------------------------------------------------------------
@@ -235,10 +227,7 @@ End If
 ! ----------------------------------------------------------------------
 
 
-
-
 END SUBROUTINE
-
 
 End
 

@@ -275,6 +275,26 @@ IF (word1_ln == "integrator_step") THEN
 END IF
 ! ----------------------------------------------------------------------
 
+
+! ----------------------------------------------------------------------
+! Orbit parameters estimation
+! ----------------------------------------------------------------------
+IF (word1_ln == "Estimator_procedure") THEN
+   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ESTIM_mode_glb 
+END IF
+
+IF (word1_ln == "Estimator_Iterations") THEN
+   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ESTIM_iter_glb 
+END IF
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! External Orbit Comparison :: Optional
+IF (word1_ln == "orbit_external_opt") THEN
+   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ORBEXT_glb 
+END IF
+! ----------------------------------------------------------------------
+
 END DO
 CLOSE (UNIT=UNIT_IN)
 ! Close of input parameterization file

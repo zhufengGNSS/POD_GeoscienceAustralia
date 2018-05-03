@@ -5,11 +5,11 @@ MODULE m_orbdet
 ! MODULE: m_orbdet.f03
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Module for orbit integration
-!  Numerical integration of Equation of Motion and Variational Equations 
+!  Module for GNSS Orbit Determiantion
 ! ----------------------------------------------------------------------
-! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
-! Created:	5 October 2017
+! Author :	Dr. Thomas Papanikolaou
+!			Geoscience Australia, CRC-SI
+! Created:	20 April 2018
 ! ----------------------------------------------------------------------
 
 
@@ -20,23 +20,26 @@ MODULE m_orbdet
 Contains
 	  
 	  
-SUBROUTINE orbdet (EQMfname, VEQfname, VEQmode, orbC, veqSmatrix, veqPmatrix)
+SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
 
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: m_orbdet.f03
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Satellite Orbit Determination 
+!  GNSS Orbit Determination 
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - EQMfname: 	Input cofiguration file name for the orbit parameterization 
 ! - VEQfname: 	Input cofiguration file name for the orbit parameterization 
-! - VEQmode:	VEQmode = 0 :: Variational Equations integration is not performed
-! 				VEQmode = 1 :: Variational Equations integration is performed
 !
 ! Output arguments:
-! - orbC: 		Satellite orbit array in ICRF including the following per epoch:
+! - orb_icrf: 	Satellite orbit array in ICRF including the following per epoch:
+!               - Modified Julian Day number (including the fraction of the day) 
+!				- Seconds since 00h 
+!				- Position vector (m)
+!				- Velocity vector (m/sec)
+! - orb_itrf: 	Satellite orbit array in ITRF including the following per epoch:
 !               - Modified Julian Day number (including the fraction of the day) 
 !				- Seconds since 00h 
 !				- Position vector (m)
@@ -49,196 +52,200 @@ SUBROUTINE orbdet (EQMfname, VEQfname, VEQmode, orbC, veqSmatrix, veqPmatrix)
 ! refer to the time system defined by the global variable TIME_SCALE in the module mdl_param.f03
 ! according to the input parameterization file 
 ! ----------------------------------------------------------------------
-! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
-! Created:	5 October 2017
+! Author :	Dr. Thomas Papanikolaou
+!			Geoscience Australia, CRC-SI
+! Created:	20 April 2018
 ! ----------------------------------------------------------------------
 	  
 	  
       USE mdl_precision
       USE mdl_num
-      USE m_integrEQM
-      USE m_integrVEQ
       USE mdl_param
+      USE mdl_planets
+      USE mdl_tides
+      USE m_orbinteg
+      USE m_orb_estimator
+      USE m_orbC2T  
+      USE m_statdelta
+      USE m_statorbit
+      USE m_writearray
       IMPLICIT NONE
-
+	  
 	  
 ! ----------------------------------------------------------------------
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      CHARACTER (LEN=100), INTENT(IN)  :: INfname				
-      INTEGER (KIND = prec_int2), INTENT(IN) :: VEQmode 
+      CHARACTER (LEN=100), INTENT(IN)  :: EQMfname, VEQfname				
 ! ----------------------------------------------------------------------
 ! OUT
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbC, veqSmatrix, veqPmatrix  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orb_icrf, orb_itrf  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: veqSmatrix, veqPmatrix  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Vres  
+      REAL (KIND = prec_d), DIMENSION(3), INTENT(OUT) :: Vrms 
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Smatrix, Pmatrix 
-      REAL (KIND = prec_d) :: MJDo
-      REAL (KIND = prec_d), DIMENSION(3) :: ro, vo
-      REAL (KIND = prec_d), DIMENSION(6) :: Zo_icrf
-      REAL (KIND = prec_d) :: arc
-      INTEGER (KIND = prec_int2) :: integID
-      REAL (KIND = prec_d) :: step
+	  
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_d) :: to_sec     
-      REAL (KIND = prec_d) :: t_sec     
-      INTEGER (KIND = prec_int8) :: Nepochs, i, j
+      REAL (KIND = prec_d) :: CPU_t0, CPU_t1
+      CHARACTER (LEN=100) :: filename
+      INTEGER (KIND = prec_int2) :: VEQmode 
+      INTEGER (KIND = prec_int2) :: ESTmode 
+      INTEGER (KIND = prec_int2) :: Niter 
+      INTEGER (KIND = prec_int8) :: i 
       INTEGER (KIND = prec_int8) :: sz1, sz2 
-      INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
-	  REAL (KIND = prec_d) :: mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
-      DOUBLE PRECISION EOP_cr(7)
-      DOUBLE PRECISION CRS2TRS(3,3), TRS2CRS(3,3), d_CRS2TRS(3,3), d_TRS2CRS(3,3)
-      REAL (KIND = prec_d) :: r_TRS(3), v_TRS(3)
-      REAL (KIND = prec_d) :: r_CRS(3), v_CRS(3)
-      REAL (KIND = prec_d) :: v_TRS_1(3), v_TRS_2(3), v_CRS_1(3), v_CRS_2(3)	  
-! ----------------------------------------------------------------------
-      INTEGER IY, IM, ID, J_flag
-      DOUBLE PRECISION DJM0, sec, FD, Sec0
-	  INTEGER (KIND = prec_int8) :: Nparam
-
-      REAL (KIND = prec_d) :: Xmatrix(6)
-
-
-
-
-! ----------------------------------------------------------------------
-! Read orbit parameterization
-Call prm_main (INfname)
-!Call prm_read (INfname)
-! ----------------------------------------------------------------------
-SVEC_Zo = SVEC_Zo_ESTIM
-print *,"orbinteg.f03 | SVEC_Zo", SVEC_Zo
-
-! ----------------------------------------------------------------------
-! Orbit integrator input parameters
-! ----------------------------------------------------------------------
-MJDo = MJD_to
-ro(1:3) = SVEC_Zo(1:3)
-vo(1:3) = SVEC_Zo(4:6)
-integID = integmeth
-step = integstep
-arc = orbarc
+      INTEGER (KIND = prec_int8) :: Nepochs	  
+      !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Xmatrix, Wmatrix, Amatrix  
+      !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqC, veqT  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb0, veq0, veq1  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb, dorb_icrf, dorb_itrf 
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_XYZ, dorb_RTN, dorb_Kepler
+!	  REAL (KIND = prec_d), DIMENSION(5,6) :: stat_XYZ, stat_RTN, stat_Kepler
+      REAL (KIND = prec_d), DIMENSION(:), ALLOCATABLE :: RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr 	  
+      INTEGER (KIND = prec_int2) :: AllocateStatus,DeAllocateStatus
+      CHARACTER (LEN=3) :: time_sys, time 
+      REAL (KIND = prec_d), DIMENSION(6) :: Zest0_icrf, Zest0_itrf, Xo_estim
 ! ----------------------------------------------------------------------
 
 
-
 ! ----------------------------------------------------------------------
-! Orbit integration
+! Read orbit parameterization											
 ! ----------------------------------------------------------------------
-
-if (VEQmode == 0) then
-
-! ----------------------------------------------------------------------
-! Orbit propagation based on numerical integration methods 
-! ----------------------------------------------------------------------
-! Numerical integration of the Equation of Motion
-Call integr_EQM (MJDo, ro, vo, arc, integID, step, orbC)
+Call prm_main (EQMfname)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
-sz1 = size(orbC, DIM = 1)
-sz2 = size(orbC, DIM = 2)
-ALLOCATE (veqSmatrix(sz1,sz2), STAT = AllocateStatus)
-veqSmatrix = orbC
-ALLOCATE (veqPmatrix(sz1,sz2), STAT = AllocateStatus)
-veqPmatrix = orbC
+! Temp																		! ----------------------------------------------------------------------
+SVEC_Zo_ESTIM = SVEC_Zo
+! ----------------------------------------------------------------------
 
-!ALLOCATE (veqSmatrix(1,1), STAT = AllocateStatus)
-!veqSmatrix(1,1) = 0.0D0
-!ALLOCATE (veqPmatrix(1,1), STAT = AllocateStatus)
-!veqPmatrix(1,1) = 0.0D0
+! ----------------------------------------------------------------------
+! Estimator settings :: Module mdl_param.f03 global parameters
+ESTmode = ESTIM_mode_glb
+Niter = ESTIM_iter_glb
+! ----------------------------------------------------------------------
+
+!PRINT *,"Data reading"
+! ----------------------------------------------------------------------
+! Data reading: Gravitational Effects
+! ----------------------------------------------------------------------
+! Earth Gravity Field model
+CALL prm_gravity (EQMfname)												
+! Planetary/Lunar DE data 
+CALL prm_planets (EQMfname)												
+! Ocean Tides model
+CALL prm_ocean (EQMfname)												
+! ----------------------------------------------------------------------
+! Pseudo-Observations: Precise Orbit (sp3) 
+CALL prm_pseudobs (EQMfname)
+! ----------------------------------------------------------------------
+! External Orbit comparison: Precise Orbit (sp3)
+!CALL prm_orbext (EQMfname)												
 ! ----------------------------------------------------------------------
 
 
-Else if (VEQmode == 1) then
+! ----------------------------------------------------------------------
+! Dynamic Orbit Determination 
+! ----------------------------------------------------------------------
+! Orbit estimation or propagation
+!ESTmode = 1
 
 ! ----------------------------------------------------------------------
-! Variational Equations solution based on numerical integration
+If (ESTmode > 0) then
+! Orbit Estimation
+
+! Iterations number of parameter estimation algorithm
+!Niter = 1
+
+! Orbit Numerical Integration: Equation of Motion and Variational Equations
+Do i = 0 , Niter
+
+!PRINT *,"Iteration:", i
+
 ! ----------------------------------------------------------------------
-! Call integr_veq (MJDo, ro, vo, arc, integID, step, orbC, veqC )
-! Number of estimated parameters (module mdl_param)
-Nparam = N_PARAM
-Call integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
-
-sz1 = size(Smatrix, DIM = 1)
-sz2 = size(Smatrix, DIM = 2)
-ALLOCATE (veqSmatrix(sz1,sz2), STAT = AllocateStatus)
-veqSmatrix = Smatrix
-
-sz1 = size(Pmatrix, DIM = 1)
-sz2 = size(Pmatrix, DIM = 2)
-ALLOCATE (veqPmatrix(sz1,sz2), STAT = AllocateStatus)
-veqPmatrix = Pmatrix
-
-!ALLOCATE (veqC(sz1,6+sz2), STAT = AllocateStatus)
-!veqC(1:sz1,1:6)     = Smatrix
-!veqC(1:sz1,7:6+sz2) = Pmatrix
+! Numerical Integration: Variational Equations
 ! ----------------------------------------------------------------------
-End If
+!PRINT *,"VEQ Integration:"
+VEQmode = 1
+Call orbinteg (VEQfname, VEQmode, orb0, veqSmatrix, veqPmatrix)
 ! ----------------------------------------------------------------------
-
 
 
 ! ----------------------------------------------------------------------
-! Time Scale transformation in orbC matrix
+! Numerical Integration: Equation of Motion
 ! ----------------------------------------------------------------------
-! Time scale change is applied in case that TIME_SCALE .NOT. Terrestrial Time
-! TIME_SCALE: global variable in module mdl_param.f03
+!PRINT *,"EQM Integration:"
+VEQmode = 0
+Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
 ! ----------------------------------------------------------------------
-If (TIME_SCALE /= 'TT') Then
 
-sz1 = size(orbC, DIM = 1)
-sz2 = size(orbC, DIM = 2)
-Nepochs = sz1
+! ----------------------------------------------------------------------
+! Orbit residuals; statistics ! ICRF
+!CALL statorbit (orbext_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
+Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr)
+! ----------------------------------------------------------------------
+!print *,"Orbit residuals (ICRF) RMS(XYZ)", RMSdsr(1:3)
 
-Do i = 1 , Nepochs
 
-! MJD in TT Time
-mjd = orbC(i,1)
+! ----------------------------------------------------------------------
+! Parameter estimation: Initial Conditions and orbit parameters
+! ----------------------------------------------------------------------
+!Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, orbext_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
+Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
 
-! Time scale: TT to GPS time
-CALL time_TT (mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC)
+filename = "Amatrix.out"
+Call writearray (Amatrix, filename)
+filename = "Wmatrix.out"
+Call writearray (Wmatrix, filename)
+! ----------------------------------------------------------------------
 
-! Test the TIME_SCALE global variable in mdl_param.f03	
-If (TIME_SCALE == 'GPS') then
-	mjd = mjd_GPS		
-Else if (TIME_SCALE == 'UTC') then
-	mjd = mjd_UTC		
-Else if (TIME_SCALE == 'TAI') then
-	mjd = mjd_TAI		
-End If	
+! ----------------------------------------------------------------------
+! Temp: to be replaced by writing prm_in files (EQM + VEQ)
+! ----------------------------------------------------------------------
+!print *, "Xmatrix", Xmatrix
+!print *,"SVEC_Zo", SVEC_Zo
+Xo_estim(1:6) = Xmatrix(1:6,1)
+SVEC_Zo_ESTIM = SVEC_Zo + Xo_estim
+!print *, "SVEC_Zo_ESTIM Zo+Xmatrix", SVEC_Zo_ESTIM
+! ----------------------------------------------------------------------
 
-! Seconds since 00h
-t_sec = (mjd - INT(mjd)) * (24.D0 * 3600.D0)
-! Seconds since 00h
-If (t_sec >= 86400.D0) Then
-	t_sec = t_sec - INT(t_sec / 86400.D0) * 86400.D0
-End IF
-
-! Time scale change in orbit matrix and VEQ matrices 
-orbC(i,1) = mjd
-orbC(i,2) = t_sec
-If (VEQmode == 1) Then
-	veqSmatrix(i,1) = mjd
-	veqSmatrix(i,2) = t_sec
-	veqPmatrix(i,1) = mjd
-	veqPmatrix(i,2) = t_sec
-End IF
- 
 End Do
-
-End If
 ! ----------------------------------------------------------------------
 
+End If
 
+! ----------------------------------------------------------------------
+! Orbit Propagation
+! ----------------------------------------------------------------------
+VEQmode = 0
+Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Orbit residuals; statistics ! ICRF
+Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr)
+sz1 = size(dorb_icrf, DIM = 1)
+sz2 = size(dorb_icrf, DIM = 2)
+ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
+Vres = dorb_icrf(1:sz1,1:5)
+Vrms  = RMSdsr(1:3)
+! ----------------------------------------------------------------------
+!print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
+
+! ----------------------------------------------------------------------
+! Orbit transformation to terrestrial frame: ICRF to ITRF
+! ----------------------------------------------------------------------
+! Time System according to global variable TIME_Scale (Module mdl_param.f03)
+time_sys = TIME_SCALE
+CALL orbC2T (orb_icrf, time_sys, orb_itrf)
+! ----------------------------------------------------------------------
 
 
 END SUBROUTINE
-
 
 End
 
