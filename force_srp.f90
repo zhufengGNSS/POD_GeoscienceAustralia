@@ -41,7 +41,7 @@ SUBROUTINE force_srp (GM,prnnum,BLKNUM,eclpf,srpid,r,v,r_sun,beta,del_u,fx,fy,fz
 ! ----------------------------------------------------------------------
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
-      INTEGER                           :: eclpf,srpid
+      INTEGER                           :: eclpf,srpid,X,ECOM
       INTEGER                           :: prnnum,BLKNUM
       REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
       REAL (KIND = prec_q)               :: fx,fy,fz
@@ -56,7 +56,7 @@ SUBROUTINE force_srp (GM,prnnum,BLKNUM,eclpf,srpid,r,v,r_sun,beta,del_u,fx,fy,fz
 
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
       REAL (KIND = prec_q) :: surforce(4,3)
-      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex
+      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,en
       REAL (KIND = prec_q), DIMENSION(3) :: fsrp
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
       REAL (KIND = prec_q), DIMENSION(9) :: srpcoef
@@ -87,8 +87,11 @@ SUBROUTINE force_srp (GM,prnnum,BLKNUM,eclpf,srpid,r,v,r_sun,beta,del_u,fx,fy,fz
       Pi = 4*atan(1.0d0)
 ! ---------------------------------------------------------------------
 
-!
+         ! ECOM =1 :ECOM-1 model is applied.
+ECOM = 2 ! ECOM =2 :D2B1   model is applied. 
 
+   X = 2 ! X = 1 : forces in the inertial frame.
+         ! X = 2 : forces in the orbital frame.
 eclpf=0
 
 
@@ -96,21 +99,31 @@ eclpf=0
       er(1)=-r(1)/sqrt(r(1)**2+r(2)**2+r(3)**2)
       er(2)=-r(2)/sqrt(r(1)**2+r(2)**2+r(3)**2)
       er(3)=-r(3)/sqrt(r(1)**2+r(2)**2+r(3)**2)
+
 ! The unit vector ed SAT->SUN (where is just opposite to the solar radiation vector)
       Ds=sqrt((r_sun(1)-r(1))**2+(r_sun(2)-r(2))**2+(r_sun(3)-r(3))**2)
       ed(1)=((r_sun(1)-r(1))/Ds)
       ed(2)=((r_sun(2)-r(2))/Ds)
       ed(3)=((r_sun(3)-r(3))/Ds)
+
 ! The unit vector ey = er x ed, parallel to the rotation axis of solar panel
       CALL cross_product (er,ed,ey)
-      ey(1)=ey(1)/sqrt(ey(1)**2+ey(2)**2+ey(3)**2)
-      ey(2)=ey(2)/sqrt(ey(1)**2+ey(2)**2+ey(3)**2)
-      ey(3)=ey(3)/sqrt(ey(1)**2+ey(2)**2+ey(3)**2)
+
+
 ! The unit vector eb = ed x ey
       CALL cross_product (ed,ey,eb)
-      eb(1)=eb(1)/sqrt(eb(1)**2+eb(2)**2+eb(3)**2)
-      eb(2)=eb(2)/sqrt(eb(1)**2+eb(2)**2+eb(3)**2)
-      eb(3)=eb(3)/sqrt(eb(1)**2+eb(2)**2+eb(3)**2)
+
+! The unit vector of x side, which is always illuminated by the
+! sun, parallel to the satellite flight/velocity direction
+! The unit vector ex
+      ex(1)=v(1)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+      ex(2)=v(2)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+      ex(3)=v(3)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+
+! the orbit normal vector
+!------------------------
+
+     Call productcross(-er,ex,en)
 
 ! computation of the factor zta related to the Sun illumination
       if (eclpf.eq.0) then
@@ -207,13 +220,13 @@ eclpf=0
       if (prnnum.ge.11 .and. prnnum.le.23 .or. prnnum.eq.2 .or. &
        prnnum.eq.5 .or. prnnum.eq.7 .or. prnnum.eq.28 .or. &
        prnnum.eq.29 .or. prnnum.eq.31) then 
-      Z_SIDE = 3.75D0 ! surface-to-mass ratio 
+      Z_SIDE = 3.75D0 
       X_SIDE = 3.05D0
       A_SOLAR= 13.60D0
       MASS   = 1100.0D0
 ! Block IIF types
       else 
-      Z_SIDE = 5.40D0 ! surface-to-mass ratio
+      Z_SIDE = 5.40D0 
       X_SIDE = 5.72D0
       A_SOLAR= 22.25D0
       MASS   = 1555.3D0
@@ -222,7 +235,7 @@ eclpf=0
 
 ! GLONASS satellites
       if (prnnum.gt.101 .and. prnnum.le.126)then
-      Z_SIDE = 0.877D0 ! surface-to-mass ratio
+      Z_SIDE = 0.877D0
       X_SIDE = 1.258D0
       A_SOLAR= 23.616D0
       MASS   = 1415.0D0
@@ -230,7 +243,7 @@ eclpf=0
 
 ! BDS satellites
       if (prnnum.gt.401 .and. prnnum.le.426)then
-      Z_SIDE = 3.69D0 ! surface-to-mass ratio
+      Z_SIDE = 3.69D0
       X_SIDE = 4.5D0
       A_SOLAR= 22.44D0
       MASS   = 1900.0D0
@@ -248,9 +261,35 @@ eclpf=0
      end if 
 
 ! Cartesian counterparts (fx,fy,fz) of acceleration fsrP
-      fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
-      fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
-      fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
+      fsrp(1) = zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
+      fsrp(2) = zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
+      fsrp(3) = zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
+
+
+
+     if (X .eq. 1)then
+! In the inertial frame
+!----------------------
+     fx=-fsrp(1)
+     fy=-fsrp(2)
+     fz=-fsrp(3)
+
+     else
+! In the orbit frame
+!--------------------
+
+     fx=-(fsrp(1)*(-er(1))+fsrp(2)*(-er(2))+fsrp(3)*(-er(3)))
+     fy=-(fsrp(1)*ex(1)   +fsrp(2)*ex(2)   +fsrp(3)*ex(3))
+     fz=-(fsrp(1)*en(1)   +fsrp(2)*en(2)   +fsrp(3)*en(3))
+
+
+!     fx=-(fsrp(1)*ed(1)   +fsrp(2)*ed(2)   +fsrp(3)*ed(3))
+!     fy=-(fsrp(1)*ey(1)   +fsrp(2)*ey(2)   +fsrp(3)*ey(3))
+!     fz=-(fsrp(1)*eb(1)   +fsrp(2)*eb(2)   +fsrp(3)*eb(3))
+
+
+     end if
+
 
 !write(*,*) fx,fy,fz
 ! end of the cannonball model
@@ -274,21 +313,13 @@ else if (srpid .eq. 2) then
        prnnum.eq.5 .or. prnnum.eq.7 .or. prnnum.eq.28 .or. &
        prnnum.eq.29 .or. prnnum.eq.31) then
       MASS   = 1100.0D0
+      
+      elseif (prnnum .eq. 4) then
+      MASS   = 975.0d0
 ! Block IIF types
       else
       MASS   = 1555.3D0
       end if
-
-
-! The unit vector of x side (ex = ey x er), which is always illuminated by the
-! sun, parallel to the satellite flight/velocity direction
-
-!     CALL cross_product (ey,er,ex)
-
-! The unit vector ex
-      ex(1)=v(1)/sqrt(v(1)**2+v(2)**2+v(3)**2)
-      ex(2)=v(2)/sqrt(v(1)**2+v(2)**2+v(3)**2)
-      ex(3)=v(3)/sqrt(v(1)**2+v(2)**2+v(3)**2)
 
 
 ! angles between ed and each surface(k)
@@ -368,9 +399,30 @@ else if (srpid .eq. 2) then
         end do
      end do
 
+
+     if (X .eq. 1)then
+! In the inertial frame
+!----------------------
      fx=-fsrp(1)
      fy=-fsrp(2)
      fz=-fsrp(3)
+
+     else
+! In the orbit frame
+!--------------------
+
+     fx=-(fsrp(1)*(-er(1))+fsrp(2)*(-er(2))+fsrp(3)*(-er(3)))
+     fy=-(fsrp(1)*ex(1)   +fsrp(2)*ex(2)   +fsrp(3)*ex(3))
+     fz=-(fsrp(1)*en(1)   +fsrp(2)*en(2)   +fsrp(3)*en(3))
+
+!     fx=-(fsrp(1)*ed(1)   +fsrp(2)*ed(2)   +fsrp(3)*ed(3))
+!     fy=-(fsrp(1)*ey(1)   +fsrp(2)*ey(2)   +fsrp(3)*ey(3))
+!     fz=-(fsrp(1)*eb(1)   +fsrp(2)*eb(2)   +fsrp(3)*eb(3))
+
+
+     end if
+
+
 
 !write(*,*) fx,fy,fz
 ! end of the box-wing model
@@ -402,66 +454,30 @@ else if (srpid .eq. 2) then
 
 ! GPS satellites
       if (prnnum.ge.1 .and. prnnum.le.32) then
+      srpcoef(1) = -0.91698d-7
+      srpcoef(2) =  0.00836d-7
+      srpcoef(3) = -0.00730d-7
+      srpcoef(4) =  0.00053d-7
+      srpcoef(5) = -0.00029d-7
+      srpcoef(6) = -0.00040d-7
+      srpcoef(7) =  0.00010d-7
+      srpcoef(8) =  0.01062d-7
+      srpcoef(9) = -0.00801d-7
 
-! GPS Block IIR types
-      if (prnnum.ge.11 .and. prnnum.le.23 .or. prnnum.eq.2 .or. &
-       prnnum.eq.5 .or. prnnum.eq.7 .or. prnnum.eq.28 .or. &
-       prnnum.eq.29 .or. prnnum.eq.31) then
+     else
 
-       srpcoef(1) = -0.0070d-7
-       srpcoef(2) = -0.0020d-7
-       srpcoef(3) =  0.0050d-7
-       srpcoef(4) = -0.0050d-7
-       srpcoef(5) = -0.0084d-7
-       srpcoef(6) =  0.0050d-7
-       srpcoef(7) =  0.0050d-7
-       srpcoef(8) = -0.0008d-7 
-       srpcoef(9) =  0.0050d-7
+      srpcoef(1) = -1.13184d-7
+      srpcoef(2) =  0.00091d-7
+      srpcoef(3) =  0.00145d-7
+      srpcoef(4) = -0.05658d-7
+      srpcoef(5) = -0.00115d-7
+      srpcoef(6) = -0.00052d-7
+      srpcoef(7) =  0.00805d-7
+      srpcoef(8) = -0.02095d-7
+      srpcoef(9) = -0.00435d-7
 
-! Block IIF types
-      else
-      srpcoef(1) = -0.01223d-7
-      srpcoef(2) =  0.00014d-7
-      srpcoef(3) = -0.00248d-7
-      srpcoef(4) =  0.00055d-7
-      srpcoef(5) = -0.00043d-7
-      srpcoef(6) =  0.00094d-7
-      srpcoef(7) = -0.00002d-7
-      srpcoef(8) =  0.01063d-7
-      srpcoef(9) = -0.00010d-7
 
-      end if
-      end if
 
-! BDS satellites
-      if (prnnum.ge.401 .and. prnnum.le.420) then
-
-! BDS IGSO types
-      if (prnnum.ge.406 .and. prnnum.le.410) then
-
-      srpcoef(1) =  1.2330d-7
-      srpcoef(2) = -0.0002d-7
-      srpcoef(3) = -0.0050d-7
-      srpcoef(4) = -0.0050d-7
-      srpcoef(5) =  0.0005d-7 
-      srpcoef(6) = -0.0050d-7
-      srpcoef(7) = -0.0050d-7
-      srpcoef(8) = -0.0150d-7 
-      srpcoef(9) = -0.0050d-7
-
-! BDS MEO types 
-      else if (prnnum.ge.411 .and. prnnum.le.415) then
-      srpcoef(1) = -1.3000d-7
-      srpcoef(2) =  0.0010d-7
-      srpcoef(3) = -0.0020d-7
-      srpcoef(4) = -0.0250d-7
-      srpcoef(5) =  0.0051d-7 
-      srpcoef(6) = -0.0100d-7
-      srpcoef(7) = -0.0050d-7
-      srpcoef(8) =  0.0080d-7 
-      srpcoef(9) = -0.0050d-7
-
-      end if
       end if
 
 
@@ -476,7 +492,9 @@ else if (srpid .eq. 2) then
 !******************************************************************
      sclfa=(AU/Ds)**2
 
-     do i=1,3
+        do i=1,3     
+     if(ECOM .eq. 2) then
+
      fsrp(i)=fsrp(i) + srpcoef(1)*sclfa*ed(i) &
                      + srpcoef(2)*sclfa*ey(i) &
                      + srpcoef(3)*sclfa*eb(i) &
@@ -486,15 +504,47 @@ else if (srpid .eq. 2) then
                      + srpcoef(7)*sclfa*ed(i)*DSIN(4.0d0*del_u) &
                      + srpcoef(8)*sclfa*eb(i)*DCOS(1.0d0*del_u) &
                      + srpcoef(9)*sclfa*eb(i)*DSIN(1.0d0*del_u)
+
  
-     end do
+     else
 
-     fx=-fsrp(1)
-     fy=-fsrp(2)
-     fz=-fsrp(3)
+     fsrp(i)=fsrp(i) + srpcoef(1)*sclfa*ed(i) &
+                     + srpcoef(2)*sclfa*ey(i) &
+                     + srpcoef(3)*sclfa*eb(i) &
+                     + srpcoef(4)*sclfa*ed(i)*DCOS(del_u) &
+                     + srpcoef(5)*sclfa*ed(i)*DSIN(del_u) &
+                     + srpcoef(6)*sclfa*ey(i)*DCOS(del_u) &
+                     + srpcoef(7)*sclfa*ey(i)*DSIN(del_u) &
+                     + srpcoef(8)*sclfa*eb(i)*DCOS(del_u) &
+                     + srpcoef(9)*sclfa*eb(i)*DSIN(del_u)
 
 
-write(*,*) fx,fy,fz
+
+     end if
+
+        end do
+
+     if (X .eq. 1)then
+! In the inertial frame
+!----------------------
+     fx=fsrp(1)
+     fy=fsrp(2)
+     fz=fsrp(3)
+
+     else
+! In the orbit frame
+!--------------------
+
+     fx=(fsrp(1)*(-er(1))+fsrp(2)*(-er(2))+fsrp(3)*(-er(3)))
+     fy=(fsrp(1)*ex(1)   +fsrp(2)*ex(2)   +fsrp(3)*ex(3))
+     fz=(fsrp(1)*en(1)   +fsrp(2)*en(2)   +fsrp(3)*en(3))
+
+!     fx=-(fsrp(1)*ed(1)   +fsrp(2)*ed(2)   +fsrp(3)*ed(3))
+!     fy=-(fsrp(1)*ey(1)   +fsrp(2)*ey(2)   +fsrp(3)*ey(3))
+!     fz=-(fsrp(1)*eb(1)   +fsrp(2)*eb(2)   +fsrp(3)*eb(3))
+
+
+     end if
 
      end if
 
