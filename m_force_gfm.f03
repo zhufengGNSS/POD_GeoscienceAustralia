@@ -201,6 +201,7 @@ SUBROUTINE force_gfm (GM, ae, r, n_max, m_max, Cnm, Snm , fx,fy,fz)
       END IF
 
 	  
+if (1<0) then	  
 ! ----------------------------------------------------------------------
 ! Arrays DeALLOCATION
 ! ----------------------------------------------------------------------
@@ -222,6 +223,8 @@ SUBROUTINE force_gfm (GM, ae, r, n_max, m_max, Cnm, Snm , fx,fy,fz)
 !         STOP "*** Not enough memory ***"
       END IF
 ! ----------------------------------------------------------------------
+end if
+
 	  
 END SUBROUTINE
 

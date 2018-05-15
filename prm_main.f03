@@ -5,7 +5,7 @@ SUBROUTINE prm_main (PRMfname)
 ! SUBROUTINE: prm_main.f03
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Read of the orbit parameterization based on the input configuration file 
+!  Read the orbit parameterization based on the input configuration file 
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
 ! Created:	04 October 2017
@@ -272,6 +272,26 @@ End IF
 ! Numerical Integration Stepsize (in sec)
 IF (word1_ln == "integrator_step") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, integstep 
+END IF
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Orbit parameters estimation
+! ----------------------------------------------------------------------
+IF (word1_ln == "Estimator_procedure") THEN
+   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ESTIM_mode_glb 
+END IF
+
+IF (word1_ln == "Estimator_Iterations") THEN
+   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ESTIM_iter_glb 
+END IF
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! External Orbit Comparison :: Optional
+IF (word1_ln == "orbit_external_opt") THEN
+   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ORBEXT_glb 
 END IF
 ! ----------------------------------------------------------------------
 
