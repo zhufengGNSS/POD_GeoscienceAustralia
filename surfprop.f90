@@ -101,11 +101,71 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 ! reflectivity and shape.
 ! The optical properties are extracted from Bernese source code and modified
 ! to fit the ACS SRP program.
+
+!     GPS BLOCK II, IIA
+!     -----------------
+
+      IF((BLKNUM.EQ.2).OR.(BLKNUM.EQ.3))THEN
+
+!     +X SIDE (including the cylindrical areas )
+         X_side(1,1) = 2.607D0
+         X_side(1,2) = 0.20D0
+         X_side(1,3) = 0.56D0
+         X_side(1,4) = 1D0
+
+!     TT&C ANTENNA SIDE
+         X_side(2,1) = 0.105D0
+         X_side(2,2) = 0.20D0
+         X_side(2,3) = 0.28D0
+         X_side(2,4) = 2D0
+
+!     EACH NAVIGATIONAL ANTENNA ADAPTER
+         X_side(3,1) = 0.181D0
+         X_side(3,2) = 0.20D0
+         X_side(3,3) = 0.36D0
+         X_side(3,4) = 2D0
+
+!     +/- Y SIDE (assumed for all block types)
+         Y_side(1,1) = 7.01D0
+         Y_side(1,2) = 0.20D0
+         Y_side(1,3) = 0.56D0
+         Y_side(1,4) = 1D0
+
+!     BODY AFT END (-Z)
+         Z_side(1,1) = 2.152D0
+         Z_side(1,2) = 0.20D0
+         Z_side(1,3) = 0.56D0
+         Z_side(1,4) = 1D0
+
+!     ENGINE AFT END (-Z)
+         Z_side(2,1) = 0.729D0
+         Z_side(2,2) = 0D0
+         Z_side(2,3) = 0D0
+         Z_side(2,4) = 1D0
+
+!     FORWARD END (+Z)
+!         Z_SIDE(3,1) = 2.881D0
+!         Z_SIDE(3,2) = 0.20D0
+!         Z_SIDE(3,3) = 0.56D0
+!         Z_SIDE(3,4) = 1D0
+
+!     ALL SOLAR PANELS
+         Solar(1,1) = 10.886D0
+         Solar(1,2) = 0.85D0
+         Solar(1,3) = 0.23D0
+         Solar(1,4) = 1D0
+
+!     SOLAR PANELS MASTS
+         Solar(2,1) = 0.985D0
+         Solar(2,2) = 0.41D0
+         Solar(2,3) = 0.52D0
+         Solar(2,4) = 2D0
+
 !  ----------------------------------
 !     GPS Block IIR
 !  ----------------------------------
 !
-      IF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
+      ELSEIF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
 
 !     + AND -X FACES
         X_side(1,1) = 3.05D0
