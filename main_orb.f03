@@ -11,19 +11,14 @@
 !			Geoscience Australia, CRC-SI
 ! Created:	13 September 2017
 ! ----------------------------------------------------------------------
-<<<<<<< HEAD
 ! Last modified: 
 ! - Dr. Thomas Papanikolaou, 3 May 2018
 ! 	Preliminary version of GNSS dynamic orbit determination	
 ! - Dr. Thomas Papanikolaou, 25 June 2018
 ! 	Version with minor revisions
-=======
-! Last modified: Dr. Thomas Papanikolaou, 3 May 2018
-! 				 Preliminary version of GNSS dynamic orbit determination	
->>>>>>> fa28295d988e3c0ee4dd734b08a9474dd54fc260
 ! ----------------------------------------------------------------------
 
-
+ 
       USE mdl_precision
       USE mdl_num
       USE mdl_param
@@ -61,14 +56,8 @@ CALL orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vre
 ! ----------------------------------------------------------------------
 print *,"Orbit residuals in ICRF : RMS(XYZ)", Vrms
 PRINT *,"Orbit Determination: Completed"
-<<<<<<< HEAD
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
-=======
-
-!CALL cpu_time (CPU_t1)
-!PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
->>>>>>> fa28295d988e3c0ee4dd734b08a9474dd54fc260
 
 
 If (ORBEXT_glb > 0) Then

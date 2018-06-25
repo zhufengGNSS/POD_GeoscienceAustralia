@@ -2,7 +2,7 @@
 POD source code compilation
 -------------------------------------
 /opt/intel/bin/ifort \
-
+   
 gfortran -llapack -lblas \
 mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_planets.f90 mdl_tides.f90 mdl_arr.f90 m_writearray.f03 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
@@ -38,12 +38,7 @@ rel_schwarzschild.f90 rel_LenseThirring.f90 rel_deSitter.f90 \
 force_srp.f90 surfprop.f90 cross_product.f90 R3.for R1.for \
 force_sum.f03 \
 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 \
-<<<<<<< HEAD
 pd_gm.f03 m_legendre2.f03 m_pd_geopotential.f03 pd_forceZ.f03 \
-=======
-pd_gm.f03 m_legendre2.f03 m_pd_geopotential.f03 \
-pd_forceZ.f03 \
->>>>>>> fa28295d988e3c0ee4dd734b08a9474dd54fc260
 m_veq_rkn768.f03 \
 m_integrEQM.f03 m_integrVEQ.f03 m_orbinteg.f03 \
 m_orb_estimator.f03 \
