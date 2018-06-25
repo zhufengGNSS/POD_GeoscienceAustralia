@@ -4,7 +4,7 @@
 Satellite_PRN             G04
 Reference_frame           ITRF
 Time_scale                GPS
-Orbit_arc_length          3600     	 ! Seconds
+Orbit_arc_length          21600     	 ! Seconds
 
 ---------------------------------------------------------------------------
 %% Initial Conditions: Epoch and State Vector                                                      
@@ -40,7 +40,7 @@ iau_pn_model              2000
 ! 2. Runge-Kutta 4th order					:	RK4
 ! 3. Runge-Kutta 8th order RK8(7)13			:	RK8
 integrator_meth			  RKN7
-integrator_step 		  300 				! Integration Stepsize (sec)
+integrator_step 		  900 				! Integration Stepsize (sec)
 
 ---------------------------------------------------------------------------
 %% Gravitational Forces 

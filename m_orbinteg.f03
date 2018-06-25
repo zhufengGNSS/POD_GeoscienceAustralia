@@ -158,7 +158,7 @@ Else if (VEQmode == 1) then
 ! Variational Equations solution based on numerical integration
 ! ----------------------------------------------------------------------
 ! Number of estimated parameters (module mdl_param)
-Nparam = N_PARAM
+Nparam = NPARAM_glb
 Call integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
 
 sz1 = size(Smatrix, DIM = 1)

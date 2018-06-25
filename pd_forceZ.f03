@@ -101,7 +101,7 @@ SUBROUTINE pd_forceZ (mjd, rsat, vsat, Fvec, PDr, PDv)
       REAL (KIND = prec_q) :: beta_ppn, gama_ppn
       REAL (KIND = prec_q) :: c_light
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: U1, U2, U3
+      !REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: U1, U2, U3
       REAL (KIND = prec_d), DIMENSION(3,3) :: Ugrav_icrf, Ugrav_itrf, Ugrav
 
 
@@ -226,23 +226,26 @@ CALL matrix_Rr (TRS2CRS, Fgrav_itrf , Fgrav_icrf)
 ! PD matrix transformation ITRF to ICRF
 ! (df/dr)_Inertial = EOP(t) * (df/dr)_Terrestrial * inv( EOP(t) )
 
-! Allocatable arrays
-ALLOCATE (U1(3,3), STAT = AllocateStatus)
-ALLOCATE (U2(3,3), STAT = AllocateStatus)
-ALLOCATE (U3(3,3), STAT = AllocateStatus)
+!! Allocatable arrays
+!ALLOCATE (U1(3,3), STAT = AllocateStatus)
+!ALLOCATE (U2(3,3), STAT = AllocateStatus)
+!ALLOCATE (U3(3,3), STAT = AllocateStatus)
 
-!Call matrixRxR(TRS2CRS, Ugrav_itrf, Ugrav)
-U1 = TRS2CRS
-U2 = Ugrav_itrf
-Call matrixRxR (U1, U2, U3)								
-Ugrav = U3
+!!Call matrixRxR(TRS2CRS, Ugrav_itrf, Ugrav)
+!U1 = TRS2CRS
+!U2 = Ugrav_itrf
+!Call matrixRxR (U1, U2, U3)								
+!Ugrav = U3
 
-!Call matrixRxR(Ugrav, TRANSPOSE(TRS2CRS) , Ugrav_icrf)
-!Call matrixRxR(Ugrav, CRS2TRS ,Ugrav_icrf)
-U1 = Ugrav
-U2 = TRANSPOSE(TRS2CRS)
-Call matrixRxR (U1, U2, U3)								
-Ugrav_icrf = U3
+!!Call matrixRxR(Ugrav, TRANSPOSE(TRS2CRS) , Ugrav_icrf)
+!!Call matrixRxR(Ugrav, CRS2TRS ,Ugrav_icrf)
+!U1 = Ugrav
+!U2 = TRANSPOSE(TRS2CRS)
+!Call matrixRxR (U1, U2, U3)								
+!Ugrav_icrf = U3
+
+Ugrav = MATMUL(TRS2CRS, Ugrav_itrf) 		
+Ugrav_icrf = MATMUL(Ugrav, TRANSPOSE(TRS2CRS)) 		
 
 End IF
 

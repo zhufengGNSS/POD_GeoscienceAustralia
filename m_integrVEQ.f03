@@ -40,6 +40,7 @@ SUBROUTINE integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, 
 ! 				2. RK4:			Runge-Kutta 4th order
 ! 				3. RK8(7)13:	Runge-Kutta 8th order
 ! - step: 		Numerical Integrator Stepsize (seconds)
+! - Nparam:		Number of parameters to be estimated through the sensitivity matrix
 !
 ! Output arguments:
 ! - orbc: 		Satellite orbit array in ICRF including the following per epoch:
@@ -122,8 +123,6 @@ ALLOCATE (orbc(Nepochs,8), STAT = AllocateStatus)
 !ALLOCATE (Smatrix(Nepochs*6,6), STAT = AllocateStatus)
 ALLOCATE (Smatrix(Nepochs,6*6+2), STAT = AllocateStatus)
 
-! Number of estimated parameters (module mdl_param)
-!Nparam = N_PARAM
 !ALLOCATE (Pmatrix(Nepochs,Nparam*6), STAT = AllocateStatus)
 ALLOCATE (Pmatrix(Nepochs,Nparam*6+2), STAT = AllocateStatus)
 
@@ -179,12 +178,12 @@ Smatrix(1,33:38) = veqZo(6,1:6)
 ! Sensitivity matrix
 Pmatrix(1,1) = MJDo
 Pmatrix(1,2) = to_sec
-i = 1
-Pmatrix(1, 2+(i-1)*6+1 : 2+(i-1)*6+6 ) = (/ veqPo(1,i), veqPo(2,i), veqPo(3,i), veqPo(4,i), veqPo(5,i), veqPo(6,i) /)
-!Do iparam = 1 , Nparam
-!   !Pmatrix(1, 2+(i-1)*6+1 : 2+(i-1)*6+6 ) = veqPo(1:6,i)
-!   Pmatrix(1, 2+(i-1)*6+1 : 2+(i-1)*6+6 ) = (/ veqPo(1,i), veqPo(2,i), veqPo(3,i), veqPo(4,i), veqPo(5,i), veqPo(6,i) /)
-!End Do
+!i = 1
+!Pmatrix(1, 2+(i-1)*6+1 : 2+(i-1)*6+6 ) = (/ veqPo(1,i), veqPo(2,i), veqPo(3,i), veqPo(4,i), veqPo(5,i), veqPo(6,i) /)
+Do iparam = 1 , Nparam
+   Pmatrix(1, 2+(iparam-1)*6+1 : 2+(iparam-1)*6+6 ) = & 
+   (/ veqPo(1,iparam), veqPo(2,iparam), veqPo(3,iparam), veqPo(4,iparam), veqPo(5,iparam), veqPo(6,iparam) /)
+End Do
 ! ----------------------------------------------------------------------
 
 
@@ -249,7 +248,6 @@ Do j = 1 , Nepochs-1
 	Pmatrix(j+1,1) = orbc(j+1,1)
 	Pmatrix(j+1,2) = orbc(j+1,2)
 	Do iparam = 1 , Nparam
-	!Pmatrix(1, 2+(i-1)*6+1 : 2+(i-1)*6+6 ) = veqPo(1:6,i)
 	   Pmatrix(j+1, 2+(iparam-1)*6+1 : 2+(iparam-1)*6+6 ) = & 
 	   (/ veqP(1,iparam), veqP(2,iparam), veqP(3,iparam), veqP(4,iparam), veqP(5,iparam), veqP(6,iparam) /)
 	End Do

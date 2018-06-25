@@ -150,7 +150,7 @@ Do n = 1 , nmax
             d2P_f2 = c * d2Pnm_norm(n-1+1,m+1) - 2.D0 * s * dPnm_norm(n-1+1,m+1) - c * Pnm_norm(n-1+1,m+1) 
             d2P_f3 = sqrt(  ( (n-1+m)*(n-1-m) ) / (2.D0*n-3.D0)  ) * d2Pnm_norm(n-2+1,m+1) 
   !% ATTENTION! correction: sqrt(2*n+1) / sqrt( (n+m)*(n-m) )       %7777777777777777777777777777777777777777777777777777777777777777777         
-            dPnm_norm(n+1,m+1) = ( sqrt(2.D0*n+1) / sqrt(1.D0*(n+m)*(n-m)) ) * ( sqrt(2.D0*n-1) * d2P_f2 - d2P_f3 )
+            d2Pnm_norm(n+1,m+1) = ( sqrt(2.D0*n+1) / sqrt(1.D0*(n+m)*(n-m)) ) * ( sqrt(2.D0*n-1) * d2P_f2 - d2P_f3 )
         end If
     end Do
 end Do
