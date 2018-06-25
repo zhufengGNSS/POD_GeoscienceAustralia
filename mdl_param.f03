@@ -115,7 +115,7 @@ INTEGER (KIND = prec_int2) :: SRP_MOD_glb
 ! ----------------------------------------------------------------------
 ! Number of parameters to be estimated
 !INTEGER (KIND = prec_int8) ::	N_PARAM 
-INTEGER (KIND = prec_int8), PARAMETER :: N_PARAM = 0 						! 777 Temp
+INTEGER (KIND = prec_int8), PARAMETER :: NPARAM_glb = 2 						! 777 Temp
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------

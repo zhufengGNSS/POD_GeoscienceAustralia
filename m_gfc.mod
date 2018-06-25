@@ -1,0 +1,86 @@
+GFORTRAN module version '0' created from m_gfc.f03 on Mon Jun 25 10:46:16 2018
+MD5:da5a2fd4b193e94f5db4e65033475e01 -- If you edit this, you'll get what you deserve.
+
+(()
+() () () () () () () () () () () () () () () () () () () () () () () ()
+() ())
+
+()
+
+()
+
+()
+
+()
+
+(2 'gfc1' 'm_gfc' 'gfc1' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL
+UNKNOWN SUBROUTINE ALWAYS_EXPLICIT) (UNKNOWN 0 0 0 UNKNOWN ()) 3 0 (4 5
+6 7 8 9 10 11 12 13 14) () 0 () () () 0 0)
+15 'gfc2' 'm_gfc' 'gfc2' 1 ((PROCEDURE UNKNOWN-INTENT MODULE-PROC DECL
+UNKNOWN SUBROUTINE ALWAYS_EXPLICIT) (UNKNOWN 0 0 0 UNKNOWN ()) 16 0 (17
+18 19 20 21 22 23 24 25 26 27 28 29) () 0 () () () 0 0)
+30 'm_gfc' 'm_gfc' 'm_gfc' 1 ((MODULE UNKNOWN-INTENT UNKNOWN-PROC
+UNKNOWN UNKNOWN) (UNKNOWN 0 0 0 UNKNOWN ()) 0 0 () () 0 () () () 0 0)
+4 'gfmfilename' '' 'gfmfilename' 3 ((VARIABLE IN UNKNOWN-PROC UNKNOWN
+UNKNOWN DUMMY) (CHARACTER 1 0 0 CHARACTER ((CONSTANT (INTEGER 4 0 0
+INTEGER ()) 0 '300'))) 0 0 () () 0 () () () 0 0)
+5 'n_trunc' '' 'n_trunc' 3 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN
+DUMMY) (INTEGER 8 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
+6 'sigma_shc' '' 'sigma_shc' 3 ((VARIABLE IN UNKNOWN-PROC UNKNOWN
+UNKNOWN DUMMY) (INTEGER 2 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
+7 'gm_gfc' '' 'gm_gfc' 3 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
+8 'ae_gfc' '' 'ae_gfc' 3 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
+9 'nmax_gfc' '' 'nmax_gfc' 3 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+DUMMY) (INTEGER 8 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
+10 'tide_gfc' '' 'tide_gfc' 3 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN
+UNKNOWN DUMMY) (CHARACTER 1 0 0 CHARACTER ((CONSTANT (INTEGER 4 0 0
+INTEGER ()) 0 '50'))) 0 0 () () 0 () () () 0 0)
+11 'cnm' '' 'cnm' 3 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+ALLOCATABLE DIMENSION DUMMY) (REAL 8 0 0 REAL ()) 0 0 () (2 DEFERRED ()
+() () ()) 0 () () () 0 0)
+12 'snm' '' 'snm' 3 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+ALLOCATABLE DIMENSION DUMMY) (REAL 8 0 0 REAL ()) 0 0 () (2 DEFERRED ()
+() () ()) 0 () () () 0 0)
+13 'scnm' '' 'scnm' 3 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+ALLOCATABLE DIMENSION DUMMY) (REAL 8 0 0 REAL ()) 0 0 () (2 DEFERRED ()
+() () ()) 0 () () () 0 0)
+14 'ssnm' '' 'ssnm' 3 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+ALLOCATABLE DIMENSION DUMMY) (REAL 8 0 0 REAL ()) 0 0 () (2 DEFERRED ()
+() () ()) 0 () () () 0 0)
+17 'gfmfilename' '' 'gfmfilename' 16 ((VARIABLE IN UNKNOWN-PROC UNKNOWN
+UNKNOWN DUMMY) (CHARACTER 1 0 0 CHARACTER ((CONSTANT (INTEGER 4 0 0
+INTEGER ()) 0 '300'))) 0 0 () () 0 () () () 0 0)
+18 'n_trunc' '' 'n_trunc' 16 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN
+DUMMY) (INTEGER 8 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
+19 'sigma_shc' '' 'sigma_shc' 16 ((VARIABLE IN UNKNOWN-PROC UNKNOWN
+UNKNOWN DUMMY) (INTEGER 2 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
+20 'mjd_t' '' 'mjd_t' 16 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN
+DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
+21 'ntv_trunc' '' 'ntv_trunc' 16 ((VARIABLE IN UNKNOWN-PROC UNKNOWN
+UNKNOWN DUMMY) (INTEGER 8 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
+22 'gm_gfc' '' 'gm_gfc' 16 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
+23 'ae_gfc' '' 'ae_gfc' 16 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+DUMMY) (REAL 8 0 0 REAL ()) 0 0 () () 0 () () () 0 0)
+24 'nmax_gfc' '' 'nmax_gfc' 16 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN
+UNKNOWN DUMMY) (INTEGER 8 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
+25 'tide_gfc' '' 'tide_gfc' 16 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN
+UNKNOWN DUMMY) (CHARACTER 1 0 0 CHARACTER ((CONSTANT (INTEGER 4 0 0
+INTEGER ()) 0 '50'))) 0 0 () () 0 () () () 0 0)
+26 'cnm' '' 'cnm' 16 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+ALLOCATABLE DIMENSION DUMMY) (REAL 8 0 0 REAL ()) 0 0 () (2 DEFERRED ()
+() () ()) 0 () () () 0 0)
+27 'snm' '' 'snm' 16 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+ALLOCATABLE DIMENSION DUMMY) (REAL 8 0 0 REAL ()) 0 0 () (2 DEFERRED ()
+() () ()) 0 () () () 0 0)
+28 'scnm' '' 'scnm' 16 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+ALLOCATABLE DIMENSION DUMMY) (REAL 8 0 0 REAL ()) 0 0 () (2 DEFERRED ()
+() () ()) 0 () () () 0 0)
+29 'ssnm' '' 'ssnm' 16 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN
+ALLOCATABLE DIMENSION DUMMY) (REAL 8 0 0 REAL ()) 0 0 () (2 DEFERRED ()
+() () ()) 0 () () () 0 0)
+)
+
+('gfc1' 0 2 'gfc2' 0 15 'm_gfc' 0 30)
