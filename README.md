@@ -30,7 +30,7 @@ The software is broken into two main components:
 
 ## POD
 
-The `ACS` Version 1.0 beta release supports:
+The `ACS` Version 0.0.1 beta release supports:
 
 1. The `POD` 
 
@@ -49,21 +49,22 @@ The `ACS` Version 1.0 beta release supports:
 To build the `POD` ...
 
     $ cd pod
+    $ make
 
-You should now have...
+You should now have the executable 'main_orb.e'
 
-    pod/
-    ├── README.md
 
 ### Configuration File
 
 The `POD` Precise Orbit Determination (`./main_orb.e`) uses the configuration file:
-    ├── EQM.in
+    ├── EQM.in (Full force model equation of motion)
+    ├── VEQ.in (For variational equations)
 
 
+### Processing Example
 
+In this example the pod will perform a dynamic orbit determination for PRN04 over a 6 hour arc. The full gravitational force models are applied, with a cannonball model SRP model.
 
-### Run
   
 To run the `POD` ...
 
@@ -71,52 +72,35 @@ To run the `POD` ...
 
 This should output the following to `stdout`...
 
- Orbit Determination
- Orbit residuals in ICRF : RMS(XYZ)   5.0362114805437154E-002  0.37740266043432752        1.0641007845262487    
- Orbit Determination: Completed
- External Orbit comparison
- Orbit comparison: ICRF
- RMS RTN  0.59203966644540662       0.91129368973505365       0.32532340451976832
- RMS XYZ   5.0362114805437154E-002  0.37740266043432752        1.0641007845262487
- Orbit comparison: ITRF
- RMS XYZ  0.37973061226403487        2.6051541426323321E-002   1.0641454646428574
- Write orbit matrices to output files
- CPU Time (sec)   266.74518600000005
+    Orbit Determination
+    Orbit residuals in ICRF : RMS(XYZ)   1.6754034501980351E-002   5.2908718335411935E-002   1.5676115599034774E-002
+    Orbit Determination: Completed
+    CPU Time (sec)   298.48134399999998
+    External Orbit comparison
+    Orbit comparison: ICRF
+    RMS RTN   2.8094479714173427E-002   2.4358145601708528E-002   4.4097979280889953E-002
+    RMS XYZ   1.6754034501980351E-002   5.2908718335411935E-002   1.5676115599034774E-002
+    Orbit comparison: ITRF
+    RMS XYZ   3.9069978513805753E-002   3.9343671258381237E-002   1.5660654272651970E-002
+    Write orbit matrices to output files
+    CPU Time (sec)   349.19307899999995
 
-and produce the following output files...
+The results above show that our orbits arcs, over 6 hours, are currently within 2-5 cm of the final combined IGS orbit. 
 
-    ├── DE.430
-    ├── Amatrix.out
-    ├── Wmatrix.out
-    ├── orbext_ICRF.out
-    ├── orbext_ITRF.out
-    ├── dorb_icrf.out
-    ├── dorb_RTN.out
-    ├── dorb_Kepler.out
-    ├── dorb_itrf.out
-    ├── orb_icrf.out
-    ├── orb_itrf.out
-    ├── VEQ_Smatrix.out
-    ├── VEQ_Pmatrix.out
+The prcessing also produces the following output files...
 
-    $ tail -n 31 output/
-    
-Performance on a t2.medium (2 virtual CPUS and 4GB of RAM) amazon server: 
+    ├── DE.430            planetary ephemris intermediate file
+    ├── Amatrix.out       design matrix
+    ├── Wmatrix.out       reduced observation matrix
+    ├── orbext_ICRF.out   intermediary file for the IGS orbit solution in ICRF for comparison purposes
+    ├── orbext_ITRF.out   intermediary file for the IGS orbit solution in ITRFfor comparison purposes
+    ├── dorb_icrf.out     differences in solutions in ICRF
+    ├── dorb_RTN.out      differences in solutions in orbital frame components radial, tangential and normal (RTN)
+    ├── dorb_Kepler.out   differences in solutions in keperian elements 
+    ├── dorb_itrf.out     differences in solutions in ITRF 
+    ├── orb_icrf.out      the final estimated orbit in ICRF
+    ├── orb_itrf.out      the final estimated orbit in ITRF
+    ├── VEQ_Smatrix.out   State transition matrix from the variational equations solution
+    ├── VEQ_Pmatrix.out   Sensitivity matrix from the variational equations solution
 
-    $ time ./main_orb.e 
- Orbit Determination
- Orbit residuals in ICRF : RMS(XYZ)   5.0362114805437154E-002  0.37740266043432752        1.0641007845262487    
- Orbit Determination: Completed
- External Orbit comparison
- Orbit comparison: ICRF
- RMS RTN  0.59203966644540662       0.91129368973505365       0.32532340451976832
- RMS XYZ   5.0362114805437154E-002  0.37740266043432752        1.0641007845262487
- Orbit comparison: ITRF
- RMS XYZ  0.37973061226403487        2.6051541426323321E-002   1.0641454646428574
- Write orbit matrices to output files
- CPU Time (sec)   266.74518600000005
-
-real    4m26.779s
-user    4m24.284s
-sys     0m2.465s
 
