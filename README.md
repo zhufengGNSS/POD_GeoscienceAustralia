@@ -61,7 +61,7 @@ The `POD` Precise Orbit Determination (`./main_orb.e`) uses the configuration fi
     ├── VEQ.in (For variational equations)
 
 
-### Processing Example
+### Processing Example #1
 
 In this example the pod will perform a dynamic orbit determination for PRN04 over a 6 hour arc. The full gravitational force models are applied, with a cannonball model SRP model.
 
@@ -102,5 +102,52 @@ The prcessing also produces the following output files...
     ├── orb_itrf.out      the final estimated orbit in ITRF
     ├── VEQ_Smatrix.out   State transition matrix from the variational equations solution
     ├── VEQ_Pmatrix.out   Sensitivity matrix from the variational equations solution
+
+
+### Processing Example #2 - ECOM2 SRP
+
+In this example we will change the SRP model to use the ECOM2 model. 
+
+Edit the EQM.in file so that the Solar Radiation Pressure configuration section now looks:
+
+! Solar Radiation Pressure model:
+! 1. Cannonball model
+! 2. Box-wing model
+! 3. ECOM (D2B1) model
+SRP_model 3
+
+Then edit VEQ.in, so that the Non-gravitational forces now looks like:
+
+%% Non-gravitational Effects
+Solar_radiation           0
+Earth_radiation           0
+Antenna_thrust            0
+
+! Solar Radiation Pressure model:
+! 1. Cannonball model
+! 2. Box-wing model
+! 3. ECOM (D2B1) model
+SRP_model                 3
+
+run the `POD` ...
+
+    $ ./main_orb.e
+
+This should output the following to `stdout`...
+
+    Orbit Determination
+    Orbit residuals in ICRF : RMS(XYZ)   2.0336204859568077E-002   8.4715644601919167E-003   3.9687932322714677E-002
+    Orbit Determination: Completed
+    CPU Time (sec)   299.68054799999999
+    External Orbit comparison
+    Orbit comparison: ICRF
+    RMS RTN   2.8182836396022540E-002   2.4598832384842121E-002   2.5879201921952168E-002
+    RMS XYZ   2.0336204859568077E-002   8.4715644601919167E-003   3.9687932322714677E-002
+    Orbit comparison: ITRF
+    RMS XYZ   1.8757217704973204E-002   1.1635302426688266E-002   3.9702619816620370E-002
+    Write orbit matrices to output files
+    CPU Time (sec)   350.88653299999999
+    
+
 
 
