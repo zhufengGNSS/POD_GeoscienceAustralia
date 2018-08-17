@@ -1,3 +1,25 @@
+MODULE m_eop_cor
+
+
+! ----------------------------------------------------------------------
+! MODULE: m_eop_cor.f03
+! ----------------------------------------------------------------------
+! Purpose:
+!  Module for calling the modified eop_cor subroutine 
+! 
+! ----------------------------------------------------------------------
+! Author :	Dr. Thomas Papanikolaou, Geoscience Australia 
+! Created:	23 July 2018
+! ----------------------------------------------------------------------
+
+
+      IMPLICIT NONE
+      !SAVE 			
+ 
+	  
+Contains
+
+
 SUBROUTINE eop_cor (mjd, EOP_days, EOP_sol, n_interp , EOP_cr)
 
 
@@ -74,7 +96,7 @@ SUBROUTINE eop_cor (mjd, EOP_days, EOP_sol, n_interp , EOP_cr)
       DOUBLE PRECISION dUT1_UTC, ut1utc_int, UT1UTC_cor
       DOUBLE PRECISION dX_eop, dY_eop, LOD 
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int2) :: sz1_EOP, sz2_EOP
+      INTEGER (KIND = prec_int2) :: i, sz1_EOP, sz2_EOP
       DOUBLE PRECISION x_int, y_int, ut1_int
       REAL (KIND = prec_d) :: MJDint_ar(n_interp), xint_ar(n_interp), yint_ar(n_interp), UT1int_ar(n_interp)
 
@@ -151,7 +173,7 @@ End If
 ! ----------------------------------------------------------------------
 
 
-
+END SUBROUTINE
 
 
 END

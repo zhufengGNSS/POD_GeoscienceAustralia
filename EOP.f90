@@ -88,7 +88,8 @@ mjd_TT = mjd
 ! - IERS Rapid Service/Prediction Center:	finals2000A.daily solution
 ! ----------------------------------------------------------------------
       IF (EOP_sol == 1 .OR. EOP_sol == 2) THEN  
-		CALL eop_cor (mjd_TT, EOP_fname, EOP_sol, EOP_Nint, EOP_cr)
+		!CALL eop_cor (mjd_TT, EOP_fname, EOP_sol, EOP_Nint, EOP_cr)
+		CALL eop_cor (mjd_TT, EOP_day_glb, EOP_sol, EOP_Nint, EOP_cr)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
