@@ -545,6 +545,8 @@ eclpf = 0
 ! SRP model
 srpid =  SRP_MOD_glb
 
+CALL prn_shift (GNSSid, PRN_no, PRN_no)
+!print*,GNSSid, PRN_no
 CALL force_srp (GMearth, PRN_no, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
