@@ -34,9 +34,8 @@
 
 ! ----------------------------------------------------------------------
 ! Open Output file
-      OPEN (UNIT=UNIT_out,FILE=fname_out,IOSTAT=ios)
-!      OPEN (UNIT=UNIT_out,FILE=fname_out,ACTION="WRITE",
-!     &      POSITION="REWIND", IOSTAT=ios)
+!      OPEN (UNIT=UNIT_out,FILE=fname_out,IOSTAT=ios)
+      OPEN (UNIT=UNIT_out,FILE=fname_out,ACTION="WRITE",POSITION="REWIND",IOSTAT=ios)
       IF (ios /= 0) THEN
          PRINT *, "Error in opening file:", fname_out
          PRINT *, "OPEN IOSTAT=", ios

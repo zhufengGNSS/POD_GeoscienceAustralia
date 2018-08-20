@@ -38,7 +38,7 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_q) :: X_side(3,4),Y_side(1,4),Z_side(4,4),Solar(2,4)
+      REAL (KIND = prec_q) :: X_side(3,4),Y_side(2,4),Z_side(4,4),Solar(2,4)
       REAL (KIND = prec_q) :: TOTAL_X_REFL_AREA, TOTAL_X_DIFU_AREA
       REAL (KIND = prec_q) :: TOTAL_Z_REFL_AREA, TOTAL_Z_DIFU_AREA
       REAL (KIND = prec_q) :: TOTAL_Y_REFL_AREA, TOTAL_Y_DIFU_AREA

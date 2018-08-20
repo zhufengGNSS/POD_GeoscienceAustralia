@@ -5,8 +5,10 @@ MODULE mdl_param
 !  Module for setting orbit modelling parameters as global variables 
 !  to be used from various part of the source code 
 ! ---------------------------------------------------------------------------
-! Dr. Thomas D. Papanikolaou, Geoscience Australia             September 2015
-! ---------------------------------------------------------------------------
+! Author :	Dr. Thomas Papanikolaou
+!			Cooperative Research Centre for Spatial Information, Australia
+! Created:	November 2017
+! ----------------------------------------------------------------------
 
 
       USE mdl_precision
@@ -38,6 +40,7 @@ MODULE mdl_param
       REAL (KIND = prec_d) :: SEC_to
 ! Initial State Vector in ICRF
       REAL (KIND = prec_d) :: SVEC_Zo(6)
+      REAL (KIND = prec_d) :: SVEC_Zo_ESTIM(6)
 ! ---------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------
@@ -46,9 +49,11 @@ MODULE mdl_param
 ! ---------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------
-! External Orbit arrays (prm_orbext.f03)
+! External Orbit arrays (prm_orbext.f03, prm_pseudobs.f03)
 ! Allocatable Arrays	  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbext_kepler, orbext_ICRF, orbext_ITRF
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF, pseudobs_ICRF
+      INTEGER (KIND = prec_int2) :: ORBEXT_glb
 ! ---------------------------------------------------------------------------
 
 
@@ -104,5 +109,19 @@ INTEGER (KIND = prec_int2) :: SRP_MOD_glb
 ! ----------------------------------------------------------------------
 
 
+
+! ----------------------------------------------------------------------
+! Variational Equations
+! ----------------------------------------------------------------------
+! Number of parameters to be estimated
+!INTEGER (KIND = prec_int8) ::	N_PARAM 
+INTEGER (KIND = prec_int8), PARAMETER :: NPARAM_glb = 2 						! 777 Temp
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Estimator method
+      INTEGER (KIND = prec_int2) :: ESTIM_mode_glb 
+      INTEGER (KIND = prec_int2) :: ESTIM_iter_glb 
+! ----------------------------------------------------------------------
 
 END

@@ -164,7 +164,7 @@ READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 IF (word1_ln == "orbit_external_opt") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, data_opt 
 END IF
-!data_opt = 5
+ORBEXT_glb = data_opt
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------

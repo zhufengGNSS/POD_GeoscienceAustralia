@@ -25,11 +25,6 @@ SUBROUTINE tides_solid2(mjd, ut1_utc , dCnm,dSnm)
 !  Computed dCnm and dSnm are formed into lower triangular matrices.
 !  Coefficient dCnm corresponds to the matrix element dCnm(n+1,m+1).
 !
-! Remark 2:
-!  Line 81: "thetag" has been set temporarily to zero. 
-!  The computation of "thetag" is strongly connected with the subroutines
-!  of the TRS function which is currently under development. Therefore,
-!  this will be fulfilled in a future version which will include TRS. 
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
 ! Created:	9 November 2015

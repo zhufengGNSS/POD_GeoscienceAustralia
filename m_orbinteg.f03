@@ -20,7 +20,7 @@ MODULE m_orbinteg
 Contains
 	  
 	  
-SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqC)
+SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqSmatrix, veqPmatrix)
 
 
 ! ----------------------------------------------------------------------
@@ -40,7 +40,8 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqC)
 !				- Seconds since 00h 
 !				- Position vector (m)
 !				- Velocity vector (m/sec)
-! - veqC:		Variational Equations solution based on numerical integration methods
+! - veqSmatrix:	State trasnition matrix obtained from the Variational Equations solution based on numerical integration methods
+! - veqPmatrix: Sensitivity matrix obtained from the Variational Equations solution based on numerical integration methods
 ! ----------------------------------------------------------------------
 ! Note 1:
 ! The time scale of the 2 first collumns of the orbit arrays (MJD and Seoncds since 00h) 
@@ -55,6 +56,7 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqC)
       USE mdl_precision
       USE mdl_num
       USE m_integrEQM
+      USE m_integrVEQ
       USE mdl_param
       IMPLICIT NONE
 
@@ -67,7 +69,7 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqC)
       INTEGER (KIND = prec_int2), INTENT(IN) :: VEQmode 
 ! ----------------------------------------------------------------------
 ! OUT
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbC, veqC  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbC, veqSmatrix, veqPmatrix  
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -95,7 +97,9 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqC)
 ! ----------------------------------------------------------------------
       INTEGER IY, IM, ID, J_flag
       DOUBLE PRECISION DJM0, sec, FD, Sec0
+	  INTEGER (KIND = prec_int8) :: Nparam
 
+      REAL (KIND = prec_d) :: Xmatrix(6)
 
 
 
@@ -103,6 +107,13 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqC)
 ! ----------------------------------------------------------------------
 ! Read orbit parameterization
 Call prm_main (INfname)
+!Call prm_read (INfname)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Temp																		! ----------------------------------------------------------------------
+SVEC_Zo = SVEC_Zo_ESTIM
+!print *,"orbinteg.f03 | SVEC_Zo", SVEC_Zo
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -134,8 +145,10 @@ Call integr_EQM (MJDo, ro, vo, arc, integID, step, orbC)
 ! ----------------------------------------------------------------------
 sz1 = size(orbC, DIM = 1)
 sz2 = size(orbC, DIM = 2)
-ALLOCATE (veqC(sz1,sz2), STAT = AllocateStatus)
-veqC = orbC
+ALLOCATE (veqSmatrix(sz1,sz2), STAT = AllocateStatus)
+veqSmatrix = orbC
+ALLOCATE (veqPmatrix(sz1,sz2), STAT = AllocateStatus)
+veqPmatrix = orbC
 ! ----------------------------------------------------------------------
 
 
@@ -144,25 +157,22 @@ Else if (VEQmode == 1) then
 ! ----------------------------------------------------------------------
 ! Variational Equations solution based on numerical integration
 ! ----------------------------------------------------------------------
-! Call integr_veq (MJDo, ro, vo, arc, integID, step, orbC, veqC )
-!Call integr_VEQ (MJDo, ro, vo, arc, integID, step, orbc, Smatrix, Pmatrix)
-! ----------------------------------------------------------------------
+! Number of estimated parameters (module mdl_param)
+Nparam = NPARAM_glb
+Call integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
 
-! ----------------------------------------------------------------------
+sz1 = size(Smatrix, DIM = 1)
+sz2 = size(Smatrix, DIM = 2)
+ALLOCATE (veqSmatrix(sz1,sz2), STAT = AllocateStatus)
+veqSmatrix = Smatrix
+
 sz1 = size(Pmatrix, DIM = 1)
 sz2 = size(Pmatrix, DIM = 2)
-ALLOCATE (veqC(sz1,6+sz2), STAT = AllocateStatus)
-veqC(1:sz1,1:6)     = Smatrix
-veqC(1:sz1,7:6+sz2) = Pmatrix
+ALLOCATE (veqPmatrix(sz1,sz2), STAT = AllocateStatus)
+veqPmatrix = Pmatrix
 ! ----------------------------------------------------------------------
-
 
 End If
-! ----------------------------------------------------------------------
-
-
-
-
 
 
 ! ----------------------------------------------------------------------
@@ -201,20 +211,23 @@ If (t_sec >= 86400.D0) Then
 	t_sec = t_sec - INT(t_sec / 86400.D0) * 86400.D0
 End IF
 
-! Time scale change in orbC
+! Time scale change in orbit matrix and VEQ matrices 
 orbC(i,1) = mjd
 orbC(i,2) = t_sec
-
+If (VEQmode == 1) Then
+	veqSmatrix(i,1) = mjd
+	veqSmatrix(i,2) = t_sec
+	veqPmatrix(i,1) = mjd
+	veqPmatrix(i,2) = t_sec
+End IF
+ 
 End Do
 
 End If
 ! ----------------------------------------------------------------------
 
 
-
-
 END SUBROUTINE
-
 
 End
 

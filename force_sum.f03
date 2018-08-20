@@ -414,11 +414,10 @@ a_solidtides(3) = az
 !PRINT *,"dCnm_tides",dCnm_tides
 !PRINT *,"dSnm_tides",dSnm_tides
 
-DEALLOCATE (dCnm_tides,   STAT = DeAllocateStatus)
-DEALLOCATE (dSnm_tides,   STAT = DeAllocateStatus)
+!DEALLOCATE (dCnm_tides,   STAT = DeAllocateStatus)
+!DEALLOCATE (dSnm_tides,   STAT = DeAllocateStatus)
 sz_tides = 0
 ! ----------------------------------------------------------------------
-
 !PRINT *,"dCnm_solid1",dCnm_solid1
 !PRINT *,"dSnm_solid1",dSnm_solid1
 !PRINT *,"dCnm_solid2",dCnm_solid2
@@ -426,7 +425,6 @@ sz_tides = 0
 !PRINT *,"dC21_pse, dS21_pse", dC21_pse, dS21_pse
 !PRINT *,"dC21_poc, dS21_poc", dC21_poc, dS21_poc
 !PRINT *, "dC20_perm"  , dC20_perm
-
 
 
 ! ----------------------------------------------------------------------
@@ -447,10 +445,16 @@ If (FMOD_TIDES(3) == 1) Then
       DEALLOCATE (dCnm_ocean,   STAT = DeAllocateStatus)
       DEALLOCATE (dSnm_ocean,   STAT = DeAllocateStatus)
       sz_tides = 0
+
+!PRINT *,"a_ocean", a_ocean
+!PRINT *,"rsat_itrf", rsat_itrf
+!PRINT *,"GMearth", GMearth
+!PRINT *,"aEarth", aEarth
+!PRINT *,"OCEAN_Nmax", OCEAN_Nmax
+!PRINT *,"OCEAN_Mmax", OCEAN_Mmax
 	  
 End if
 ! ----------------------------------------------------------------------
-
 
 
 ! ----------------------------------------------------------------------
@@ -474,6 +478,7 @@ End IF
 !PRINT *,"a_tides", a_tides
 !PRINT *,"a_solid", a_solidtides
 !PRINT *,"a_ocean", a_ocean
+!PRINT *,"Ftides_icrf",Ftides_icrf
 !PRINT *,"FMOD_TIDES",FMOD_TIDES
 
 

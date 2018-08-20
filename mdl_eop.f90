@@ -18,6 +18,10 @@ MODULE mdl_eop
 !   EOP_sol:	EOP data solution type
 !   EOP_Nint:	Number of data points used in Lagrange interpolation of EOP data
 !   iau_model:	IAU Precession-Nutation model  
+!
+! - 19/06/2018: 	Dr. Thomas Papanikolaou
+!   				Geoscience Australia, CRC-SI
+!   EOP_day_glb global variable has been added
 ! ---------------------------------------------------------------------------
 
       USE mdl_precision
@@ -39,6 +43,9 @@ MODULE mdl_eop
       INTEGER (KIND = prec_int4) :: EOP_Nint
       INTEGER (KIND = prec_int1) :: EOP_sol
       INTEGER (KIND = prec_int2) :: iau_model
+      !REAL (KIND = prec_d) :: EOP_day_glb(7)	
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: EOP_day_glb
+      REAL (KIND = prec_d) :: EOP_MJD0_glb	  
 ! ---------------------------------------------------------------------------
 
 
