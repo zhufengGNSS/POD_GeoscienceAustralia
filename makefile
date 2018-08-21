@@ -1,4 +1,4 @@
-
+BIN = ./bin
 # Fortan compiler
 #FC = /opt/intel/bin/ifort
 FC = gfortran
@@ -7,7 +7,7 @@ FC = gfortran
 FCFLAGS = -llapack -lblas
 
 # Linker flags
-FLFLAGS = 
+FLFLAGS = -L/usr/lib64
 
 SRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_planets.f90 mdl_tides.f90 mdl_arr.f90 m_writearray.f03 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
@@ -57,9 +57,32 @@ m_statist.f03 m_statdelta.f03 m_statorbit.f03 \
 m_orbdet.f03 m_orbext.f03 \
 main_orb.f03
 
+CRS2TRSSRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
+arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
+m_matrixinv.f03 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
+jd2cal.for cal2jd.for dat.for \
+fad03.for  faf03.for   fal03.for   fama03.for  fane03.for  fapa03.for  faur03.for \
+fae03.for  faju03.for  falp03.for  fame03.for  faom03.for  fasa03.for  fave03.for \
+xy06.for s06.for c2ixys.for \
+xys00a.for pnm00a.for bpn2xy.for s00.for pn00a.for nut00a.for pn00.for pr00.for obl80.for bp00.for numat.for bi00.for \
+ir.for rz.for ry.for rx.for \
+anp.for era00.for gmst00.for gmst06.for \
+sp00.for pom00.for \
+ORTHO_EOP.F CNMTX.F UTLIBR.F PMSDNUT2.F FUNDARG.F RG_ZONT2.F \
+interp_iers.f \
+rxr.for tr.for cr.for cp.for \
+time_TT.f90 time_GPS.f90 time_UTC.f90 time_TAI.f90 time_GPSweek.f90 \
+crs_trs.f90 m_eop_data.f03 m_eop_cor.f03 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 eop_igu.f90 interp_lin.f90 \
+era_matrix.f90 main_crs2trs.f03
+
 PROGRAM = main_orb.e
 
-all: $(PROGRAM)
+all: $(PROGRAM) crs2trs
+
+directories: $(BIN)
+
+$(BIN): 
+	mkdir -p $(BIN)
 
 $(PROGRAM): $(SRCS)
 	$(FC) $(FCFLAGS) -o $@ $^
@@ -70,6 +93,9 @@ $(PROGRAM): $(SRCS)
 %.mod: %.h
 	$(FC) $(FLFLAGS) -o $@ $<
 
+crs2trs: $(CRS2TRSSRCS) $(BIN)
+	$(FC) $(FCFLAGS) $(FLFLAGS) $(CRS2TRSSRCS) -o $(BIN)/crs2trs
+
 clean:
-	rm -f *.o *.mod $(PROGRAM)
+	rm -f *.o *.mod $(PROGRAM) $(BIN)/crs2trs
 
