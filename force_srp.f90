@@ -39,7 +39,7 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! ----------------------------------------------------------------------
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
-      INTEGER                           :: eclpf,srpid
+      INTEGER                           :: eclpf,srpid,ECOM
       INTEGER                           :: prnnum,BLKNUM
 !      REAL (KIND = prec_q), INTENT(IN), DIMENSION(3) :: r,v,r_sun
 !      REAL (KIND = prec_q), INTENT(OUT) :: fx,fy,fz
@@ -88,6 +88,8 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       Pi = 4*atan(1.0d0)
   BLKNUM = 3 ! for GPS Block IIA testing
 ! ---------------------------------------------------------------------
+   ECOM  = 1 ! ECOM =1 :ECOM1 model is applied.
+             ! ECOM =2 :ECOM2 model is applied.
 
 
 ! The unit vector er SAT->EARTH
@@ -103,7 +105,7 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       CALL cross_product (er,ed,ey)
 
 ! The unit vector eb = ed x ey
-      CALL cross_product (ey,ed,eb)
+      CALL cross_product (ed,ey,eb)
 
 ! The unit vector of x side, which is always illuminated by the
 ! sun, parallel to the satellite flight/velocity direction
@@ -115,7 +117,7 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! the orbit normal vector
 !------------------------
 
-     Call productcross(-er,ex,en)
+     Call cross_product(-er,ex,en)
 
 ! computation of the factor zta related to the Sun illumination
       if (eclpf.eq.0) then
@@ -381,12 +383,12 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! srpcoef(5) = D4_c
 ! srpcoef(6) = D2_s
 ! srpcoef(7) = D4_s
-! srpcoef(8) = D1_c 
-! srpcoef(9) = D1_c
+! srpcoef(8) = B1_c 
+! srpcoef(9) = B1_s
 !=======================================
 
-! GPS satellites
-      if (prnnum.ge.1 .and. prnnum.le.32) then
+
+      if (ECOM .eq. 2) then
 
       srpcoef(1) = -0.91698d-7
       srpcoef(2) =  0.00836d-7
@@ -399,16 +401,41 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       srpcoef(9) = -0.00801d-7
 
 
-      else 
-      srpcoef(1) = -1.09628d-7
-      srpcoef(2) =  0.00030d-7
-      srpcoef(3) = -0.00026d-7
-      srpcoef(4) =  0.02198d-7
-      srpcoef(5) = -0.00446d-7
-      srpcoef(6) = -0.01095d-7
-      srpcoef(7) =  0.00473d-7
-      srpcoef(8) = -0.02249d-7
-      srpcoef(9) =  0.00461d-7
+
+
+! ECOM1 model
+! ***************************************
+! a=D(u)*ed+Y(u)*ey+B(u)*eb
+!
+! D(u)=D0+Dc*cos1*(del_u)+Ds*sin1*(del_u)
+!        
+!
+! Y(u)=Y0+Yc*cos1*(del_u)+Ys*sin1*(del_u)
+!
+! B(u)=B0+Bc*cos1*(del_u)+Bs*sin1*(del_u)
+! ***************************************
+! srpcoef(1) = D0
+! srpcoef(2) = Y0
+! srpcoef(3) = B0
+! srpcoef(4) = Dc
+! srpcoef(5) = Ds
+! srpcoef(6) = Yc
+! srpcoef(7) = Ys
+! srpcoef(8) = Bc
+! srpcoef(9) = Bs
+!=======================================
+
+
+      else if (ECOM .eq. 1) then
+      srpcoef(1) = -0.91664d-7
+      srpcoef(2) =  0.00831d-7
+      srpcoef(3) = -0.00617d-7
+      srpcoef(4) =  0.00067d-7
+      srpcoef(5) =  0.00035d-7
+      srpcoef(6) = -0.00051d-7
+      srpcoef(7) = -0.00100d-7
+      srpcoef(8) =  0.01228d-7
+      srpcoef(9) = -0.00894d-7
 
       end if
 
@@ -425,6 +452,8 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
      sclfa=(AU/Ds)**2
 
      do i=1,3
+
+     if(ECOM .eq. 2) then
      fsrp(i)=fsrp(i) + srpcoef(1)*sclfa*ed(i) &
                      + srpcoef(2)*sclfa*ey(i) &
                      + srpcoef(3)*sclfa*eb(i) &
@@ -434,6 +463,20 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
                      + srpcoef(7)*sclfa*ed(i)*DSIN(4.0d0*del_u) &
                      + srpcoef(8)*sclfa*eb(i)*DCOS(1.0d0*del_u) &
                      + srpcoef(9)*sclfa*eb(i)*DSIN(1.0d0*del_u)
+
+     else
+
+     fsrp(i)=fsrp(i) + srpcoef(1)*sclfa*ed(i) &
+                     + srpcoef(2)*sclfa*ey(i) &
+                     + srpcoef(3)*sclfa*eb(i) &
+                     + srpcoef(4)*sclfa*ed(i)*DCOS(del_u) &
+                     + srpcoef(5)*sclfa*ed(i)*DSIN(del_u) &
+                     + srpcoef(6)*sclfa*ey(i)*DCOS(del_u) &
+                     + srpcoef(7)*sclfa*ey(i)*DSIN(del_u) &
+                     + srpcoef(8)*sclfa*eb(i)*DCOS(del_u) &
+                     + srpcoef(9)*sclfa*eb(i)*DSIN(del_u)
+
+     end if
  
      end do
 
