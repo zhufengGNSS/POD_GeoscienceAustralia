@@ -22,6 +22,7 @@
       !USE mdl_eop
       USE m_eop_data
       USE m_eop_cor
+      USE m_eop_igu
       USE mdl_param
       USE m_writearray
       IMPLICIT NONE
@@ -139,7 +140,7 @@ IF (EOP_sol == 1 .OR. EOP_sol == 2) THEN
 
 ! ----------------------------------------------------------------------
 ! EOP data reading
-CALL eop_data (mjd, EOP_fname, EOP_sol, n_interp , EOP_days)
+CALL eop_data (mjd_TT, EOP_fname, EOP_sol, n_interp , EOP_days)
 !print *,"EOP_days", EOP_days
 ! ----------------------------------------------------------------------
 ! EOP data corrections due to tidal variations
@@ -151,7 +152,7 @@ CALL eop_cor (mjd_TT, EOP_days , EOP_sol, n_interp, EOP_cr)
 ! ----------------------------------------------------------------------
 ELSEIF (EOP_sol == 3)  THEN 
 ! EOP ultra-rapid: ERP by IGS and dX,dY (IAU 2000A) by IERS RS/PC (finals2000A.daily)
-	CALL eop_igu (mjd_TT, ERP_fname, EOP_fname, EOP_cr)
+	CALL eop_igu (mjd_TT, ERP_fname, EOP_days, EOP_cr)
 END IF
 ! ----------------------------------------------------------------------
 
@@ -178,7 +179,7 @@ Print *,"d_TRS2CRS", d_TRS2CRS
 
 ! ----------------------------------------------------------------------
 ! Write matrices to ouput files (ascii)
-PRINT *,"Write ICRF-ITRF transformation matrices to output files: CRS2TRS.out,TRS2CRS.out,d_CRS2TRS.out,d_TRS2CRS.out"
+PRINT *,"Write ICRF-ITRF transformation matrices to output files: CRS2TRS.out, TRS2CRS.out, d_CRS2TRS.out, d_TRS2CRS.out"
 ! ----------------------------------------------------------------------
 ! Allocatable arrays
 ALLOCATE (R_Matrix(3,3), STAT = AllocateStatus)

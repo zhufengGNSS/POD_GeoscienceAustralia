@@ -63,6 +63,7 @@ SUBROUTINE eop_rd (EOP_fname, EOP_sol, mjd , eop)
          CALL eop_finals2000A (EOP_fname,mjd , eop)
       ELSE IF (EOP_sol == 3) THEN
          !CALL erp_igu (EOP_fname,mjd , eop)
+		 CALL eop_finals2000A (EOP_fname,mjd , eop)		 
       END IF
 ! ----------------------------------------------------------------------
 !         PRINT *, "eop_rd.f90 eop", eop

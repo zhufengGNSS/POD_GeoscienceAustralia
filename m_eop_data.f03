@@ -85,13 +85,13 @@ SUBROUTINE eop_data (mjd, EOP_fname, EOP_sol, n_interp , EOP_days)
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d) :: mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC, mjd_UT1
       DOUBLE PRECISION TT1, TT2, TT1_UT1, TT2_UT1, TAI1, TAI2
-      INTEGER (KIND = prec_int8) :: mjd_UTC_day
+      INTEGER (KIND = prec_int8) :: mjd_UTC_day, mjd_day_int
       REAL (KIND = prec_d) :: EOP_day(7)
       DOUBLE PRECISION xp, yp, xp_int, yp_int, xp_cor, yp_cor
       DOUBLE PRECISION dUT1_UTC, ut1utc_int, UT1UTC_cor
       DOUBLE PRECISION dX_eop, dY_eop, LOD 
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int8) :: MJD_day, MJD_i, n_cent
+      INTEGER (KIND = prec_int8) :: MJD_i, n_cent
       INTEGER (KIND = prec_int4) :: i
       REAL (KIND = prec_d) :: EOP_i(7)
       REAL (KIND = prec_d) :: MJDint_ar(n_interp), xint_ar(n_interp), yint_ar(n_interp), UT1int_ar(n_interp)
@@ -125,17 +125,17 @@ ALLOCATE (EOP_days(n_interp,7), STAT = AllocateStatus)
 ! ----------------------------------------------------------------------
 ! EOP data reading
 ! ----------------------------------------------------------------------
-      CALL eop_rd (EOP_fname, EOP_sol, mjd_UTC_day , EOP_day)
+!      CALL eop_rd (EOP_fname, EOP_sol, mjd_UTC_day , EOP_day)
 ! xp,yp (arcsec)
-      xp = EOP_day(2)
-      yp = EOP_day(3)
+!      xp = EOP_day(2)
+!      yp = EOP_day(3)
 ! UT1-UTC (sec)
-      dUT1_UTC = EOP_day(4)
+!      dUT1_UTC = EOP_day(4)
 ! LOD (sec)
-	  LOD = EOP_day(5)
+!	  LOD = EOP_day(5)
 ! dX,dY (arcsec)													
-      dX_eop = EOP_day(6)
-      dY_eop = EOP_day(7)
+!      dX_eop = EOP_day(6)
+!      dY_eop = EOP_day(7)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -147,9 +147,14 @@ ALLOCATE (EOP_days(n_interp,7), STAT = AllocateStatus)
       END IF
 ! ----------------------------------------------------------------------
 
+mjd_day_int = INT(mjd)
+!mjd_day_int = mjd_UTC_day
+
+! ----------------------------------------------------------------------
+! EOP data reading
 ! ----------------------------------------------------------------------
 DO i = 1 , n_interp
-   MJD_i = mjd_UTC_day - n_cent + i
+   MJD_i = mjd_day_int - n_cent + i
    CALL eop_rd (EOP_fname, EOP_sol, MJD_i , EOP_i)
    MJDint_ar(i) = MJD_i
    xint_ar(i) = EOP_i(2)
@@ -170,7 +175,7 @@ EOP_days(i,5) = EOP_i(5)
 EOP_days(i,6) = EOP_i(6)
 EOP_days(i,7) = EOP_i(7)
 
-      END DO
+END DO
 ! ----------------------------------------------------------------------
 
 

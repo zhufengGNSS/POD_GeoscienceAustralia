@@ -49,6 +49,8 @@ SUBROUTINE EOP (mjd, EOP_cr, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2CRS)
       USE mdl_precision
       USE mdl_num
       USE mdl_eop
+      USE m_eop_cor
+      USE m_eop_igu
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -88,7 +90,6 @@ mjd_TT = mjd
 ! - IERS Rapid Service/Prediction Center:	finals2000A.daily solution
 ! ----------------------------------------------------------------------
       IF (EOP_sol == 1 .OR. EOP_sol == 2) THEN  
-		!CALL eop_cor (mjd_TT, EOP_fname, EOP_sol, EOP_Nint, EOP_cr)
 		CALL eop_cor (mjd_TT, EOP_day_glb, EOP_sol, EOP_Nint, EOP_cr)
 ! ----------------------------------------------------------------------
 
@@ -97,7 +98,7 @@ mjd_TT = mjd
 !		  dX,dY w.r.t. IAU2000A by IERS RS/PC (finals2000A.daily) 
 ! ----------------------------------------------------------------------
       ELSEIF (EOP_sol == 3)  THEN 
-		CALL eop_igu (mjd_TT, ERP_fname, EOP_fname, EOP_cr)
+		CALL eop_igu (mjd_TT, ERP_fname, EOP_day_glb, EOP_cr)
       END IF
 ! ----------------------------------------------------------------------
 
