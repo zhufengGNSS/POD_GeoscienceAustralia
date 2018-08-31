@@ -73,8 +73,9 @@ ORTHO_EOP.F CNMTX.F UTLIBR.F PMSDNUT2.F FUNDARG.F RG_ZONT2.F \
 interp_iers.f \
 rxr.for tr.for cr.for cp.for \
 time_TT.f90 time_GPS.f90 time_UTC.f90 time_TAI.f90 time_GPSweek.f90 \
-crs_trs.f90 m_eop_data.f03 m_eop_cor.f03 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 eop_igu.f90 interp_lin.f90 \
-era_matrix.f90 main_crs2trs.f03
+crs_trs.f90 m_eop_data.f03 m_eop_cor.f03 m_eop_igu.f03 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 interp_lin.f90 \
+era_matrix.f90 \
+main_crs2trs.f03
 
 PROGRAM = main_orb.e
 
