@@ -24,7 +24,8 @@ ORTHO_EOP.F CNMTX.F UTLIBR.F PMSDNUT2.F FUNDARG.F RG_ZONT2.F \
 interp_iers.f \
 rxr.for tr.for cr.for cp.for \
 time_TT.f90 time_GPS.f90 time_UTC.f90 time_TAI.f90 time_GPSweek.f90 \
-crs_trs.f90 EOP.f90 eop_cor.f90 eop_interp.f90 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 eop_igu.f90 interp_lin.f90 \
+m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03\
+crs_trs.f90 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 interp_lin.f90 EOP.f90 \
 era_matrix.f90 \
 orb_frame.f90 \
 kepler_eq.f90 kepler_k2z.f90 kepler_z2k.f90 m_keplerorb.f03 \
@@ -40,7 +41,7 @@ tides_fes2004.f90 m_tides_ocean.f03 \
 IERS_CMP_2015.F  tide_pole_se.f90 tide_pole_oc.f90 \
 m_force_tides.f03 \
 rel_schwarzschild.f90 rel_LenseThirring.f90 rel_deSitter.f90 \
-force_srp.f90 surfprop.f90 cross_product.f90 R3.for R1.for \
+force_srp.f90 prn_shift.f03 surfprop.f90 cross_product.f90 R3.for R1.for \
 force_sum.f03 \
 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 \
 pd_gm.f03 m_legendre2.f03 m_pd_geopotential.f03 \
