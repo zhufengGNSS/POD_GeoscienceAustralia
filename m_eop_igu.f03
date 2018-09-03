@@ -1,4 +1,25 @@
-SUBROUTINE eop_igu (mjd, ERP_fname, EOP_fname, EOP_int)
+MODULE m_eop_igu
+
+
+! ----------------------------------------------------------------------
+! MODULE: m_eop_igu.f03
+! ----------------------------------------------------------------------
+! Purpose:
+!  Module for calling the modified eop_igu subroutine 
+! 
+! ----------------------------------------------------------------------
+! Author :	Dr. Thomas Papanikolaou, Geoscience Australia 
+! Created:	28 August 2018
+! ----------------------------------------------------------------------
+
+
+      IMPLICIT NONE
+      !SAVE 			
+ 
+	  
+Contains
+
+SUBROUTINE eop_igu (mjd, ERP_fname, EOP_days, EOP_int)
 
 
 ! ----------------------------------------------------------------------
@@ -17,7 +38,7 @@ SUBROUTINE eop_igu (mjd, ERP_fname, EOP_fname, EOP_int)
 ! - mjd:			Modified Julian Day number at the required epoch
 !					(including fraction of the day)
 ! - ERP_fname:		IGS ultra-rapid ERP data file name e.g. igu18861_00.erp
-! - EOP_fname:		IERS RS/PC EOP data file name e.g. finals2000A.daily
+! - EOP_days:		EOP data array of the days (data points aplied for interpolation) based on IERS RS/PC EOP data
 !
 ! Output arguments:
 ! - eop_int:		EOP data array at the input epoch
@@ -40,7 +61,8 @@ SUBROUTINE eop_igu (mjd, ERP_fname, EOP_fname, EOP_int)
 ! ----------------------------------------------------------------------
 ! IN
       REAL (KIND = prec_d), INTENT(IN) :: mjd
-      CHARACTER (LEN=50), INTENT(IN) :: ERP_fname, EOP_fname
+      CHARACTER (LEN=50), INTENT(IN) :: ERP_fname
+      REAL (KIND = prec_d), INTENT(IN), DIMENSION(:,:), ALLOCATABLE :: EOP_days
 ! OUT
       REAL (KIND = prec_d), INTENT(OUT) :: EOP_int(7)
 ! ----------------------------------------------------------------------
@@ -53,6 +75,8 @@ SUBROUTINE eop_igu (mjd, ERP_fname, EOP_fname, EOP_int)
       INTEGER (KIND = prec_int8) :: mjd_UTC_day
       REAL (KIND = prec_d) :: mjd_ar(2), Xpole_ar(2), Ypole_ar(2), UT1UTC_ar(2), LOD_ar(2)
       REAL (KIND = prec_d) :: mjd_int, Xpole_int, Ypole_int, UT1UTC_int, LOD_int
+      REAL (KIND = prec_d) :: dX_eop, dY_eop
+      INTEGER (KIND = prec_int2) :: i, sz1_EOP, sz2_EOP
 ! ----------------------------------------------------------------------
 
 
@@ -94,10 +118,19 @@ SUBROUTINE eop_igu (mjd, ERP_fname, EOP_fname, EOP_int)
 
 ! ----------------------------------------------------------------------
 ! dX,dY : Corrections w.r.t Precession-Nutation model
-      mjd_UTC_day = INT (mjd)
-      CALL eop_finals2000A (EOP_fname, mjd_UTC_day , EOP_data)
+      !mjd_UTC_day = INT (mjd)
+      !CALL eop_finals2000A (EOP_fname, mjd_UTC_day , EOP_data)
       !dX = EOP_data(6) 
-      !dY = EOP_data(7)  
+      !dY = EOP_data(7) 
+sz1_EOP = SIZE (EOP_days,DIM=1)
+sz2_EOP = SIZE (EOP_days,DIM=2)
+DO i = 1 , sz1_EOP  
+If (mjd_int == EOP_days(i,1) ) then
+! dX,dY (arcsec)													
+      dX_eop = EOP_days(i,6)
+      dY_eop = EOP_days(i,7)
+End If
+END DO
 ! ----------------------------------------------------------------------
 
 
@@ -108,8 +141,8 @@ SUBROUTINE eop_igu (mjd, ERP_fname, EOP_fname, EOP_int)
       EOP_int (4) = UT1UTC_int
       EOP_int (5) = LOD_int
 	  ! dX,dY : Precession-Nutation model corrections
-      EOP_int (6) = EOP_data (6) 
-      EOP_int (7) = EOP_data (7) 
+      EOP_int (6) = dX_eop !EOP_data (6) 
+      EOP_int (7) = dY_eop !EOP_data (7) 
 ! ----------------------------------------------------------------------
 
 
@@ -122,4 +155,7 @@ SUBROUTINE eop_igu (mjd, ERP_fname, EOP_fname, EOP_int)
 
 
 	  
+END SUBROUTINE
+
+
 END

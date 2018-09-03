@@ -17,6 +17,7 @@ SUBROUTINE prm_main (PRMfname)
       USE mdl_param
       USE mdl_eop
       USE mdl_arr
+      USE m_eop_data
       IMPLICIT NONE
 
 
@@ -67,6 +68,7 @@ SUBROUTINE prm_main (PRMfname)
       CHARACTER (LEN=500) :: line_ith	  
       CHARACTER (LEN=150) :: word1_ln, word_i, t0	  
 ! ----------------------------------------------------------------------
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: EOP_days	  
 
 
 
@@ -347,6 +349,11 @@ SEC_to = (MJD_to - INT(MJD_to)) * (24.D0 * 3600.D0)
 
 End If
 
+! ----------------------------------------------------------------------
+! EOP data reading and save global variables to module mdl_eop.f90
+! ----------------------------------------------------------------------
+CALL eop_data (mjd_TT, EOP_fname, EOP_sol, EOP_Nint , EOP_day_glb)
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Reference frame of initial state vector

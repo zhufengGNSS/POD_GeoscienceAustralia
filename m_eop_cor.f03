@@ -1,4 +1,26 @@
-SUBROUTINE eop_cor (mjd, EOP_fname, EOP_sol, n_interp , EOP_cr)
+MODULE m_eop_cor
+
+
+! ----------------------------------------------------------------------
+! MODULE: m_eop_cor.f03
+! ----------------------------------------------------------------------
+! Purpose:
+!  Module for calling the modified eop_cor subroutine 
+! 
+! ----------------------------------------------------------------------
+! Author :	Dr. Thomas Papanikolaou, Geoscience Australia 
+! Created:	23 July 2018
+! ----------------------------------------------------------------------
+
+
+      IMPLICIT NONE
+      !SAVE 			
+ 
+	  
+Contains
+
+
+SUBROUTINE eop_cor (mjd, EOP_days, EOP_sol, n_interp , EOP_cr)
 
 
 ! ----------------------------------------------------------------------
@@ -11,6 +33,7 @@ SUBROUTINE eop_cor (mjd, EOP_fname, EOP_sol, n_interp , EOP_cr)
 ! Input arguments:
 ! - mjd:			Modified Julian Day number of the epoch (in TT)
 ! - EOP_fname:		EOP data file name  e.g. 'eopc04_IAU2000.62-now'
+! - EOP_days:		EOP data array of the days (data points aplied for interpolation)
 ! - EOP_sol:		EOP solution type (see Note 1)
 ! - n_interp:		number of points to be used for EOP data interpolation 
 !
@@ -36,7 +59,12 @@ SUBROUTINE eop_cor (mjd, EOP_fname, EOP_sol, n_interp , EOP_cr)
 ! ----------------------------------------------------------------------
 ! Dr. Thomas Papanikolaou, Geoscience Australia            December 2015
 ! ----------------------------------------------------------------------
-
+! Last modified:
+! - Dr. Thomas Papanikolaou, 16 August 2018
+!	Replacement of reading here the EOP data (input variable "EOP_fname") 
+!   with the EOP data array (input variable "EOP_days") that is povided 
+!   by the global variable "EOP_day_glb" through the module mdl_eop.f90
+! ----------------------------------------------------------------------
 
 
       USE mdl_precision
@@ -48,7 +76,8 @@ SUBROUTINE eop_cor (mjd, EOP_fname, EOP_sol, n_interp , EOP_cr)
 ! ----------------------------------------------------------------------
 ! IN
       REAL (KIND = prec_d), INTENT(IN) :: mjd
-      CHARACTER (LEN=50), INTENT(IN) :: EOP_fname
+      !CHARACTER (LEN=50), INTENT(IN) :: EOP_fname
+      REAL (KIND = prec_d), INTENT(IN), DIMENSION(:,:), ALLOCATABLE :: EOP_days
       INTEGER (KIND = prec_int4), INTENT(IN) :: n_interp
       INTEGER (KIND = prec_int1), INTENT(IN) :: EOP_sol
 ! OUT
@@ -67,6 +96,9 @@ SUBROUTINE eop_cor (mjd, EOP_fname, EOP_sol, n_interp , EOP_cr)
       DOUBLE PRECISION dUT1_UTC, ut1utc_int, UT1UTC_cor
       DOUBLE PRECISION dX_eop, dY_eop, LOD 
 ! ----------------------------------------------------------------------
+      INTEGER (KIND = prec_int2) :: i, sz1_EOP, sz2_EOP
+      DOUBLE PRECISION x_int, y_int, ut1_int
+      REAL (KIND = prec_d) :: MJDint_ar(n_interp), xint_ar(n_interp), yint_ar(n_interp), UT1int_ar(n_interp)
 
 
 
@@ -89,43 +121,45 @@ SUBROUTINE eop_cor (mjd, EOP_fname, EOP_sol, n_interp , EOP_cr)
 
 
 ! ----------------------------------------------------------------------
-! EOP data reading
-! ----------------------------------------------------------------------
-      CALL eop_rd (EOP_fname, EOP_sol, mjd_UTC_day , EOP_day)
+! EOP data array
+sz1_EOP = SIZE (EOP_days,DIM=1)
+sz2_EOP = SIZE (EOP_days,DIM=2)
+      DO i = 1 , sz1_EOP
+         MJDint_ar(i) = EOP_days(i,1)
 ! xp,yp (arcsec)
-      xp = EOP_day(2)
-      yp = EOP_day(3)
+         xint_ar(i)   = EOP_days(i,2)
+         yint_ar(i)   = EOP_days(i,3)
 ! UT1-UTC (sec)
-      dUT1_UTC = EOP_day(4)
+         UT1int_ar(i) = EOP_days(i,4)
+
 ! LOD (sec)
-	  LOD = EOP_day(5)
+!		 LOD_ar = EOP_days(i,5)
+
 ! dX,dY (arcsec)													
-      dX_eop = EOP_day(6)
-      dY_eop = EOP_day(7)
-! ----------------------------------------------------------------------
+!		 dX_ar = EOP_days(i,6)
+!		 dY_ar = EOP_days(i,7)
 
-
+If (mjd_UTC_day == EOP_days(i,1) ) then
+	  LOD =    EOP_days(i,5)
+      dX_eop = EOP_days(i,6)
+      dY_eop = EOP_days(i,7)
+End If
+      END DO
 ! ----------------------------------------------------------------------
-! Diurnal and semi-diurnal tidal corrections to EOP data by IERS
-! ----------------------------------------------------------------------
-! Applied to IERS solutions e.g. C04 and Daily (finals2000A.daily)
-      IF (EOP_sol == 1 .OR. EOP_sol == 2) THEN
   
 ! ----------------------------------------------------------------------
-! "Polar motion" and "UT1" corrections due to ocean tidal and libration effects
-! - interp.f
-      CALL eop_interp (n_interp, EOP_fname, EOP_sol, mjd_UTC , xp_int,yp_int,ut1utc_int)
+! Diurnal and semi-diurnal tidal corrections to EOP data by IERS
+! "Polar motion" and "UT1" corrections due to ocean tidal and libration effects at interpolation epoch
+      CALL INTERP_iers (MJDint_ar, xint_ar, yint_ar, UT1int_ar, n_interp, mjd_UTC, x_int,y_int,ut1_int)
 ! ----------------------------------------------------------------------
-
-      END IF
-
+  
 ! ----------------------------------------------------------------------
 ! xp,yp corrected (arcsec) 											
-      xp_cor = xp_int
-      yp_cor = yp_int  
+      xp_cor = x_int
+      yp_cor = y_int  
 ! ----------------------------------------------------------------------
 ! UT1-UTC corrected (sec) 													
-      UT1UTC_cor = ut1utc_int
+      UT1UTC_cor = ut1_int
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -137,6 +171,9 @@ SUBROUTINE eop_cor (mjd, EOP_fname, EOP_sol, n_interp , EOP_cr)
       EOP_cr(6) = dX_eop
       EOP_cr(7) = dY_eop
 ! ----------------------------------------------------------------------
+
+
+END SUBROUTINE
 
 
 END
