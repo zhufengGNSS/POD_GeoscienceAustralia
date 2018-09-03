@@ -55,7 +55,10 @@ MODULE mdl_param
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF, pseudobs_ICRF
       INTEGER (KIND = prec_int2) :: ORBEXT_glb
 ! ---------------------------------------------------------------------------
-
+! ---------------------------------------------------------------------------
+! GNSS initial state vectors
+      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: ini_vet
+! ---------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------
 ! Force Model

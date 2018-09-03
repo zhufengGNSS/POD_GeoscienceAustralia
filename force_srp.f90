@@ -197,9 +197,9 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       if (prnnum.ge.11 .and. prnnum.le.23 .or. prnnum.eq.2 .or. &
        prnnum.eq.5 .or. prnnum.eq.7 .or. prnnum.eq.28 .or. &
        prnnum.eq.29 .or. prnnum.eq.31) then 
-      Z_SIDE = 3.75D0 ! surface-to-mass ratio 
-      X_SIDE = 3.05D0
-      A_SOLAR= 13.60D0
+      Z_SIDE = 4.25D0 ! surface-to-mass ratio 
+      X_SIDE = 4.11D0
+      A_SOLAR= 13.92D0
       MASS   = 1100.0D0
 
 ! GPS Block IIA
@@ -211,24 +211,32 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 
 ! Block IIF types
       else 
-      Z_SIDE = 5.40D0 ! surface-to-mass ratio
-      X_SIDE = 5.72D0
+      Z_SIDE = 5.05D0 ! surface-to-mass ratio
+      X_SIDE = 4.55D0
       A_SOLAR= 22.25D0
-      MASS   = 1555.3D0
+      MASS   = 1630.0D0
       end if
       end if
 
 ! GLONASS satellites
       if (prnnum.gt.101 .and. prnnum.le.126)then
-      Z_SIDE = 0.877D0 ! surface-to-mass ratio
-      X_SIDE = 1.258D0
+      Z_SIDE = 1.6620D0 ! surface-to-mass ratio
+      X_SIDE = 4.200D0
       A_SOLAR= 23.616D0
       MASS   = 1415.0D0
       end if
 
+! GALILEO satellites
+      if (prnnum.gt.201 .and. prnnum.le.230)then
+      Z_SIDE = 3.002D0
+      X_SIDE = 1.323D0
+      A_SOLAR= 11.0D0
+      MASS   = 700.0D0
+      end if
+
 ! BDS satellites
-      if (prnnum.gt.401 .and. prnnum.le.426)then
-      Z_SIDE = 3.69D0 ! surface-to-mass ratio
+      if (prnnum.gt.301 .and. prnnum.le.326)then
+      Z_SIDE = 3.96D0 ! surface-to-mass ratio
       X_SIDE = 4.5D0
       A_SOLAR= 22.44D0
       MASS   = 1900.0D0
@@ -239,17 +247,24 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! The main surface area face toward to the Sun using the SAT->SUN and SAT->EARTH
 ! vectors
      ANG=acos(ed(1)*er(1)+ed(2)*er(2)+ed(3)*er(3))*180.0d0/Pi
-     
+!print*, "ANG=", ANG     
+
      if (abs(ANG) .le. 30.0d0) then
      AREA=Z_SIDE+A_SOLAR
      else
      AREA=X_SIDE+A_SOLAR
-     end if 
+     end if
 
 ! Cartesian counterparts (fx,fy,fz) of acceleration fr
       fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
       fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
       fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
+
+      if (abs(ANG) .le. 14 ) then
+         fx=0.0d0
+         fy=0.0d0
+         fz=0.0d0
+       end if
 
 ! end of the cannonball model
 !--------------------------------------------------------------------------
@@ -390,15 +405,15 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 
       if (ECOM .eq. 2) then
 
-      srpcoef(1) = -0.91698d-7
-      srpcoef(2) =  0.00836d-7
-      srpcoef(3) = -0.00730d-7
-      srpcoef(4) =  0.00053d-7
-      srpcoef(5) = -0.00029d-7
-      srpcoef(6) = -0.00040d-7
-      srpcoef(7) =  0.00010d-7
-      srpcoef(8) =  0.01062d-7
-      srpcoef(9) = -0.00801d-7
+      srpcoef(1) = -0.91647d-7
+      srpcoef(2) =  0.00811d-7
+      srpcoef(3) = -0.00652d-7
+      srpcoef(4) =  0.00064d-7
+      srpcoef(5) =  0.00073d-7
+      srpcoef(6) = -0.00065d-7
+      srpcoef(7) = -0.00142d-7
+      srpcoef(8) =  0.01236d-7
+      srpcoef(9) = -0.00968d-7
 
 
 

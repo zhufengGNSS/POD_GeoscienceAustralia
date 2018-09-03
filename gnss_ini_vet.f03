@@ -1,4 +1,4 @@
-SUBROUTINE prm_pseudobs (PRMfname)
+SUBROUTINE gnss_ini_vet (PRMfname)
 
 
 ! ----------------------------------------------------------------------
@@ -91,8 +91,6 @@ SUBROUTINE prm_pseudobs (PRMfname)
 !      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: ini_vet
 ! ----------------------------------------------------------------------
 
-
-  
 ! ----------------------------------------------------------------------
 ! Orbit parameterization INPUT file read:
 ! ----------------------------------------------------------------------
@@ -138,72 +136,19 @@ READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 !PRINT *, "word1_ln: ", word1_ln
 
 
-! ----------------------------------------------------------------------
-! Parameters Keywords read 
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! External Orbit (sp3) to be used as pseudo-observations
-! ----------------------------------------------------------------------
 ! GNSS orbit data (sp3) file name
 IF (word1_ln == "pseudobs_filename") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, fname_orb 
 END IF
 ! ----------------------------------------------------------------------
 
-! ----------------------------------------------------------------------
-! Interpolated Orbit
-! ----------------------------------------------------------------------
-! Numerical Interpolation interval (sec)
-IF (word1_ln == "pseudobs_interp_step") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, interpstep 
-END IF
-!interpstep = integstep ! Module mdl_param.f03
-! ----------------------------------------------------------------------
-! Number of data points used in Lagrange interpolation   
-IF (word1_ln == "pseudobs_interp_points") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, NPint 
-END IF
-!NPint = 12
-! ----------------------------------------------------------------------
-
-
 END DO
 CLOSE (UNIT=UNIT_IN)
-! Close of input parameterization file
-! ----------------------------------------------------------------------
 
 
-data_opt = 2
-
-! ----------------------------------------------------------------------
-! Orbit (Position vector) obtained from from IGS sp3 data 
-! ----------------------------------------------------------------------
-if (data_opt == 1) Then
-
-! Read IGS sp3 orbit data file 
-Call sp3 (fname_orb, PRN, pseudobs_ITRF)
-!CALL sat_ini_vet (fname_orb, ini_vet)
-! Orbit transformation ITRF to ICRF
-time_sys = 'GPS'
-!Call orbT2C (pseudobs_ITRF, time_sys, pseudobs_ICRF)
-Call obsorbT2C (pseudobs_ITRF, time_sys, pseudobs_ICRF)
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! Case 2: Orbit based on Lagrange interpolation of orbit sp3 data e.g. IGS final/rapid (15 min); MGEX (5 min) IGS rapid orbits; interval 15 min
-! ----------------------------------------------------------------------
-Else if (data_opt == 2) then
-
-! Interpolated Orbit: Read sp3 orbit data and apply Lagrange interpolation
-CALL interp_orb (fname_orb, PRN, interpstep, NPint, pseudobs_ITRF)
-!CALL sat_ini_vet (fname_orb, ini_vet)
-! Orbit transformation ITRF to ICRF
-time_sys = 'GPS'
-Call orbT2C (pseudobs_ITRF, time_sys, pseudobs_ICRF)
-! ----------------------------------------------------------------------
-
-End IF
+! satellite position and velocity are based on ITRF
+! generate the initial state vectors for multi-GNSS satellitesn
+CALL sat_ini_vet (fname_orb, ini_vet)
 
 
 END

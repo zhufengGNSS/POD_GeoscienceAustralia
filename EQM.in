@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 %% Orbit parameterization %%                                       
 ---------------------------------------------------------------------------
-Satellite_PRN             G04
+Satellite_PRN             G32
 Reference_frame           ITRF
 Time_scale                GPS
 Orbit_arc_length          21600     	 ! Seconds
@@ -15,8 +15,7 @@ Day                       15
 Seconds                   00
 
 ! Initial State Vector (m):
-state_vector       		  -9068521.293 -17111796.604 -18237240.400 818.7615143 -2152.2032877  1665.4739963  
- 
+state_vector                       24675434.866  -7573772.197 -4953635.713  716.7996753  218.8038160  3105.1415531
 ---------------------------------------------------------------------------
 %% Earth Orientation 
 
@@ -108,7 +107,7 @@ SRP_model				  1
 ! External orbit as pseudo-observations                                                
 ! Interpolated orbit based on Lagrange interpolation of Precise Orbit sp3 data
 pseudobs_filename		  igs16403.sp3
-pseudobs_interp_step      300 					! Interval (sec) of the interpolated orbit
+pseudobs_interp_step      900 					! Interval (sec) of the interpolated orbit
 pseudobs_interp_points    12 					! Number of data points used in Lagrange interpolation   
 
 ---------------------------------------------------------------------------
@@ -128,6 +127,6 @@ Estimator_Iterations     1
 ! 3. Keplerian orbit 
 orbit_external_opt		  2
 orbit_filename		  	  igs16403.sp3			! CH-OG-3-RSO+CTS-GPS_2011_166_00.dat			
-orbit_interp_step         300 					! Interval (sec) of the interpolated/Kepler orbit
+orbit_interp_step         900 					! Interval (sec) of the interpolated/Kepler orbit
 orbit_interp_points  	  12 					! Number of data points used in Lagrange interpolation   
 ---------------------------------------------------------------------------
