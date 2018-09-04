@@ -29,7 +29,7 @@ crs_trs.f90 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 interp_lin.f9
 era_matrix.f90 \
 orb_frame.f90 \
 kepler_eq.f90 kepler_k2z.f90 kepler_z2k.f90 m_keplerorb.f03 \
-m_rso.f03 m_sp3.f03 m_gnssp3.f03 m_sat_ini_vet.f03 \
+m_rso.f03 m_sp3.f03 \
 m_lagrange.f03 m_interporb.f03 \
 force_gm.f90 \
 m_legendre.f03 m_legendre1.f03 m_force_gfm.f03 \
