@@ -34,13 +34,11 @@ SUBROUTINE prm_pseudobs (PRMfname)
       USE mdl_param
       !USE mdl_arr
       USE m_sp3
-      USE m_gnssp3
       !USE m_keplerorb
       !USE m_rso
       USE m_interporb
       USE m_orbT2C
       USE m_obsorbT2C
-      USE m_sat_ini_vet
       IMPLICIT NONE
 
 	  
@@ -50,7 +48,7 @@ SUBROUTINE prm_pseudobs (PRMfname)
 ! IN
       CHARACTER (LEN=100), INTENT(IN) :: PRMfname				
 ! OUT
-!      REAL (KIND = prec_q), INTENT(OUT), DIMENSION(:,:,:), ALLOCATABLE :: ini_vet 
+! 
 ! ----------------------------------------------------------------------
  
 
@@ -88,7 +86,6 @@ SUBROUTINE prm_pseudobs (PRMfname)
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=3) :: time
 	  REAL (KIND = prec_d) :: mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
-!      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: ini_vet
 ! ----------------------------------------------------------------------
 
 
@@ -183,7 +180,7 @@ if (data_opt == 1) Then
 
 ! Read IGS sp3 orbit data file 
 Call sp3 (fname_orb, PRN, pseudobs_ITRF)
-!CALL sat_ini_vet (fname_orb, ini_vet)
+
 ! Orbit transformation ITRF to ICRF
 time_sys = 'GPS'
 !Call orbT2C (pseudobs_ITRF, time_sys, pseudobs_ICRF)
@@ -197,7 +194,7 @@ Else if (data_opt == 2) then
 
 ! Interpolated Orbit: Read sp3 orbit data and apply Lagrange interpolation
 CALL interp_orb (fname_orb, PRN, interpstep, NPint, pseudobs_ITRF)
-!CALL sat_ini_vet (fname_orb, ini_vet)
+
 ! Orbit transformation ITRF to ICRF
 time_sys = 'GPS'
 Call orbT2C (pseudobs_ITRF, time_sys, pseudobs_ICRF)
