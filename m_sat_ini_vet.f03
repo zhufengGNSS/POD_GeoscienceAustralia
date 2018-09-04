@@ -275,7 +275,7 @@ print*, ini_vet (PRN, 1, 8),  orbint(1, 8)
 !print*, ini_vet (55, 1, 7)
 !print*, ini_vet (55, 1, 8)
 
-pause
+!pause
 	  Deallocate (X_interp)
 	  Deallocate (Y_interp)
 
