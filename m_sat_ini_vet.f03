@@ -78,6 +78,7 @@ Contains
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
       CHARACTER (LEN=300) :: fname_write
       INTEGER (KIND = 4) :: PRN,NEPO,zz
+      INTEGER (KIND = 4) :: Ofile
       INTEGER (KIND = prec_int8) :: interv, NPint
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: orbint
@@ -92,6 +93,8 @@ Contains
 ! ---------------------------------------
        interv = 900 ! in second
        NPint  = 12 
+       Ofile  = 88
+      OPEN (unit = 88, file= "gnss-t0-vector.txt")
 
 	  ! Read IGS sp3 orbit data file (position only): orbsp3 
       Call gnssp3 (fname_sp3, orbeph)
@@ -100,7 +103,7 @@ Contains
       ALLOCATE ( orbsp3(size(orbeph, DIM = 2), size(orbeph, DIM = 3)), STAT = AllocateStatus)
       ALLOCATE ( ini_vet(size(orbeph, DIM = 1),1, 8), STAT = AllocateStatus)
 
-      DO PRN = 1 , 32 !size(orbeph, DIM = 1) ! satellite PRN (BIG LOOP for PROCESSING MULTI-GNSS SATELLITES)
+      DO PRN = 1 , size(orbeph, DIM = 1) ! satellite PRN (BIG LOOP for PROCESSING MULTI-GNSS SATELLITES)
 
 	               DO NEPO = 1, size(orbeph, DIM = 2) ! number of epochs
 
@@ -253,29 +256,20 @@ Nlimit = 1
 
       End Do
 
-print*,"PRN=",PRN
-print*, ini_vet (PRN, 1, 1),  orbint(1, 1)
-print*, ini_vet (PRN, 1, 2),  orbint(1, 2)
-print*, ini_vet (PRN, 1, 3),  orbint(1, 3)
-print*, ini_vet (PRN, 1, 4),  orbint(1, 4)
-print*, ini_vet (PRN, 1, 5),  orbint(1, 5)
-print*, ini_vet (PRN, 1, 6),  orbint(1, 6)
-print*, ini_vet (PRN, 1, 7),  orbint(1, 7)
-print*, ini_vet (PRN, 1, 8),  orbint(1, 8)
+      WRITE (UNIT = 88, FMT = "(I4,5X,F8.2,5X,F3.1,3(5X,F15.4),3(5X,F14.8))") &
+      & PRN, ini_vet (PRN, 1, 1), ini_vet (PRN, 1, 2), ini_vet (PRN, 1, 3), &
+      &      ini_vet (PRN, 1, 4), ini_vet (PRN, 1, 5), ini_vet (PRN, 1, 6), &
+      &      ini_vet (PRN, 1, 7), ini_vet (PRN, 1, 8)
+ 
+
+!print*,"PRN=",PRN
+!print*, ini_vet (PRN, 1, 1), ini_vet (PRN, 1, 2), ini_vet (PRN, 1, 3), &
+!      & ini_vet (PRN, 1, 4), ini_vet (PRN, 1, 5), ini_vet (PRN, 1, 6), &
+!      & ini_vet (PRN, 1, 7), ini_vet (PRN, 1, 8)
 
 
       END DO ! BIG LOOP for PROCESSING MULTI-GNSS SATELLITES
 
-!print*, ini_vet (55, 1, 1)
-!print*, ini_vet (55, 1, 2)
-!print*, ini_vet (55, 1, 3)
-!print*, ini_vet (55, 1, 4)
-!print*, ini_vet (55, 1, 5)
-!print*, ini_vet (55, 1, 6)
-!print*, ini_vet (55, 1, 7)
-!print*, ini_vet (55, 1, 8)
-
-!pause
 	  Deallocate (X_interp)
 	  Deallocate (Y_interp)
 

@@ -300,8 +300,8 @@ Contains
 
       END DO
 
-print*, PRN
-print*, orbsp3 (PRN,orb_i , 1), orbsp3 (PRN,orb_i , 2), orbsp3 (PRN,orb_i , 3), orbsp3 (PRN,orb_i , 4), orbsp3 (PRN,orb_i , 5)
+!print*, PRN
+!print*, orbsp3 (PRN,orb_i , 1), orbsp3 (PRN,orb_i , 2), orbsp3 (PRN,orb_i , 3), orbsp3 (PRN,orb_i , 4), orbsp3 (PRN,orb_i , 5)
       CLOSE (UNIT=UNIT_IN)
 
   
