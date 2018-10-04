@@ -52,6 +52,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       REAL (KIND = prec_d), DIMENSION(3) :: SF
       REAL (KIND = prec_q), DIMENSION(3) :: Fgrav_itrf , Fgrav_icrf, Fplanets_icrf, Ftides_icrf, Frelativity_icrf
       REAL (KIND = prec_d), DIMENSION(3) :: Fsrp_icrf
+      REAL (KIND = prec_d), DIMENSION(3) :: Ferp_icrf
       REAL (KIND = prec_d) :: fx, fy, fz
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: GMearth, aEarth
@@ -549,11 +550,13 @@ CALL prn_shift (GNSSid, PRN_no, PRN_no)
 !print*,GNSSid, PRN_no
 CALL force_srp (GMearth, PRN_no, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
 Fsrp_icrf = (/ fx, fy, fz /)
+CALL force_erp (mjd, PRN_no, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
+Ferp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
 
 	Fsrp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
-
+        Ferp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 End IF
 ! ----------------------------------------------------------------------
 
@@ -566,7 +569,7 @@ End IF
 ! ----------------------------------------------------------------------
 ! Acceleration sum of the force model
 ! ----------------------------------------------------------------------
-SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf
+SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf + Ferp_icrf
 
 SFx = SF(1) 
 SFy = SF(2)

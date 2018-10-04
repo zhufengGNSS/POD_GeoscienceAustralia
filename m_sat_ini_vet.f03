@@ -273,7 +273,7 @@ Nlimit = 1
 	  Deallocate (X_interp)
 	  Deallocate (Y_interp)
 
-	  
+      CLOSE (UNIT = 88)  
 End subroutine
 
 
