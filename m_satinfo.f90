@@ -60,9 +60,8 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
 ! -------------------------------------
   TYPE sat
     INTEGER(KIND=4)             :: prn     !Satellite number (PRN)
-    INTEGER(KIND=4)             :: svn
-!    CHARACTER(Len=4)            :: svn     !System flag with satellite number
-                                           !(SVN)
+    INTEGER(KIND=4)             :: svn     ! SVN
+                                          
     INTEGER(KIND=4)             :: iblock  !Block number
     CHARACTER(LEN=9)            :: cospar  !Cospar ID
     INTEGER(KIND=4)             :: attflag !Attitude flag
@@ -136,8 +135,8 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
 ! Read satellite parameters
 ! -------------------------
   DO ii = 1,nlin 
-    READ (ifile,'(A)') line
-    icrx = ii 
+     READ (ifile,'(A)') line
+     icrx = ii 
 
      READ (line, '(I3,2X,I3,I4,3X,A9,I6,5X,I4,5(1X,I2),2X,I4,5(1X,I2),F10.1)')        &
           satellite(icrx)%prn   , satellite(icrx)%svn,      satellite(icrx)%iblock,   &
@@ -146,6 +145,8 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
           satellite(icrx)%st_MIN, satellite(icrx)%st_SEC,   satellite(icrx)%end_YY,   &
           satellite(icrx)%end_MM, satellite(icrx)%end_DD,   satellite(icrx)%end_HR,   &
           satellite(icrx)%end_MIN,satellite(icrx)%end_SEC,  satellite(icrx)%mass
+
+!print*, prnnum, satellite(icrx)%prn, satellite(icrx)%svn
 
 !print*, satellite(icrx)%st_YY, satellite(icrx)%st_MM, satellite(icrx)%st_DD
 !print*, satellite(icrx)%end_YY, satellite(icrx)%end_MM, satellite(icrx)%end_DD
@@ -156,16 +157,27 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
     CALL iau_CAL2JD (satellite(icrx)%st_YY, satellite(icrx)%st_MM, satellite(icrx)%st_DD, DJM0, st_time, J )
     CALL iau_CAL2JD (satellite(icrx)%end_YY, satellite(icrx)%end_MM, satellite(icrx)%end_DD, DJM0, end_time, J )
 
-!print*, st_time, end_time
+!print*, st_time, mjd, end_time
 
-     IF (prnnum .eq. satellite(icrx)%prn .and. mjd .ge. st_time .and. mjd .le. end_time) then
-     satsvn = satellite(icrx)%svn
-     exit
+     IF (prnnum .eq. satellite(icrx)%prn) then
+
+        if ( mjd .ge. st_time .and. mjd .le. end_time) then
+         satsvn = satellite(icrx)%svn
+         exit
+
+        elseif (st_time .gt. end_time .and. mjd .ge. st_time) then
+         satsvn = satellite(icrx)%svn
+         exit
+
+        end if
+  
      END IF
+
   END DO
 
-
+ DEALLOCATE(satellite)
  CLOSE(UNIT = 88)
+
 END SUBROUTINE 
 
 END MODULE
