@@ -16,11 +16,10 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
 !             the specific satellite operated.
 !
 ! Parameters:
-!         in:     Satellite PRN
+!         in:     mjd
+!                 Satellite PRN
 !                         
 !        out:     Satellite SVN 
-!                 st_time: the starting date for the SVN service
-!                end_time: the end date for the SVN service         
 !
 !
 ! Remarks:
@@ -30,7 +29,8 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
 ! Created:    27-09-2018
 ! 
 !
-! Changes:
+! Changes:    12-10-2018   Tzupang Tseng: fixed the bugs related to the st_time
+!                                         bigger than the end_time
 !
 ! Copyright:  Geoscience Australia, Australia
 ! ------------------------------------------------------------------------------
