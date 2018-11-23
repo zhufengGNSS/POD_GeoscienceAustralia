@@ -359,15 +359,15 @@ C |BETA| =< BETA0  (BODYX =>  SAT VELOCITY (YAW PHI=0))
           PHI =  0.D0                       
         IF (NIGHT) THEN
 C BEI NIGHT ECLIPS REPORTING
-              write(*,*)"R",IPRN,TTAG,YANGLE, PHI,DET,
-     &        BETADG 
+c              write(*,*)"R",IPRN,TTAG,YANGLE, PHI,DET,
+c     &        BETADG 
              IECLIPS=1
              NECLIPS(IPRN)=1
         ENDIF
         IF(NOON) THEN
 C BEI NOON ECLIPS REPORTING
-              write(*,*)"S",IPRN,TTAG,YANGLE, PHI,DET,
-     &        BETADG                 
+c              write(*,*)"S",IPRN,TTAG,YANGLE, PHI,DET,
+c     &        BETADG                 
              IECLIPS=2
              NECLIPS(IPRN)=1
         ENDIF
@@ -567,7 +567,7 @@ C Yaw-bias is replaced by the beta angle.  Case: GPS IIA for beta<0
 C     &           +SIGN(YRATE(IPRN),YBIAS)*(TTAG-ECLSTM(IPRN,I)) 
      &         +SIGN(YRATE(IPRN),BETADG)*(TTAG-ECLSTM(IPRN,I))     				    
 	 
-               write(*,*) iprn, phi, betadg, betaini(iprn)
+c               write(*,*) iprn, phi, betadg, betaini(iprn)
 			   
 C Dec 12, 2013
 c    &           +SIGN(YRATE(IPRN),0.5d0)*(TTAG-ECLSTM(IPRN,I)) 
@@ -690,8 +690,8 @@ C MODEL TURN
                ENDIF
 C  GALILEO night - ends 
 C Jan 10, 2017 - end
-              write(*,*)"R",IPRN,TTAG,YANGLE, PHI,DET,
-     & BETADG, ECLETM(IPRN,I),I
+c              write(*,*)"R",IPRN,TTAG,YANGLE, PHI,DET,
+c     & BETADG, ECLETM(IPRN,I),I
              IECLIPS=1
            ELSE
 C NOON TURNS 
@@ -783,8 +783,8 @@ C Jan 10, 2017 - end
                ENDIF
 C Jan 10, 2017 - GALILEO noon  - ends
 C
-              write(*,*)"S",IPRN,TTAG,YANGLE, PHI,DET,
-     & BETADG, ECLSTM(IPRN,I)                  
+c              write(*,*)"S",IPRN,TTAG,YANGLE, PHI,DET,
+c     & BETADG, ECLSTM(IPRN,I)                  
              IECLIPS=2
            END IF
 C ROTATE X-VECTOR TO ECLIPSING YAW ANGLE PHI 
