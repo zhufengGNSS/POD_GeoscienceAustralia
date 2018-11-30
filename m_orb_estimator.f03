@@ -46,6 +46,7 @@ SUBROUTINE orb_estimator(orbref, veqZarray, veqParray, orbobs, Xmatrix, Wmatrix,
       USE mdl_precision
       USE mdl_num
       USE m_matrixinv
+      USE mdl_param
       IMPLICIT NONE
 
 	  
@@ -66,7 +67,7 @@ SUBROUTINE orb_estimator(orbref, veqZarray, veqParray, orbobs, Xmatrix, Wmatrix,
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int8) :: sz1, sz2, sz3, sz4, sz5, sz6, sz7, sz8 
       INTEGER (KIND = prec_int8) :: Norb, Nobs, Nparam, n_NEQn 
-      INTEGER (KIND = prec_int8) :: Nepochs, Ncommon, iobs0, iobs, iref   
+      INTEGER (KIND = prec_int8) :: Nepochs, Ncommon, iobs0, iobs, iref, iepoch, jepoch   
       INTEGER (KIND = prec_int2) :: Nobsset   
       REAL (KIND = prec_d) :: tiref, tiobs, dt_limit
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: AmatrixZ
@@ -96,13 +97,11 @@ Norb = sz3
 sz5 = size(veqZarray, DIM = 1)
 sz6 = size(veqZarray, DIM = 2)
 
-sz7 = size(veqParray, DIM = 1)
-sz8 = size(veqParray, DIM = 2)
-Nparam = (sz8 - 2) / 6
+!sz7 = size(veqParray, DIM = 1)
+!sz8 = size(veqParray, DIM = 2)
+!Nparam = (sz8 - 2) / 6
+Nparam = NPARAM_glb
 ! ----------------------------------------------------------------------
-
-! Temp
-Nparam = 0																	! 777 Temp
 
 ! ----------------------------------------------------------------------
 ! Number of common epochs
@@ -175,9 +174,25 @@ Do iref = 1 , Norb
 			AmatrixZ((Nepochs-1)*Nobsset + 1,:) = veqZarray(iref,3:8)
 			AmatrixZ((Nepochs-1)*Nobsset + 2,:) = veqZarray(iref,9:14)
 			AmatrixZ((Nepochs-1)*Nobsset + 3,:) = veqZarray(iref,15:20)	
-! ----------------------------------------------------------------------
+			If (Nparam /= 0) Then	
 			! veqParray
 !            AmatrixP((Nepochs-1)*Nobsset+1, : ) = ...
+            AmatrixP((Nepochs-1)*Nobsset + 1, : ) = veqParray(iref,3:Nparam+2)
+            AmatrixP((Nepochs-1)*Nobsset + 2, : ) = veqParray(iref,  Nparam+3:2*Nparam+2)
+            AmatrixP((Nepochs-1)*Nobsset + 3, : ) = veqParray(iref,2*Nparam+3:3*Nparam+2)
+! ----------------------------------------------------------------------
+			! Design Matrix
+			!Amatrix((Nepochs-1)*Nobsset + 1,1:6) = AmatrixZ((Nepochs-1)*Nobsset + 1,:)
+			!Amatrix((Nepochs-1)*Nobsset + 1,7:6+Nparam) = AmatrixP((Nepochs-1)*Nobsset + 1, : )
+			
+			!Amatrix((Nepochs-1)*Nobsset + 2,1:6) = AmatrixZ((Nepochs-1)*Nobsset + 2,:)
+			!Amatrix((Nepochs-1)*Nobsset + 2,7:6+Nparam) = AmatrixP((Nepochs-1)*Nobsset + 2, : )
+
+			!Amatrix((Nepochs-1)*Nobsset + 3,1:6) = AmatrixZ((Nepochs-1)*Nobsset + 3,:)
+			!Amatrix((Nepochs-1)*Nobsset + 3,7:6+Nparam) = AmatrixP((Nepochs-1)*Nobsset + 3, : )
+			!Else
+			!Amatrix = AmatrixZ
+			End If
 ! ----------------------------------------------------------------------
             iobs0 = iobs + 1
         end IF
@@ -188,7 +203,49 @@ end Do
 ! Design matrix
 ! Amatrix summarized
 !Amatrix = [AmatrixZ AmatrixP]
-Amatrix = AmatrixZ
+!Amatrix = AmatrixZ
+!sz7 = size(AmatrixZ, DIM = 1)
+!sz8 = size(AmatrixZ, DIM = 2)
+!print *,"AmatrixZ DIM",sz7,sz8
+!sz7 = size(AmatrixP, DIM = 1)
+!sz8 = size(AmatrixP, DIM = 2)
+!print *,"AmatrixP DIM",sz7,sz8
+
+!print *,"Nparam",Nparam
+!print *,"Ncommon",Ncommon,Nepochs
+
+if(1<0) then
+If (Nparam /= 0) Then	
+Do iepoch = 1 , 3*Ncommon
+	Do jepoch = 1 , 6
+	Amatrix (iepoch,jepoch) = AmatrixZ(iepoch,jepoch)
+	End Do
+	Do jepoch = 1 , Nparam
+	Amatrix (iepoch,jepoch+6) = AmatrixP(iepoch,jepoch)
+	End Do
+End Do
+Else
+	Amatrix = AmatrixZ
+End IF
+end if
+
+If (Nparam /= 0) Then	
+Do jepoch = 1 , 6
+Do iepoch = 1 , 3*Ncommon
+	Amatrix (iepoch,jepoch) = AmatrixZ(iepoch,jepoch)
+End Do
+End Do
+
+Do jepoch = 1 , Nparam
+Do iepoch = 1 , 3*Ncommon
+	Amatrix (iepoch,jepoch+6) = AmatrixP(iepoch,jepoch)
+End Do
+End Do
+Else
+	Amatrix = AmatrixZ
+End IF
+! ----------------------------------------------------------------------
+
 ! ----------------------------------------------------------------------
 ! Normal Equations
 Amatrix_T = TRANSPOSE(Amatrix)

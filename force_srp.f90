@@ -224,8 +224,16 @@ SUBROUTINE force_srp (GM,prnnum,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       MASS   = 1415.0D0
       end if
 
+! GALILEO satellites
+      if (prnnum.gt.201 .and. prnnum.le.230)then
+      Z_SIDE = 3.002D0
+      X_SIDE = 1.323D0
+      A_SOLAR= 11.0D0
+      MASS   = 700.0D0
+      end if
+	  
 ! BDS satellites
-      if (prnnum.gt.401 .and. prnnum.le.426)then
+      if (prnnum.gt.301 .and. prnnum.le.326)then
       Z_SIDE = 3.69D0 ! surface-to-mass ratio
       X_SIDE = 4.5D0
       A_SOLAR= 22.44D0

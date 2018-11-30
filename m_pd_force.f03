@@ -1,11 +1,33 @@
-SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
+MODULE m_pd_force
 
 
 ! ----------------------------------------------------------------------
-! SUBROUTINE: force_sum.f03
+! MODULE: m_pd_force
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Satellite acceleration components based on the considered force model 
+!  Module for calling the pd_force subroutine
+! ----------------------------------------------------------------------
+! Author :	Dr. Thomas Papanikolaou
+!			Cooperative Research Centre for Spatial Information, Australia
+! Created:	24 September 2018
+! ----------------------------------------------------------------------
+
+
+      IMPLICIT NONE
+      !SAVE 			
+  
+	  
+Contains
+
+
+SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
+
+
+! ----------------------------------------------------------------------
+! SUBROUTINE: pd_force.f03
+! ----------------------------------------------------------------------
+! Purpose:
+!  Partial derivatives of the force model effects w.r.t. the satellite state vector and the (force-related) unknown parameters 
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - mjd:			Modified Julian Day number (including the fraction of the day) in Terrestrial Time (TT)
@@ -13,10 +35,14 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! - vsat:			Satellite Velocity vector (m/s) in inertial frame (ICRF)
 ! 
 ! Output arguments:
-! - fx,fy,fz:		Acceleration's cartesian components (m)
+! - Fvec:			Acceleration vector cartesian components in inertial frame (ICRF)
+! - PDr: 			Partial derivatives matrix of the acceleration w.r.t. the position vector in ICRF
+! - PDv: 			Partial derivatives matrix of the acceleration w.r.t. the velocity vector in ICRF
+! - PD_param: 		Partial derivatives matrix of the acceleration w.r.t. the (force-related) unknown parameters in ICRF
 ! ----------------------------------------------------------------------
-! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
-! Created:	9 October 2017
+! Author :	Dr. Thomas Papanikolaou
+! 			Cooperative Research Centre for Spatial Information, Australia
+! Created:	September 2018
 ! ----------------------------------------------------------------------
 
 
@@ -28,7 +54,9 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       USE mdl_tides
       USE m_force_gfm
       USE m_force_tides
-      USE m_tides_ocean
+      USE m_tides_ocean  
+      USE m_pd_geopotential
+      USE m_matrixRxR
       USE m_pd_empirical
       IMPLICIT NONE
 
@@ -40,7 +68,9 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       REAL (KIND = prec_d), INTENT(IN), DIMENSION(3) :: rsat, vsat
 ! ----------------------------------------------------------------------
 ! OUT
-      REAL (KIND = prec_d), INTENT(OUT) :: SFx, SFy, SFz
+      REAL (KIND = prec_d), INTENT(OUT) :: Fvec(3)
+      REAL (KIND = prec_d), INTENT(OUT) :: PDr(3,3), PDv(3,3)
+      REAL (KIND = prec_d), INTENT(OUT), DIMENSION(:,:), ALLOCATABLE :: PD_param
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -50,7 +80,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 	  DOUBLE PRECISION EOP_cr(7)
       DOUBLE PRECISION CRS2TRS(3,3), TRS2CRS(3,3), d_CRS2TRS(3,3), d_TRS2CRS(3,3)	  
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_d), DIMENSION(3) :: SF, SFgrav, SFnongrav, SFemp
+      REAL (KIND = prec_d), DIMENSION(3) :: SF, SFgrav, SFnongrav, SFemp    
       REAL (KIND = prec_q), DIMENSION(3) :: Fgrav_itrf , Fgrav_icrf, Fplanets_icrf, Ftides_icrf, Frelativity_icrf
       REAL (KIND = prec_d), DIMENSION(3) :: Fsrp_icrf
       REAL (KIND = prec_d) :: fx, fy, fz
@@ -96,6 +126,8 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       REAL (KIND = prec_q) :: beta_ppn, gama_ppn
       REAL (KIND = prec_q) :: c_light
 ! ----------------------------------------------------------------------
+     INTEGER (KIND = prec_int8) :: N_param, PD_Param_ID
+      REAL (KIND = prec_d), DIMENSION(3,3) :: Ugrav_icrf, Ugrav_itrf, Ugrav
       REAL (KIND = prec_d) :: PD_EMP_r(3,3), PD_EMP_v(3,3)
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: PD_EMP_param
 ! ----------------------------------------------------------------------
@@ -105,6 +137,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! Global variables used
 ! ----------------------------------------------------------------------
 ! Module mdl_param.f03:
+
 ! FMOD_GRAV, FMOD_NONGRAV
 ! GFM_Cnm, GFM_Snm
 ! GFM_Nmax, GFM_Mmax
@@ -113,6 +146,7 @@ GMearth = GFM_GM
 aEarth = GFM_ae
 ! ----------------------------------------------------------------------
 ! Module mdl_num.f90:
+
 ! Relativistic parameters
 beta_ppn = ppn_beta
 gama_ppn = ppn_gama
@@ -120,17 +154,28 @@ c_light = cslight
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
+! Partial derivatives w.r.t. unknown parameters
+N_param = NPARAM_glb
+If (N_param == 0) Then
+N_param = 1
+End If
+ALLOCATE (PD_param(3,N_param), STAT = AllocateStatus)
+PD_Param_ID = 0
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
 If (FMOD_GRAVFIELD == 0) THEN
+
 ! Module mdl_num
 GMearth = GM_global
 aEarth = Earth_radius
+
 END IF
 ! ----------------------------------------------------------------------
 
 ! State Vector in ICRF
 rsat_icrf = rsat
 vsat_icrf = vsat
-
 
 ! ----------------------------------------------------------------------
 ! EOP data and Tranformation matrices between ITRF and ICRF
@@ -173,32 +218,41 @@ fy = 0.0D0
 fz = 0.0D0	  
 Fgrav_icrf = (/ fx, fy, fz /)
 
+Ugrav_icrf(1,:) = (/0.0D0, 0.0D0, 0.0D0 /)
+Ugrav_icrf(2,:) = (/0.0D0, 0.0D0, 0.0D0 /)
+Ugrav_icrf(3,:) = (/0.0D0, 0.0D0, 0.0D0 /)
+
 Else 	  
 
 If (FMOD_GRAVFIELD == 0) Then
 
 ! Central term of the Earth Gravity Field 
-!Call force_gm (rsat_icrf, fx, fy, fz)
 Call force_gm (GMearth, rsat_icrf, fx,fy,fz )
 Fgrav_icrf = (/ fx, fy, fz /)
+! Partial derivatives
+Call pd_gm (GMearth, rsat_icrf, Ugrav_icrf)
 
 Else 
 
 ! Earth Gravity Field model acceleration components (spherical harmonics expansion) 
 n_max = GFM_Nmax
 m_max = GFM_Mmax
-CALL force_gfm (GMearth, aEarth, rsat_itrf, n_max, m_max, GFM_Cnm, GFM_Snm , fx,fy,fz)
-Fgrav_itrf = (/ fx, fy, fz /)
+
+! Partial derivatives
+Call pd_geopotential(GMearth, aEarth, rsat_itrf, n_max, m_max, GFM_Cnm, GFM_Snm, Fgrav_itrf, Ugrav_itrf)
 
 ! Acceleration vector transformation from terrestrial to inertial frame
-! Fgrav_icrf = TRS2CRS * Fgrav_itrf
 CALL matrix_Rr (TRS2CRS, Fgrav_itrf , Fgrav_icrf)
+
+! PD matrix transformation ITRF to ICRF
+! (df/dr)_Inertial = EOP(t) * (df/dr)_Terrestrial * inv( EOP(t) )
+Ugrav = MATMUL(TRS2CRS, Ugrav_itrf) 		
+Ugrav_icrf = MATMUL(Ugrav, TRANSPOSE(TRS2CRS)) 		
 
 End IF
 
 End If
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Planetary/Lunar orbital perturbations
@@ -227,7 +281,7 @@ DO NTARG_body = 1 , 11
 
 ! GM gravity constants of the solar system bodies
       GMbody = GMconst(NTARG)
- 
+  
 ! ----------------------------------------------------------------------
 ! Point-mass perturbations vector due to the selected celestial body
       CALL force_gm3rd (rbody, rsat_icrf, GMbody , a_perturb)
@@ -249,9 +303,8 @@ DO NTARG_body = 1 , 11
       end if
 ! ----------------------------------------------------------------------  
    END IF
-END DO
- 
-  
+END DO  
+	  
 ! ----------------------------------------------------------------------
 ! Indirect J2 effect
 ! ----------------------------------------------------------------------
@@ -264,11 +317,9 @@ If (FMOD_GRAVFIELD > 0) Then
 ! C20 spherical harmonic coefficient of geopotential 
 C20 = GFM_Cnm(2+1,0+1)
 !Re = GFM_ae
-
 Else If (FMOD_GRAVFIELD == 0) then
 C20 = -4.841694552725D-04
 !Re = Earth_radius
-
 End IF
 
 ! Earth Radius
@@ -287,9 +338,7 @@ Fplanets_icrf = aPlanets_icrf + a_iJ2_icrf
 ! ----------------------------------------------------------------------
 
 ELSE If (FMOD_GRAV(2) == 0) Then
-
 Fplanets_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
-
 End IF	  
 ! ----------------------------------------------------------------------
 
@@ -304,9 +353,7 @@ If (FMOD_GRAV(3) > 0) Then
 ! ----------------------------------------------------------------------
 ! Frequency-independent : Step 1 (IERS Conventions 2010)
 If (FMOD_TIDES(1) > 0) Then 
-
-      CALL tides_solid1(rMoon_ITRS, rSun_ITRS, GMearth, aEarth, GM_moon, GM_sun, dCnm_solid1, dSnm_solid1)
-	  
+      CALL tides_solid1(rMoon_ITRS, rSun_ITRS, GMearth, aEarth, GM_moon, GM_sun, dCnm_solid1, dSnm_solid1)  
 Else If (FMOD_TIDES(1) == 0) Then  
       dCnm_solid1 = 0.0D0
       dSnm_solid1 = 0.0D0
@@ -314,27 +361,22 @@ End if
 
 ! Frequency-dependent : Step 2 (IERS Conventions 2010)
 If (FMOD_TIDES(2) > 0) Then 
-
       CALL tides_solid2(mjd, ut1_utc , dCnm_solid2, dSnm_solid2)
-	  
 Else If (FMOD_TIDES(2) == 0) Then
       dCnm_solid2 = 0.0D0
       dSnm_solid2 = 0.0D0
 End if
- 
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Zero Tide term
 CALL tide_perm (dC20_perm)
-
 ! Tide system of the input gravity field model is set in the GFM_tide global variable in the module mdl_param.f03
 if (GFM_tide == 'zero_tide') then
    dCnm_solid1(2+1,0+1) = dCnm_solid1(2+1,0+1) - dC20_perm
    !dCnm_solid2(2+1,0+1) = dCnm_solid2(2+1,0+1) - dC20_perm
 end if	  
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Pole Tide
@@ -364,7 +406,6 @@ ALLOCATE (dCnm_tides(sz_tides,sz_tides), STAT = AllocateStatus)
          PRINT *, "Error: Allocatable Array: dCnm_tides | Nmax:", sz_tides
 !         STOP "*** Not enough memory ***"
       END IF  
-
 ALLOCATE (dSnm_tides(sz_tides,sz_tides), STAT = AllocateStatus)
       IF (AllocateStatus /= 0) THEN
          PRINT *, "Error: Not enough memory"
@@ -372,7 +413,6 @@ ALLOCATE (dSnm_tides(sz_tides,sz_tides), STAT = AllocateStatus)
          PRINT *, "Error: Allocatable Array: dSnm_tides | Nmax:", sz_tides
 !         STOP "*** Not enough memory ***"
       END IF  
-	  
 dCnm_tides = dCnm_solid1
 dSnm_tides = dSnm_solid1
 
@@ -391,12 +431,8 @@ CALL force_tides(rsat_itrf, GMearth, aEarth, sz_tides-1, sz_tides-1, dCnm_tides,
 a_solidtides(1) = ax
 a_solidtides(2) = ay
 a_solidtides(3) = az
-
-!PRINT *,"dCnm_tides",dCnm_tides
-!PRINT *,"dSnm_tides",dSnm_tides
-
-!DEALLOCATE (dCnm_tides,   STAT = DeAllocateStatus)
-!DEALLOCATE (dSnm_tides,   STAT = DeAllocateStatus)
+DEALLOCATE (dCnm_tides,   STAT = DeAllocateStatus)
+DEALLOCATE (dSnm_tides,   STAT = DeAllocateStatus)
 sz_tides = 0
 ! ----------------------------------------------------------------------
 
@@ -406,10 +442,11 @@ a_ocean = (/ 0.D0, 0.0D0, 0.0D0 /)
 If (FMOD_TIDES(3) == 1) Then 
       CALL tides_ocean(OCEAN_Nmax, OCEAN_Mmax, mjd, ut1_utc, dCnm_ocean, dSnm_ocean)
       ! Acceleration cartesian components
-	  CALL force_tides(rsat_itrf, GMearth, aEarth, OCEAN_Nmax, OCEAN_Mmax, dCnm_ocean, dSnm_ocean, ax,ay,az)	  
+	  !CALL force_tides(rsat_itrf, GMearth, aEarth, sz_tides-1, sz_tides-1, dCnm_ocean, dSnm_ocean, ax,ay,az)
+	  CALL force_tides(rsat_itrf, GMearth, aEarth, OCEAN_Nmax, OCEAN_Mmax, dCnm_ocean, dSnm_ocean, ax,ay,az)
       a_ocean (1) = ax
       a_ocean (2) = ay
-      a_ocean (3) = az
+      a_ocean (3) = az  
       DEALLOCATE (dCnm_ocean,   STAT = DeAllocateStatus)
       DEALLOCATE (dSnm_ocean,   STAT = DeAllocateStatus)
       sz_tides = 0
@@ -425,11 +462,9 @@ a_tides = a_solidtides + a_ocean
 ! Acceleration vector transformation from terrestrial to inertial frame
 CALL matrix_Rr (TRS2CRS, a_tides , Ftides_icrf)
 ! ----------------------------------------------------------------------
-  
+ 
 Else If (FMOD_GRAV(3) == 0) Then
-
 Ftides_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
-
 End IF
 ! End of Tidal effects
 ! ----------------------------------------------------------------------
@@ -470,7 +505,6 @@ SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf
 ! End of Gravitational Effects
 ! ----------------------------------------------------------------------
 
-
  
 ! ----------------------------------------------------------------------
 ! Non-Gravitational Effects
@@ -505,7 +539,6 @@ End IF
 
 ! Summary of non-gravitational effects
 SFnongrav = Fsrp_icrf
-
 ! End of non-Gravitational Effects
 ! ----------------------------------------------------------------------
 
@@ -517,6 +550,12 @@ IF (EMP_param_glb == 1) Then
 	Call pd_empirical (rsat_icrf, vsat_icrf, GMearth, SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)	
 Else IF (EMP_param_glb == 0) Then
 	SFemp = (/ 0.0D0, 0.0D0, 0.0D0 /)
+	Do i = 1 , 3
+		Do j = 1 , 3
+			PD_EMP_r(i,j) = 0.0D0
+		End Do
+	End Do
+	!PD_EMP_param = 
 End IF
 ! ----------------------------------------------------------------------
 
@@ -526,11 +565,26 @@ End IF
 ! ----------------------------------------------------------------------
 !SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf
 SF = SFgrav + SFnongrav + SFemp 		
-SFx = SF(1) 
-SFy = SF(2)
-SFz = SF(3)
+Fvec = SF
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Partial derivatives w.r.t state vector - overall matrix
+! ----------------------------------------------------------------------
+! PD w.r.t position vector
+PDr = Ugrav_icrf + PD_EMP_r
+! PD  w.r.t velocity vector
+!PDv
+! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Partial derivatives w.r.t unknown parameters to be estimated
+! ----------------------------------------------------------------------
+IF (EMP_param_glb == 1) Then
+PD_param = PD_EMP_param
+End IF
+! ----------------------------------------------------------------------
 
-END
+END SUBROUTINE
+
+END Module

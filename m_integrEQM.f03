@@ -147,7 +147,6 @@ Do j = 1 , Nepochs-1
     
 	! Next epoch TT (to+h)
     TT = TT + step    
-
 	! Seconds since 00h
 	TTo = TT
 	If (TT >= 86400.D0) Then

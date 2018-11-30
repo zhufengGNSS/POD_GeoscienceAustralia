@@ -407,7 +407,7 @@ Call prm_grav (PRMfname)
 Call prm_nongrav (PRMfname)
 
 ! Empirical parameters/accelerations
-
+Call prm_emp (PRMfname)
 ! ----------------------------------------------------------------------
 
 
@@ -418,10 +418,35 @@ Call prm_nongrav (PRMfname)
 
 ! ----------------------------------------------------------------------
 
-
-
-
-
+! ----------------------------------------------------------------------
+! Unknow parameters to be estimated
+! ----------------------------------------------------------------------
+! Number of parameters to be estimated
+NPARAM_glb = 0
+! Empirical parameters
+If (EMP_param_glb == 1) Then
+! Bias parameters
+	If (EMP_Bias_glb(1) == 1) Then
+		NPARAM_glb = NPARAM_glb + 1
+	End If
+	If (EMP_Bias_glb(2) == 1) Then
+		NPARAM_glb = NPARAM_glb + 1
+	End If
+	If (EMP_Bias_glb(3) == 1) Then
+		NPARAM_glb = NPARAM_glb + 1
+	End If
+! Cycle-per-revolution parameters
+	IF (EMP_CPR_glb(1) == 1) Then
+		NPARAM_glb = NPARAM_glb + 2
+	End If
+	IF (EMP_CPR_glb(2) == 1) Then
+		NPARAM_glb = NPARAM_glb + 2
+	End If
+	IF (EMP_CPR_glb(3) == 1) Then
+		NPARAM_glb = NPARAM_glb + 2
+	End If
+End	If
+! ----------------------------------------------------------------------
 
 
 if (1<0) then
