@@ -43,7 +43,7 @@ IERS_CMP_2015.F  tide_pole_se.f90 tide_pole_oc.f90 \
 m_force_tides.f03 \
 rel_schwarzschild.f90 rel_LenseThirring.f90 rel_deSitter.f90 \
 force_srp.f90 prn_shift.f03 surfprop.f90 cross_product.f90 R3.for R1.for \
-force_erp.f90 \
+force_erp.f90 force_ant.f90 \
 force_sum.f03 \
 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 \
 pd_gm.f03 m_legendre2.f03 m_pd_geopotential.f03 \

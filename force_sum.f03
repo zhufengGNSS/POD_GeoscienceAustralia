@@ -16,7 +16,12 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! - fx,fy,fz:		Acceleration's cartesian components (m)
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
+!
 ! Created:	9 October 2017
+!
+! Changes: 03-12-2018 Dr. Tzupang Tseng: Added the models of solar radiation
+!                                        pressure, earth radiation pressure 
+!                                        and antenna thrust
 ! ----------------------------------------------------------------------
 
 
@@ -54,6 +59,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       REAL (KIND = prec_q), DIMENSION(3) :: Fgrav_itrf , Fgrav_icrf, Fplanets_icrf, Ftides_icrf, Frelativity_icrf
       REAL (KIND = prec_d), DIMENSION(3) :: Fsrp_icrf
       REAL (KIND = prec_d), DIMENSION(3) :: Ferp_icrf
+      REAL (KIND = prec_d), DIMENSION(3) :: Fant_icrf
       REAL (KIND = prec_d) :: fx, fy, fz
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: GMearth, aEarth
@@ -533,14 +539,25 @@ End IF
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
 
+
+if (FMOD_NONGRAV(1) > 0 .OR. FMOD_NONGRAV(2) > 0 .or. FMOD_NONGRAV (3) > 0) Then
+! PRN: GNSS constellation ID letter + Satellite number
+fmt_line = '(A1,I2.2)'
+READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
+
+CALL prn_shift (GNSSid, PRN_no, PRN_no)
+!print*,GNSSid, PRN_no
+
+CALL satinfo (mjd, PRN_no, satsvn)
+!print*,satsvn
+
+END IF
+ 
 ! ----------------------------------------------------------------------
 ! Solar Radiation
 ! ----------------------------------------------------------------------
 if (FMOD_NONGRAV(1) > 0) Then
 
-! PRN: GNSS constellation ID letter + Satellite number
-fmt_line = '(A1,I2.2)'
-READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
 
 ! Eclipse status		!! Temporary !!  Upgrade for calling the Yaw attitude library
 eclpf = 0
@@ -548,22 +565,42 @@ eclpf = 0
 ! SRP model
 srpid =  SRP_MOD_glb
 
-CALL prn_shift (GNSSid, PRN_no, PRN_no)
-!print*,GNSSid, PRN_no
 
-CALL satinfo (mjd, PRN_no, satsvn)
-!print*,satsvn
-CALL force_srp (mjd, GMearth, PRN_no,satsvn, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
+CALL force_srp (mjd, GMearth, PRN_no, satsvn, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
 Fsrp_icrf = (/ fx, fy, fz /)
-CALL force_erp (mjd, PRN_no,satsvn, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
-Ferp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
 
 	Fsrp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
+End IF
+
+! ----------------------------------------------------------------------
+! Earth radiation pressure
+! ----------------------------------------------------------------------
+if (FMOD_NONGRAV(2) > 0) Then
+
+CALL force_erp (mjd, PRN_no, satsvn, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
+Ferp_icrf = (/ fx, fy, fz /)
+
+Else IF (FMOD_NONGRAV(2) == 0) Then
+
         Ferp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 End IF
+
 ! ----------------------------------------------------------------------
+! Antenna thrust effect 
+! ----------------------------------------------------------------------
+if (FMOD_NONGRAV(3) > 0) Then
+
+CALL force_ant (mjd, PRN_no, satsvn, rsat_icrf, fx, fy, fz)
+Fant_icrf = (/ fx, fy, fz /)
+
+Else IF (FMOD_NONGRAV(3) == 0) Then
+
+        Fant_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
+End IF
+
+
 
 
 ! End of non-Gravitational Effects
@@ -574,7 +611,7 @@ End IF
 ! ----------------------------------------------------------------------
 ! Acceleration sum of the force model
 ! ----------------------------------------------------------------------
-SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf + Ferp_icrf
+SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf + Ferp_icrf + Fant_icrf
 
 SFx = SF(1) 
 SFy = SF(2)
@@ -588,6 +625,8 @@ print *,"Fplanets   ", Fplanets_icrf
 print *,"Ftides     ", Ftides_icrf
 print *,"Frelativity", Frelativity_icrf
 print *,"Fsrp_icrf  ", Fsrp_icrf
+print *,"Ferp_icrf  ", Ferp_icrf
+print *,"Fant_icrf  ", Fant_icrf
 end if
 
 
