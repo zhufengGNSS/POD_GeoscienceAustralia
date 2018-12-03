@@ -58,7 +58,7 @@ SUBROUTINE force_erp (mjd,prnnum,satsvn,r,vsat,r_sun,fx_erp,fy_erp,fz_erp)
       REAL (KIND = prec_q) :: Re,c,Esun
       REAL (KIND = prec_q) :: cospsi,psi
       REAL (KIND = prec_q) :: Ds,sclfa,rsat,SS,DDs
-      REAL (KIND = prec_q) :: u,v
+      REAL (KIND = prec_q) :: u,v,w
 
       REAL (KIND = prec_q), DIMENSION(3) :: er,e_sun,ev,en,ey,ed,ex
       REAL (KIND = prec_q), DIMENSION(4) :: AREA1,REFL1,DIFU1,ABSP1
