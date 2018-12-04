@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 %% Orbit parameterization %%                                       
 ---------------------------------------------------------------------------
-Satellite_PRN             G29
+Satellite_PRN             E19
 Reference_frame           ITRF
 Time_scale                GPS
 Orbit_arc_length          86400     	 ! Seconds
@@ -9,13 +9,13 @@ Orbit_arc_length          86400     	 ! Seconds
 ---------------------------------------------------------------------------
 %% Initial Conditions: Epoch and State Vector                                                      
 ! Initial Epoch:
-Year                      2011
-Month                     6 
-Day                       15
+Year                      2018
+Month                     7 
+Day                       19
 Seconds                   00
 
 ! Initial State Vector (m):
-state_vector       		  -2643245.7880000002        17569739.379999999       -19680812.377999999       -1771.7003672788851       -1787.5218830555677       -1348.1235421597958  
+state_vector       		  19984916.370163400        11879669.198658017        18330315.856925163        822.38024477151725        1642.2873999703977       -1962.4420273362759    
  
 ---------------------------------------------------------------------------
 %% Earth Orientation 
@@ -90,8 +90,8 @@ ocean_tides_model_deg  	  15					! Ocean Tides model maximum degree/order
 ---------------------------------------------------------------------------
 %% Non-gravitational Effects        
 Solar_radiation			  1
-Earth_radiation 		  1
-Antenna_thrust 			  1
+Earth_radiation 		  0
+Antenna_thrust 			  0
 
 ! Solar Radiation Pressure model:
 ! 1. Cannonball model
@@ -116,8 +116,8 @@ cpr_no				  	  1				! Number of cycles per revolution
 %% Observation Model                                                       
 ! External orbit as pseudo-observations                                                
 ! Interpolated orbit based on Lagrange interpolation of Precise Orbit sp3 data
-pseudobs_filename		  igs16403.sp3
-pseudobs_interp_step      900 					! Interval (sec) of the interpolated orbit
+pseudobs_filename		  COD0MGXFIN_20182000000_01D_05M_ORB.SP3
+pseudobs_interp_step      300 					! Interval (sec) of the interpolated orbit
 pseudobs_interp_points    12 					! Number of data points used in Lagrange interpolation   
 
 ---------------------------------------------------------------------------
@@ -126,17 +126,17 @@ VEQ_integration           0
 
 ---------------------------------------------------------------------------
 %% Parameter Estimation               
-Estimator_procedure      1
+Estimator_procedure      0
 Estimator_Iterations     3
  
 ---------------------------------------------------------------------------
 %% External Orbit Comparison  
 ! 0. Exclude external orbit comparison 
-! 1. RSO orbit data; GPS Position and Veloctiy vectors per 30 sec
+! 1. RSO orbit data; GPS Position and Velocity vectors per 30 sec
 ! 2. Interpolated orbit based on Lagrange interpolation of daily sp3 data
 ! 3. Keplerian orbit 
 orbit_external_opt		  2
-orbit_filename		  	  igs16403.sp3			! CH-OG-3-RSO+CTS-GPS_2011_166_00.dat			
-orbit_interp_step         900 					! Interval (sec) of the interpolated/Kepler orbit
+orbit_filename		  	  COD0MGXFIN_20182000000_01D_05M_ORB.SP3					
+orbit_interp_step         300 					! Interval (sec) of the interpolated/Kepler orbit
 orbit_interp_points  	  12 					! Number of data points used in Lagrange interpolation   
 ---------------------------------------------------------------------------

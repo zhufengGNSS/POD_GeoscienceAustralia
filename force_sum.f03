@@ -18,6 +18,14 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
 ! Created:	9 October 2017
 ! ----------------------------------------------------------------------
+! Last modified:
+! - Dr. Thomas Papanikolaou, 3 October 2018:
+!	Empirical forces of bias & cycle per revolution accelerations have been added 
+! ----------------------------------------------------------------------
+! Changes: 03-12-2018 Dr. Tzupang Tseng: Added the models of solar radiation
+!                                        pressure, earth radiation pressure 
+!                                        and antenna thrust
+! ----------------------------------------------------------------------
 
 
       USE mdl_precision
@@ -30,6 +38,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       USE m_force_tides
       USE m_tides_ocean
       USE m_pd_empirical
+      USE m_satinfo
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -53,10 +62,13 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       REAL (KIND = prec_d), DIMENSION(3) :: SF, SFgrav, SFnongrav, SFemp
       REAL (KIND = prec_q), DIMENSION(3) :: Fgrav_itrf , Fgrav_icrf, Fplanets_icrf, Ftides_icrf, Frelativity_icrf
       REAL (KIND = prec_d), DIMENSION(3) :: Fsrp_icrf
+      REAL (KIND = prec_d), DIMENSION(3) :: Ferp_icrf
+      REAL (KIND = prec_d), DIMENSION(3) :: Fant_icrf
       REAL (KIND = prec_d) :: fx, fy, fz
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: GMearth, aEarth
       INTEGER (KIND = prec_int8) :: n_max, m_max
+      INTEGER(KIND = 4)          :: satsvn
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q), DIMENSION(3) :: aPlanets_icrf, a_perturb, a_iJ2, a_iJ2_icrf
       DOUBLE PRECISION  JD, Zbody(6)
@@ -476,14 +488,24 @@ SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
 
+if (FMOD_NONGRAV(1) > 0 .OR. FMOD_NONGRAV(2) > 0 .or. FMOD_NONGRAV (3) > 0) Then
+! PRN: GNSS constellation ID letter + Satellite number
+fmt_line = '(A1,I2.2)'
+READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
+
+CALL prn_shift (GNSSid, PRN_no, PRN_no)
+!print*,GNSSid, PRN_no
+
+CALL satinfo (mjd, PRN_no, satsvn)
+!print*,satsvn
+
+END IF
+ 
 ! ----------------------------------------------------------------------
 ! Solar Radiation
 ! ----------------------------------------------------------------------
 if (FMOD_NONGRAV(1) > 0) Then
 
-! PRN: GNSS constellation ID letter + Satellite number
-fmt_line = '(A1,I2.2)'
-READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
 
 ! Eclipse status		!! Temporary !!  Upgrade for calling the Yaw attitude library
 eclpf = 0
@@ -491,20 +513,44 @@ eclpf = 0
 ! SRP model
 srpid =  SRP_MOD_glb
 
-CALL prn_shift (GNSSid, PRN_no, PRN_no)
-!print*,GNSSid, PRN_no
-CALL force_srp (GMearth, PRN_no, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
+
+CALL force_srp (mjd, GMearth, PRN_no, satsvn, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
 
 	Fsrp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
+End IF
 
+! ----------------------------------------------------------------------
+! Earth radiation pressure
+! ----------------------------------------------------------------------
+if (FMOD_NONGRAV(2) > 0) Then
+
+CALL force_erp (mjd, PRN_no, satsvn, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
+Ferp_icrf = (/ fx, fy, fz /)
+
+Else IF (FMOD_NONGRAV(2) == 0) Then
+
+        Ferp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
+End IF
+
+! ----------------------------------------------------------------------
+! Antenna thrust effect 
+! ----------------------------------------------------------------------
+if (FMOD_NONGRAV(3) > 0) Then
+
+CALL force_ant (mjd, PRN_no, satsvn, rsat_icrf, fx, fy, fz)
+Fant_icrf = (/ fx, fy, fz /)
+
+Else IF (FMOD_NONGRAV(3) == 0) Then
+
+        Fant_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 End IF
 ! ----------------------------------------------------------------------
 
 ! Summary of non-gravitational effects
-SFnongrav = Fsrp_icrf
+SFnongrav = Fsrp_icrf + Ferp_icrf + Fant_icrf
 
 ! End of non-Gravitational Effects
 ! ----------------------------------------------------------------------

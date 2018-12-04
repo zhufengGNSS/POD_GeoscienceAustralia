@@ -4,18 +4,18 @@
 Satellite_PRN             G29
 Reference_frame           ITRF
 Time_scale                GPS
-Orbit_arc_length          86400     	 ! Seconds
+Orbit_arc_length          21600     	 ! Seconds
 
 ---------------------------------------------------------------------------
 %% Initial Conditions: Epoch and State Vector                                                      
 ! Initial Epoch:
 Year                      2011
 Month                     6 
-Day                       15
+Day                       16
 Seconds                   00
 
 ! Initial State Vector (m):
-state_vector       		  -2643245.7880000002        17569739.379999999       -19680812.377999999       -1771.7003672788851       -1787.5218830555677       -1348.1235421597958  
+state_vector       		  -3068800.5069643958        17139650.350883633       -19993483.508601673       -1824.1669465038974       -1790.9918693021086       -1245.9344315955020  
  
 ---------------------------------------------------------------------------
 %% Earth Orientation 
@@ -25,7 +25,7 @@ state_vector       		  -2643245.7880000002        17569739.379999999       -1968
 ! 2. IERS RS/PC Daily 								: EOP_sol=2
 ! 3. IGS ultra-rapid ERP + IERS RS/PC Daily (dX,dY)	: EOP_sol=3
 EOP_data_sol              1
-EOP_filename              eopc04_14_IAU2000.62-now 		! EOP_sol=1: eopc04_08_IAU2000.62-now	! EOP_sol=2: finals2000A.daily
+EOP_filename              eopc04_08_IAU2000.62-now 		! EOP_sol=1: eopc04_08_IAU2000.62-now	! EOP_sol=2: finals2000A.daily
 ERP_filename              igu18543_12.erp
 EOP_interpolation_points  4   	
 
@@ -39,7 +39,7 @@ iau_pn_model              2000
 ! 1. Runge-Kutta-Nystrom 7th order RKN7(6)8	:	RKN7   
 ! 2. Runge-Kutta 4th order					:	RK4
 ! 3. Runge-Kutta 8th order RK8(7)13			:	RK8
-integrator_meth			  RKN7
+integrator_meth			  RK8
 integrator_step 		  900 				! Integration Stepsize (sec)
 
 ---------------------------------------------------------------------------
@@ -90,8 +90,8 @@ ocean_tides_model_deg  	  15					! Ocean Tides model maximum degree/order
 ---------------------------------------------------------------------------
 %% Non-gravitational Effects        
 Solar_radiation			  1
-Earth_radiation 		  1
-Antenna_thrust 			  1
+Earth_radiation 		  0
+Antenna_thrust 			  0
 
 ! Solar Radiation Pressure model:
 ! 1. Cannonball model
@@ -116,7 +116,7 @@ cpr_no				  	  1				! Number of cycles per revolution
 %% Observation Model                                                       
 ! External orbit as pseudo-observations                                                
 ! Interpolated orbit based on Lagrange interpolation of Precise Orbit sp3 data
-pseudobs_filename		  igs16403.sp3
+pseudobs_filename		  igs16404.sp3
 pseudobs_interp_step      900 					! Interval (sec) of the interpolated orbit
 pseudobs_interp_points    12 					! Number of data points used in Lagrange interpolation   
 
@@ -126,7 +126,7 @@ VEQ_integration           0
 
 ---------------------------------------------------------------------------
 %% Parameter Estimation               
-Estimator_procedure      1
+Estimator_procedure      0
 Estimator_Iterations     3
  
 ---------------------------------------------------------------------------
@@ -136,7 +136,7 @@ Estimator_Iterations     3
 ! 2. Interpolated orbit based on Lagrange interpolation of daily sp3 data
 ! 3. Keplerian orbit 
 orbit_external_opt		  2
-orbit_filename		  	  igs16403.sp3			! CH-OG-3-RSO+CTS-GPS_2011_166_00.dat			
+orbit_filename		  	  igs16404.sp3			! CH-OG-3-RSO+CTS-GPS_2011_166_00.dat			
 orbit_interp_step         900 					! Interval (sec) of the interpolated/Kepler orbit
 orbit_interp_points  	  12 					! Number of data points used in Lagrange interpolation   
 ---------------------------------------------------------------------------
