@@ -23,6 +23,14 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 !                                        pressure, earth radiation pressure 
 !                                        and antenna thrust
 ! ----------------------------------------------------------------------
+! Last modified:
+! - Dr. Thomas Papanikolaou, 3 October 2018:
+!	Empirical forces of bias & cycle per revolution accelerations have been added 
+! ----------------------------------------------------------------------
+! Changes: 03-12-2018 Dr. Tzupang Tseng: Added the models of solar radiation
+!                                        pressure, earth radiation pressure 
+!                                        and antenna thrust
+! ----------------------------------------------------------------------
 
 
       USE mdl_precision
@@ -34,6 +42,10 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       USE m_force_gfm
       USE m_force_tides
       USE m_tides_ocean
+<<<<<<< HEAD
+=======
+      USE m_pd_empirical
+>>>>>>> thomas
       USE m_satinfo
       IMPLICIT NONE
 
@@ -55,7 +67,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 	  DOUBLE PRECISION EOP_cr(7)
       DOUBLE PRECISION CRS2TRS(3,3), TRS2CRS(3,3), d_CRS2TRS(3,3), d_TRS2CRS(3,3)	  
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_d), DIMENSION(3) :: SF
+      REAL (KIND = prec_d), DIMENSION(3) :: SF, SFgrav, SFnongrav, SFemp
       REAL (KIND = prec_q), DIMENSION(3) :: Fgrav_itrf , Fgrav_icrf, Fplanets_icrf, Ftides_icrf, Frelativity_icrf
       REAL (KIND = prec_d), DIMENSION(3) :: Fsrp_icrf
       REAL (KIND = prec_d), DIMENSION(3) :: Ferp_icrf
@@ -104,15 +116,15 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       REAL (KIND = prec_q) :: beta_ppn, gama_ppn
       REAL (KIND = prec_q) :: c_light
 ! ----------------------------------------------------------------------
-
-
+      REAL (KIND = prec_d) :: PD_EMP_r(3,3), PD_EMP_v(3,3)
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: PD_EMP_param
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
 ! Global variables used
 ! ----------------------------------------------------------------------
 ! Module mdl_param.f03:
-
 ! FMOD_GRAV, FMOD_NONGRAV
 ! GFM_Cnm, GFM_Snm
 ! GFM_Nmax, GFM_Mmax
@@ -121,25 +133,19 @@ GMearth = GFM_GM
 aEarth = GFM_ae
 ! ----------------------------------------------------------------------
 ! Module mdl_num.f90:
-
 ! Relativistic parameters
 beta_ppn = ppn_beta
 gama_ppn = ppn_gama
 c_light = cslight
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 If (FMOD_GRAVFIELD == 0) THEN
-
 ! Module mdl_num
 GMearth = GM_global
 aEarth = Earth_radius
-
 END IF
 ! ----------------------------------------------------------------------
-
-
 
 ! State Vector in ICRF
 rsat_icrf = rsat
@@ -171,7 +177,6 @@ vsat_itrf = v_TRS_1 + v_TRS_2
 
 End IF 
 ! ----------------------------------------------------------------------
-
 
 
 ! ----------------------------------------------------------------------
@@ -215,7 +220,6 @@ End If
 ! ----------------------------------------------------------------------
 
 
-
 ! ----------------------------------------------------------------------
 ! Planetary/Lunar orbital perturbations
 ! ----------------------------------------------------------------------
@@ -244,14 +248,12 @@ DO NTARG_body = 1 , 11
 ! GM gravity constants of the solar system bodies
       GMbody = GMconst(NTARG)
  
- 
 ! ----------------------------------------------------------------------
 ! Point-mass perturbations vector due to the selected celestial body
       CALL force_gm3rd (rbody, rsat_icrf, GMbody , a_perturb)
 ! Overall (sum) planetary pertrubation acceleration vector
 	  aPlanets_icrf = aPlanets_icrf + a_perturb
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Sun
@@ -266,11 +268,10 @@ DO NTARG_body = 1 , 11
       GM_moon = GMbody
       end if
 ! ----------------------------------------------------------------------  
-
    END IF
 END DO
-	  
-	  
+ 
+  
 ! ----------------------------------------------------------------------
 ! Indirect J2 effect
 ! ----------------------------------------------------------------------
@@ -292,7 +293,6 @@ End IF
 
 ! Earth Radius
 Re = aEarth
-
   
 ! Indirect J2 effect of Sun and Moon
 CALL indirectJ2(C20,Re,GM_moon,rMoon_ITRS,GM_sun,rSun_ITRS , a_iJ2)
@@ -301,12 +301,10 @@ CALL indirectJ2(C20,Re,GM_moon,rMoon_ITRS,GM_sun,rSun_ITRS , a_iJ2)
 CALL matrix_Rr (TRS2CRS, a_iJ2 , a_iJ2_icrf)
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 ! Planetary/Lunar perturbation accleration
 Fplanets_icrf = aPlanets_icrf + a_iJ2_icrf
 ! ----------------------------------------------------------------------
-
 
 ELSE If (FMOD_GRAV(2) == 0) Then
 
@@ -314,8 +312,6 @@ Fplanets_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 
 End IF	  
 ! ----------------------------------------------------------------------
-
-
 
 
 ! ----------------------------------------------------------------------
@@ -378,10 +374,8 @@ If (FMOD_TIDES(5) == 1) Then
 end if
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 ! dCnm, dSnm arrays sum
-
 sz_tides = SIZE (dCnm_solid1,DIM=1)
 ALLOCATE (dCnm_tides(sz_tides,sz_tides), STAT = AllocateStatus)
       IF (AllocateStatus /= 0) THEN
@@ -398,7 +392,6 @@ ALLOCATE (dSnm_tides(sz_tides,sz_tides), STAT = AllocateStatus)
          PRINT *, "Error: Allocatable Array: dSnm_tides | Nmax:", sz_tides
 !         STOP "*** Not enough memory ***"
       END IF  
-
 	  
 dCnm_tides = dCnm_solid1
 dSnm_tides = dSnm_solid1
@@ -409,7 +402,6 @@ Do j = 1 , 3
    dSnm_tides(i,j) = dSnm_tides(i,j) + dSnm_solid2(i,j) 
 End Do
 End Do
-
 
 dCnm_tides(2+1,1+1) = dCnm_tides(2+1,1+1) + dC21_pse + dC21_poc 
 dSnm_tides(2+1,1+1) = dSnm_tides(2+1,1+1) + dS21_pse + dS21_poc
@@ -427,44 +419,22 @@ a_solidtides(3) = az
 !DEALLOCATE (dSnm_tides,   STAT = DeAllocateStatus)
 sz_tides = 0
 ! ----------------------------------------------------------------------
-!PRINT *,"dCnm_solid1",dCnm_solid1
-!PRINT *,"dSnm_solid1",dSnm_solid1
-!PRINT *,"dCnm_solid2",dCnm_solid2
-!PRINT *,"dSnm_solid2",dSnm_solid2
-!PRINT *,"dC21_pse, dS21_pse", dC21_pse, dS21_pse
-!PRINT *,"dC21_poc, dS21_poc", dC21_poc, dS21_poc
-!PRINT *, "dC20_perm"  , dC20_perm
-
 
 ! ----------------------------------------------------------------------
 ! Ocean Tides
 a_ocean = (/ 0.D0, 0.0D0, 0.0D0 /)
 If (FMOD_TIDES(3) == 1) Then 
-
       CALL tides_ocean(OCEAN_Nmax, OCEAN_Mmax, mjd, ut1_utc, dCnm_ocean, dSnm_ocean)
-		!PRINT *,"dCnm_ocean",dCnm_ocean
-		!PRINT *,"dSnm_ocean",dSnm_ocean
-  
       ! Acceleration cartesian components
 	  CALL force_tides(rsat_itrf, GMearth, aEarth, OCEAN_Nmax, OCEAN_Mmax, dCnm_ocean, dSnm_ocean, ax,ay,az)	  
       a_ocean (1) = ax
       a_ocean (2) = ay
       a_ocean (3) = az
-	  
       DEALLOCATE (dCnm_ocean,   STAT = DeAllocateStatus)
       DEALLOCATE (dSnm_ocean,   STAT = DeAllocateStatus)
       sz_tides = 0
-
-!PRINT *,"a_ocean", a_ocean
-!PRINT *,"rsat_itrf", rsat_itrf
-!PRINT *,"GMearth", GMearth
-!PRINT *,"aEarth", aEarth
-!PRINT *,"OCEAN_Nmax", OCEAN_Nmax
-!PRINT *,"OCEAN_Mmax", OCEAN_Mmax
-	  
 End if
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Tides acceleration cartesian components : Overall effects
@@ -480,17 +450,9 @@ Else If (FMOD_GRAV(3) == 0) Then
 
 Ftides_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 
-
 End IF
 ! End of Tidal effects
 ! ----------------------------------------------------------------------
-!PRINT *,"a_tides", a_tides
-!PRINT *,"a_solid", a_solidtides
-!PRINT *,"a_ocean", a_ocean
-!PRINT *,"Ftides_icrf",Ftides_icrf
-!PRINT *,"FMOD_TIDES",FMOD_TIDES
-
-
 
 ! ----------------------------------------------------------------------
 ! Relativistic effects
@@ -514,9 +476,7 @@ a_LenseThirring = (/ 0.D0, 0.0D0, 0.0D0 /)
 ! de Sitter effect or geodesic precesssion 
 CALL rel_deSitter (Zsat_GCRS, Zearth_GCRS, GMearth, GM_sun, gama_ppn, c_light , a_deSitter)
 
-
 Frelativity_icrf = a_Schwarzschild + a_LenseThirring + a_deSitter
-
 
 Else If (FMOD_GRAV(4) == 0) Then
 
@@ -524,12 +484,9 @@ Frelativity_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 
 End IF
 ! ----------------------------------------------------------------------
-!print *,"a_Schwarzschild ", a_Schwarzschild
-!print *,"a_LenseThirring ", a_LenseThirring
-!print *,"a_deSitter      ", a_deSitter
-!print *,"Frelativity_icrf", Frelativity_icrf
 
-
+! Summary of gravitational effects 
+SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf 
 ! End of Gravitational Effects
 ! ----------------------------------------------------------------------
 
@@ -539,7 +496,10 @@ End IF
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> thomas
 if (FMOD_NONGRAV(1) > 0 .OR. FMOD_NONGRAV(2) > 0 .or. FMOD_NONGRAV (3) > 0) Then
 ! PRN: GNSS constellation ID letter + Satellite number
 fmt_line = '(A1,I2.2)'
@@ -581,6 +541,12 @@ if (FMOD_NONGRAV(2) > 0) Then
 
 CALL force_erp (mjd, PRN_no, satsvn, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
 Ferp_icrf = (/ fx, fy, fz /)
+<<<<<<< HEAD
+
+Else IF (FMOD_NONGRAV(2) == 0) Then
+
+        Ferp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
+=======
 
 Else IF (FMOD_NONGRAV(2) == 0) Then
 
@@ -598,27 +564,59 @@ Fant_icrf = (/ fx, fy, fz /)
 Else IF (FMOD_NONGRAV(3) == 0) Then
 
         Fant_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
+>>>>>>> thomas
+End IF
+
+! ----------------------------------------------------------------------
+! Antenna thrust effect 
+! ----------------------------------------------------------------------
+if (FMOD_NONGRAV(3) > 0) Then
+
+CALL force_ant (mjd, PRN_no, satsvn, rsat_icrf, fx, fy, fz)
+Fant_icrf = (/ fx, fy, fz /)
+
+Else IF (FMOD_NONGRAV(3) == 0) Then
+
+        Fant_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 End IF
 
 
 
+! Summary of non-gravitational effects
+SFnongrav = Fsrp_icrf + Ferp_icrf + Fant_icrf
 
 ! End of non-Gravitational Effects
 ! ----------------------------------------------------------------------
 
 
+! ----------------------------------------------------------------------
+! Empirical forces
+! ----------------------------------------------------------------------
+IF (EMP_param_glb == 1) Then
+	Call pd_empirical (rsat_icrf, vsat_icrf, GMearth, SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)	
+Else IF (EMP_param_glb == 0) Then
+	SFemp = (/ 0.0D0, 0.0D0, 0.0D0 /)
+End IF
+! ----------------------------------------------------------------------
+
 
 ! ----------------------------------------------------------------------
 ! Acceleration sum of the force model
 ! ----------------------------------------------------------------------
+<<<<<<< HEAD
 SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf + Ferp_icrf + Fant_icrf
 
+=======
+!SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf
+SF = SFgrav + SFnongrav + SFemp 		
+>>>>>>> thomas
 SFx = SF(1) 
 SFy = SF(2)
 SFz = SF(3)
 ! ----------------------------------------------------------------------
 
 
+<<<<<<< HEAD
 if (1<0) then
 print *,"Fgravity   ", Fgrav_icrf
 print *,"Fplanets   ", Fplanets_icrf
@@ -630,5 +628,7 @@ print *,"Fant_icrf  ", Fant_icrf
 end if
 
 
+=======
+>>>>>>> thomas
 
 END

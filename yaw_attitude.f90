@@ -1,5 +1,5 @@
-SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbdir, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle, Mangle_e, Mrate_e, Ynom_e)
-
+SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbdir, eclipsf, & 
+						 eBX_nom, eBX_ecl, Yangle, Mangle, Mangle_e, Mrate_e, Ynom_e)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: yaw_attitude.f90

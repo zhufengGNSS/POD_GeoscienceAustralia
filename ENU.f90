@@ -5,7 +5,7 @@ SUBROUTINE ENU (rEF, rENU, eE, eN, eU)
 ! SUBROUTINE: ENU.f90
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Cross product between two vectors
+!  Transformation from geocentric (XYZ) to local (East, North, Up) system  
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - rEF:			Geocentric Position vector 
@@ -15,11 +15,16 @@ SUBROUTINE ENU (rEF, rENU, eE, eN, eU)
 ! ----------------------------------------------------------------------
 ! Dr. Thomas Papanikolaou, Geoscience Australia           11 August 2016
 ! ----------------------------------------------------------------------
+! Last modified
+! - Dr. Thomas Papanikolaou, 20 November 2018:
+!	Upgraded from Fortran 90 to Fortran 2003 for calling the modified 
+!   subroutines (upgraded to F03) 
+! ----------------------------------------------------------------------
 
 
       USE mdl_precision
       USE mdl_num
-      USE mdl_arr
+      !USE mdl_arr
       IMPLICIT NONE
 
 ! ---------------------------------------------------------------------------
@@ -34,17 +39,15 @@ SUBROUTINE ENU (rEF, rENU, eE, eN, eU)
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-	  REAL (KIND = prec_d), Dimension(3,3) :: Rx, Rz	  
+	  REAL (KIND = prec_d), Dimension(3,3) :: Rx, Rz, R3	  
 	  REAL (KIND = prec_d) :: phi,lamda,radius	  
 	  REAL (KIND = prec_d) :: x_angle,z_angle	  
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
 ! ----------------------------------------------------------------------
 
 
-
 ! Spherical coordinates
 CALL coord_r2sph (rEF, phi,lamda,radius)
-
 
 ! Rotation matrices
       x_angle = PI_global/2.D0 - phi
@@ -56,19 +59,17 @@ CALL coord_r2sph (rEF, phi,lamda,radius)
       Rz(1,1:3) = (/  		 cos(z_angle),  sin(z_angle),  0.0D0 /)
       Rz(2,1:3) = (/ -1.D0 * sin(z_angle),  cos(z_angle),  0.0D0 /)
       Rz(3,1:3) = (/         		0.0D0,         0.0D0,  1.0D0 /)
-
 	  
 ! Allocate arrays for using matrix_RxR subroutine
-      ALLOCATE (R1(3,3), STAT = AllocateStatus)
-      ALLOCATE (R2(3,3), STAT = AllocateStatus)
-      ALLOCATE (R3(3,3), STAT = AllocateStatus)
-
-	  R1 = Rx
-	  R2 = Rz
-	  CALL matrix_RxR	  
-
-	  
+!      ALLOCATE (R1(3,3), STAT = AllocateStatus)
+!      ALLOCATE (R2(3,3), STAT = AllocateStatus)
+!      ALLOCATE (R3(3,3), STAT = AllocateStatus)
+!	  R1 = Rx
+!	  R2 = Rz
+!	  CALL matrix_RxR	  
+  
 ! Coordinates in local East,North,Up (ENU) system	  
+R3 = MATMUL(Rx , Rz) 
       CALL matrix_Rr (R3,rEF, rENU)
 	  
 	  

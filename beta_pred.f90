@@ -52,7 +52,7 @@ SUBROUTINE beta_pred (mjd, r_sat, v_sat, fti, ft0, beta)
       REAL (KIND = prec_q) :: ti, t0, frate
       REAL (KIND = prec_q) :: mjd_t0 , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
       INTEGER (KIND = prec_int8) :: Norb, i, sz1, sz2
-      REAL (KIND = prec_q) :: GM, kepler_i(6), kepler_0(6), a_semiaxis, ec, n_motion, Ei_rad, Mi_rad, Mo_rad, Mo_deg, Eo_deg
+      REAL (KIND = prec_q) :: GM, kepler_i(9), kepler_0(6), a_semiaxis, ec, n_motion, Ei_rad, Mi_rad, Mo_rad, Mo_deg, Eo_deg
       REAL (KIND = prec_q) :: dt
       REAL (KIND = prec_q), DIMENSION(3) :: rsat_t0, vsat_t0
 ! ----------------------------------------------------------------------

@@ -36,7 +36,11 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
 ! ------------------------------------------------------------------------------
 
   USE mdl_precision
+<<<<<<< HEAD
   USE mdl_param, ONLY: satinfoplace
+=======
+  !USE mdl_param, ONLY: satinfoplace ! Temporary deactivated
+>>>>>>> thomas
   IMPLICIT NONE
 
 ! Dummy variables
@@ -95,8 +99,13 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
 ! -----------------------------------
 
   ifile  = 88
+<<<<<<< HEAD
   OPEN (ifile, file= satinfoplace//"satinfo.dat", status = 'old')
 
+=======
+  !OPEN (ifile, file= satinfoplace//"satinfo.dat", status = 'old')  ! Temporary deactivated
+  OPEN (ifile, file= "satinfo.dat", status = 'old')
+>>>>>>> thomas
 !
 ! Read the content of satinfo.txt
 ! -------------------------------
