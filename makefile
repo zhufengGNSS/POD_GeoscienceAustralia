@@ -29,7 +29,8 @@ crs_trs.f90 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 interp_lin.f9
 era_matrix.f90 \
 orb_frame.f90 \
 kepler_eq.f90 kepler_k2z.f90 kepler_z2k.f90 m_keplerorb.f03 \
-m_rso.f03 m_sp3.f03 \
+m_rso.f03 m_sp3.f03  m_gnssp3.f03 m_sat_ini_vet.f03 m_gnss_ini_vet.f03 \
+m_satinfo.f90 \
 m_lagrange.f03 m_interporb.f03 \
 force_gm.f90 \
 m_legendre.f03 m_legendre1.f03 m_force_gfm.f03 \
@@ -42,6 +43,7 @@ IERS_CMP_2015.F  tide_pole_se.f90 tide_pole_oc.f90 \
 m_force_tides.f03 \
 rel_schwarzschild.f90 rel_LenseThirring.f90 rel_deSitter.f90 \
 force_srp.f90 prn_shift.f03 surfprop.f90 cross_product.f90 R3.for R1.for \
+force_erp.f90 force_ant.f90 \
 force_sum.f03 \
 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 \
 pd_gm.f03 m_legendre2.f03 m_pd_geopotential.f03 \
