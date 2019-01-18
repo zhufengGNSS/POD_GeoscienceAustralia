@@ -140,7 +140,7 @@ Niter = ESTIM_iter_glb
 
 !Print *,"Orbit ESTmode:", ESTmode
 If (ESTmode == 0) then
-Print *,"Orbit Prediction"
+Print *,"Orbit Propagation"
 Else 
 Print *,"Orbit Determination"
 End IF

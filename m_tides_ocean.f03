@@ -160,6 +160,8 @@ DO n = 2 , n_max
         dCnm_f = 0.0D0
         dSnm_f = 0.0D0
         DO ifrq = 1 , Nfrq
+			! ifrq.NE.5 .and. 
+			IF (ifrq.NE.9 .and. ifrq.NE.10 .and. ifrq.NE.11 .and. ifrq.NE.12 .and. ifrq.NE.13 .and. ifrq.NE.Nfrq) then
             ! thetaf (in radians)
             matrix_mult = 0.0D0
             DO j = 1 , 5
@@ -173,7 +175,7 @@ DO n = 2 , n_max
 			        - (dCnm_p(n+1,m+1,ifrq) - dCnm_m(n+1,m+1,ifrq)) * sin(thetaf)
             dCnm_f = dCnm_f + dCnm_fi
             dSnm_f = dSnm_f + dSnm_fi	
-			
+			END IF
         END DO
 		
         ! IERS Conventions update 10/08/2012 Section 6.3.2

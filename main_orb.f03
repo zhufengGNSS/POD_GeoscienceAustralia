@@ -57,7 +57,6 @@ VEQfname = 'VEQ.in'
 ! ----------------------------------------------------------------------
 
 
-
 ! ----------------------------------------------------------------------
 ! Precise Orbit Determination or Orbit Prediction
 CALL orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)

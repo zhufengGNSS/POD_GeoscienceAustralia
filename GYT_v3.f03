@@ -170,7 +170,7 @@ PRN = 'G03'  ! IIF
 ! ----------------------------------------------------------------------	  
 ! satbf = 1 : Body-fixed frame according to the IGS Conventions; Cases: GPS Block II,IIA,IIF, GLONASS, BeiDou  
 ! satbf = 2 : Body-fixed frame X,Y axes reversal; Cases: Galileo, GPS Block IIR 
-satbf = 2
+satbf = 1
 ! ----------------------------------------------------------------------	
 
 
@@ -192,7 +192,7 @@ BDSorbtype = 'MEO'
 ! Approach for the beta angle computation at the latest epoch that the orbital angle M is equal to 90 degrees
 ! BetaP = 1 : Orbit backward prediction based on Keplerian elements  
 ! BetaP = 2 : Orbit backward computation based on numerical interpolation of the precise orbit data sp3 
-BetaP = 2
+BetaP = 1
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------

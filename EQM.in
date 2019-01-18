@@ -132,10 +132,11 @@ Estimator_Iterations     3
 ---------------------------------------------------------------------------
 %% External Orbit Comparison  
 ! 0. Exclude external orbit comparison 
-! 1. RSO orbit data; GPS Position and Veloctiy vectors per 30 sec
+! 1. Orbit data in sp3 format (including position and velocity vectors)
 ! 2. Interpolated orbit based on Lagrange interpolation of daily sp3 data
 ! 3. Keplerian orbit 
 orbit_external_opt		  2
+orbit_ext_frame			  ITRF
 orbit_filename		  	  igs16403.sp3			! CH-OG-3-RSO+CTS-GPS_2011_166_00.dat			
 orbit_interp_step         900 					! Interval (sec) of the interpolated/Kepler orbit
 orbit_interp_points  	  12 					! Number of data points used in Lagrange interpolation   

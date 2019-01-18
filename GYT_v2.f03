@@ -199,7 +199,7 @@ BetaP = 2
 ! ----------------------------------------------------------------------	  
 ! satbf = 1 : Body-fixed frame according to the IGS Conventions; Cases: GPS Block II,IIA,IIF, GLONASS, BeiDou  
 ! satbf = 2 : Body-fixed frame X,Y axes reversal; Cases: Galileo, GPS Block IIR 
-satbf = 2
+satbf = 1
 ! ----------------------------------------------------------------------	
 
 
@@ -408,7 +408,7 @@ End If
 
 ! ----------------------------------------------------------------------
       PRINT *,"--------------------------------------------------------"
-      PRINT *,"-------------------- Num_yaw.f90 -----------------------"
+      PRINT *,"-------------------- GYT v.2 ---------------------------"
       PRINT *," "
       PRINT *,"--------------------- INPUT ----------------------------"
       PRINT *, "Yaw attitude model/method: ", yaw_mod
