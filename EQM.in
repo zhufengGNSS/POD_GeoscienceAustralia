@@ -1,11 +1,7 @@
 ---------------------------------------------------------------------------
 %% Orbit parameterization %%                                       
 ---------------------------------------------------------------------------
-<<<<<<< HEAD
-Satellite_PRN             G32
-=======
 Satellite_PRN             G29
->>>>>>> thomas
 Reference_frame           ITRF
 Time_scale                GPS
 Orbit_arc_length          86400     	 ! Seconds
@@ -19,12 +15,8 @@ Day                       15
 Seconds                   00
 
 ! Initial State Vector (m):
-<<<<<<< HEAD
-state_vector                       24675434.866  -7573772.197 -4953635.713  716.7996753  218.8038160  3105.1415531
-=======
 state_vector       		  -2643245.7880000002        17569739.379999999       -19680812.377999999       -1771.7003672788851       -1787.5218830555677       -1348.1235421597958  
  
->>>>>>> thomas
 ---------------------------------------------------------------------------
 %% Earth Orientation 
 
@@ -140,10 +132,11 @@ Estimator_Iterations     3
 ---------------------------------------------------------------------------
 %% External Orbit Comparison  
 ! 0. Exclude external orbit comparison 
-! 1. RSO orbit data; GPS Position and Veloctiy vectors per 30 sec
+! 1. Orbit data in sp3 format (including position and velocity vectors)
 ! 2. Interpolated orbit based on Lagrange interpolation of daily sp3 data
 ! 3. Keplerian orbit 
 orbit_external_opt		  2
+orbit_ext_frame			  ITRF
 orbit_filename		  	  igs16403.sp3			! CH-OG-3-RSO+CTS-GPS_2011_166_00.dat			
 orbit_interp_step         900 					! Interval (sec) of the interpolated/Kepler orbit
 orbit_interp_points  	  12 					! Number of data points used in Lagrange interpolation   

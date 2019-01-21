@@ -49,12 +49,36 @@ CALL cpu_time (CPU_t0)
 
 ! ----------------------------------------------------------------------
 ! Configuration files of Orbit parameterization:
-EQMfname = 'EQM.in'
-VEQfname = 'VEQ.in'
+!EQMfname = 'EQM.in'
+!VEQfname = 'VEQ.in'
 ! ----------------------------------------------------------------------
 !EQMfname = 'G29_EQM_2011.in'
 !VEQfname = 'G29_VEQ_2011.in'
 ! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! IGS Orbit Integration Test
+! ----------------------------------------------------------------------
+! G01
+EQMfname = 'IGS_test_G01_EQM_not_nst.in'
+!EQMfname = 'IGS_test_G01_EQM_not.in'
+EQMfname = 'IGS_test_G01_EQM_wot.in'
+
+! G02
+!EQMfname = 'IGS_test_G02_EQM_not_nst.in'
+!EQMfname = 'IGS_test_G02_EQM_not.in'
+!EQMfname = 'IGS_test_G02_EQM_wot.in'
+! ----------------------------------------------------------------------
+Print *,"Orbit Parameterisation: ", EQMfname 
+
+!VEQfname = 'IGS_test_G01_VEQ_not_nst.in'
+!VEQfname = 'IGS_test_G01_VEQ_not.in'
+!VEQfname = 'IGS_test_G01_VEQ_wot.in'
+
+!VEQfname = 'IGS_test_G02_VEQ_not_nst.in'
+!VEQfname = 'IGS_test_G02_VEQ_not.in'
+!VEQfname = 'IGS_test_G02_VEQ_wot.in'
+
 
 
 ! ----------------------------------------------------------------------

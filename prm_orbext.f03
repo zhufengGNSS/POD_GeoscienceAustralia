@@ -52,6 +52,8 @@ SUBROUTINE prm_orbext (PRMfname)
       USE m_rso
       USE m_interporb
       USE m_orbT2C
+      USE m_orbC2T
+      USE m_sp3
       IMPLICIT NONE
 
 	  
@@ -70,12 +72,12 @@ SUBROUTINE prm_orbext (PRMfname)
 ! ----------------------------------------------------------------------
 !      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbext_ICRF, orbext_ITRF, orbext_kepler
       INTEGER (KIND = prec_int2) :: data_opt
+      CHARACTER (LEN=10) :: FRAME_EXT
       CHARACTER (LEN=3) :: time_sys
       CHARACTER (LEN=300) :: fname_orb
       CHARACTER (LEN=300) :: fname_orb_0, fname_orb_1, fname_orb_2
       CHARACTER (LEN=300) :: fname_orbint
-      CHARACTER (LEN=300) :: fname_write
-  
+      CHARACTER (LEN=300) :: fname_write  
       INTEGER (KIND = prec_int8) :: NPint
       INTEGER (KIND = prec_int8) :: interpstep
       INTEGER (KIND = prec_int8) :: sz1, sz2 
@@ -156,15 +158,24 @@ READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 ! ----------------------------------------------------------------------
 ! External Orbit
 ! ----------------------------------------------------------------------
-! 1. RSO orbit data by GFZ; GPS Position and Veloctiy vectors per 30 sec
+! 1. Orbit data in sp3 format (including position and velocity vectors) ! Old option: RSO orbit data by GFZ 
 ! 2. Interpolated orbit based on Lagrange interpolation of daily sp3 data
 ! 3: Keplerian orbit
-! 4. Interpolated orbit (3 days arc) based on Lagange interpolation of 3 boundary sp3 data files 
-! 5. Orbit: Position vector from sp3 data; Velocity vactor approximated through sp3 position differences without applying interpolation  
+! 4. Interpolated orbit (3 days arc) based on Lagrange interpolation of 3 boundary sp3 data files 
+! 5. Orbit: Position vector from sp3 data; Velocity vector approximated through sp3 position differences without applying interpolation  
 IF (word1_ln == "orbit_external_opt") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, data_opt 
 END IF
 ORBEXT_glb = data_opt
+! ----------------------------------------------------------------------
+
+! Reference Frame of external orbit
+! 1. ITRF
+! 2. ICRF
+IF (word1_ln == "orbit_ext_frame") THEN
+   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, FRAME_EXT 
+END IF
+
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -216,20 +227,30 @@ CLOSE (UNIT=UNIT_IN)
 ! ----------------------------------------------------------------------
  
 ! ----------------------------------------------------------------------
-! Case 1: RSO data by GFZ; Data interval 30 sec
+! Case 1: Orbit SP3 data with position and velocity vectors (Old: RSO data by GFZ)
 ! ----------------------------------------------------------------------
 If (data_opt == 1) then 
 	  
 ! PRN: GNSS constellation ID letter + Satellite number
 fmt_line = '(A1,I2.2)'
 READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
-
 ! Read RSO data and produce the orbit array (orbext_ITRF) for the input satellite PRN
-CALL rso (fname_orb, PRN_no, orbext_ITRF)	  
+!CALL rso (fname_orb, PRN_no, orbext_ITRF)	  
 
+! Read sp3 orbit data that include position and velocity vectors 
+If (FRAME_EXT == 'ICRF') Then
+! ICRF
+Call sp3 (fname_orb, PRN, orbext_ICRF)
+! Orbit transformation ICRF to ITRF
+time_sys = 'GPS'
+Call orbC2T (orbext_ICRF, time_sys, orbext_ITRF)
+Else If (FRAME_EXT == 'ITRF') Then
+! ITRF
+Call sp3 (fname_orb, PRN, orbext_ITRF)
 ! Orbit transformation ITRF to ICRF
 time_sys = 'GPS'
 Call orbT2C (orbext_ITRF, time_sys, orbext_ICRF)
+End IF
 ! ----------------------------------------------------------------------
 
   
@@ -239,11 +260,20 @@ Call orbT2C (orbext_ITRF, time_sys, orbext_ICRF)
 Else if (data_opt == 2) then
 
 ! Interpolated Orbit: Read sp3 orbit data and apply Lagrange interpolation
-CALL interp_orb (fname_orb, PRN, interpstep, NPint, orbext_ITRF)
+If (FRAME_EXT == 'ICRF') Then
+CALL interp_orb (fname_orb, PRN, interpstep, NPint, orbext_ICRF)
+! Orbit transformation ICRF to ITRF
+time_sys = 'GPS'
+Call orbC2T (orbext_ICRF, time_sys, orbext_ITRF)
 
+Else If (FRAME_EXT == 'ITRF') Then
+
+CALL interp_orb (fname_orb, PRN, interpstep, NPint, orbext_ITRF)
 ! Orbit transformation ITRF to ICRF
 time_sys = 'GPS'
 Call orbT2C (orbext_ITRF, time_sys, orbext_ICRF)
+
+END IF
 ! ----------------------------------------------------------------------
 
 
@@ -311,7 +341,7 @@ orbext_ITRF = orbext_ICRF
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
-! Case 4: Interpolated orbit 3 days arc based on Lagange interpoaltion of 3 daily sp3 data files 
+! Case 4: Interpolated orbit 3 days arc based on Lagrange interpolation of 3 daily sp3 data files 
 ! ----------------------------------------------------------------------
 else if (data_opt == 4) then
 	! Performing interpolation individually for each sp3 orbit file

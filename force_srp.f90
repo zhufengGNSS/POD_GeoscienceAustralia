@@ -91,7 +91,7 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! ----------------------------------------------------------------------
 ! Numerical Constants
       Ps = 4.56D-6 ! (Nm^-2)
-      Cr = 1.33 ! SRP coefficient ranges from 1.3 to 1.5
+      Cr = 1.4 ! SRP coefficient ranges from 1.3 to 1.5
       AU = 1.496d11 ! (m)
       Pi = 4*atan(1.0d0)
 !  BLKNUM = 3 ! for GPS Block IIA testing
@@ -300,15 +300,6 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 
 ! The main surface area face toward to the Sun using the SAT->SUN and SAT->EARTH
 ! vectors
-<<<<<<< HEAD
-!     ANG=acos(ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3))*180.0d0/Pi
-
-!     if (abs(ANG) .lt. 14.0d0) then
-!     AREA=Z_SIDE+A_SOLAR
-!     else
-!     AREA=X_SIDE+A_SOLAR
-!     end if
-=======
      ANG=acos(ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3))*180.0d0/Pi
 
      if (abs(ANG) .lt. 30.0d0) then
@@ -316,21 +307,10 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
      else
      AREA=X_SIDE+A_SOLAR
      end if
->>>>>>> thomas
 ! Cartesian counterparts (fx,fy,fz) of acceleration fr
-!      fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
-!      fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
-!      fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
-
-      fx = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(1)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-      fy = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(2)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-      fz = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(3)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-
-!      if (abs(ANG) .le. 14 ) then
-!         fx=0.0d0
-!         fy=0.0d0
-!         fz=0.0d0
-!      end if
+      fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
+      fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
+      fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
 
 !      fx = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(1)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
 !      fy = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(2)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
@@ -449,7 +429,6 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! srpcoef(7) = D4_s
 ! srpcoef(8) = B1_c 
 ! srpcoef(9) = B1_s
-<<<<<<< HEAD
 !=======================================
 
 
@@ -491,49 +470,6 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 !=======================================
 
 
-=======
-!=======================================
-
-
-      if (ECOM .eq. 2) then
-
-      srpcoef(1) = -0.91647d-7
-      srpcoef(2) =  0.00811d-7
-      srpcoef(3) = -0.00652d-7
-      srpcoef(4) =  0.00064d-7
-      srpcoef(5) =  0.00073d-7
-      srpcoef(6) = -0.00065d-7
-      srpcoef(7) = -0.00142d-7
-      srpcoef(8) =  0.01236d-7
-      srpcoef(9) = -0.00968d-7
-
-
-
-
-! ECOM1 model
-! ***************************************
-! a=D(u)*ed+Y(u)*ey+B(u)*eb
-!
-! D(u)=D0+Dc*cos1*(del_u)+Ds*sin1*(del_u)
-!        
-!
-! Y(u)=Y0+Yc*cos1*(del_u)+Ys*sin1*(del_u)
-!
-! B(u)=B0+Bc*cos1*(del_u)+Bs*sin1*(del_u)
-! ***************************************
-! srpcoef(1) = D0
-! srpcoef(2) = Y0
-! srpcoef(3) = B0
-! srpcoef(4) = Dc
-! srpcoef(5) = Ds
-! srpcoef(6) = Yc
-! srpcoef(7) = Ys
-! srpcoef(8) = Bc
-! srpcoef(9) = Bs
-!=======================================
-
-
->>>>>>> thomas
       else if (ECOM .eq. 1) then
       srpcoef(1) = -0.91664d-7
       srpcoef(2) =  0.00831d-7

@@ -16,12 +16,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! - fx,fy,fz:		Acceleration's cartesian components (m)
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
-!
 ! Created:	9 October 2017
-!
-! Changes: 03-12-2018 Dr. Tzupang Tseng: Added the models of solar radiation
-!                                        pressure, earth radiation pressure 
-!                                        and antenna thrust
 ! ----------------------------------------------------------------------
 ! Last modified:
 ! - Dr. Thomas Papanikolaou, 3 October 2018:
@@ -42,10 +37,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       USE m_force_gfm
       USE m_force_tides
       USE m_tides_ocean
-<<<<<<< HEAD
-=======
       USE m_pd_empirical
->>>>>>> thomas
       USE m_satinfo
       IMPLICIT NONE
 
@@ -496,10 +488,6 @@ SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
 
-<<<<<<< HEAD
-
-=======
->>>>>>> thomas
 if (FMOD_NONGRAV(1) > 0 .OR. FMOD_NONGRAV(2) > 0 .or. FMOD_NONGRAV (3) > 0) Then
 ! PRN: GNSS constellation ID letter + Satellite number
 fmt_line = '(A1,I2.2)'
@@ -541,12 +529,6 @@ if (FMOD_NONGRAV(2) > 0) Then
 
 CALL force_erp (mjd, PRN_no, satsvn, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
 Ferp_icrf = (/ fx, fy, fz /)
-<<<<<<< HEAD
-
-Else IF (FMOD_NONGRAV(2) == 0) Then
-
-        Ferp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
-=======
 
 Else IF (FMOD_NONGRAV(2) == 0) Then
 
@@ -564,23 +546,8 @@ Fant_icrf = (/ fx, fy, fz /)
 Else IF (FMOD_NONGRAV(3) == 0) Then
 
         Fant_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
->>>>>>> thomas
 End IF
-
 ! ----------------------------------------------------------------------
-! Antenna thrust effect 
-! ----------------------------------------------------------------------
-if (FMOD_NONGRAV(3) > 0) Then
-
-CALL force_ant (mjd, PRN_no, satsvn, rsat_icrf, fx, fy, fz)
-Fant_icrf = (/ fx, fy, fz /)
-
-Else IF (FMOD_NONGRAV(3) == 0) Then
-
-        Fant_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
-End IF
-
-
 
 ! Summary of non-gravitational effects
 SFnongrav = Fsrp_icrf + Ferp_icrf + Fant_icrf
@@ -603,32 +570,13 @@ End IF
 ! ----------------------------------------------------------------------
 ! Acceleration sum of the force model
 ! ----------------------------------------------------------------------
-<<<<<<< HEAD
-SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf + Ferp_icrf + Fant_icrf
-
-=======
 !SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf
 SF = SFgrav + SFnongrav + SFemp 		
->>>>>>> thomas
 SFx = SF(1) 
 SFy = SF(2)
 SFz = SF(3)
 ! ----------------------------------------------------------------------
 
 
-<<<<<<< HEAD
-if (1<0) then
-print *,"Fgravity   ", Fgrav_icrf
-print *,"Fplanets   ", Fplanets_icrf
-print *,"Ftides     ", Ftides_icrf
-print *,"Frelativity", Frelativity_icrf
-print *,"Fsrp_icrf  ", Fsrp_icrf
-print *,"Ferp_icrf  ", Ferp_icrf
-print *,"Fant_icrf  ", Fant_icrf
-end if
-
-
-=======
->>>>>>> thomas
 
 END

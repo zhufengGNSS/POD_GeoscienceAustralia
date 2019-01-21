@@ -23,11 +23,7 @@ MODULE mdl_param
 
 ! ---------------------------------------------------------------------------
 ! Satellite information file
-<<<<<<< HEAD
-      CHARACTER (*), PARAMETER :: satinfoplace ='/data/bitbucket/Tzupang/pod/SATINFO/'
-=======
 !      CHARACTER (*), PARAMETER :: satinfoplace ='/data/bitbucket/Tzupang/pod/SATINFO/'
->>>>>>> thomas
 ! --------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------
