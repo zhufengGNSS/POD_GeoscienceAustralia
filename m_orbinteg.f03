@@ -122,6 +122,7 @@ SVEC_Zo = SVEC_Zo_ESTIM
 ! Orbit integrator input parameters
 ! ----------------------------------------------------------------------
 MJDo = MJD_to
+to_sec = SEC_to
 ro(1:3) = SVEC_Zo(1:3)
 vo(1:3) = SVEC_Zo(4:6)
 integID = integmeth
@@ -141,7 +142,7 @@ if (VEQmode == 0) then
 ! Orbit propagation based on numerical integration methods 
 ! ----------------------------------------------------------------------
 ! Numerical integration of the Equation of Motion
-Call integr_EQM (MJDo, ro, vo, arc, integID, step, orbC)
+Call integr_EQM (MJDo, to_sec, ro, vo, arc, integID, step, orbC)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -161,7 +162,7 @@ Else if (VEQmode == 1) then
 ! ----------------------------------------------------------------------
 ! Number of estimated parameters (module mdl_param)
 Nparam = NPARAM_glb
-Call integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
+Call integr_VEQ (MJDo, to_sec, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
 
 sz1 = size(Smatrix, DIM = 1)
 sz2 = size(Smatrix, DIM = 2)
@@ -195,6 +196,7 @@ Do i = 1 , Nepochs
 mjd = orbC(i,1)
 ! Seconds since 00h
 t_sec = orbC(i,2)
+!print *, "t_sec ", t_sec
 
 ! Time scale: TT to GPS time
 CALL time_TT (mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC)
@@ -212,9 +214,12 @@ Else if (TIME_SCALE == 'TAI') then
 	mjd = mjd_TAI
 	t_sec = t_sec - (dt_TT_TAI)	
 End If	
+!print *, "TIME_SCALE ", TIME_SCALE
+!print *, "(dt_TT_TAI + dt_TAI_GPS) ", (dt_TT_TAI + dt_TAI_GPS)
+!print *, "t_sec ", t_sec
 
 ! Seconds since 00h
-t_sec = (mjd - INT(mjd)) * (24.D0 * 3600.D0)
+!t_sec = (mjd - INT(mjd)) * (24.D0 * 3600.D0)
 ! Seconds since 00h
 If (t_sec >= 86400.D0) Then
 	t_sec = t_sec - INT(t_sec / 86400.D0) * 86400.D0

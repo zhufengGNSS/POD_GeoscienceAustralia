@@ -1,0 +1,143 @@
+---------------------------------------------------------------------------
+%% Orbit parameterization %%                                       
+---------------------------------------------------------------------------
+Satellite_PRN             G01
+Reference_frame           ICRF
+Time_scale                GPS
+Orbit_arc_length          259200     	 ! Seconds
+
+---------------------------------------------------------------------------
+%% Initial Conditions: Epoch and State Vector                                                      
+! Initial Epoch:
+Year                      2007
+Month                     4 
+Day                       12
+Seconds                   00
+
+! Initial State Vector (m):
+state_vector       		  1120484.5        15079297.0        22047746.5       -3778.4290       -500.1870        533.1295  
+ 
+---------------------------------------------------------------------------
+%% Earth Orientation
+
+! EOP data solution options:
+! 1. IERS C04 										: EOP_sol=1
+! 2. IERS RS/PC Daily 								: EOP_sol=2
+! 3. IGS ultra-rapid ERP + IERS RS/PC Daily (dX,dY)	: EOP_sol=3
+EOP_data_sol              1
+EOP_filename              eopc04_14_IAU2000.62-now 		! EOP_sol=1: eopc04_08_IAU2000.62-now	! EOP_sol=2: finals2000A.daily
+ERP_filename              igu18543_12.erp
+EOP_interpolation_points  12   	
+
+! IAU Precession-Nutation model:
+! 1. IAU2000A:		iau_pn_model = 2000
+! 2. IAU2006/2000A:	iau_pn_model = 2006
+iau_pn_model              2000
+
+---------------------------------------------------------------------------
+%% Numerical integration methods                                                     
+! 1. Runge-Kutta-Nystrom 7th order RKN7(6)8	:	RKN7   
+! 2. Runge-Kutta 4th order					:	RK4
+! 3. Runge-Kutta 8th order RK8(7)13			:	RK8
+integrator_meth			  RKN7
+integrator_step 		  900 				! Integration Stepsize (sec)
+
+---------------------------------------------------------------------------
+%% Gravitational Forces 
+
+Gravity_field			  1
+Planets_perturbations	  0
+Tidal_effects			  0	
+Relativistic_effects	  0
+
+---------------------------------------------------------------------------
+%% Earth Gravity Field
+
+! Gravity Field options:
+! 0. Central gravity field 					  : gravity_model = 0     
+! 1. Static global gravity field model     	  : gravity_model = 1 
+! 2. Time-variable global gravity field model : gravity_model = 2 
+! 3. IERS conventional geopotential model 	  : gravity_model = 3 
+gravity_model  			  2
+gravity_model_filename	  goco05s.gfc 	! goco05s.gfc	! eigen-6s2.gfc	! ITSG-Grace2014k.gfc	
+degree_max		  		  3			! Gravity model maximum degree/order (d/o)
+degree_max_timevar		  3			! Time-variable coefficients maximum d/o
+
+---------------------------------------------------------------------------
+%% Planetary/Lunar ephemeris
+
+! JPL DE Ephemeris:
+DE_fname_header 		  header.430_229
+DE_fname_data 			  ascp1950.430
+
+---------------------------------------------------------------------------
+%% Tidal Effects:
+! 1. Solid Earth Tides frequency-independent terms
+! 2. Solid Earth Tides frequency-dependent terms
+! 3. Ocean Tides
+! 4. Solid Earth Pole Tide
+! 5. Ocean Pole Tide
+solid_tides_nonfreq		  1
+solid_tides_freq		  1
+ocean_tides				  1	
+solid_earth_pole_tide	  1	 
+ocean_pole_tide			  1	 
+
+! Ocean Tides:
+ocean_tides_model_file	  fes2004_Cnm-Snm.dat   ! FES2004 ocean tide model
+ocean_tides_model_deg  	  15					! Ocean Tides model maximum degree/order
+
+---------------------------------------------------------------------------
+%% Non-gravitational Effects        
+Solar_radiation			  0
+Earth_radiation 		  0
+Antenna_thrust 			  0
+
+! Solar Radiation Pressure model:
+! 1. Cannonball model
+! 2. Box-wing model
+! 3. ECOM (D2B1) model
+SRP_model				  1 
+
+---------------------------------------------------------------------------
+%% Empirical parameters 
+EMP_param				  0 
+! Bias accelerations per radial, along-track and cross-track directions
+bias_r				  	  1 
+bias_t				  	  1 
+bias_n				  	  1 
+! Cycle-per-revolution accelerations per radial, along-track and cross-track directions
+cpr_r				  	  1 
+cpr_t				  	  1 
+cpr_n				  	  1 
+cpr_no				  	  1				! Number of cycles per revolution 
+
+---------------------------------------------------------------------------
+%% Observation Model                                                       
+! External orbit as pseudo-observations                                                
+! Interpolated orbit based on Lagrange interpolation of Precise Orbit sp3 data
+pseudobs_filename		  esoc2_ecf_not_nst.sp3
+pseudobs_interp_step      900 					! Interval (sec) of the interpolated orbit
+pseudobs_interp_points    12 					! Number of data points used in Lagrange interpolation   
+
+---------------------------------------------------------------------------
+%% Variational Equations                                                   
+VEQ_integration           0
+
+---------------------------------------------------------------------------
+%% Parameter Estimation               
+Estimator_procedure      1
+Estimator_Iterations     1
+ 
+---------------------------------------------------------------------------
+%% External Orbit Comparison  
+! 0. Exclude external orbit comparison 
+! 1. Orbit data in sp3 format (including position and velocity vectors)
+! 2. Interpolated orbit based on Lagrange interpolation of daily sp3 data
+! 3. Keplerian orbit 
+orbit_external_opt		  1
+orbit_ext_frame			  ICRF
+orbit_filename		  	  esoc2_eci_not_nst.sp3			! CH-OG-3-RSO+CTS-GPS_2011_166_00.dat			
+orbit_interp_step         900 					! Interval (sec) of the interpolated/Kepler orbit
+orbit_interp_points  	  12 					! Number of data points used in Lagrange interpolation   
+---------------------------------------------------------------------------
