@@ -47,6 +47,8 @@ SUBROUTINE prm_main (PRMfname)
       INTEGER IY, IM, ID, J_flag
       DOUBLE PRECISION DJM0, Sec, FD
       REAL (KIND = prec_d) :: mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
+      REAL (KIND = prec_d) :: t_sec     
+	  REAL (KIND = prec_d) :: dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS
 
       REAL (KIND = prec_d) :: r_TRS(3), v_TRS(3)
       REAL (KIND = prec_d) :: r_CRS(3), v_CRS(3), v_CRS_1(3), v_CRS_2(3)
@@ -323,17 +325,23 @@ SEC_to = Sec
 ! ----------------------------------------------------------------------
 
 Else
-
+t_sec = Sec
 ! ----------------------------------------------------------------------
 ! "Time Systems" transformation											 
       IF (time_in == 1) THEN
 	     CALL time_TT (mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC)
       ELSE IF (time_in == 2) THEN 
 	     CALL time_GPS (mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC)
+		 Call time_TT_sec (mjd_TT , dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS)
+		 t_sec = t_sec + (dt_TT_TAI + dt_TAI_GPS)		 
       ELSE IF (time_in == 3) THEN 
 	     CALL time_UTC (mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC)
+		 Call time_TT_sec (mjd_TT , dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS)
+		 t_sec = t_sec + (dt_TT_TAI + dt_TAI_UTC)
       ELSE IF (time_in == 4) THEN 
          CALL time_TAI (mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC)
+		 Call time_TT_sec (mjd_TT , dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS)
+		 t_sec = t_sec + (dt_TT_TAI)	
       END IF 
 ! ----------------------------------------------------------------------
 ! GPS week and Seconds of GPS week
@@ -344,9 +352,9 @@ Else
 ! Initial Epoch in TT
 MJD_to = mjd_TT
 ! Seconds since 00h
-SEC_to = (MJD_to - INT(MJD_to)) * (24.D0 * 3600.D0)
+SEC_to = t_sec !SEC_to = (MJD_to - INT(MJD_to)) * (24.D0 * 3600.D0)
 ! ----------------------------------------------------------------------
-
+!print *,"SEC_to", SEC_to, t_sec 
 End If
 
 ! ----------------------------------------------------------------------

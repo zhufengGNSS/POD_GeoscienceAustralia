@@ -21,7 +21,7 @@ MODULE m_integrVEQ
 Contains
 
 
-SUBROUTINE integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
+SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
 
 
 ! ----------------------------------------------------------------------
@@ -68,7 +68,7 @@ SUBROUTINE integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, 
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      REAL (KIND = prec_d), INTENT(IN) :: MJDo
+      REAL (KIND = prec_d), INTENT(IN) :: MJDo, tsec_start
       REAL (KIND = prec_d), INTENT(IN), DIMENSION(3) :: ro, vo
       REAL (KIND = prec_d), INTENT(IN) :: arc
       INTEGER (KIND = prec_int2), INTENT(IN) :: integID
@@ -106,7 +106,7 @@ SUBROUTINE integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, 
 ! Time conversion to seconds (MJD from days to seconds)
 
 ! Initial Epoch's Fraction of the day (in seconds)
-to_sec = (MJDo - INT(MJDo)) * (24.D0 * 3600.D0)
+to_sec = tsec_start !to_sec = (MJDo - INT(MJDo)) * (24.D0 * 3600.D0)
 
 ! Final Epoch
 tmax = to_sec + arc
