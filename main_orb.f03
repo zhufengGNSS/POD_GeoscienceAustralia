@@ -16,9 +16,11 @@
 ! 	Preliminary version of GNSS dynamic orbit determination	
 ! - Dr. Thomas Papanikolaou, 25 June 2018
 ! 	Version with minor revisions
+! - Dr. Thomas Papanikolaou, 30 November 2018
+! 	Precise Orbit Determination (POD) version including the estimation of empirical parameters (forces related)
 ! ----------------------------------------------------------------------
 
- 
+
       USE mdl_precision
       USE mdl_num
       USE mdl_param
@@ -37,25 +39,30 @@
       REAL (KIND = prec_d), DIMENSION(3) :: Vrms 	    
 	  REAL (KIND = prec_d), DIMENSION(5,6) :: stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT
 ! ----------------------------------------------------------------------
+      CHARACTER (LEN=2) :: GNSS_id
+	  INTEGER (KIND = prec_int2) :: ORB_mode
 
-
-Print *,"Orbit Determination"
-
+	  
 ! CPU Time
 CALL cpu_time (CPU_t0)
+
 
 ! ----------------------------------------------------------------------
 ! Configuration files of Orbit parameterization:
 EQMfname = 'EQM.in'
 VEQfname = 'VEQ.in'
 ! ----------------------------------------------------------------------
+!EQMfname = 'G29_EQM_2011.in'
+!VEQfname = 'G29_VEQ_2011.in'
+! ----------------------------------------------------------------------
+
 
 ! ----------------------------------------------------------------------
-! Satellite Orbit Determination
+! Precise Orbit Determination or Orbit Prediction
 CALL orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
 ! ----------------------------------------------------------------------
 print *,"Orbit residuals in ICRF : RMS(XYZ)", Vrms
-PRINT *,"Orbit Determination: Completed"
+!PRINT *,"Orbit Determination: Completed"
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
 
@@ -82,16 +89,19 @@ End If
 ! Write orbit matrices to ouput files (ascii)
 PRINT *,"Write orbit matrices to output files"
 ! ----------------------------------------------------------------------
-! Estimated Orbit 
+! Estimated Orbit or Predicted Orbit
 filename = "orb_icrf.out"
 Call writearray (orb_icrf, filename)
 filename = "orb_itrf.out"
 Call writearray (orb_itrf, filename)
+
 ! Variational Equations matrices
+If (ESTIM_mode_glb > 0) then
 filename = "VEQ_Smatrix.out"
 Call writearray (veqSmatrix, filename)
 filename = "VEQ_Pmatrix.out"
 Call writearray (veqPmatrix, filename)
+End IF
 ! ----------------------------------------------------------------------
 
 CALL cpu_time (CPU_t1)

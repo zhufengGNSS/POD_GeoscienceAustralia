@@ -57,6 +57,7 @@ SUBROUTINE veq_rkn768(zo, veqZo, veqPo, step, lamda_h, Np, z_q, e_r, veqZ, veqP)
       USE mdl_precision
       USE mdl_num
       USE m_matrixRxR
+      USE m_pd_force
       IMPLICIT NONE
 
 
@@ -172,11 +173,6 @@ ALLOCATE (sum_bq_r_gP(3,Np2), STAT = AllocateStatus)
 ALLOCATE (sum_bq_v_gP(3,Np2), STAT = AllocateStatus)
 ALLOCATE (sumkP(3,Np2), STAT = AllocateStatus)
 
-!ALLOCATE (U3n(3,Np2), STAT = AllocateStatus)
-!ALLOCATE (P3n(3,Np2), STAT = AllocateStatus)
-
-ALLOCATE (pd_Fp(3,Np2), STAT = AllocateStatus)
-
 Else
 
 N0 = 1 
@@ -189,24 +185,6 @@ Do i1 = 1 , 6
 End Do
 
 End IF
-
-! ----------------------------------------------------------------------	  
-! TEMP											! 777
-!Do i1 = 1 , 3
-!   Do j1 = 1 , Np
-!      pd_Fp(i1,j1) = 0.0D0
-!   End Do	  
-!End Do
-! ----------------------------------------------------------------------	  
-
-! ----------------------------------------------------------------------	  
-
-! ----------------------------------------------------------------------	  
-!ALLOCATE (U33(3,3), STAT = AllocateStatus)
-!ALLOCATE (U36(3,6), STAT = AllocateStatus)
-!ALLOCATE (Z36(3,6), STAT = AllocateStatus)
-! ----------------------------------------------------------------------	  
-
 
 
 ! ----------------------------------------------------------------------	  
@@ -289,10 +267,8 @@ DO i = 0 , s
 		ri1(1:3) = ro
 		vi1 = vo
 ! ----------------------------------------------------------------------
-		!! Force model acceleration components
-		!Call force_sum(mjd_t, ri1, vi1, fx, fy, fz)
-		! Force model acceleration components & Partial derivatives w.r.t. state vector 
-		Call pd_forceZ (mjd_t, ri1, vi1, Fi, pd_Fr, pd_Fv)				! 777
+		! Force model acceleration components & Partial derivatives w.r.t. state vector & Parameters 
+		Call pd_force (mjd_t, ri1, vi1, Fi, pd_Fr, pd_Fv, pd_Fp) 
 ! ----------------------------------------------------------------------	
 !      Function evaluations (ki) for State vector (z = [r v]')       
 		fx = Fi(1)
@@ -302,34 +278,15 @@ DO i = 0 , s
 ! ----------------------------------------------------------------------
 !      Function evaluations for the State Transition matrix (k_Z)	
 		! Position transition matrix : k_Z 3x6 matrix
-
-        !!Call matrixRxR (pd_Fr, veqZ_ro, kZ_i) 							
-        !U33 = pd_Fr
-		!U36 = veqZ_ro
-        !Call matrixRxR (U33, U36, Z36) 
-		!kZ_i = Z36
-		!print *,"kZ_i matrixRxR", kZ_i
-
 		kZ_i = MATMUL(pd_Fr, veqZ_ro) 		
-		!print *,"kZ_i matmul", kZ_i		
-		
+		!print *,"kZ_i matmul", kZ_i				
         ! Function evaluation as a 3x6xi matrix
 		k_Z(:,:,i+1) = kZ_i(:,:)  										 
 ! ----------------------------------------------------------------------
 !       Function evaluations for the Sensitivity matrix (k_P)
 If (Np /= 0) Then
-		!Call pd_forceP (mjd_t, ri1, vi1, Fi, pd_Fr, pd_Fv, pd_Fp)		! 777 777
-		pd_Fp(1:3,1) = (/ 1.0D0, 1.0D0, 1.0D0 /) 								! 777 777	
-		
-		
         !gp = pd_Fr * veqP_ro + pd_Fp  ! 3xNp matrix
-
-		!!Call matrixRxR (pd_Fr, veqP_ro, kP_i)		
-        !U33 = pd_Fr
-        !Call matrixRxR (U33, veqP_ro, kP_i) 
-
-		kP_i = MATMUL(pd_Fr, veqP_ro) 		
-		
+		kP_i = MATMUL(pd_Fr, veqP_ro) 			
 		kP_i = kP_i + pd_Fp
         ! Function evaluation as a 3xPxi matrix
 		k_P(:,:,i+1) = kP_i(:,:) 									
@@ -351,10 +308,8 @@ End IF
         ! Compute velocity at intermediate epoch ti
         vi1 = vo + (h / c(i+1)) * sum_ak 	
 ! ----------------------------------------------------------------------
-		!! Force model acceleration components
-		!Call force_sum(mjd_t, ri1, vi1, fx, fy, fz)
-		! Force model acceleration components & Partial derivatives w.r.t. state vector 
-		Call pd_forceZ (mjd_t, ri1, vi1, Fi, pd_Fr, pd_Fv)				! 777
+		! Force model acceleration components & Partial derivatives w.r.t. state vector & Parameters 
+		Call pd_force (mjd_t, ri1, vi1, Fi, pd_Fr, pd_Fv, pd_Fp) 	
 ! ----------------------------------------------------------------------
 		fx = Fi(1)
 		fy = Fi(2)
@@ -385,15 +340,7 @@ End IF
 		End Do
 		
 		! Position transition matrix : k_Z 3x6 matrix
-        
-		!U33 = pd_Fr
-		!U36 = veqZ_r
-        !!Call matrixRxR (pd_Fr, veqZ_r, kZ_i) 						
-        !Call matrixRxR (U33, U36, Z36) 
-		!kZ_i = Z36
-		
 		kZ_i = MATMUL(pd_Fr, veqZ_r) 		
-
         ! Function evaluation as a 3x6xi matrix
 		k_Z(:,:,i+1) = kZ_i(:,:) 
 		!print *,"pd_Fr", pd_Fr  										 
@@ -417,19 +364,8 @@ If (Np /= 0) Then
 		   End Do	  
 		End Do
 		
-		!Call pd_forceP (mjd_t, ri1, vi1, Fi, pd_Fr, pd_Fv, pd_Fp)		! 777 777
-		pd_Fp(1:3,1) = (/ 1.0D0, 1.0D0, 1.0D0 /) 								! 777 777	
-
-		
         !gp = pd_Fr * veqP_ro + pd_Fp  ! 3xNp matrix
-
-		!!Call matrixRxR (pd_Fr, veqP_r, kP_i)								
-        !U33 = pd_Fr
-		!U3n = veqP_r
-        !Call matrixRxR (U33, veqP_r, kP_i) 
-
 		kP_i = MATMUL(pd_Fr, veqP_r) 		
-		
 		kP_i = kP_i + pd_Fp
         ! Function evaluation as a 3xPxi matrix
 		k_P(:,:,i+1) = kP_i(:,:) 									

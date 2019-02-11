@@ -1,5 +1,5 @@
-SUBROUTINE yaw_bds (mjd, r_sat, v_sat, r_sun, orbtype, satbf, BetaP, NPint, beta, beta_t0, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle)
-
+SUBROUTINE yaw_bds (mjd, r_sat, v_sat, r_sun, orbtype, satbf, BetaP, NPint, & 
+					beta, beta_t0, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: yaw_bds.f90
@@ -204,7 +204,7 @@ Call beta_pred (mjd, r_sat, v_sat, fti, ft0, beta_t0)
 
 Else If (BetaP == 2) Then
  
-Call beta_interp (mjd, r_sat, v_sat, fti, ft0, NPint, beta_t0)
+!Call beta_interp (mjd, r_sat, v_sat, fti, ft0, NPint, beta_t0)
 
 End If 
 ! ----------------------------------------------------------------------

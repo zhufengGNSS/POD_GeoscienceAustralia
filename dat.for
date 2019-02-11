@@ -4,7 +4,7 @@
 *   i a u _ D A T
 *  - - - - - - - -
 *
-*  For a given UTC date, calculate delta(AT) = TAI-UTC.
+*  For a given UTC date, calculate Delta(AT) = TAI-UTC.
 *
 *     :------------------------------------------:
 *     :                                          :
@@ -37,14 +37,14 @@
 *     :  even if no leap seconds have been       :
 *     :  added.                                  :
 *     :                                          :
-*     :  Latest leap second:  2015 June 30       :
+*     :  Latest leap second:  2016 December 31   :
 *     :                                          :
 *     :__________________________________________:
 *
 *  This routine is part of the International Astronomical Union's
 *  SOFA (Standards of Fundamental Astronomy) software collection.
 *
-*  Status:  support routine.
+*  Status:  user-replaceable support routine.
 *
 *  Given:
 *     IY       i     UTC:  year (Notes 1 and 2)
@@ -81,9 +81,9 @@
 *     year so early that JD could not be computed.
 *
 *  2) If the specified date is for a day which ends with a leap second,
-*     the UTC-TAI value returned is for the period leading up to the
+*     the TAI-UTC value returned is for the period leading up to the
 *     leap second.  If the date is for a day which begins as a leap
-*     second ends, the UTC-TAI returned is for the period following the
+*     second ends, the TAI-UTC returned is for the period following the
 *     leap second.
 *
 *  3) The day number must be in the normal calendar range, for example
@@ -118,11 +118,11 @@
 *  Called:
 *     iau_CAL2JD   Gregorian calendar to JD
 *
-*  This revision:  2015 February 27
+*  This revision:  2017 October 7
 *
-*  SOFA release 2015-02-09
+*  SOFA release 2018-01-30
 *
-*  Copyright (C) 2015 IAU SOFA Board.  See notes at end.
+*  Copyright (C) 2018 IAU SOFA Board.  See notes at end.
 *
 *-----------------------------------------------------------------------
 
@@ -134,11 +134,11 @@
 
 *  Release year for this version of iau_DAT
       INTEGER IYV
-      PARAMETER ( IYV = 2015 )
+      PARAMETER ( IYV = 2017 )
 
 *  Number of Delta(AT) changes (increase by 1 for each new leap second)
       INTEGER NDAT
-      PARAMETER ( NDAT = 41 )
+      PARAMETER ( NDAT = 42 )
 
 *  Number of Delta(AT) expressions before leap seconds were introduced
       INTEGER NERA1
@@ -205,7 +205,8 @@
      :    2006,  1, 33D0,
      :    2009,  1, 34D0,
      :    2012,  7, 35D0,
-     :    2015,  7, 36D0 /
+     :    2015,  7, 36D0,
+     :    2017,  1, 37D0 /
 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -269,7 +270,7 @@
 
 *+----------------------------------------------------------------------
 *
-*  Copyright (C) 2015
+*  Copyright (C) 2017
 *  Standards Of Fundamental Astronomy Board
 *  of the International Astronomical Union.
 *
@@ -305,6 +306,14 @@
 *     b) The source code of your derived work must contain descriptions
 *        of how the derived work is based upon, contains and/or differs
 *        from the original SOFA software.
+*
+*     c) UNLIKE OTHER SOFA SOFTWARE, WHICH IS STRICTLY "READ ONLY",
+*        USERS ARE PERMITTED TO REPLACE THIS SUBROUTINE WITH ONE USING
+*        THE SAME NAME BUT DIFFERENT CODE.  This is to allow use of
+*        locally supported mechanisms for keeping track of leap
+*        seconds, perhaps file or network based.  It avoids the need for
+*        applications to be relinked periodically in order to pick up
+*        SOFA updates.
 *
 *     c) The names of all routines in your derived work shall not
 *        include the prefix "iau" or "sofa" or trivial modifications

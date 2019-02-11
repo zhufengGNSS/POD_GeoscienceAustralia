@@ -91,7 +91,7 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! ----------------------------------------------------------------------
 ! Numerical Constants
       Ps = 4.56D-6 ! (Nm^-2)
-      Cr = 1.33 ! SRP coefficient ranges from 1.3 to 1.5
+      Cr = 1.4 ! SRP coefficient ranges from 1.3 to 1.5
       AU = 1.496d11 ! (m)
       Pi = 4*atan(1.0d0)
 !  BLKNUM = 3 ! for GPS Block IIA testing
@@ -300,21 +300,21 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 
 ! The main surface area face toward to the Sun using the SAT->SUN and SAT->EARTH
 ! vectors
-!     ANG=acos(ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3))*180.0d0/Pi
+     ANG=acos(ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3))*180.0d0/Pi
 
-!     if (abs(ANG) .lt. 14.0d0) then
-!     AREA=Z_SIDE+A_SOLAR
-!     else
-!     AREA=X_SIDE+A_SOLAR
-!     end if
+     if (abs(ANG) .lt. 30.0d0) then
+     AREA=Z_SIDE+A_SOLAR
+     else
+     AREA=X_SIDE+A_SOLAR
+     end if
 ! Cartesian counterparts (fx,fy,fz) of acceleration fr
-!      fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
-!      fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
-!      fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
+      fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
+      fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
+      fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
 
-      fx = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(1)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-      fy = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(2)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-      fz = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(3)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
+!      fx = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(1)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
+!      fy = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(2)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
+!      fz = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(3)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
 
 !      if (abs(ANG) .le. 14 ) then
 !         fx=0.0d0

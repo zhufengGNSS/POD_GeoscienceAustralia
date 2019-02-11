@@ -23,7 +23,7 @@ MODULE mdl_param
 
 ! ---------------------------------------------------------------------------
 ! Satellite information file
-      CHARACTER (*), PARAMETER :: satinfoplace ='/data/bitbucket/Tzupang/pod/SATINFO/'
+!      CHARACTER (*), PARAMETER :: satinfoplace ='/data/bitbucket/Tzupang/pod/SATINFO/'
 ! --------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------
@@ -105,14 +105,22 @@ REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: GFM_sSnm
 INTEGER (KIND = prec_int8) :: OCEAN_Nmax, OCEAN_Mmax
 ! ---------------------------------------------------------------------------
 
-
-
 ! ----------------------------------------------------------------------
 ! Non-gravitational forces modelling considered (on/off): defined in prm_nongrav.f03 
 INTEGER (KIND = prec_int2) :: FMOD_NONGRAV(3)
 INTEGER (KIND = prec_int2) :: SRP_MOD_glb
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Empirical forces
+INTEGER (KIND = prec_int2) :: EMP_param_glb
+INTEGER (KIND = prec_int2) :: EMP_Bias_glb(3)
+REAL (KIND = prec_q) :: Bias_accel_glb(3), Bias_accel_aposteriori(3)
+
+INTEGER (KIND = prec_int2) :: EMP_CPR_glb(3)
+INTEGER (KIND = prec_int2) :: EMP_nCPR_glb
+REAL (KIND = prec_q) :: CPR_CS_glb(3,2), CPR_CS_aposteriori(3,2)
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -120,7 +128,7 @@ INTEGER (KIND = prec_int2) :: SRP_MOD_glb
 ! ----------------------------------------------------------------------
 ! Number of parameters to be estimated
 !INTEGER (KIND = prec_int8) ::	N_PARAM 
-INTEGER (KIND = prec_int8), PARAMETER :: NPARAM_glb = 2 						! 777 Temp
+INTEGER (KIND = prec_int8) :: NPARAM_glb
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------

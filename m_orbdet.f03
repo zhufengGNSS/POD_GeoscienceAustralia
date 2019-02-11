@@ -87,9 +87,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
 
 ! ----------------------------------------------------------------------
 ! Local variables declaration
-! ----------------------------------------------------------------------
-	  
-! ----------------------------------------------------------------------
+! ----------------------------------------------------------------------  
       REAL (KIND = prec_d) :: CPU_t0, CPU_t1
       CHARACTER (LEN=100) :: filename
       INTEGER (KIND = prec_int2) :: VEQmode 
@@ -110,8 +108,17 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
       CHARACTER (LEN=3) :: time_sys, time 
       REAL (KIND = prec_d), DIMENSION(6) :: Zest0_icrf, Zest0_itrf, Xo_estim
 ! ----------------------------------------------------------------------
+      REAL (KIND = prec_d) :: Bias_corr(3), CPR_corr(3,2)
+! ----------------------------------------------------------------------
+      CHARACTER (LEN=100) :: fname, fname1, fname2				
+      CHARACTER (LEN=50) :: fname_id				
+      CHARACTER (LEN=100) :: param_id				
+      CHARACTER (LEN=500) :: param_value				
+      REAL (KIND = prec_d) :: apriori_3(3), apriori_2(2) 				
+	  REAL (KIND = prec_q) :: Bias_0(3)
+	  REAL (KIND = prec_q) :: CPR_CS_0(3,2)
 
-
+	  
 ! ----------------------------------------------------------------------
 ! Read orbit parameterization											
 ! ----------------------------------------------------------------------
@@ -121,13 +128,22 @@ Call prm_main (EQMfname)
 ! ----------------------------------------------------------------------
 ! Temp																		! ----------------------------------------------------------------------
 SVEC_Zo_ESTIM = SVEC_Zo
-! ----------------------------------------------------------------------
+!Bias_accel_aposteriori = Bias_accel_glb
+!CPR_CS_aposteriori = CPR_CS_glb
+! ----------------------------------------------------------------------	! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Estimator settings :: Module mdl_param.f03 global parameters
 ESTmode = ESTIM_mode_glb
 Niter = ESTIM_iter_glb
 ! ----------------------------------------------------------------------
+
+!Print *,"Orbit ESTmode:", ESTmode
+If (ESTmode == 0) then
+Print *,"Orbit Propagation"
+Else 
+Print *,"Orbit Determination"
+End IF
 
 !PRINT *,"Data reading"
 ! ----------------------------------------------------------------------
@@ -158,6 +174,18 @@ CALL prm_pseudobs (EQMfname)
 If (ESTmode > 0) then
 ! Orbit Estimation
 
+! ----------------------------------------------------------------------
+! Initial conditions
+! ----------------------------------------------------------------------
+! Empirical parameters apriori values set to zero
+i = 999
+Bias_0 = (/ 0.0D0, 0.0D0, 0.0D0/)
+CPR_CS_0(1,:) = (/ 0.0D0, 0.0D0/)
+CPR_CS_0(2,:) = (/ 0.0D0, 0.0D0/)
+CPR_CS_0(3,:) = (/ 0.0D0, 0.0D0/)
+Call empirical_init (i, Bias_0, CPR_CS_0)
+! ----------------------------------------------------------------------
+
 ! Iterations number of parameter estimation algorithm
 !Niter = 1
 
@@ -174,7 +202,6 @@ VEQmode = 1
 Call orbinteg (VEQfname, VEQmode, orb0, veqSmatrix, veqPmatrix)
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 ! Numerical Integration: Equation of Motion
 ! ----------------------------------------------------------------------
@@ -188,13 +215,12 @@ Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
 !CALL statorbit (orbext_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
 Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr)
 ! ----------------------------------------------------------------------
-!print *,"Orbit residuals (ICRF) RMS(XYZ)", RMSdsr(1:3)
+print *,"Orbit residuals (ICRF) RMS(XYZ)", RMSdsr(1:3)
 
 
 ! ----------------------------------------------------------------------
 ! Parameter estimation: Initial Conditions and orbit parameters
 ! ----------------------------------------------------------------------
-!Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, orbext_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
 Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
 
 filename = "Amatrix.out"
@@ -204,19 +230,90 @@ Call writearray (Wmatrix, filename)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
-! Temp: to be replaced by writing prm_in files (EQM + VEQ)
+! Temp: to be replaced by writing prm_in files (EQM + VEQ)								! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
-!print *, "Xmatrix", Xmatrix
+!print *, "Xmatrix Z", Xmatrix(1:6,1)
+!print *, "Xmatrix P", Xmatrix(7:NPARAM_glb+6,1)
 !print *,"SVEC_Zo", SVEC_Zo
 Xo_estim(1:6) = Xmatrix(1:6,1)
 SVEC_Zo_ESTIM = SVEC_Zo + Xo_estim
 !print *, "SVEC_Zo_ESTIM Zo+Xmatrix", SVEC_Zo_ESTIM
+
+If (NPARAM_glb /=0) Then
+If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 1) Then
+! Bias & CPR
+Bias_corr = Xmatrix(7:9,1)
+CPR_corr(1,1) = Xmatrix(10,1)
+CPR_corr(1,2) = Xmatrix(11,1)
+CPR_corr(2,1) = Xmatrix(12,1)
+CPR_corr(2,2) = Xmatrix(13,1)
+CPR_corr(3,1) = Xmatrix(14,1)
+CPR_corr(3,2) = Xmatrix(15,1)
+Else If (EMP_Bias_glb(1) == 0 .and. EMP_CPR_glb(1) == 1) Then
+! CPR
+CPR_corr(1,1) = Xmatrix(7,1)
+CPR_corr(1,2) = Xmatrix(8,1)
+CPR_corr(2,1) = Xmatrix(9,1)
+CPR_corr(2,2) = Xmatrix(10,1)
+CPR_corr(3,1) = Xmatrix(11,1)
+CPR_corr(3,2) = Xmatrix(12,1)
+Else If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 0) Then
+! Bias 
+Bias_corr = Xmatrix(7:9,1)
+End If
+End IF
+
+Bias_accel_aposteriori = Bias_accel_glb + Bias_corr
+!print *, "Bias_accel_aposteriori", Bias_accel_aposteriori
+!print *, "Bias_accel_glb", Bias_accel_glb
+!print *, "Bias_corr", Bias_corr
+
+CPR_CS_aposteriori = CPR_CS_glb + CPR_corr
+!print *, "CPR_CS_aposteriori", CPR_CS_aposteriori
+!print *, "CPR_CS_glb", CPR_CS_glb
+!print *, "CPR_corr", CPR_corr
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Write the estimated parameters in the input files
+! ----------------------------------------------------------------------
+write (fname_id, *) i
+! ----------------------------------------------------------------------
+! Initial state vector
+If (1<0) Then
+! SVEC_Zo_ESTIM transformation to ITRF
+
+! or Reference_frame set to ICRF
+fname = EQMfname
+param_id = 'Reference_frame'
+param_value = 'ICRF'
+Call write_prmfile (fname, fname_id, param_id, param_value)
+param_id = 'state_vector'
+write (param_value, *) SVEC_Zo_ESTIM
+Call write_prmfile (fname, fname_id, param_id, param_value)
+
+fname = VEQfname
+param_id = 'Reference_frame'
+param_value = 'ICRF'
+Call write_prmfile (fname, fname_id, param_id, param_value)
+param_id = 'state_vector'
+write (param_value, *) SVEC_Zo_ESTIM
+Call write_prmfile (fname, fname_id, param_id, param_value)
+
+End If
+! ----------------------------------------------------------------------
+! Empirical parameters
+! Bias and CPR terms
+Bias_0 = Bias_accel_aposteriori
+CPR_CS_0 = CPR_CS_aposteriori
+Call empirical_init (i, Bias_0, CPR_CS_0)
 ! ----------------------------------------------------------------------
 
 End Do
 ! ----------------------------------------------------------------------
 
 End If
+
 
 ! ----------------------------------------------------------------------
 ! Orbit Propagation

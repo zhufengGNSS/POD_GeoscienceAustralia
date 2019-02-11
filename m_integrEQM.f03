@@ -20,7 +20,7 @@ MODULE m_integrEQM
 Contains
 
 
-SUBROUTINE integr_EQM (MJDo, ro, vo, arc, integID, step, orbc)
+SUBROUTINE integr_EQM (MJDo, tsec_start, ro, vo, arc, integID, step, orbc)
 
 
 ! ----------------------------------------------------------------------
@@ -61,7 +61,7 @@ SUBROUTINE integr_EQM (MJDo, ro, vo, arc, integID, step, orbc)
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      REAL (KIND = prec_d), INTENT(IN) :: MJDo
+      REAL (KIND = prec_d), INTENT(IN) :: MJDo, tsec_start
       REAL (KIND = prec_d), INTENT(IN), DIMENSION(3) :: ro, vo
       REAL (KIND = prec_d), INTENT(IN) :: arc
       INTEGER (KIND = prec_int2), INTENT(IN) :: integID
@@ -94,7 +94,7 @@ SUBROUTINE integr_EQM (MJDo, ro, vo, arc, integID, step, orbc)
 ! Time conversion to seconds (MJD from days to seconds)
 
 ! Initial Epoch's Fraction of the day (in seconds)
-to_sec = (MJDo - INT(MJDo)) * (24.D0 * 3600.D0)
+to_sec = tsec_start !to_sec = (MJDo - INT(MJDo)) * (24.D0 * 3600.D0)
 
 ! Final Epoch
 tmax = to_sec + arc
@@ -147,7 +147,6 @@ Do j = 1 , Nepochs-1
     
 	! Next epoch TT (to+h)
     TT = TT + step    
-
 	! Seconds since 00h
 	TTo = TT
 	If (TT >= 86400.D0) Then

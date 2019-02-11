@@ -21,7 +21,7 @@ MODULE m_integrVEQ
 Contains
 
 
-SUBROUTINE integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
+SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, Pmatrix)
 
 
 ! ----------------------------------------------------------------------
@@ -68,7 +68,7 @@ SUBROUTINE integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, 
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      REAL (KIND = prec_d), INTENT(IN) :: MJDo
+      REAL (KIND = prec_d), INTENT(IN) :: MJDo, tsec_start
       REAL (KIND = prec_d), INTENT(IN), DIMENSION(3) :: ro, vo
       REAL (KIND = prec_d), INTENT(IN) :: arc
       INTEGER (KIND = prec_int2), INTENT(IN) :: integID
@@ -106,7 +106,7 @@ SUBROUTINE integr_VEQ (MJDo, ro, vo, arc, integID, step, Nparam, orbc, Smatrix, 
 ! Time conversion to seconds (MJD from days to seconds)
 
 ! Initial Epoch's Fraction of the day (in seconds)
-to_sec = (MJDo - INT(MJDo)) * (24.D0 * 3600.D0)
+to_sec = tsec_start !to_sec = (MJDo - INT(MJDo)) * (24.D0 * 3600.D0)
 
 ! Final Epoch
 tmax = to_sec + arc
@@ -180,10 +180,20 @@ Pmatrix(1,1) = MJDo
 Pmatrix(1,2) = to_sec
 !i = 1
 !Pmatrix(1, 2+(i-1)*6+1 : 2+(i-1)*6+6 ) = (/ veqPo(1,i), veqPo(2,i), veqPo(3,i), veqPo(4,i), veqPo(5,i), veqPo(6,i) /)
+!Do iparam = 1 , Nparam
+!   Pmatrix(1, 2+(iparam-1)*6+1 : 2+(iparam-1)*6+6 ) = & 
+!   (/ veqPo(1,iparam), veqPo(2,iparam), veqPo(3,iparam), veqPo(4,iparam), veqPo(5,iparam), veqPo(6,iparam) /)
+!End Do
+i1 = 0
+iparam = 0	
+Do i1 = 1 , 6 
 Do iparam = 1 , Nparam
-   Pmatrix(1, 2+(iparam-1)*6+1 : 2+(iparam-1)*6+6 ) = & 
-   (/ veqPo(1,iparam), veqPo(2,iparam), veqPo(3,iparam), veqPo(4,iparam), veqPo(5,iparam), veqPo(6,iparam) /)
+   Pmatrix(1, 2+(i1-1)*Nparam+iparam) = veqPo(i1,iparam) 
+   !(/ veqP(1,iparam), veqP(2,iparam), veqP(3,iparam), veqP(4,iparam), veqP(5,iparam), veqP(6,iparam) /)
 End Do
+End Do
+i1 = 0
+!print *,"Pmatrix(1,:)", Pmatrix(1,:)
 ! ----------------------------------------------------------------------
 
 
@@ -228,8 +238,7 @@ Do j = 1 , Nepochs-1
 	orbc(j+1,2) = TTo
 		
 	! State vector at the next epoch TT (to+h) in the GCRS
-	orbc(j+1,3:8) = Zq
-	
+	orbc(j+1,3:8) = Zq	
 !	print *,"orbc t", orbc(j+1,1:2)
 !	print *,"orbc r", orbc(j+1,3:5)
 
@@ -247,17 +256,31 @@ Do j = 1 , Nepochs-1
 	! Sensitivity matrix
 	Pmatrix(j+1,1) = orbc(j+1,1)
 	Pmatrix(j+1,2) = orbc(j+1,2)
+	!Do iparam = 1 , Nparam
+	!   Pmatrix(j+1, 2+(iparam-1)*6+1 : 2+(iparam-1)*6+6 ) = & 
+	!   (/ veqP(1,iparam), veqP(2,iparam), veqP(3,iparam), veqP(4,iparam), veqP(5,iparam), veqP(6,iparam) /)
+	!End Do
+
+	i1 = 0
+	iparam = 0	
+	Do i1 = 1 , 6 
 	Do iparam = 1 , Nparam
-	   Pmatrix(j+1, 2+(iparam-1)*6+1 : 2+(iparam-1)*6+6 ) = & 
-	   (/ veqP(1,iparam), veqP(2,iparam), veqP(3,iparam), veqP(4,iparam), veqP(5,iparam), veqP(6,iparam) /)
+	   Pmatrix(j+1, 2+(i1-1)*Nparam+iparam) = veqP(i1,iparam) 
 	End Do
+	End Do
+!print *,"m_integrVEQf03: j,Nepochs",j,Nepochs
+!print *,"m_integrVEQf03: Nparam ", Nparam
+!print *,"m_integrVEQf03: veqP   ", veqP(1,:)
+!print *,"m_integrVEQf03: Pmatrix", Pmatrix(j+1,3:Nparam+2)
+!print *,"m_integrVEQf03: veqPo  ", veqPo
+!print *,"m_integrVEQf03: veqP   ", veqP
+!print *,"m_integrVEQf03: Pmatrix", Pmatrix(j+1,:)
 
     ! Initial VEQ arrays at next epoch numerical integration 
     veqZo = veqZ
     veqPo = veqP
 End DO
 ! ----------------------------------------------------------------------
-
 
 
 ! ----------------------------------------------------------------------
@@ -290,7 +313,6 @@ Do j = 1 , Nepochs-1
 		
 	! State vector at the next epoch TT (to+h) in the GCRS
 	orbc(j+1,3:8) = yn
-
 	
 	! VEQ matrices at the next epoch TT (to+h)
 	! State Transition Matrix
@@ -306,12 +328,17 @@ Do j = 1 , Nepochs-1
 	! Sensitivity matrix
 	Pmatrix(j+1,1) = orbc(j+1,1)
 	Pmatrix(j+1,2) = orbc(j+1,2)
+	!Do iparam = 1 , Nparam
+	!   Pmatrix(j+1, 2+(iparam-1)*6+1 : 2+(iparam-1)*6+6 ) = & 
+	!   (/ veqP(1,iparam), veqP(2,iparam), veqP(3,iparam), veqP(4,iparam), veqP(5,iparam), veqP(6,iparam) /)
+	!End Do
+	i1 = 0
+	iparam = 0	
+	Do i1 = 1 , 6 
 	Do iparam = 1 , Nparam
-	!Pmatrix(1, 2+(i-1)*6+1 : 2+(i-1)*6+6 ) = veqPo(1:6,i)
-	   Pmatrix(j+1, 2+(iparam-1)*6+1 : 2+(iparam-1)*6+6 ) = & 
-	   (/ veqP(1,iparam), veqP(2,iparam), veqP(3,iparam), veqP(4,iparam), veqP(5,iparam), veqP(6,iparam) /)
+	   Pmatrix(j+1, 2+(i1-1)*Nparam+iparam) = veqP(i1,iparam) 
 	End Do
-	
+	End Do
 End DO
 ! ----------------------------------------------------------------------
 
