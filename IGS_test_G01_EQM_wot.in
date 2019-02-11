@@ -59,7 +59,7 @@ Relativistic_effects	  0
 ! 2. Time-variable global gravity field model : gravity_model = 2 
 ! 3. IERS conventional geopotential model 	  : gravity_model = 3 
 gravity_model  			  1
-gravity_model_filename	  goco05s.gfc 	! goco05s.gfc	! eigen-6s2.gfc	! ITSG-Grace2014k.gfc	
+gravity_model_filename	  goco05s.gfc 	! goco05s.gfc  eigen-6s2.gfc  ITSG-Grace2014k.gfc  egm2008.gfc	
 degree_max		  		  15			! Gravity model maximum degree/order (d/o)
 degree_max_timevar		  15			! Time-variable coefficients maximum d/o
 
