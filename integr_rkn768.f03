@@ -10,7 +10,7 @@ SUBROUTINE integr_rkn768(zo, step, lamda_h, z_q, e_r)
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - zo:  		Initial epoch (to) and state vector in Celestial Reference System GCRS
-!        		zo = [MJDo ro vo]  
+!        		zo = [MJDo to ro vo]  
 !   			MJDo: initial epoch's Modified Julian Day (MJD) number (including the fraction of the day)
 !   			ro:   Position vector at initial epoch in GCRS (m)
 !   			vo:   Velocity vector at initial epoch in GCRS (m/sec)
@@ -35,7 +35,7 @@ SUBROUTINE integr_rkn768(zo, step, lamda_h, z_q, e_r)
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      REAL (KIND = prec_d), INTENT(IN), DIMENSION(7) :: zo
+      REAL (KIND = prec_d), INTENT(IN), DIMENSION(8) :: zo
       REAL (KIND = prec_d), INTENT(IN) :: step
       REAL (KIND = prec_d), INTENT(IN) :: lamda_h
 ! ----------------------------------------------------------------------
@@ -78,11 +78,11 @@ h = step
 ! MJD
 mjd_to = zo(1)
 ! Seconds at MJDo since 00h
-to = (mjd_to - INT(mjd_to)) * (24.D0 * 3600.D0)
+to = zo(2) !to = (mjd_to - INT(mjd_to)) * (24.D0 * 3600.D0)
 
 !% Initial position and velocity vectors
-ro = zo(2:4)
-vo = zo(5:7)
+ro = zo(3:5)
+vo = zo(6:8)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

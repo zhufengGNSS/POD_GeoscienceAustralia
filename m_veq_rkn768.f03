@@ -32,7 +32,7 @@ SUBROUTINE veq_rkn768(zo, veqZo, veqPo, step, lamda_h, Np, z_q, e_r, veqZ, veqP)
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - zo:  		Initial epoch (to) and state vector in Celestial Reference System GCRS
-!        		zo = [MJDo ro vo]  
+!        		zo = [MJDo to ro vo]  
 !   			MJDo: initial epoch's Modified Julian Day (MJD) number (including the fraction of the day)
 !   			ro:   Position vector at initial epoch in GCRS (m)
 !   			vo:   Velocity vector at initial epoch in GCRS (m/sec)
@@ -65,7 +65,7 @@ SUBROUTINE veq_rkn768(zo, veqZo, veqPo, step, lamda_h, Np, z_q, e_r, veqZ, veqP)
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      REAL (KIND = prec_d), INTENT(IN), DIMENSION(7) :: zo
+      REAL (KIND = prec_d), INTENT(IN), DIMENSION(8) :: zo
       REAL (KIND = prec_d), INTENT(IN), DIMENSION(6,6) :: veqZo
       REAL (KIND = prec_d), INTENT(IN), DIMENSION(:,:), ALLOCATABLE :: veqPo
       REAL (KIND = prec_d), INTENT(IN) :: step
@@ -123,11 +123,11 @@ h = step
 ! MJD
 mjd_to = zo(1)
 ! Seconds at MJDo since 00h
-to = (mjd_to - INT(mjd_to)) * (24.D0 * 3600.D0)
+to = zo(2) !to = (mjd_to - INT(mjd_to)) * (24.D0 * 3600.D0)
 
 ! Initial position and velocity vectors
-ro = zo(2:4)
-vo = zo(5:7)
+ro = zo(3:5)
+vo = zo(6:8)
 
 ! State Transition Matrix Initial values
 veqZ_ro(1,:) = veqZo(1,:)

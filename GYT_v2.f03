@@ -168,6 +168,9 @@ PRN = 'G03'  ! IIF
 
 !PRN = 'E11'  ! Galileo 
 !PRN = 'E12'  ! Galileo 
+
+! Phase wind-up effect comparison test
+PRN = 'G02'  ! IIR
 ! ----------------------------------------------------------------------
 
 
@@ -176,7 +179,7 @@ PRN = 'G03'  ! IIF
 ! ----------------------------------------------------------------------
 ! Satellite Block ID (according to the numbering adopted in eclips.f)
 ! satblk:	1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
-satblk = 6
+satblk = 4
 ! ----------------------------------------------------------------------
 
 
@@ -199,7 +202,7 @@ BetaP = 2
 ! ----------------------------------------------------------------------	  
 ! satbf = 1 : Body-fixed frame according to the IGS Conventions; Cases: GPS Block II,IIA,IIF, GLONASS, BeiDou  
 ! satbf = 2 : Body-fixed frame X,Y axes reversal; Cases: Galileo, GPS Block IIR 
-satbf = 1
+satbf = 2
 ! ----------------------------------------------------------------------	
 
 
@@ -242,7 +245,10 @@ else if (data_opt == 2 .or. data_opt == 3) then
 !fname_orb = 'igs18822.sp3'	! 02/02/2016 IIR  
 !fname_orb = 'igs18820.sp3'	! 31/01/2016 IIR  
 !fname_orb = 'jpl16416.sp3' 	! 25/06/2011
-fname_orb = 'igs18885.sp3'	! 18/03/2016  IIF
+!fname_orb = 'igs18885.sp3'	! 18/03/2016  IIF
+
+! Phase wind-up comparison
+fname_orb = 'igs19423.sp3'	
 
 ! BeiDou
 !fname_orb = 'wum19284.sp3'  ! C13
@@ -395,7 +401,10 @@ End If
 
 ! ----------------------------------------------------------------------
 ! Station coordinates in ITRF (Used for the phase wind-up correction)
-      r_station = (/ -4467074.711D0, 2683011.851D0, -3667007.739D0 /)
+! Mt. Stromlo
+!r_station = (/ -4467074.711D0, 2683011.851D0, -3667007.739D0 /)
+! Alice Springs
+r_station = (/ -4052052.628D0, 4212835.995D0, -2545104.733D0 /)	     
 ! ----------------------------------------------------------------------
 
 

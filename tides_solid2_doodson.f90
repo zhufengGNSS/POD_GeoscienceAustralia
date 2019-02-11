@@ -33,10 +33,6 @@ SUBROUTINE tides_solid2(mjd, ut1_utc , dCnm,dSnm)
 ! - Dr. Thomas Papanikolaou, 27 October 2017:
 !   The subroutine has been modified in order to call the subroutine gmst_iers.f03 
 !   for the computation of the Greenwich mean sidereal time
-! - Dr. Thomas Papanikolaou, 30 January 2019:
-!   Modified in order to replace the fundamental arguments used in the 
-!   basic formula of the tidal corrections. 
-!   The Doodson arguments and multipliers are now applied instead of the Delaunay arguments.
 ! ----------------------------------------------------------------------
 
 
