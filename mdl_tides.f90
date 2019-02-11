@@ -6,6 +6,11 @@ MODULE mdl_tides
 ! ---------------------------------------------------------------------------
 ! Dr. Thomas D. Papanikolaou, Geoscience Australia              November 2015
 ! ---------------------------------------------------------------------------
+! Last modified:
+! - Dr. Thomas Papanikolaou, 30 January 2019:
+!   The Doodson arguments multipliers have now been applied and stored 
+!   as global dynamic allocatable array through this module.
+! ----------------------------------------------------------------------
 
 
       USE mdl_precision
@@ -21,7 +26,7 @@ MODULE mdl_tides
 ! ---------------------------------------------------------------------------
 ! Allocated in "tides_fes2004.f90" 
       !REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: DelaunayNf
-      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: Delaunay_FES
+      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: Delaunay_FES, Doodson_mult_glb
       REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: dCnm_p,dSnm_p, dCnm_m,dSnm_m
 ! ---------------------------------------------------------------------------
 ! Allocated in "lib4_tides.f90"		

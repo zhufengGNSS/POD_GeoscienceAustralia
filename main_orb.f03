@@ -11,13 +11,16 @@
 !			Geoscience Australia, CRC-SI
 ! Created:	13 September 2017
 ! ----------------------------------------------------------------------
-! Last modified: 
+! POD version major modifications highlights: 
+! Last modified 
 ! - Dr. Thomas Papanikolaou, 3 May 2018
 ! 	Preliminary version of GNSS dynamic orbit determination	
 ! - Dr. Thomas Papanikolaou, 25 June 2018
 ! 	Version with minor revisions
 ! - Dr. Thomas Papanikolaou, 30 November 2018
 ! 	Precise Orbit Determination (POD) version including the estimation of empirical parameters (forces related)
+! - Dr. Thomas Papanikolaou, 30 January 2019
+! 	POD version including the upgrade of the ocean tides effect with impact on longer orbit arcs e.g. 3 days 
 ! ----------------------------------------------------------------------
 
 
@@ -61,7 +64,8 @@ VEQfname = 'VEQ.in'
 ! Precise Orbit Determination or Orbit Prediction
 CALL orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
 ! ----------------------------------------------------------------------
-print *,"Orbit residuals in ICRF : RMS(XYZ)", Vrms
+print *,"Orbit residuals in ICRF:" 
+WRITE (*,FMT='(A9, 3F17.4)'),"RMS XYZ", Vrms
 !PRINT *,"Orbit Determination: Completed"
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
@@ -74,19 +78,18 @@ Call orbext(EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kep
 ! ----------------------------------------------------------------------
 PRINT *,"External Orbit comparison"
 print *,"Orbit comparison: ICRF"
-print *,"RMS RTN", stat_RTN_extC(1, 1:3)
-!print *,"RMS RTN v", stat_RTN_extC(1, 4:6)
-print *,"RMS XYZ", stat_XYZ_extC(1, 1:3)
-!print *,"RMS Vxyz", stat_XYZ_extC(1, 4:6)
+WRITE (*,FMT='(A9, 3F17.4)'),"RMS RTN", stat_RTN_extC(1, 1:3)
+WRITE (*,FMT='(A9, 3F17.4)'),"RMS XYZ",  stat_XYZ_extC(1, 1:3)
+!WRITE (*,FMT='(A9, 3F17.9)'),"RMS Vxyz", stat_XYZ_extC(1, 4:6)
 
 print *,"Orbit comparison: ITRF"
-print *,"RMS XYZ", stat_XYZ_extT(1,1:3)
-!print *,"RMS Vxyz", stat_XYZ_extT(1,4:6)
+WRITE (*,FMT='(A9, 3F17.4)'),"RMS XYZ",  stat_XYZ_extT(1, 1:3)
+!WRITE (*,FMT='(A9, 3F17.9)'),"RMS Vxyz", stat_XYZ_extT(1,4:6)
 End If
 
 
 ! ----------------------------------------------------------------------
-! Write orbit matrices to ouput files (ascii)
+! Write orbit matrices to output files (ascii)
 PRINT *,"Write orbit matrices to output files"
 ! ----------------------------------------------------------------------
 ! Estimated Orbit or Predicted Orbit
@@ -103,6 +106,9 @@ filename = "VEQ_Pmatrix.out"
 Call writearray (veqPmatrix, filename)
 End IF
 ! ----------------------------------------------------------------------
+
+
+
 
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0

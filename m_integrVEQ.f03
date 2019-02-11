@@ -91,7 +91,7 @@ SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orb
       REAL (KIND = prec_d), DIMENSION(3) :: er
       REAL (KIND = prec_d) :: mjd_to, mjd_th, mjdn
       REAL (KIND = prec_d), DIMENSION(3) :: rto, vto, rth, vth  
-      REAL (KIND = prec_d), DIMENSION(7) :: Zo 
+      REAL (KIND = prec_d), DIMENSION(8) :: Zo 
       REAL (KIND = prec_d), DIMENSION(6) :: yo, yn, ey 
 ! ----------------------------------------------------------------------	  
       REAL (KIND = prec_d), DIMENSION(6,6) :: veqZo, veqZ  
@@ -218,7 +218,8 @@ Do j = 1 , Nepochs-1
 	
 	! Epoch to	
     Zo(1) = orbc(j,1) 
-    Zo(2:7) = orbc(j,3:8) 
+    Zo(2) = orbc(j,2) 
+    Zo(3:8) = orbc(j,3:8) 
 	
     ! Numerical integration for the next epoch
     !Call integr_rkn768(Zo, step, lamda_h, Zq, er)
