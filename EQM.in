@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 %% Orbit parameterization %%                                       
 ---------------------------------------------------------------------------
-Satellite_PRN             G29
+Satellite_PRN             G10
 Reference_frame           ITRF
 Time_scale                GPS
 Orbit_arc_length          86400     	 ! Seconds
@@ -15,7 +15,7 @@ Day                       15
 Seconds                   00
 
 ! Initial State Vector (m):
-state_vector       		  -2643245.7880000002        17569739.379999999       -19680812.377999999       -1771.7003672788851       -1787.5218830555677       -1348.1235421597958  
+state_vector       		  -14713604.9150      -10963737.0340      -19543187.3780      2339.39246252      -658.99736188     -1370.23529317  
  
 ---------------------------------------------------------------------------
 %% Earth Orientation 
@@ -97,11 +97,23 @@ Antenna_thrust 			  1
 ! 1. Cannonball model
 ! 2. Box-wing model
 ! 3. ECOM (D2B1) model
-SRP_model				  1 
+SRP_model				  3 
+
+---------------------------------------------------------------------------
+%% ECOM SRP parameters
+ECOM_param                                1                             ! ECOM_param = 1 (ECOM1); ECOM_param = 2 (ECOM2)
+! Bias accelerations in D, Y and B directions
+bias_D                                    1
+bias_Y                                    1
+bias_B                                    1
+! Cycle-per-revolution accelerations in D, Y and B directions
+cpr_D                                     1                             ! If ECOM2 is applied, cpr_D becomes cpr_D2
+cpr_Y                                     1                             ! If ECOM2 is applied, cpr_Y becomes cpr_D4
+cpr_B                                     1
 
 ---------------------------------------------------------------------------
 %% Empirical parameters 
-EMP_param				  1 
+EMP_param				  0 
 ! Bias accelerations per radial, along-track and cross-track directions
 bias_r				  	  1 
 bias_t				  	  1 
