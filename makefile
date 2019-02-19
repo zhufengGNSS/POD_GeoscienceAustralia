@@ -22,6 +22,7 @@ anp.for era00.for gmst00.for gmst06.for \
 sp00.for pom00.for \
 ORTHO_EOP.F CNMTX.F UTLIBR.F PMSDNUT2.F FUNDARG.F RG_ZONT2.F \
 interp_iers.f \
+matrix_inv3.f90 \
 rxr.for tr.for cr.for cp.for \
 time_TT.f90 time_GPS.f90 time_UTC.f90 time_TAI.f90 time_GPSweek.f90 \
 m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03\
@@ -48,6 +49,11 @@ force_sum.f03 \
 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 \
 pd_gm.f03 m_legendre2.f03 m_pd_geopotential.f03 \
 pd_forceZ.f03 \
+write_prmfile.f03 writeparam.f03 writeparam1.f03 \
+time_TT_sec.f90 prm_main.f03 prm_emp.f03\
+m_pd_force.f03 m_pd_empirical.f03 empirical_cor.f03 empirical_init.f03 \
+prm_srp.f03 \
+m_pd_ECOM.f90 \
 m_veq_rkn768.f03 \
 m_integrEQM.f03 m_integrVEQ.f03 m_orbinteg.f03 \
 m_orb_estimator.f03 \
