@@ -514,7 +514,7 @@ eclpf = 0
 srpid =  SRP_MOD_glb
 
 
-CALL force_srp (mjd, GMearth, PRN_no, satsvn, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
+CALL force_srp (GMearth, PRN_no, satsvn, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then

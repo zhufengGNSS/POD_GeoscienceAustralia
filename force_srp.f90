@@ -1,5 +1,5 @@
 
-SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
+SUBROUTINE force_srp (GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 
 
 ! ----------------------------------------------------------------------
@@ -12,11 +12,11 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! and a ECOM model (srpid=3) 
 ! ----------------------------------------------------------------------
 ! Input arguments:
-! - mjd          : mjd
 ! - GM           : the earth gravitational constant  
 ! - prnnum       : satellite PRN number
 ! - satsvn       : satellite SVN
-! - eclpf        : =0: in the sun illumination; =1 in the satellite eclipse
+! - eclpf        : =0: in the sun illumination; 
+!                  =1: in the satellite eclipse
 ! - srpid        : =1: a simply cannonball model; 
 !                  =2: box-wing model;
 !                  =3: ECOM model
@@ -29,18 +29,23 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Tzupang Tseng
 !
-! Created:	01-Nov-2017
+! Created:	01-10-2017
 ! 
-! Changes:      10-Oct-2018   Tzupang Tseng: modify the Cannonball model to be 
+! Changes:      10-10-2018 Tzupang Tseng: modify the Cannonball model to be 
 !                                            similar to the box-wing model in
 !                                            preparation for BDS with the ON
 !                                            attitude mode.
+!               11-12-2018 Tzupang Tseng: make the force matrix dynamic
+!               23-01-2019 Tzupang Tseng: add the ECOM2 model
+!               31-01-2019 Tzupang Tseng: change the definition of ey by
+!                                         dividing the length of ey
 !
 ! Copyright:  GEOSCIENCE AUSTRALIA, AUSTRALIA
 ! ----------------------------------------------------------------------
 
       USE mdl_precision
       USE mdl_num
+      USE mdl_param
       USE m_satinfo
       IMPLICIT NONE
 
@@ -51,7 +56,6 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       INTEGER                           :: prnnum,BLKNUM
       REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
       REAL (KIND = prec_q)               :: fx,fy,fz
-      REAL (KIND = prec_q)               :: mjd
       INTEGER                            :: satsvn
 
 ! ----------------------------------------------------------------------
@@ -65,14 +69,16 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
       REAL (KIND = prec_q) :: surforce(4,3)
       REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,en,ev,ez
+      REAL (KIND = prec_q), DIMENSION(3) :: yy
       REAL (KIND = prec_q), DIMENSION(3) :: fsrp
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
-      REAL (KIND = prec_q), DIMENSION(9) :: srpcoef 
+      REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: srpcoef 
       REAL (KIND = prec_q), DIMENSION(4) :: cosang
       REAL (KIND = prec_q), DIMENSION(4) :: AREA1,REFL1,DIFU1,ABSP1
-
+      INTEGER (KIND = prec_int2) :: AllocateStatus,DeAllocateStatus
       INTEGER              :: zta
       INTEGER              :: i,j,k,m
+      INTEGER              :: N_param, PD_Param_ID
 ! ----------------------------------------------------------------------
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
@@ -94,15 +100,13 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       Cr = 1.4 ! SRP coefficient ranges from 1.3 to 1.5
       AU = 1.496d11 ! (m)
       Pi = 4*atan(1.0d0)
-!  BLKNUM = 3 ! for GPS Block IIA testing
 ! ---------------------------------------------------------------------
 
-! SRP model for different GNSS constellations
-      if(prnnum.le.100)then  
-      ECOM = 1 
-      else
-      ECOM = 2
-      end if
+! initialize the SRP force
+! -------------------------
+     DO i=1,3
+     fsrp(i)=0.0d0
+     END DO
 
 ! GPS constellation
 ! -----------------
@@ -171,10 +175,6 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 !         end if
       end if
 
-! Initialize the coefficients of the ECOM-based SRP model
-      do m=1,9
-      srpcoef(m)= 0.0d0
-      end do
 
 ! The unit vector ez SAT->EARTH
       er(1)=r(1)/sqrt(r(1)**2+r(2)**2+r(3)**2)
@@ -189,9 +189,11 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
       ed(1)=((r_sun(1)-r(1))/Ds)
       ed(2)=((r_sun(2)-r(2))/Ds)
       ed(3)=((r_sun(3)-r(3))/Ds)
-! The unit vector ey = ez x ed, parallel to the rotation axis of solar panel
-      CALL cross_product (ez,ed,ey)
-
+! The unit vector ey = ez x ed/|ez x ed|, parallel to the rotation axis of solar panel
+      CALL cross_product (ez,ed,yy)
+      ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 ! The unit vector eb = ed x ey
       CALL cross_product (ed,ey,eb)
 
@@ -290,13 +292,11 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 
 !print*, 'COSANG1=', cosang(1)
 
-
-      if (srpid .eq. 1) then
+      IF (srpid == 1) THEN
 ! A simply cannonball model
 ! *********************************
 !  a=-zta*Cr*(A/m)P(1AU/r)^2*Dr(i)
 ! ********************************
-
 
 ! The main surface area face toward to the Sun using the SAT->SUN and SAT->EARTH
 ! vectors
@@ -328,12 +328,7 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 
 ! Box-wing model
 ! **************
-     else if (srpid .eq. 2) then
-! initialize the SRP force
-! -------------------------
-    do i=1,3
-     fsrp(i)=0.0d0
-     end do
+     ELSE IF (srpid == 2) THEN
 
 !      CALL surfprop(BLKNUM,AREA1,REFL1,DIFU1,ABSP1)
 
@@ -408,130 +403,172 @@ SUBROUTINE force_srp (mjd,GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 ! =======================================================================
 
 
-     else if (srpid .eq. 3) then
-! ECOM2 model
-! ***************************************
-! a=D(u)*ed+Y(u)*ey+B(u)*eb
-!
-! D(u)=D0+Dc*cos2*(del_u)+Ds*sin2*(del_u)
-!        +Dc*cos4*(del_u)+Ds*sin4*(del_u)
-!
-! Y(u)=Y0
-!
-! B(u)=B0+Bc*cos1*(del_u)+Bs*sin1*(del_u)
-! ***************************************
-! srpcoef(1) = D0
-! srpcoef(2) = Y0
-! srpcoef(3) = B0
-! srpcoef(4) = D2_c
-! srpcoef(5) = D4_c
-! srpcoef(6) = D2_s
-! srpcoef(7) = D4_s
-! srpcoef(8) = B1_c 
-! srpcoef(9) = B1_s
-!=======================================
-
-
-      if (ECOM .eq. 2) then
-
-      srpcoef(1) = -0.91647d-7
-      srpcoef(2) =  0.00811d-7
-      srpcoef(3) = -0.00652d-7
-      srpcoef(4) =  0.00064d-7
-      srpcoef(5) =  0.00073d-7
-      srpcoef(6) = -0.00065d-7
-      srpcoef(7) = -0.00142d-7
-      srpcoef(8) =  0.01236d-7
-      srpcoef(9) = -0.00968d-7
-
-
-
-
-! ECOM1 model
-! ***************************************
-! a=D(u)*ed+Y(u)*ey+B(u)*eb
-!
-! D(u)=D0+Dc*cos1*(del_u)+Ds*sin1*(del_u)
-!        
-!
-! Y(u)=Y0+Yc*cos1*(del_u)+Ys*sin1*(del_u)
-!
-! B(u)=B0+Bc*cos1*(del_u)+Bs*sin1*(del_u)
-! ***************************************
-! srpcoef(1) = D0
-! srpcoef(2) = Y0
-! srpcoef(3) = B0
-! srpcoef(4) = Dc
-! srpcoef(5) = Ds
-! srpcoef(6) = Yc
-! srpcoef(7) = Ys
-! srpcoef(8) = Bc
-! srpcoef(9) = Bs
-!=======================================
-
-
-      else if (ECOM .eq. 1) then
-      srpcoef(1) = -0.91664d-7
-      srpcoef(2) =  0.00831d-7
-      srpcoef(3) = -0.00617d-7
-      srpcoef(4) =  0.00067d-7
-      srpcoef(5) =  0.00035d-7
-      srpcoef(6) = -0.00051d-7
-      srpcoef(7) = -0.00100d-7
-      srpcoef(8) =  0.01228d-7
-      srpcoef(9) = -0.00894d-7
-
-      end if
-
-
-! initialize the SRP force
-! -------------------------
-     do i=1,3
-     fsrp(i)=0.0d0
-     end do
-
-
-! A scaling factor is applied to ECOM model as suggested by Bernese
-!******************************************************************
+     ELSE IF (srpid == 3) THEN
+! A scaling factor 
+!*************************************************************************
      sclfa=(AU/Ds)**2
 
-     do i=1,3
+ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
 
-     if(ECOM .eq. 2) then
-     fsrp(i)=fsrp(i) + srpcoef(1)*sclfa*ed(i) &
-                     + srpcoef(2)*sclfa*ey(i) &
-                     + srpcoef(3)*sclfa*eb(i) &
-                     + srpcoef(4)*sclfa*ed(i)*DCOS(2.0d0*del_u) &
-                     + srpcoef(5)*sclfa*ed(i)*DCOS(4.0d0*del_u) &
-                     + srpcoef(6)*sclfa*ed(i)*DSIN(2.0d0*del_u) &
-                     + srpcoef(7)*sclfa*ed(i)*DSIN(4.0d0*del_u) &
-                     + srpcoef(8)*sclfa*eb(i)*DCOS(1.0d0*del_u) &
-                     + srpcoef(9)*sclfa*eb(i)*DSIN(1.0d0*del_u)
+! ECOM1 model
+! ***********************************************************************
+      IF (ECOM_param_glb == 1 ) then
+      PD_Param_ID = 0
+If (ECOM_Bias_glb(1) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)
+        END DO
+End IF
+If (ECOM_Bias_glb(2) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)
+        END DO
+End IF
+If (ECOM_Bias_glb(3) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
+        END DO
+End IF
+If (ECOM_CPR_glb(1) == 1) THEN
+! C term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ed(i)
+        END DO
+! S term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ed(i)
+        END DO
+End IF
+If (ECOM_CPR_glb(2) == 1) THEN
+! C term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ey(i)
+        END DO
+! S term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ey(i)
+        END DO
+End IF
+If (ECOM_CPR_glb(3) == 1) THEN
+! C term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)
+        END DO
+! S term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)
+        END DO
 
-     else
+End If
 
-     fsrp(i)=fsrp(i) + srpcoef(1)*sclfa*ed(i) &
-                     + srpcoef(2)*sclfa*ey(i) &
-                     + srpcoef(3)*sclfa*eb(i) &
-                     + srpcoef(4)*sclfa*ed(i)*DCOS(del_u) &
-                     + srpcoef(5)*sclfa*ed(i)*DSIN(del_u) &
-                     + srpcoef(6)*sclfa*ey(i)*DCOS(del_u) &
-                     + srpcoef(7)*sclfa*ey(i)*DSIN(del_u) &
-                     + srpcoef(8)*sclfa*eb(i)*DCOS(del_u) &
-                     + srpcoef(9)*sclfa*eb(i)*DSIN(del_u)
+! ECOM2 model
+! **********************************************************************
 
-     end if
- 
-     end do
+     ELSE IF (ECOM_param_glb == 2 ) then
+      PD_Param_ID = 0
+If (ECOM_Bias_glb(1) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)
+        END DO
+End IF
+If (ECOM_Bias_glb(2) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)
+        END DO
+End IF
+If (ECOM_Bias_glb(3) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
+        END DO
+End IF
+If (ECOM_CPR_glb(1) == 1) THEN
+! C term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(2*del_u)*ed(i)
+        END DO
+! S term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(2*del_u)*ed(i)
+        END DO
+End IF
+If (ECOM_CPR_glb(2) == 1) THEN
+! C term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(4*del_u)*ed(i)
+        END DO
+! S term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(4*del_u)*ed(i)
+        END DO
+End IF
+If (ECOM_CPR_glb(3) == 1) THEN
+! C term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)
+        END DO
+! S term
+        PD_Param_ID = PD_Param_ID + 1
+        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        DO i=1,3
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)
+        END DO
 
-     fx=fsrp(1)
-     fy=fsrp(2)
-     fz=fsrp(3)
+End If
+      END IF 
 
 
-     end if
+     fx=-fsrp(1)
+     fy=-fsrp(2)
+     fz=-fsrp(3)
 
-! end of ECOM model
+! Implement BW + ECOM model (To be worked on)
+! ***********************************************************************
+! IF (SRP_MOD == 4) THEN
+!      fxo =-Cr/MASS*Ps*sclfa*ed(1)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
+!      fyo =-Cr/MASS*Ps*sclfa*ed(2)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
+!      fzo =-Cr/MASS*Ps*sclfa*ed(3)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
+!     fx=-(fsrp(1) + fxo)
+!     fy=-(fsrp(2) + fyo)
+!     fz=-(fsrp(3) + fzo)
+
+! END IF
+     END IF 
+
+! end of ECOM-based model
 ! ---------------------------------------------------------
 
 END
