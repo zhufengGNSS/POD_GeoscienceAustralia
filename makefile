@@ -58,7 +58,7 @@ m_veq_rkn768.f03 \
 m_integrEQM.f03 m_integrVEQ.f03 m_orbinteg.f03 \
 m_orb_estimator.f03 \
 m_gfc.f03 m_gfc3.f03 \
-m_orbC2T.f03 m_orbT2C.f03 m_obsorbT2C.f03 \
+m_writedata.f03 m_orbC2T.f03 m_orbT2C.f03 m_obsorbT2C.f03 \
 prm_read.f03 prm_gravity.f03 prm_planets.f03 prm_ocean.f03 \
 prm_orbext.f03 prm_pseudobs.f03 \
 prm_main.f03 prm_grav.f03 prm_nongrav.f03 \
