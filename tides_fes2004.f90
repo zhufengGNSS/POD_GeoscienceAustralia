@@ -28,12 +28,19 @@ SUBROUTINE tides_fes2004(FESxxfname)
 ! ----------------------------------------------------------------------
 ! Dr. Thomas Papanikolaou, Geoscience Australia            November 2015
 ! ----------------------------------------------------------------------
+! Last modified:
+! - Dr. Thomas Papanikolaou, 30 January 2019:
+!   Modified in order to replace the fundamental arguments used in the 
+!   basic formula of the tidal corrections. 
+!   The Doodson arguments and multipliers are now applied instead of the Delaunay arguments.
+! ----------------------------------------------------------------------
 
 
       USE mdl_precision
       USE mdl_num
       USE mdl_tides
       USE mdl_param
+      USE m_writearray
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -50,14 +57,19 @@ SUBROUTINE tides_fes2004(FESxxfname)
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: fes2004_cfunit
       REAL (KIND = prec_d) :: Ndelaunay_f_transp(8,71),Ndelaunay_f(71,8)
-      REAL (KIND = prec_d), DIMENSION(8,14) :: Delaunay_FES_t
-      INTEGER (KIND = prec_int4) :: N_Delaunay, Nfrq
+      REAL (KIND = prec_d), DIMENSION(8,18) :: Delaunay_FES_t
+      REAL (KIND = prec_d), DIMENSION(7,18) :: Doodson_mult_T
+      INTEGER (KIND = prec_int4) :: N_Delaunay, Nfrq, N_Doodson
       INTEGER (KIND = prec_int4) :: UNIT_IN,ios,ios_line,ios_data,AllocateStatus, i,space_i,i_Delaunay_FES, i_3Darray
       CHARACTER (LEN=150) :: line_ith, word1_ln  
       REAL (KIND = prec_q) :: doodson_no, dCp, dSp, dCm, dSm
-      INTEGER (KIND = prec_int8) :: Nread, Mread, nmax
+      INTEGER (KIND = prec_int8) :: Nread, Mread, nmax, iNmax, iMmax
       CHARACTER (LEN=5) :: Darw  
 ! ----------------------------------------------------------------------
+      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: dCSnm_wrt
+      CHARACTER (LEN=100) :: fname				
+      CHARACTER (LEN=50) :: fname_id				
+      INTEGER (KIND = prec_int4) :: ifreq  
 
 
 ! ----------------------------------------------------------------------
@@ -72,7 +84,7 @@ SUBROUTINE tides_fes2004(FESxxfname)
 ! ----------------------------------------------------------------------
 ! Coefficients Unit : 10^-12 (IERS Conventions 2010)
 ! Coefficients Unit : 10^-11 (IERS Conventions 2010, update 23/09/11)
-      fes2004_cfunit = 10D-11
+      fes2004_cfunit = 1.0D-11
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -174,10 +186,15 @@ Delaunay_FES_t = RESHAPE ( (/                                        &
 145.555D0,  0.0D0,  0.0D0,  2.0D0,  0.0D0,  2.0D0,   -6.8D0,    0.6D0,  &
 163.555D0,  0.0D0,  0.0D0,  2.0D0, -2.0D0,  2.0D0,  -43.4D0,    2.9D0,  &
 165.555D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  470.9D0,  -30.2D0,  &
+235.755D0, -2.0D0,  0.0D0, -2.0D0,  0.0D0, -2.0D0,   -0.3D0,    0.0D0,  & 
 245.655D0,  1.0D0,  0.0D0,  2.0D0,  0.0D0,  2.0D0,   -0.3D0,    0.0D0,  & 
-255.555D0,  0.0D0,  0.0D0,  2.0D0,  0.0D0,  2.0D0,   -1.2D0,    0.0D0  &
-/) , (/ 8 , 14 /) )  
+255.555D0,  0.0D0,  0.0D0,  2.0D0,  0.0D0,  2.0D0,   -1.2D0,    0.0D0,  &
+273.555D0,  0.0D0,  0.0D0,  2.0D0, -2.0D0,  2.0D0,    0.0D0,    0.0D0,  &
+275.555D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,    0.0D0,    0.0D0,  &
+455.555D0,  0.0D0,  0.0D0,  4.0D0,  0.0D0,  4.0D0,    0.0D0,    0.0D0  &
+/) , (/ 8 , 18 /) )  
 
+! 255.555D0,  0.0D0,  0.0D0,  2.0D0,  0.0D0,  2.0D0,   -1.2D0,    0.0D0,  &
 
 ! ---------------------------------------------------------------------------
 ! Allocate array
@@ -195,6 +212,54 @@ Delaunay_FES_t = RESHAPE ( (/                                        &
       END IF  
       Delaunay_FES = TRANSPOSE (Delaunay_FES_t)
 ! ---------------------------------------------------------------------------
+
+
+
+! ---------------------------------------------------------------------------
+Doodson_mult_T = RESHAPE ( (/                              &
+55.565D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  1.0D0,  0.0D0,  &
+55.575D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  2.0D0,  0.0D0,  &
+56.554D0,  0.0D0,  0.0D0,  1.0D0,  0.0D0,  0.0D0, -1.0D0,  &
+57.555D0,  0.0D0,  0.0D0,  2.0D0,  0.0D0,  0.0D0,  0.0D0,  &
+65.455D0,  0.0D0,  1.0D0,  0.0D0, -1.0D0,  0.0D0,  0.0D0,  &
+75.555D0,  0.0D0,  2.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  &
+85.455D0,  0.0D0,  3.0D0,  0.0D0, -1.0D0,  0.0D0,  0.0D0,  &
+93.555D0,  0.0D0,  4.0D0, -2.0D0,  0.0D0,  0.0D0,  0.0D0,  &
+135.655D0,  1.0D0, -2.0D0,  0.0D0,  1.0D0,  0.0D0,  0.0D0, &
+145.555D0,  1.0D0, -1.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0, &
+163.555D0,  1.0D0,  1.0D0, -2.0D0,  0.0D0,  0.0D0,  0.0D0, &
+165.555D0,  1.0D0,  1.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0, &
+235.755D0,  2.0D0, -2.0D0,  0.0D0,  2.0D0,  0.0D0,  0.0D0, & 
+245.655D0,  2.0D0, -1.0D0,  0.0D0,  1.0D0,  0.0D0,  0.0D0, & 
+255.555D0,  2.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0, &
+273.555D0,  2.0D0,  2.0D0, -2.0D0,  0.0D0,  0.0D0,  0.0D0, &
+275.555D0,  2.0D0,  2.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0, &
+455.555D0,  4.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0 &
+/) , (/ 7 , 18 /) )  
+
+!55.565D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  1.0D0,  0.0D0,  &
+!55.575D0,  0.0D0,  0.0D0,  0.0D0,  0.0D0,  2.0D0,  0.0D0,  &
+!93.555D0,  0.0D0,  0.0D0, -2.0D0, -2.0D0, -2.0D0,   0.1D0,  &
+
+
+! ---------------------------------------------------------------------------
+! Allocate array
+! ---------------------------------------------------------------------------
+      N_Doodson = SIZE (Doodson_mult_T,DIM=1)
+      Nfrq = SIZE (Doodson_mult_T,DIM=2)
+      !PRINT *,"tides_fes2004.f90 Nfrq", Nfrq
+	  
+      ALLOCATE (Doodson_mult_glb(Nfrq,N_Doodson), STAT = AllocateStatus)
+      IF (AllocateStatus /= 0) THEN
+         PRINT *, "Error: Not enough memory"
+         PRINT *, "Error: SUBROUTINE tides_fes2004.f90"
+         PRINT *, "Error: Allocatable Array: Doodson_mult_glb"
+!         STOP "*** Not enough memory ***"
+      END IF  
+      Doodson_mult_glb = TRANSPOSE (Doodson_mult_T)
+! ---------------------------------------------------------------------------
+
+
 
 ! ---------------------------------------------------------------------------
 ! Allocate Arrays	  
@@ -309,11 +374,16 @@ Delaunay_FES_t = RESHAPE ( (/                                        &
             dCnm_p  (Nread+1, Mread+1, i_3Darray) = fes2004_cfunit * dCp
             dSnm_p  (Nread+1, Mread+1, i_3Darray) = fes2004_cfunit * dSp
             dCnm_m (Nread+1, Mread+1, i_3Darray) = fes2004_cfunit * dCm
-            dSnm_m (Nread+1, Mread+1, i_3Darray) = fes2004_cfunit * dSm
+            dSnm_m (Nread+1, Mread+1, i_3Darray) = fes2004_cfunit * dSm			
+!print *," "
+!print *,"Nread, Mread, i_3Darray, dCp, dSp, dCm, dSm", Nread, Mread, i_3Darray, dCp, dSp, dCm, dSm
+!print *,"CS_p ", dCnm_p(Nread+1,Mread+1,i_3Darray), dSnm_p(Nread+1,Mread+1,i_3Darray)
+!print *,"CS_m ", dCnm_m(Nread+1,Mread+1,i_3Darray), dSnm_m(Nread+1,Mread+1,i_3Darray)
+!Call SLEEP (1)
          END IF
 ! ----------------------------------------------------------------------
-
       END DO
       CLOSE (UNIT=UNIT_IN)
-
+ 
+		
 END

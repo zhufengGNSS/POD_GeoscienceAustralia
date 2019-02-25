@@ -82,7 +82,7 @@ SUBROUTINE integr_EQM (MJDo, tsec_start, ro, vo, arc, integID, step, orbc)
       REAL (KIND = prec_d), DIMENSION(3) :: er
       REAL (KIND = prec_d) :: mjd_to, mjd_th, mjdn
       REAL (KIND = prec_d), DIMENSION(3) :: rto, vto, rth, vth  
-      REAL (KIND = prec_d), DIMENSION(7) :: Zo 
+      REAL (KIND = prec_d), DIMENSION(8) :: Zo 
       REAL (KIND = prec_d), DIMENSION(6) :: yo, yn, ey 
 ! ----------------------------------------------------------------------	  
 
@@ -142,7 +142,8 @@ Do j = 1 , Nepochs-1
 	
     ! Numerical integration for computation of the state vector at next epoch
     Zo(1) = orbc(j,1) 
-    Zo(2:7) = orbc(j,3:8) 
+    Zo(2) = orbc(j,2) 
+    Zo(3:8) = orbc(j,3:8) 
     Call integr_rkn768(Zo, step, lamda_h, Zq, er)
     
 	! Next epoch TT (to+h)

@@ -39,6 +39,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       USE m_tides_ocean
       USE m_pd_empirical
       USE m_satinfo
+      USE m_writedata
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -110,6 +111,12 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d) :: PD_EMP_r(3,3), PD_EMP_v(3,3)
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: PD_EMP_param
+! ----------------------------------------------------------------------
+      REAL (KIND = prec_q) :: phi,lamda,radius
+      REAL (KIND = prec_q), DIMENSION(3) :: a_solidtides_icrf, a_ocean_icrf 
+! ----------------------------------------------------------------------
+      CHARACTER (LEN=100) :: filename
+      CHARACTER (LEN=1000) :: writeline
 ! ----------------------------------------------------------------------
 
 
@@ -259,7 +266,47 @@ DO NTARG_body = 1 , 11
 	  rMoon = rbody
       GM_moon = GMbody
       end if
-! ----------------------------------------------------------------------  
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+if (1<0) then
+! ----------------------------------------------------------------------
+! Venus
+If (NTARG == 2) then
+!print *,"Venus", mjd, JD, rbody(1:3) 
+WRITE (writeline,FMT='(2F25.15, 3F25.5)'), mjd, JD, rbody(1:3)
+filename = 'Venus.out'
+Call write_data (filename, writeline)
+End IF
+! ----------------------------------------------------------------------
+! Jupiter
+If (NTARG == 5) then
+!print *,"Jupiter", mjd, JD, rbody(1:3) 
+WRITE (writeline,FMT='(2F25.15, 3F25.5)'), mjd, JD, rbody(1:3)
+filename = 'Jupiter.out'
+Call write_data (filename, writeline)
+End IF
+! ----------------------------------------------------------------------
+! Sun
+If (NTARG == 11) then
+!print *,"Sun", mjd, JD, rbody(1:3) 
+WRITE (writeline,FMT='(2F25.15, 3F25.5)'), mjd, JD, rbody(1:3)
+filename = 'Sun.out'
+Call write_data (filename, writeline)
+End IF
+! ----------------------------------------------------------------------
+! Moon
+If (NTARG == 10) then
+!print *,"Moon", mjd, JD, rbody(1:3) 
+WRITE (writeline,FMT='(2F25.15, 3F25.9)'), mjd, JD, rbody(1:3)
+filename = 'Moon.out'
+Call write_data (filename, writeline)
+End IF
+! ----------------------------------------------------------------------
+end if
+! ----------------------------------------------------------------------
+  
    END IF
 END DO
  
@@ -483,7 +530,29 @@ SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf
 ! ----------------------------------------------------------------------
 
 
- 
+IF (1<0) then
+!print *,"Fgrav:    ", Fgrav_icrf 
+!print *,"Fgrav:    ", sqrt(Fgrav_icrf(1)**2+Fgrav_icrf(2)**2+Fgrav_icrf(3)**2)
+Call SLEEP (1)
+print *,"          " 
+print *,"mjd:      ", mjd
+CALL coord_r2sph(Fgrav_icrf,phi,lamda,radius)
+print *,"Fgrav:    ", radius
+
+CALL coord_r2sph(Fplanets_icrf,phi,lamda,radius)
+print *,"Fplanets: ", radius
+
+CALL matrix_Rr (TRS2CRS, a_solidtides , a_solidtides_icrf)
+CALL coord_r2sph(a_solidtides_icrf,phi,lamda,radius)
+print *,"a_solid:  ", radius 
+
+CALL matrix_Rr (TRS2CRS, a_ocean, a_ocean_icrf)
+CALL coord_r2sph(a_ocean_icrf,phi,lamda,radius)
+print *,"a_ocean:  ", radius 
+end IF
+
+
+
 ! ----------------------------------------------------------------------
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------

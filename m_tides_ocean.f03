@@ -96,16 +96,25 @@ SUBROUTINE tides_ocean(n_max, m_max , mjd, ut1_utc, dCnm_ocean, dSnm_ocean)
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: thetag, thetaf
       REAL (KIND = prec_q) :: F1,F2,F3,F4,F5
+      REAL (KIND = prec_q) :: beta1, beta2, beta3, beta4, beta5, beta6
       REAL (KIND = prec_d), DIMENSION(5) :: delaunay_arr
-      INTEGER (KIND = prec_int4) :: Nfrq, i, j, ifrq, AllocateStatus
+      REAL (KIND = prec_d), DIMENSION(6) :: doodson_arr
+      INTEGER (KIND = prec_int4) :: Nfrq, i, j, ifrq, AllocateStatus, N_arg
       REAL (KIND = prec_q) :: dCnm_fi,dSnm_fi, dCnm_f,dSnm_f, matrix_mult
       INTEGER (KIND = prec_int8) :: n, m, m_limit
       REAL (KIND = prec_q) :: pi
 ! ----------------------------------------------------------------------
+      INTEGER (KIND = prec_int4) :: fundarguments, n1_mult
 
 
 pi = PI_global																	
 
+! ----------------------------------------------------------------------
+! Fundamental arguments
+! 1. Delaunay arguments  
+! 2. Doodson arguments  
+fundarguments = 2
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Delaunay variables (in radians)
@@ -122,10 +131,44 @@ Call gmst_iers(mjd, ut1_utc , thetag)
 !PRINT *,"thetag",thetag
 
 
+! ----------------------------------------------------------------------  
+! Doodson arguments in radians
+! ----------------------------------------------------------------------  
+! N' = -Omega : Negative of the Mean Longitude of the Ascending Node of the Moon
+beta5 = -1.0D0 * F5
+
+! s = F+Omega : Mean Longitude of the Moon
+beta2 = F3 + F5
+
+! taph = thetag+p - s : Mean Lunar Time
+beta1 = (thetag + pi) -1.0D0 * beta2 
+
+! h = s - D : Mean Longitude of the Sun
+beta3 = beta2 - F4
+
+! p = s - l : Longitude of the Moon's mean perigee 
+beta4 = beta2 - F1
+
+! ps = s - D - l' : Longitude of the Sun's mean perigee 
+beta6 = beta2 - F4 -F2
+
+doodson_arr = (/ beta1 , beta2 , beta3 , beta4 , beta5, beta6 /)							
+! ----------------------------------------------------------------------  
+
+
 ! ----------------------------------------------------------------------
+IF (fundarguments == 1) then
 Nfrq = SIZE (Delaunay_FES,DIM=1)
 !sz2 = SIZE (Delaunay_FES,DIM=2)
+
+Else if (fundarguments == 2) then
+
+Nfrq = SIZE (Doodson_mult_glb,DIM=1)
+N_arg = SIZE (Doodson_mult_glb,DIM=2)
+
+End IF
 !PRINT *,"tides_ocean.f90 Nfrq", Nfrq
+! ---------------------------------------------------------------------------
 
 
 ! ---------------------------------------------------------------------------
@@ -160,27 +203,48 @@ DO n = 2 , n_max
         dCnm_f = 0.0D0
         dSnm_f = 0.0D0
         DO ifrq = 1 , Nfrq
-			! ifrq.NE.5 .and. 
-			IF (ifrq.NE.9 .and. ifrq.NE.10 .and. ifrq.NE.11 .and. ifrq.NE.12 .and. ifrq.NE.13 .and. ifrq.NE.Nfrq) then
-            ! thetaf (in radians)
+            ! thetaf (in radians)		 
+			IF (fundarguments == 1) THEN
+			
             matrix_mult = 0.0D0
             DO j = 1 , 5
                matrix_mult = matrix_mult + ( Delaunay_FES(ifrq,j+1) * delaunay_arr(j) )
             END DO
-			thetaf = m * (thetag + pi) - 1.0D0 * matrix_mult														 		
+			!thetaf = m * (thetag + pi) - 1.0D0 * matrix_mult														 		
+			If (ifrq.LE.8) Then
+			n1_mult = 0
+			Else If (ifrq>8 .and. ifrq.LE.12) Then
+			n1_mult = 1
+			Else If (ifrq>12 .and. ifrq.LE.17) Then
+			n1_mult = 2
+			! M4
+			Else If (ifrq==18) Then
+			n1_mult = 4
+			End IF		
+			thetaf = n1_mult * (thetag + pi) - 1.0D0 * matrix_mult														 		
+			!END IF
+			
+			ELSE IF (fundarguments == 2) THEN
 
+            matrix_mult = 0.0D0
+            DO j = 1 , 6
+               matrix_mult = matrix_mult + ( Doodson_mult_glb(ifrq,j+1) * doodson_arr(j) )
+            END DO
+			thetaf = matrix_mult														 				
+		
+			END IF
+			
             dCnm_fi = (dCnm_p(n+1,m+1,ifrq) + dCnm_m(n+1,m+1,ifrq)) * cos(thetaf) &
 			        + (dSnm_p(n+1,m+1,ifrq) + dSnm_m(n+1,m+1,ifrq)) * sin(thetaf)
             dSnm_fi = (dSnm_p(n+1,m+1,ifrq) - dSnm_m(n+1,m+1,ifrq)) * cos(thetaf) &
 			        - (dCnm_p(n+1,m+1,ifrq) - dCnm_m(n+1,m+1,ifrq)) * sin(thetaf)
             dCnm_f = dCnm_f + dCnm_fi
-            dSnm_f = dSnm_f + dSnm_fi	
-			END IF
+            dSnm_f = dSnm_f + dSnm_fi				
         END DO
 		
         ! IERS Conventions update 10/08/2012 Section 6.3.2
         IF (m == 0) THEN
-          dSnm_f = 0
+          dSnm_f = 0.0D0
         END IF
 		
         dCnm_ocean(n+1,m+1) = dCnm_f
