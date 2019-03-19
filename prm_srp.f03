@@ -13,8 +13,10 @@ SUBROUTINE prm_srp (PRMfname)
 !
 ! Created:	13 DEC 2018
 !
-! Changes:      13-12-2018 Dr. Tzupang Tseng : added ECOM-based options in the configuration file
+! Changes:      13-12-2018 Tzupang Tseng : added ECOM-based options in the configuration file
 !                                              for ACS POD
+!               21-02-2019 Tzupang Tseng : added a function for switching on and
+!                                          off some coefficients in ECOM models   
 !
 ! ----------------------------------------------------------------------
 	  
@@ -54,10 +56,9 @@ SUBROUTINE prm_srp (PRMfname)
       INTEGER (KIND = prec_int2) :: bias_D, bias_Y, bias_B
       INTEGER (KIND = prec_int2) :: cpr_D, cpr_Y, cpr_B, cpr_freq
       INTEGER (KIND = prec_int2) :: cpr_D2, cpr_D4
-      REAL (KIND = prec_q) :: Bias_radial, Bias_along, Bias_cross
-      REAL (KIND = prec_q) :: Cterm, Sterm
-      REAL (KIND = prec_q) :: D0, Y0, B0, DC, DS, YC, YS, BC, BS
-      REAL (KIND = prec_q) :: D2C, D2S, D4C, D4S
+!      REAL (KIND = prec_q) :: D0, Y0, B0, DC, DS, YC, YS, BC, BS
+!      REAL (KIND = prec_q) :: D2C, D2S, D4C, D4S
+      REAL(KIND = prec_q), DIMENSION(:), ALLOCATABLE :: SRP_PARA
 
 ! ----------------------------------------------------------------------
 ! Orbit parameterization INPUT file read:
@@ -247,33 +248,46 @@ END IF
 PD_Param_ID = 0
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
 End If
 
 ALLOCATE (ECOM_accel_glb(PD_Param_ID), STAT = AllocateStatus)
+ALLOCATE (SRP_PARA(PD_Param_ID), STAT = AllocateStatus)
 
 NPARAM_glb = PD_Param_ID
 
@@ -285,86 +299,140 @@ IF (word1_ln == "ECOM1") THEN
 
 PD_Param_ID = 0
 
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, &
-   D0, Y0, B0, DC, DS, YC, YS, BC, BS  
+READ (line_ith, FMT = * , IOSTAT=ios_key) word_i, SRP_PARA(:)  
+!print*,"SRP_PARA=",SRP_PARA(:)
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = D0
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!print*,'D0=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = Y0
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!print*,'Y0=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = B0
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!print*,'B0=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = DC
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!print*,'DC=',PD_Param_ID
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = DS
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!print*,'DS=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = YC
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!print*,'YC=',PD_Param_ID
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = YS
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!print*,'YS=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = BC
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!print*,'BC=',PD_Param_ID
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = BS
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!print*,'BS=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End If
+
+
 
 ELSE IF (word1_ln == "ECOM2") THEN
 
 PD_Param_ID = 0
 
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, &
-   D0, Y0, B0, D2C, D2S, D4C, D4S, BC, BS
+READ (line_ith, FMT = * , IOSTAT=ios_key) word_i, SRP_PARA(:)
+!print*,"SRP_PARA=",SRP_PARA(:)
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = D0
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!        ECOM_accel_glb(PD_Param_ID) = D0
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = Y0
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!        ECOM_accel_glb(PD_Param_ID) = Y0
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = B0
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!        ECOM_accel_glb(PD_Param_ID) = B0
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = D2C
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!        ECOM_accel_glb(PD_Param_ID) = D2C
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = D2S
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!        ECOM_accel_glb(PD_Param_ID) = D2S
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = D4C
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!        ECOM_accel_glb(PD_Param_ID) = D4C
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = D4S
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!        ECOM_accel_glb(PD_Param_ID) = D4S
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
+
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = BC
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!        ECOM_accel_glb(PD_Param_ID) = BC
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        ECOM_accel_glb(PD_Param_ID) = BS
+        ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
+!        ECOM_accel_glb(PD_Param_ID) = BS
+Else
+        PD_Param_ID = PD_Param_ID
 End If
 
 
