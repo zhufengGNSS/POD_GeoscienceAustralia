@@ -46,6 +46,8 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
 ! Changes:    11-12-2018  Tzupang Tseng : make the PD matrix dynamic
 !             31-01-2019  Tzupang Tseng : change the definition of ey by
 !                                         dividing the length of ey
+!             20-02-2019  Tzupang Tseng : create a function for switching on and
+!                                         off some particular coefficients in ECOM models
 ! 
 ! Copyright:  GEOSCIENCE AUSTRALIA
 ! ----------------------------------------------------------------------
@@ -59,16 +61,16 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
 ! ----------------------------------------------------------------------
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int4)         :: prnnum
-      REAL (KIND = prec_q), DIMENSION(3) :: r,v
-      REAL (KIND = prec_q), DIMENSION(3) :: r_sun
-
+      INTEGER (KIND = prec_int4),INTENT(IN)         :: prnnum
+      REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r,v
+      REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r_sun
+      REAL (KIND = prec_q),INTENT(IN) :: GM
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: AU,Pi
       REAL (KIND = prec_q) :: Cr,ab,Lab
-      REAL (KIND = prec_q) :: ANG,GM,E,Edot
+      REAL (KIND = prec_q) :: ANG,E,Edot
       REAL (KIND = prec_q) :: Ds,sclfa
 
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
@@ -90,7 +92,7 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int8) :: N_param, PD_Param_ID
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Asrp
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE,INTENT(OUT) :: Asrp
 ! ----------------------------------------------------------------------
 
 
@@ -180,35 +182,47 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
 
 ! ----------------------------------------------------------------------
 ! Partial derivatives w.r.t. unknown parameters
-N_param = NPARAM_glb
-If (N_param == 0) Then
-N_param = 1
-End If
+!N_param = NPARAM_glb
+!If (N_param == 0) Then
+!N_param = 1
+!End If
 
-ALLOCATE (Asrp(3,N_param), STAT = AllocateStatus)
+!ALLOCATE (Asrp(3,N_param), STAT = AllocateStatus)
 IF (ECOM_param_glb /= 0) THEN
 ! Bias partial derivatives matrix allocation
 PD_Param_ID = 0
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 
 ! CPR partial derivatives matrix allocation
 
 If (ECOM_CPR_glb(1) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
+ELSE
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
+ELSE
+        PD_Param_ID = PD_Param_ID
 End If
 
 IF (NPARAM_glb /= PD_Param_ID) THEN
@@ -231,25 +245,34 @@ sclfa=(AU/Ds)**2
 ! ***************************************
 
      IF (ECOM_param_glb == 1) THEN
-
+!print*,'ECOM1 partials'
 PD_Param_ID = 0
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ed(1)
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)
+!print*,'D0=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ey(1)
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ey(2)
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ey(3)
+!print*,'Y0=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*eb(1)
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*eb(2)
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*eb(3)
+!print*,'B0=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
@@ -257,11 +280,15 @@ If (ECOM_CPR_glb(1) == 1) THEN
         Asrp (1,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(1)
         Asrp (2,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(2)
         Asrp (3,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(3)
+!print*,'DC=',PD_Param_ID
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(1)
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(2)
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(3)
+!print*,'DS=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
@@ -269,11 +296,15 @@ If (ECOM_CPR_glb(2) == 1) THEN
         Asrp (1,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(1)
         Asrp (2,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(2)
         Asrp (3,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(3)
+!print*,'YC=',PD_Param_ID
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(1)
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(2)
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(3)
+!print*,'YS=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
@@ -281,12 +312,17 @@ If (ECOM_CPR_glb(3) == 1) THEN
         Asrp(1,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(1)
         Asrp(2,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(2)
         Asrp(3,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(3)
+!print*,'BC=',PD_Param_ID
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         Asrp(1,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(1)
         Asrp(2,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(2)
         Asrp(3,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(3)
+!print*,'BS=',PD_Param_ID
+Else
+        PD_Param_ID = PD_Param_ID
 End If
+
 
 ! ECOM2 model
 ! ***************************************
@@ -299,6 +335,8 @@ If (ECOM_Bias_glb(1) == 1) Then
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ed(1)
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
 
@@ -306,6 +344,8 @@ If (ECOM_Bias_glb(2) == 1) Then
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ey(1)
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ey(2)
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ey(3)
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
 
@@ -313,6 +353,8 @@ If (ECOM_Bias_glb(3) == 1) Then
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*eb(1)
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*eb(2)
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*eb(3)
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
@@ -325,6 +367,8 @@ If (ECOM_CPR_glb(1) == 1) THEN
         Asrp (1,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(1)
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(2)
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(3)
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
@@ -337,6 +381,8 @@ If (ECOM_CPR_glb(2) == 1) THEN
         Asrp (1,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(1)
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(2)
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(3)
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
@@ -349,6 +395,8 @@ If (ECOM_CPR_glb(3) == 1) THEN
         Asrp(1,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(1)
         Asrp(2,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(2)
         Asrp(3,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(3)
+Else
+        PD_Param_ID = PD_Param_ID
 End If
 
 

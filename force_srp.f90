@@ -1,5 +1,5 @@
 
-SUBROUTINE force_srp (GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
+SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
 
 
 ! ----------------------------------------------------------------------
@@ -39,6 +39,8 @@ SUBROUTINE force_srp (GM,prnnum,satsvn,eclpf,srpid,r,v,r_sun,fx,fy,fz )
 !               23-01-2019 Tzupang Tseng: add the ECOM2 model
 !               31-01-2019 Tzupang Tseng: change the definition of ey by
 !                                         dividing the length of ey
+!               20-02-2019 Tzupang Tseng: create a functionality for switching
+!                                         on and off some particular coefficients in ECOM models
 !
 ! Copyright:  GEOSCIENCE AUSTRALIA, AUSTRALIA
 ! ----------------------------------------------------------------------
@@ -420,6 +422,10 @@ If (ECOM_Bias_glb(1) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)
         END DO
+!print*,'ECOM1-caused accelerations'
+!print*,'D0'
+Else 
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -427,6 +433,9 @@ If (ECOM_Bias_glb(2) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)
         END DO
+!print*,'Y0'
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -434,6 +443,9 @@ If (ECOM_Bias_glb(3) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
         END DO
+!print*,'B0'
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
@@ -442,12 +454,16 @@ If (ECOM_CPR_glb(1) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ed(i)
         END DO
+!print*,'DC'
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ed(i)
         END DO
+!print*,'DS'
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
@@ -456,12 +472,16 @@ If (ECOM_CPR_glb(2) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ey(i)
         END DO
+!print*,'YC'
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ey(i)
         END DO
+!print*,'YS'
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
@@ -470,13 +490,16 @@ If (ECOM_CPR_glb(3) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)
         END DO
+!print*,'BC'
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)
         END DO
-
+!print*,'BS'
+Else
+        PD_Param_ID = PD_Param_ID
 End If
 
 ! ECOM2 model
@@ -490,6 +513,8 @@ If (ECOM_Bias_glb(1) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)
         END DO
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -497,6 +522,8 @@ If (ECOM_Bias_glb(2) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)
         END DO
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -504,6 +531,8 @@ If (ECOM_Bias_glb(3) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
         END DO
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
@@ -518,6 +547,8 @@ If (ECOM_CPR_glb(1) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(2*del_u)*ed(i)
         END DO
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
@@ -532,6 +563,8 @@ If (ECOM_CPR_glb(2) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(4*del_u)*ed(i)
         END DO
+Else
+        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
@@ -546,7 +579,8 @@ If (ECOM_CPR_glb(3) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)
         END DO
-
+Else
+        PD_Param_ID = PD_Param_ID
 End If
       END IF 
 

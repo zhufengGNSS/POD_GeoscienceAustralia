@@ -11,8 +11,10 @@ SUBROUTINE prm_main (PRMfname)
 !
 ! Created:	04 October 2017
 !
-! Changes       07-12-2018 Dr. Tzupang Tseng: added a condition for the NPARAM_glb when the SRP estimation
+! Changes       07-12-2018 Tzupang Tseng: added a condition for the NPARAM_glb when the SRP estimation
 !                                             is switched on.
+!               21-02-2019 Tzupang Tseng: added a function capable of switching
+!                                         on and off some parameters in ECOM models
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -470,24 +472,37 @@ If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
 ! Bias parameters
         If (ECOM_Bias_glb(1) == 1) Then
                 NPARAM_glb = NPARAM_glb + 1
+        ELSE
+                NPARAM_glb = NPARAM_glb
         End If
         If (ECOM_Bias_glb(2) == 1) Then
                 NPARAM_glb = NPARAM_glb + 1
+        ELSE
+                NPARAM_glb = NPARAM_glb
         End If
         If (ECOM_Bias_glb(3) == 1) Then
                 NPARAM_glb = NPARAM_glb + 1
+        ELSE
+                NPARAM_glb = NPARAM_glb
         End If
 ! Cycle-per-revolution parameters
         IF (ECOM_CPR_glb(1) == 1) Then
                 NPARAM_glb = NPARAM_glb + 2
+        ELSE
+                NPARAM_glb = NPARAM_glb
         End If
         IF (ECOM_CPR_glb(2) == 1) Then
                 NPARAM_glb = NPARAM_glb + 2
+        ELSE
+                NPARAM_glb = NPARAM_glb
         End If
         IF (ECOM_CPR_glb(3) == 1) Then
                 NPARAM_glb = NPARAM_glb + 2
+        ELSE
+                NPARAM_glb = NPARAM_glb
         End If
 !print*,'ECOM_Bias_glb=',ECOM_Bias_glb, 'ECOM_CPR_glb=',ECOM_CPR_glb
+!print*,'NPARAM_glb=',NPARAM_glb
 End If
 
 ! ----------------------------------------------------------------------
