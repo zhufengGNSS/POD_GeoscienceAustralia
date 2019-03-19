@@ -51,6 +51,10 @@ SUBROUTINE veq_rkn768(zo, veqZo, veqPo, step, lamda_h, Np, z_q, e_r, veqZ, veqP)
 ! Author :	Dr. Thomas Papanikolaou
 !			Cooperative Research Centre for Spatial Information, Australia
 ! Created:	29 January 2018
+!
+! Changes:  18-03-2019 Simon McClusky: Initialise the three matrixes of sumkP, sum_agP and sum_ag with zero values
+!                                      to make the system stable in estimating the SRP parameters
+!
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -172,6 +176,10 @@ ALLOCATE (sum_agP(3,Np2), STAT = AllocateStatus)
 ALLOCATE (sum_bq_r_gP(3,Np2), STAT = AllocateStatus)
 ALLOCATE (sum_bq_v_gP(3,Np2), STAT = AllocateStatus)
 ALLOCATE (sumkP(3,Np2), STAT = AllocateStatus)
+
+sumkP   = 0.d0
+sum_agP = 0.d0
+sum_ag  = 0.d0
 
 Else
 
