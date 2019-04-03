@@ -120,6 +120,8 @@ REAL (KIND = prec_q) :: Bias_accel_glb(3), Bias_accel_aposteriori(3)
 INTEGER (KIND = prec_int2) :: EMP_CPR_glb(3)
 INTEGER (KIND = prec_int2) :: EMP_nCPR_glb
 REAL (KIND = prec_q) :: CPR_CS_glb(3,2), CPR_CS_aposteriori(3,2)
+
+INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces_glb
 ! ----------------------------------------------------------------------
 
 
@@ -136,5 +138,12 @@ INTEGER (KIND = prec_int8) :: NPARAM_glb
       INTEGER (KIND = prec_int2) :: ESTIM_mode_glb 
       INTEGER (KIND = prec_int2) :: ESTIM_iter_glb 
 ! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Attitude models
+      INTEGER (KIND = 4) :: SATblock_glb
+      CHARACTER (LEN=5)  :: BDSorbtype_glb
+! ----------------------------------------------------------------------
+
 
 END

@@ -173,6 +173,10 @@ ALLOCATE (sum_bq_r_gP(3,Np2), STAT = AllocateStatus)
 ALLOCATE (sum_bq_v_gP(3,Np2), STAT = AllocateStatus)
 ALLOCATE (sumkP(3,Np2), STAT = AllocateStatus)
 
+! Initialize to zero
+sum_agP = 0.0D0
+sumkP = 0.0D0
+
 Else
 
 N0 = 1 

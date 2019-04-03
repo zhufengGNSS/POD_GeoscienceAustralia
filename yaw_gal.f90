@@ -62,6 +62,8 @@ SUBROUTINE yaw_gal (mjd, r_sat, v_sat, r_sun, beta_angle, eclipsf, eBX_nom, eBX_
       LOGICAL GALecl
       LOGICAL NOON, NIGHT
       REAL (KIND = prec_d) :: ANOON, ANIGHT
+      REAL (KIND = prec_d) :: delta_Yaw, delta_Yaw_rad
+      REAL (KIND = prec_d) :: Rz_yaw(3,3)
 ! ----------------------------------------------------------------------
 
 
@@ -318,7 +320,21 @@ Yangle(2) = Yangle_ecl
 If (eclipsf > 0) THEN
 
 ! Body-fixed X-axis rotation about body-fixed frame Z-axis
-! Call .....
+
+! Rotation matrix: Inertial/Orbital frame to Body-fixed frame
+!CALL crf_bff (r_sat, v_sat, Yangle_ecl, Rcrf_bff, Rrtn_bff)
+
+delta_Yaw = Yangle_ecl - Yangle_nom
+
+! Rz(delta-yaw) rotation matrix: 
+delta_Yaw_rad = delta_Yaw * (PI_global / 180.0D0)	  
+Rz_yaw(1,1:3) = (/  cos(delta_Yaw_rad),  sin(delta_Yaw_rad),  0.0D0 /)
+Rz_yaw(2,1:3) = (/ -sin(delta_Yaw_rad),  cos(delta_Yaw_rad),  0.0D0 /)
+Rz_yaw(3,1:3) = (/        0.0D0,            0.0D0,  			1.0D0 /)
+
+! Apply rotation matrix to the Body-fixed X-axis unit vector
+eBX_ecl = MATMUL(Rz_yaw, eBX_nom)
+
  
 Else
 

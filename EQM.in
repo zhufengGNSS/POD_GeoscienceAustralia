@@ -4,7 +4,7 @@
 Satellite_PRN             G29
 Reference_frame           ITRF
 Time_scale                GPS
-Orbit_arc_length          86400     	 ! Seconds
+Orbit_arc_length          86400     	 !sec
 
 ---------------------------------------------------------------------------
 %% Initial Conditions: Epoch and State Vector                                                      
@@ -127,7 +127,7 @@ VEQ_integration           0
 ---------------------------------------------------------------------------
 %% Parameter Estimation               
 Estimator_procedure      1
-Estimator_Iterations     3
+Estimator_Iterations     2
  
 ---------------------------------------------------------------------------
 %% External Orbit Comparison  

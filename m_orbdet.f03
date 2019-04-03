@@ -150,11 +150,11 @@ End IF
 ! Data reading: Gravitational Effects
 ! ----------------------------------------------------------------------
 ! Earth Gravity Field model
-CALL prm_gravity (EQMfname)												
+!CALL prm_gravity (EQMfname)												
 ! Planetary/Lunar DE data 
-CALL prm_planets (EQMfname)												
+!CALL prm_planets (EQMfname)												
 ! Ocean Tides model
-CALL prm_ocean (EQMfname)												
+!CALL prm_ocean (EQMfname)												
 ! ----------------------------------------------------------------------
 ! Pseudo-Observations: Precise Orbit (sp3) 
 CALL prm_pseudobs (EQMfname)
@@ -215,7 +215,7 @@ Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
 !CALL statorbit (orbext_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
 Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr)
 ! ----------------------------------------------------------------------
-print *,"Orbit residuals (ICRF) RMS(XYZ)", RMSdsr(1:3)
+!print *,"Orbit residuals (ICRF) RMS(XYZ)", RMSdsr(1:3)
 
 
 ! ----------------------------------------------------------------------

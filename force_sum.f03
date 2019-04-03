@@ -21,10 +21,14 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! Last modified:
 ! - Dr. Thomas Papanikolaou, 3 October 2018:
 !	Empirical forces of bias & cycle per revolution accelerations have been added 
-! ----------------------------------------------------------------------
+!
 ! Changes: 03-12-2018 Dr. Tzupang Tseng: Added the models of solar radiation
 !                                        pressure, earth radiation pressure 
 !                                        and antenna thrust
+! - Dr. Thomas Papanikolaou, 25 March 2019:
+!	The satellite attitude models have now been integrated into POD through
+!   the "attitude.f03 subroutine" obtained from the conversion of the 
+!   "GNSS yaw-attitude program" to subroutine 
 ! ----------------------------------------------------------------------
 
 
@@ -117,6 +121,15 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: filename
       CHARACTER (LEN=1000) :: writeline
+! ----------------------------------------------------------------------
+      CHARACTER (LEN=3)  :: PRN_GNSS
+      INTEGER (KIND = 4) :: satblk
+      CHARACTER (LEN=5)  :: BDSorbtype
+      INTEGER (KIND = 4) :: eclipsf
+      REAL (KIND = prec_d) :: beta, Mangle, Yangle(2)
+	  REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
+      INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
+      REAL (KIND = prec_d) :: Yawangle
 ! ----------------------------------------------------------------------
 
 
@@ -233,7 +246,10 @@ NCTR = 3
 ! Planets perturbation loop
 aPlanets_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 DO NTARG_body = 1 , 11
-   IF (NTARG_body /= 3) THEN 
+   IF (NTARG_body /= 3) THEN
+   !IF (NTARG_body /= 3 .and. &
+   !(NTARG_body==2 .or. NTARG_body==5 .or. NTARG_body==10 .or. NTARG_body==11) ) THEN 
+   !print *,"NTARG_body", NTARG_body !IF (NTARG_body/=3 .and. NTARG_body/=1 .and. ) THEN 
 		
 ! Celestial body's (NTARG) Cartesian coordinates w.r.t. Center body (NCTR)
       NTARG = NTARG_body
@@ -530,27 +546,23 @@ SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf
 ! ----------------------------------------------------------------------
 
 
-IF (1<0) then
-!print *,"Fgrav:    ", Fgrav_icrf 
-!print *,"Fgrav:    ", sqrt(Fgrav_icrf(1)**2+Fgrav_icrf(2)**2+Fgrav_icrf(3)**2)
-Call SLEEP (1)
-print *,"          " 
-print *,"mjd:      ", mjd
-CALL coord_r2sph(Fgrav_icrf,phi,lamda,radius)
-print *,"Fgrav:    ", radius
+! ----------------------------------------------------------------------
+! Attitude model :: GNSS Yaw-attitude models
+! ----------------------------------------------------------------------
+! Variables "satblk" and "BDSorbtype" are temporary manually configured 
+! in the main program file (main_pod.f03) through setting the global variables:  
 
-CALL coord_r2sph(Fplanets_icrf,phi,lamda,radius)
-print *,"Fplanets: ", radius
+! GPS case: Satellite Block ID:	1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
+satblk = SATblock_glb
 
-CALL matrix_Rr (TRS2CRS, a_solidtides , a_solidtides_icrf)
-CALL coord_r2sph(a_solidtides_icrf,phi,lamda,radius)
-print *,"a_solid:  ", radius 
+! Beidou case: 'IGSO', 'MEO'
+BDSorbtype = BDSorbtype_glb
 
-CALL matrix_Rr (TRS2CRS, a_ocean, a_ocean_icrf)
-CALL coord_r2sph(a_ocean_icrf,phi,lamda,radius)
-print *,"a_ocean:  ", radius 
-end IF
-
+! Yaw-attitude model
+PRN_GNSS = PRN
+CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
+                     eclipsf, beta, Mangle, Yangle, eBX_nom, eBX_ecl)
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -629,7 +641,13 @@ SFnongrav = Fsrp_icrf + Ferp_icrf + Fant_icrf
 ! Empirical forces
 ! ----------------------------------------------------------------------
 IF (EMP_param_glb == 1) Then
-	Call pd_empirical (rsat_icrf, vsat_icrf, GMearth, SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)	
+
+!Call pd_empirical (rsat_icrf, vsat_icrf, GMearth, SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)
+Frame_EmpiricalForces = Frame_EmpiricalForces_glb	
+Yawangle = Yangle(2)
+CALL pd_empirical (rsat_icrf, vsat_icrf, GMearth, Yawangle, Frame_EmpiricalForces, & 
+                   SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)
+	
 Else IF (EMP_param_glb == 0) Then
 	SFemp = (/ 0.0D0, 0.0D0, 0.0D0 /)
 End IF

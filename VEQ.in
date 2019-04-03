@@ -4,7 +4,7 @@
 Satellite_PRN             G29
 Reference_frame           ITRF
 Time_scale                GPS
-Orbit_arc_length          86400     	 ! Seconds
+Orbit_arc_length          86400     	 !sec
 
 ---------------------------------------------------------------------------
 %% Initial Conditions: Epoch and State Vector                                                      
@@ -46,7 +46,7 @@ integrator_step 		  900 				! Integration Stepsize (sec)
 %% Gravitational Forces 
 
 Gravity_field			  1
-Planets_perturbations	  0
+Planets_perturbations	  1
 Tidal_effects			  0	
 Relativistic_effects	  0
 
@@ -60,8 +60,8 @@ Relativistic_effects	  0
 ! 3. IERS conventional geopotential model 	  : gravity_model = 3 
 gravity_model  			  2
 gravity_model_filename	  goco05s.gfc 	! goco05s.gfc	! eigen-6s2.gfc	! ITSG-Grace2014k.gfc	
-degree_max		  		  3			! Gravity model maximum degree/order (d/o)
-degree_max_timevar		  3			! Time-variable coefficients maximum d/o
+degree_max		  		  5			! Gravity model maximum degree/order (d/o)
+degree_max_timevar		  5			! Time-variable coefficients maximum d/o
 
 ---------------------------------------------------------------------------
 %% Planetary/Lunar ephemeris

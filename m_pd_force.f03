@@ -131,6 +131,15 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       REAL (KIND = prec_d) :: PD_EMP_r(3,3), PD_EMP_v(3,3)
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: PD_EMP_param
 ! ----------------------------------------------------------------------
+      CHARACTER (LEN=3)  :: PRN_GNSS
+      INTEGER (KIND = 4) :: satblk
+      CHARACTER (LEN=5)  :: BDSorbtype
+      INTEGER (KIND = 4) :: eclipsf
+      REAL (KIND = prec_d) :: beta, Mangle, Yangle(2)
+	  REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
+      INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
+      REAL (KIND = prec_d) :: Yawangle
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -505,6 +514,25 @@ SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf
 ! End of Gravitational Effects
 ! ----------------------------------------------------------------------
 
+
+! ----------------------------------------------------------------------
+! Attitude model :: GNSS Yaw-attitude models
+! ----------------------------------------------------------------------
+! Variables "satblk" and "BDSorbtype" are temporary manually configured 
+! in the main program file (main_pod.f03) through setting the global variables:  
+
+! GPS case: Satellite Block ID:	1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
+satblk = SATblock_glb
+
+! Beidou case: 'IGSO', 'MEO'
+BDSorbtype = BDSorbtype_glb
+
+! Yaw-attitude model
+PRN_GNSS = PRN
+CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
+                     eclipsf, beta, Mangle, Yangle, eBX_nom, eBX_ecl)
+! ----------------------------------------------------------------------
+
  
 ! ----------------------------------------------------------------------
 ! Non-Gravitational Effects
@@ -547,7 +575,13 @@ SFnongrav = Fsrp_icrf
 ! Empirical forces
 ! ----------------------------------------------------------------------
 IF (EMP_param_glb == 1) Then
-	Call pd_empirical (rsat_icrf, vsat_icrf, GMearth, SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)	
+
+!Call pd_empirical (rsat_icrf, vsat_icrf, GMearth, SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)	
+Frame_EmpiricalForces = Frame_EmpiricalForces_glb	
+Yawangle = Yangle(2)
+CALL pd_empirical (rsat_icrf, vsat_icrf, GMearth, Yawangle, Frame_EmpiricalForces, & 
+                   SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)
+	
 Else IF (EMP_param_glb == 0) Then
 	SFemp = (/ 0.0D0, 0.0D0, 0.0D0 /)
 	Do i = 1 , 3
