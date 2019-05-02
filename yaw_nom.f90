@@ -32,7 +32,8 @@ SUBROUTINE yaw_nom (e_BX, v_sat, beta, satblk, cosE, ANOON, ANIGHT, Mangle, Yang
 !  within the attitude_yaw.f90 subroutine 
 ! 
 ! Note 3:
-!  ANOON and ANIGHT are defined within the attitude_yaw.f90 subroutine
+!  ANOON and ANIGHT arguments are no longer necessary and should be removed 
+!  from the yaw_nom.f90 subroutine
 ! ----------------------------------------------------------------------
 ! Dr. Thomas D. Papanikolaou, Geoscience Australia             June 2016
 ! ----------------------------------------------------------------------

@@ -20,7 +20,7 @@ MODULE m_pd_empirical
 Contains
 
 
-SUBROUTINE pd_empirical (rsat, vsat, GMearth, Femp, PDr, PDv, PD_param)
+SUBROUTINE pd_empirical (rsat, vsat, GMearth, Yangle, frame, Femp, PDr, PDv, PD_param)
 
 
 ! ----------------------------------------------------------------------
@@ -56,6 +56,8 @@ SUBROUTINE pd_empirical (rsat, vsat, GMearth, Femp, PDr, PDv, PD_param)
 ! IN
       REAL (KIND = prec_d), INTENT(IN), DIMENSION(3) :: rsat, vsat
       REAL (KIND = prec_q), INTENT(IN) :: GMearth
+      REAL (KIND = prec_q), INTENT(IN) :: Yangle
+      INTEGER (KIND = prec_int2), INTENT(IN) :: frame
 ! ----------------------------------------------------------------------
 ! OUT
       REAL (KIND = prec_d), INTENT(OUT) :: Femp(3)
@@ -92,7 +94,10 @@ SUBROUTINE pd_empirical (rsat, vsat, GMearth, Femp, PDr, PDv, PD_param)
 	  REAL (KIND = prec_q), DIMENSION(3) :: r_dx, r_dy, r_dz
 	  REAL (KIND = prec_q), DIMENSION(9) :: kepler_dx, kepler_dy, kepler_dz
 ! ----------------------------------------------------------------------
+      REAL (KIND = prec_d) :: Rcrf_bff(3,3), Rrtn_bff(3,3)
+! ----------------------------------------------------------------------
 
+	  
 Param_Bias = 0
 Param_CPR  = 0
 
@@ -142,8 +147,23 @@ vsat_icrf = vsat
 ! ----------------------------------------------------------------------
  
 ! ----------------------------------------------------------------------
+! Reference Frame of empirical forces:
+! 1. Orbital Frame
+! 2. Body-fixed Frame
+! ----------------------------------------------------------------------
+if (frame == 1) then
+
 ! Inertial (GCRF) to Orbital Frame
 Call orb_frame(rsat_icrf, vsat_icrf, Rrtn)	
+
+elseif (frame == 2) then
+
+! Inertial (GCRF) to Body-fixed Frame
+CALL crf_bff (rsat_icrf, vsat_icrf, Yangle, Rcrf_bff, Rrtn_bff)
+Rrtn = Rcrf_bff
+
+end if
+
 ! Orbital frame to Inertial frame (GCRF) : Inverse matrix
 CALL matrix_inv3 (Rrtn, Rrtn_inv)
 ! ----------------------------------------------------------------------

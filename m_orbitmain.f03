@@ -1,26 +1,59 @@
-      program main_orb
+MODULE m_orbitmain
 
 
 ! ----------------------------------------------------------------------
-! Program:	main_orb.f90
+! MODULE: m_orbitmain.f03
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Dynamic Orbit Determination of GNSS satellites 
+!  Module for Precise Orbit Determination
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou
-!			Geoscience Australia, CRC-SI
-! Created:	13 September 2017
+!			Geoscience Australia, Frontier-SI
+! Created:	21 March 2019
 ! ----------------------------------------------------------------------
-! POD version major modifications highlights: 
-! Last modified  
-! - Dr. Thomas Papanikolaou, 3 May 2018
-! 	Preliminary version of GNSS dynamic orbit determination	
-! - Dr. Thomas Papanikolaou, 25 June 2018
-! 	Version with minor revisions
-! - Dr. Thomas Papanikolaou, 30 November 2018
-! 	Precise Orbit Determination (POD) version: Estimation of empirical forces parameters (bias, cycle-per-rev) that lead to mm-cm level orbital accuracy w.r.t. IGS precise orbits
-! - Dr. Thomas Papanikolaou, 30 January 2019
-! 	POD version upgrade: Ocean tides effect revision that has significant impact on longer orbit arcs e.g. 3 days 
+
+
+      IMPLICIT NONE
+      !SAVE 			
+  
+	  
+Contains
+	  
+	  
+SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
+
+! ----------------------------------------------------------------------
+! SUBROUTINE:	orbitmain.f03
+! ----------------------------------------------------------------------
+! Purpose:
+!  Precise Orbit Determination 
+! ----------------------------------------------------------------------
+! Input arguments:
+! - EQMfname: 	Input cofiguration file name for the orbit parameterization 
+! - VEQfname: 	Input cofiguration file name for the orbit parameterization 
+!
+! Output arguments:
+! - orb_icrf: 	Satellite orbit array in ICRF including the following per epoch:
+!               - Modified Julian Day number (including the fraction of the day) 
+!				- Seconds since 00h 
+!				- Position vector (m)
+!				- Velocity vector (m/sec)
+! - orb_itrf: 	Satellite orbit array in ITRF including the following per epoch:
+!               - Modified Julian Day number (including the fraction of the day) 
+!				- Seconds since 00h 
+!				- Position vector (m)
+!				- Velocity vector (m/sec)
+! - veqSmatrix:	State trasnition matrix obtained from the Variational Equations solution based on numerical integration methods
+! - veqPmatrix: Sensitivity matrix obtained from the Variational Equations solution based on numerical integration methods
+! ----------------------------------------------------------------------
+! Note 1:
+! The time scale of the 2 first collumns of the orbit arrays (MJD and Seoncds since 00h) 
+! refer to the time system defined by the global variable TIME_SCALE in the module mdl_param.f03
+! according to the input parameterization file 
+! ----------------------------------------------------------------------
+! Author :	Dr. Thomas Papanikolaou
+!			Geoscience Australia, Frontier-SI
+! Created:	21 March 2019
 ! ----------------------------------------------------------------------
 
 
@@ -30,7 +63,7 @@
       USE m_orbdet
       USE m_orbext
       USE m_writearray
-      USE m_writeorbit
+!      USE m_writeorbit
       IMPLICIT NONE
 
 	  
@@ -45,19 +78,16 @@
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=2) :: GNSS_id
 	  INTEGER (KIND = prec_int2) :: ORB_mode
-
-	  
-! CPU Time
-CALL cpu_time (CPU_t0)
-
-
 ! ----------------------------------------------------------------------
-! Configuration files of Orbit parameterization:
-EQMfname = 'EQM.in'
-VEQfname = 'VEQ.in'
-! ----------------------------------------------------------------------
-!EQMfname = 'G29_EQM_2011.in'
-!VEQfname = 'G29_VEQ_2011.in'
+	  INTEGER (KIND = prec_int8) :: Nsat, isat
+	  INTEGER (KIND = prec_int8) :: iepoch, iparam
+	  INTEGER (KIND = prec_int8) :: i
+	  INTEGER (KIND = prec_int8) :: sz1, sz2, Nepochs, N2_orb, N2_veqSmatrix, N2_veqPmatrix, N2sum  
+      REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbit_veq  
+      INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
+	  CHARACTER (LEN=3), ALLOCATABLE :: PRN_array(:)
+	  CHARACTER (LEN=3) :: PRN_isat
+	  INTEGER :: ios
 ! ----------------------------------------------------------------------
 
 
@@ -68,8 +98,8 @@ CALL orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vre
 print *,"Orbit residuals in ICRF:" 
 WRITE (*,FMT='(A9, 3F17.4)'),"RMS XYZ", Vrms
 !PRINT *,"Orbit Determination: Completed"
-CALL cpu_time (CPU_t1)
-PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
+!CALL cpu_time (CPU_t1)
+!PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
 
 
 If (ORBEXT_glb > 0) Then
@@ -91,15 +121,15 @@ End If
 
 ! ----------------------------------------------------------------------
 ! Write orbit matrices to output files (ascii)
-PRINT *,"Write orbit matrices to output files"
+!PRINT *,"Write orbit matrices to output files"
 ! ----------------------------------------------------------------------
 ! Estimated Orbit or Predicted Orbit
 filename = "orb_icrf.out"
 !Call writearray (orb_icrf, filename)
-Call writeorbit (orb_icrf, filename)
+!Call writeorbit (orb_icrf, filename)
 filename = "orb_itrf.out"
 !Call writearray (orb_itrf, filename)
-Call writeorbit (orb_itrf, filename)
+!Call writeorbit (orb_itrf, filename)
 
 ! Variational Equations matrices
 If (ESTIM_mode_glb > 0) then
@@ -112,10 +142,7 @@ End IF
 
 
 
-
-CALL cpu_time (CPU_t1)
-PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
+End SUBROUTINE
 
 
-End Program
-
+End MODULE

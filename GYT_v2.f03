@@ -120,6 +120,7 @@
 ! PWU
       REAL (KIND = prec_d) :: r_station(3), rstat_crs(3), rstat_trs(3), rstat_ref(3)
 	  REAL (KIND = prec_d) :: dphi_wup_nom, dphi_wup_ecl
+	  REAL (KIND = prec_d) :: deg2rad_mult, rad2cycles_mult
 ! ----------------------------------------------------------------------
 
 
@@ -171,6 +172,11 @@ PRN = 'G03'  ! IIF
 
 ! Phase wind-up effect comparison test
 PRN = 'G02'  ! IIR
+PRN = 'G03'  ! IIF
+PRN = 'G08'  ! IIF
+!PRN = 'G22'  ! IIR
+!PRN = 'G23'  ! IIR
+!PRN = 'G29'  ! IIR
 ! ----------------------------------------------------------------------
 
 
@@ -179,7 +185,7 @@ PRN = 'G02'  ! IIR
 ! ----------------------------------------------------------------------
 ! Satellite Block ID (according to the numbering adopted in eclips.f)
 ! satblk:	1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
-satblk = 4
+satblk = 6
 ! ----------------------------------------------------------------------
 
 
@@ -202,7 +208,7 @@ BetaP = 2
 ! ----------------------------------------------------------------------	  
 ! satbf = 1 : Body-fixed frame according to the IGS Conventions; Cases: GPS Block II,IIA,IIF, GLONASS, BeiDou  
 ! satbf = 2 : Body-fixed frame X,Y axes reversal; Cases: Galileo, GPS Block IIR 
-satbf = 2
+satbf = 1
 ! ----------------------------------------------------------------------	
 
 
@@ -829,6 +835,21 @@ CALL pwindup (r_TRS, eBX_ecl_ITRF, r_station, dphi_wup_ecl)
 
 ! Write	results per epoch to array
 phasewup_itrf(epoch_i , :) = (/ mjd_GPS, time_write, eclipsf * 1.0D0, dphi_wup_nom, dphi_wup_ecl /)
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Phase wind-up correction: Units conversion
+! ----------------------------------------------------------------------
+! Radians to cycles
+deg2rad_mult    = PI_global / 180.0D0
+rad2cycles_mult = 1.0D0 / (2.0D0*PI_global)
+if (1<0) then
+phasewup_icrf(epoch_i , 4) = phasewup_icrf(epoch_i , 4) * deg2rad_mult * rad2cycles_mult 	
+phasewup_icrf(epoch_i , 5) = phasewup_icrf(epoch_i , 5) * deg2rad_mult * rad2cycles_mult 	
+phasewup_itrf(epoch_i , 4) = phasewup_itrf(epoch_i , 4) * deg2rad_mult * rad2cycles_mult 	
+phasewup_itrf(epoch_i , 5) = phasewup_itrf(epoch_i , 5) * deg2rad_mult * rad2cycles_mult 	
+end if
 ! ----------------------------------------------------------------------
 
 ! End of yaw-attitude computations

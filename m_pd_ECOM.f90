@@ -20,7 +20,7 @@ MODULE m_pd_ECOM
 Contains
 
 
-SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
+SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
 
 
 ! ----------------------------------------------------------------------
@@ -35,6 +35,8 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
 ! - r            : satellite position vector (m)
 ! - v            : satellite velocity vector
 ! - r_sun        : Sun position vector
+! - lambda       : shadow coefficient
+! - eBX_ecl      : dynamic ex of satellite body frame
 ! 
 ! Output arguments:
 ! - Asrp         : Partial derivative output 
@@ -48,6 +50,10 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
 !                                         dividing the length of ey
 !             20-02-2019  Tzupang Tseng : create a function for switching on and
 !                                         off some particular coefficients in ECOM models
+!             22-03-2019  Tzupang Tseng : set a simple condition for the eclipsed satellites
+!                                         where only D0 partials are setup to zero 
+!             02-05-2019  Tzupang Tseng : use the coefficient from the shadow.f90 for scaling
+!                                         the SRP effect
 ! 
 ! Copyright:  GEOSCIENCE AUSTRALIA
 ! ----------------------------------------------------------------------
@@ -62,9 +68,12 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int4),INTENT(IN)         :: prnnum
+      REAL (KIND = prec_d) , Dimension(3), INTENT(IN) :: eBX_ecl
       REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r,v
       REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r_sun
+      INTEGER (KIND = 4), INTENT(IN) :: eclipsf
       REAL (KIND = prec_q),INTENT(IN) :: GM
+      REAL (KIND = prec_q),INTENT(IN) :: lambda
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
@@ -75,18 +84,18 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
 
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
      ! REAL (KIND = prec_q) :: Asrp(3,9)
-      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,ez
+      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,ez,ECOM_ey
       REAL (KIND = prec_q), DIMENSION(3) :: yy
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
       INTEGER              :: i,j,k,ECOM
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
-
+      INTEGER              :: ex_i
 ! ----------------------------------------------------------------------
 ! Sun-related variables
 ! ----------------------------------------------------------------------
-       REAL (KIND = prec_q) :: u_sun,beta,del_u
+       REAL (KIND = prec_q) :: u_sun,beta,del_u, dang
        REAL (KIND = prec_q), DIMENSION(3) :: r_sun1,r_sun2
 
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
@@ -100,6 +109,9 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
 ! Numerical Constants
       AU = 1.4959787066d11 ! (m)
       Pi = 4*atan(1.0d0)
+    ex_i = 0 ! change the definition of the unit vector ex
+             ! ex_i = 0 (default)
+             !      = 1 (using dynamic ex vector from attitude routine)
 ! ---------------------------------------------------------------------
 ! The unit vector ez SAT->EARTH
       er(1)=r(1)/sqrt(r(1)**2+r(2)**2+r(3)**2)
@@ -108,19 +120,31 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
       ez(1)=-er(1)
       ez(2)=-er(2)
       ez(3)=-er(3)
+
 ! The unit vector ed SAT->SUN (where is just opposite to the solar radiation vector)
       Ds=sqrt((r_sun(1)-r(1))**2+(r_sun(2)-r(2))**2+(r_sun(3)-r(3))**2)
       ed(1)=((r_sun(1)-r(1))/Ds)
       ed(2)=((r_sun(2)-r(2))/Ds)
       ed(3)=((r_sun(3)-r(3))/Ds)
 ! The unit vector ey = ez x ed/|ez x ed|, parallel to the rotation axis of solar panel
-      CALL cross_product (ez,ed,yy)
+
+      CALL productcross (ez,ed,yy)
       ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
       ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
       ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 
+! Using the BODY-X univector from Kouba routine to redefine the ey for the satellite eclipsed
+IF(ex_i .gt. 0) THEN
+      ex(1)=eBX_ecl(1)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
+      ex(2)=eBX_ecl(2)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
+      ex(3)=eBX_ecl(3)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
+
+      CALL productcross (ez,ex,ey) 
+END IF
 ! The unit vector eb = ed x ey
-      CALL cross_product (ed,ey,eb)
+
+      CALL productcross (ed,ey,eb)
+
 
 ! computation of the satellite argument of latitude and orbit inclination
       CALL kepler_z2k (r,v,GM,kepler)
@@ -170,7 +194,7 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
 
 !compute the sun argument of lattitude and beta angle
       u_sun = atan2(r_sun2(2),r_sun2(1)) ! in rad
-     ! beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2)) ! in rad
+      beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2)) ! in rad
 
       del_u = u_sat - u_sun ! in rad
       IF (del_u*180/Pi .GT.360.0d0) THEN
@@ -180,12 +204,11 @@ SUBROUTINE pd_ECOM (GM, prnnum, r, v, r_sun, Asrp)
       END IF 
      !write (*,*) beta*180.0d0/Pi, del_u*180.0d0/Pi
 
+
+
+
 ! ----------------------------------------------------------------------
 ! Partial derivatives w.r.t. unknown parameters
-!N_param = NPARAM_glb
-!If (N_param == 0) Then
-!N_param = 1
-!End If
 
 !ALLOCATE (Asrp(3,N_param), STAT = AllocateStatus)
 IF (ECOM_param_glb /= 0) THEN
@@ -399,12 +422,21 @@ Else
         PD_Param_ID = PD_Param_ID
 End If
 
-
      END IF 
 
 ! end of ECOM2 model
 ! ==================================================================
 
+! use the shadow coefficient for scaling the SRP effect
+!-------------------------------------------------------
+IF (lambda .lt. 1) THEN
+!IF (abs(beta*180.0d0/Pi) .lt. 13.87 .and. del_u*180.0d0/Pi .gt. 167 .and. del_u*180.0d0/Pi .lt. 193) then
+
+Asrp(1:3,1) = lambda*Asrp(1:3,1)
+
+END IF
+
+!----------------------------------------------------------------------------------------------
 
 END SUBROUTINE
 

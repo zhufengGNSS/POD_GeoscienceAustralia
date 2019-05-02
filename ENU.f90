@@ -79,6 +79,9 @@ R3 = MATMUL(Rx , Rz)
 	  eU = (/  cos(lamda)*cos(phi)	,  sin(lamda)*cos(phi)	, sin(phi)	/)
 
 
+! Reverse East to West
+!eE = (/ sin(lamda)			,  -1.0D0 * cos(lamda)			, 0.D0		/)
+
 
 END
 

@@ -17,8 +17,8 @@ SUBROUTINE prm_grav (PRMfname)
       USE mdl_num
       USE mdl_param
       !USE mdl_gfc
-      USE m_gfc
-      USE m_gfc3
+      !USE m_gfc
+      !USE m_gfc3
       !USE mdl_legendre
       !USE mdl_legendre1
       !USE mdl_planets
@@ -53,12 +53,12 @@ SUBROUTINE prm_grav (PRMfname)
       INTEGER (KIND = prec_int8) :: Nmax_gfc 
       CHARACTER (LEN=50) :: tide_gfc  
 	  
-! Spherical Harmonic Coefficients (SHC) lower triangular matrices (Dynamic Allocatable arrays)
-      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: Cnm
-      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: Snm
+!! Spherical Harmonic Coefficients (SHC) lower triangular matrices (Dynamic Allocatable arrays)
+!      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: Cnm
+!      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: Snm
 ! Errors/Variances of SHC (Dynamic Allocatable arrays)
-      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: sCnm
-      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: sSnm  
+!      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: sCnm
+!      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: sSnm  
 ! ----------------------------------------------------------------------
 ! Planetary/Lunar orbits variables
       CHARACTER (LEN=100) :: fname_header,fname_data,fname_out
@@ -305,118 +305,6 @@ CLOSE (UNIT=UNIT_IN)
 
 
 
-
-if (1<0) then
-! ----------------------------------------------------------------------
-! Earth Gravity Field
-! ----------------------------------------------------------------------
-
-IF (FMOD_GRAVFIELD == 0) Then
-
-GFM_GM = GM_global
-GFM_ae = Earth_radius
-GFM_tide = 'tide_free'
-
-Else 
-
-! ----------------------------------------------------------------------
-! Gravity model's data: Spherical Harmonic Coefficients (icgem format)
-! ----------------------------------------------------------------------
-      if (gfc_opt == 1) then 
-          CALL gfc1 (gfmfilename, Ntrunc, sigma_shc, GM_gfc, ae_gfc, Nmax_gfc, tide_gfc, Cnm, Snm, sCnm, sSnm)
-		  
-      else if (gfc_opt == 2) then 	  
-		  mjd_t = MJD_to ! Module mdl_param.f03
-          CALL gfc2 (gfmfilename,Ntrunc,sigma_shc, mjd_t, Ntrunc_tv, GM_gfc, ae_gfc, Nmax_gfc, tide_gfc, Cnm, Snm, sCnm, sSnm)
-		  
-      else if (gfc_opt == 3) then 	  
-		  mjd_t = MJD_to ! Module mdl_param.f03
-          CALL gfc3_iers (gfmfilename, Ntrunc, sigma_shc, mjd_t, GM_gfc, ae_gfc, Nmax_gfc, tide_gfc, Cnm, Snm, sCnm, sSnm)
-		  
-      end if
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! Gravity model's global variables set in mdl_param.f03
-GFM_GM = GM_gfc
-GFM_ae = ae_gfc
-GFM_degmax = Nmax_gfc
-GFM_tide = tide_gfc
-
-! Truncation maximum degree and order 	  
-! Nmax
-IF (Ntrunc == -1) THEN
-   GFM_Nmax = Nmax_gfc
-ELSE
-   GFM_Nmax = Ntrunc
-END IF  
-! Mmax
-GFM_Mmax = GFM_Nmax
-
-ALLOCATE (GFM_Cnm(GFM_Nmax+1,GFM_Nmax+1), STAT = AllocateStatus)
-ALLOCATE (GFM_Snm(GFM_Nmax+1,GFM_Nmax+1), STAT = AllocateStatus)
-GFM_Cnm  = Cnm
-GFM_Snm  = Snm
-
-IF (sigma_shc /= 0) THEN	  
-  	ALLOCATE (GFM_sCnm(GFM_Nmax+1,GFM_Nmax+1), STAT = AllocateStatus)
-   	ALLOCATE (GFM_sSnm(GFM_Nmax+1,GFM_Nmax+1), STAT = AllocateStatus)
-	GFM_sCnm = sCnm
-	GFM_sSnm = sSnm
-END IF
-
-END IF
-! End of parameters setting for Gravity Field
-! ----------------------------------------------------------------------
-!print *,"gfmfilename: ",gfmfilename
-
-
-! ----------------------------------------------------------------------
-! Planetary/Lunar orbit data
-! ---------------------------------------------------------------------- 
-If (FMOD_GRAV(2) == 1) Then
-
-! Planetary/Lunar precise ephemeris DE: Data files merging
-fname_out = 'DE.430' 
-CALL CATfile (fname_header,fname_data,fname_out)
-
-! DE ephemeris data processing
-! Store selected DE data to global variables via the module mdl_planets.f90 
-CALL asc2eph (fname_out)
-
-! Set the GM gravity constants of the solar system bodies as global variables via the module mdl_planets.f90
-CALL GM_de
-
-End If
-! End of parameters setting for Planetary/Lunar orbit data
-! ----------------------------------------------------------------------
-
-
-
-! ----------------------------------------------------------------------
-!  Tidal effects to orbits: Solid Earth Tides, Ocean Tides and Pole Tide
-! ----------------------------------------------------------------------
-If (FMOD_GRAV(3) == 1) Then
-
-! ----------------------------------------------------------------------
-! Ocean Tides
-IF (FMOD_TIDES(3) == 1) Then
-
-! Ocean Tides model
-! Read ocean tides model data: Spherical harmonic coefficients corrections
-! The spherical harmoncis corrections are stored in dynamic allocatable arrays through the module mdl_tides.f90
-CALL tides_fes2004(FESxxfname)
-
-End IF 
-! ----------------------------------------------------------------------
-
-End IF
-! End of parameters setting for Tidal effects
-! ----------------------------------------------------------------------
-
-
-END IF
-
 ! ----------------------------------------------------------------------
 ! Relativity parameters: beta and gama
 ! ----------------------------------------------------------------------
@@ -425,28 +313,6 @@ END IF
 
 ! beta and gama parameters are declared as global variables in the module mdl_num.f90
 ! ----------------------------------------------------------------------
-
-
-
-if (1<0) then
-! ----------------------------------------------------------------------
-PRINT *,"--------------------- INPUT ----------------------------"
-print *,"FMOD_GRAV           ",FMOD_GRAV
-print *,"FMOD_GRAVFIELD      ",FMOD_GRAVFIELD
-print *,"GFM_GM:             ",GFM_GM
-print *,"GFM_ae:             ",GFM_ae
-print *,"GFM_degmax:         ",GFM_degmax
-print *,"GFM_tide:           ",GFM_tide
-print *,"GFM_Nmax, GFM_Mmax: ",GFM_Nmax, GFM_Mmax
-PRINT *,"Planetary Ephemeris ",TRIM(fname_header)," ", TRIM(fname_data)
-print *,"FMOD_TIDES          ",FMOD_TIDES
-print *,"Ocean Tide model    ",TRIM(FESxxfname)
-print *,"OCEAN  Nmax, Mmax:  ",OCEAN_Nmax, OCEAN_Mmax
-PRINT *,"--------------------------------------------------------"
-PRINT *," "
-! ----------------------------------------------------------------------
-end if
-
 
 
 
