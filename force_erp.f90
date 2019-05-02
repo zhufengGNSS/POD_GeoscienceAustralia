@@ -58,9 +58,10 @@ SUBROUTINE force_erp (mjd,prnnum,satsvn,r,vsat,r_sun,fx_erp,fy_erp,fz_erp)
       REAL (KIND = prec_q) :: Re,c,Esun
       REAL (KIND = prec_q) :: cospsi,psi
       REAL (KIND = prec_q) :: Ds,sclfa,rsat,SS,DDs
-      REAL (KIND = prec_q) :: u,v,w
-
+      REAL (KIND = prec_q) :: u_vis,v_vis,u_ir,v_ir,w
+      REAL (KIND = prec_q) :: u,v
       REAL (KIND = prec_q), DIMENSION(3) :: er,e_sun,ev,en,ey,ed,ex
+      REAL (KIND = prec_q), DIMENSION(3) :: yy
       REAL (KIND = prec_q), DIMENSION(4) :: AREA1,REFL1,DIFU1,ABSP1
 ! ----------------------------------------------------------------------
 ! Satellite physical informaiton
@@ -70,7 +71,10 @@ SUBROUTINE force_erp (mjd,prnnum,satsvn,r,vsat,r_sun,fx_erp,fy_erp,fz_erp)
       REAL (KIND = prec_q) :: A_SOLAR
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: E1,Evis,Eir
+      REAL (KIND = prec_q) :: f_Evis,f_Eir
       REAL (KIND = prec_q) :: f_Z_radial,f_solar_radial,f_solar_non_radial
+      REAL (KIND = prec_q) :: f_Evis_solar_radial,f_Evis_solar_non_radial
+      REAL (KIND = prec_q) :: f_Eir_solar_radial,f_Eir_solar_non_radial
 ! ----------------------------------------------------------------------
 ! Sun-related variables
 ! ----------------------------------------------------------------------
@@ -236,8 +240,12 @@ SUBROUTINE force_erp (mjd,prnnum,satsvn,r,vsat,r_sun,fx_erp,fy_erp,fz_erp)
 ! in satellite body frame. 
 ! Contruct the satellite body-fixed frame
 ! --------------------------------------
-      CALL productcross(-er,ed,ey)
-      CALL productcross(er,ey,ex)
+      CALL productcross(-er,ed,yy)
+      ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+      CALL productcross(ey,-er,ex)
 
 ! Sun vector from the Earth
 ! -------------------------
@@ -281,12 +289,24 @@ SUBROUTINE force_erp (mjd,prnnum,satsvn,r,vsat,r_sun,fx_erp,fy_erp,fz_erp)
 ! The radial component
 ! satellite bus +Z
 ! ----------------
-  u = 0.d0    ! specularity
-  v = 0.13d0  ! reflectivity
+  u_vis = 0.d0    ! specularity
+  v_vis = 0.06d0  ! reflectivity
+  u     =u_vis
+  v     =v_vis
+  f_Evis= Evis*((1+u*v)+2/3*(v-u*v))
+
+  u_ir = 0.5d0    ! specularity
+  v_ir = 0.2d0  ! reflectivity
+  u    =u_ir
+  v    =v_ir
+  f_Eir= Eir*((1+u*v)+2/3*(v-u*v))
+
+
   sclfa=(AU/Ds)**2
   SS = sclfa/(MASS*c)
+
    
-  f_Z_radial = Z_SIDE*SS*aa*((1+u*v)+2/3*(v-u*v))
+  f_Z_radial = Z_SIDE*SS*(f_Evis+f_Eir)
 !print *, '+Z=',AREA1(3)
 
 
@@ -295,30 +315,60 @@ SUBROUTINE force_erp (mjd,prnnum,satsvn,r,vsat,r_sun,fx_erp,fy_erp,fz_erp)
 
       if ( psi .lt. Pi/2) then ! solar panel back
 
-      u = 0.5d0
-      v = 0.2d0
+      u_vis = 0.5d0
+      v_vis = 0.11d0
+      u     =u_vis
+      v     =v_vis
 
-      f_solar_radial = A_SOLAR*SS*abs(cos(psi))*aa*(1+2/3*(v-u*v)*abs(cos(psi))+(u*v)*cos(2*psi))
+      f_Evis_solar_radial    =Evis*(1+2/3*(v-u*v)*abs(cos(psi))+(u*v)*cos(2*psi))
+      f_Evis_solar_non_radial=Evis*(2/3*(v-u*v)*sin(psi)+(u*v)*abs(sin(2*psi)))
 
-      f_solar_non_radial = A_SOLAR*SS*cos(psi)*aa*(2/3*(v-u*v)*sin(psi)+(u*v)*abs(sin(2*psi)))
+      u_ir = 0.5d0 
+      v_ir = 0.2d0 
+
+      u    =u_ir
+      v    =v_ir
+
+
+      f_Eir_solar_radial    =Eir*(1+2/3*(v-u*v)*abs(cos(psi))+(u*v)*cos(2*psi))
+      f_Eir_solar_non_radial=Eir*(2/3*(v-u*v)*sin(psi)+(u*v)*abs(sin(2*psi)))
+
+      f_solar_radial     = A_SOLAR*SS*abs(cos(psi))*(f_Evis_solar_radial+f_Eir_solar_radial)
+
+      f_solar_non_radial = A_SOLAR*SS*cos(psi)*(f_Evis_solar_non_radial+f_Eir_solar_non_radial)
 
       else if (psi .ge. Pi/2 ) then ! solar panel front
-      u = 0.67d0
-      v = 0.24d0
+      u_vis = 0.85d0
+      v_vis = 0.28d0
 
-      f_solar_radial = A_SOLAR*SS*abs(cos(psi))*aa*(1+2/3*(v-u*v)*abs(cos(psi))+(u*v)*cos(2*psi))
+      u     =u_vis
+      v     =v_vis
+
+      f_Evis_solar_radial    =Evis*(1+2/3*(v-u*v)*abs(cos(psi))+(u*v)*cos(2*psi))
+      f_Evis_solar_non_radial=Evis*(2/3*(v-u*v)*sin(psi)+(u*v)*abs(sin(2*psi)))
+
+      u_ir = 0.5d0
+      v_ir = 0.2d0
+
+      u    =u_ir
+      v    =v_ir
+
+      f_Eir_solar_radial    =Eir*(1+2/3*(v-u*v)*abs(cos(psi))+(u*v)*cos(2*psi))
+      f_Eir_solar_non_radial=Eir*(2/3*(v-u*v)*sin(psi)+(u*v)*abs(sin(2*psi)))
 
 
-      f_solar_non_radial = A_SOLAR*SS*cos(psi)*aa*(2/3*(v-u*v)*sin(psi)+(u*v)*abs(sin(2*psi)))
+      f_solar_radial = A_SOLAR*SS*abs(cos(psi))*(f_Evis_solar_radial+f_Eir_solar_radial)
+
+      f_solar_non_radial = A_SOLAR*SS*cos(psi)*(f_Evis_solar_non_radial+f_Eir_solar_non_radial)
       end if
 
 
 
 ! forces in the inertial frame
 !-------------------------------
-   fx_erp = -((f_Z_radial+f_solar_radial)*er(1)+f_solar_non_radial*ex(1))
-   fy_erp = -((f_Z_radial+f_solar_radial)*er(2)+f_solar_non_radial*ex(2))
-   fz_erp = -((f_Z_radial+f_solar_radial)*er(3)+f_solar_non_radial*ex(3))
+   fx_erp = ((f_Z_radial+f_solar_radial)*er(1)+f_solar_non_radial*ex(1))
+   fy_erp = ((f_Z_radial+f_solar_radial)*er(2)+f_solar_non_radial*ex(2))
+   fz_erp = ((f_Z_radial+f_solar_radial)*er(3)+f_solar_non_radial*ex(3))
 
    
 ! forces in the orbital frame

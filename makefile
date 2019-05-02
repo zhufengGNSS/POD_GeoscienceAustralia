@@ -11,6 +11,7 @@ FLFLAGS = -L/usr/lib64
 
 SRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_planets.f90 mdl_tides.f90 mdl_arr.f90 m_writearray.f03 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
+m_writeorbit_multi.f03 m_write_orb2sp3.f03\
 m_matrixinv.f03 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
 jd2cal.for cal2jd.for dat.for \
 fad03.for  faf03.for   fal03.for   fama03.for  fane03.for  fapa03.for  faur03.for \
@@ -30,8 +31,8 @@ crs_trs.f90 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 interp_lin.f9
 era_matrix.f90 \
 orb_frame.f90 \
 kepler_eq.f90 kepler_k2z.f90 kepler_z2k.f90 m_keplerorb.f03 \
-m_rso.f03 m_sp3.f03  m_gnssp3.f03 m_sat_ini_vet.f03 m_gnss_ini_vet.f03 \
-m_satinfo.f90 \
+m_rso.f03 m_sp3.f03 m_gnssp3.f03 m_sat_ini_vet.f03 m_gnss_ini_vet.f03 \
+m_sp3_PRN.f03 m_satinfo.f90 \
 m_lagrange.f03 m_interporb.f03 \
 force_gm.f90 \
 m_legendre.f03 m_legendre1.f03 m_force_gfm.f03 \
@@ -45,7 +46,11 @@ m_force_tides.f03 \
 rel_schwarzschild.f90 rel_LenseThirring.f90 rel_deSitter.f90 \
 force_srp.f90 prn_shift.f03 surfprop.f90 cross_product.f90 R3.for R1.for \
 force_erp.f90 force_ant.f90 \
+m_shadow.f90 m_get_lambda.f \
 force_sum.f03 \
+attitude.f03 beta_angle.f90 yaw_attitude.f90 yaw_gal.f90 yaw_bds.f90 yawdyn.f90 yaw_nom.f90\
+eclips201707.f eclips2017.f eclips.f \
+beta_pred.f90 crf_bff.f90 \
 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 \
 pd_gm.f03 m_legendre2.f03 m_pd_geopotential.f03 \
 pd_forceZ.f03 \
@@ -63,8 +68,9 @@ prm_read.f03 prm_gravity.f03 prm_planets.f03 prm_ocean.f03 \
 prm_orbext.f03 prm_pseudobs.f03 \
 prm_main.f03 prm_grav.f03 prm_nongrav.f03 \
 m_statist.f03 m_statdelta.f03 m_statorbit.f03 \
+m_orbitmain.f03 \
 m_orbdet.f03 m_orbext.f03 \
-main_orb.f03
+main_pod.f03
 
 CRS2TRSSRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
@@ -85,7 +91,8 @@ crs_trs.f90 m_eop_data.f03 m_eop_cor.f03 m_eop_igu.f03 eop_rd.f90 eop_c04.f90 eo
 era_matrix.f90 \
 main_crs2trs.f03
 
-PROGRAM = main_orb.e
+#PROGRAM = main_orb.e
+PROGRAM = main_pod.e
 
 all: $(PROGRAM) crs2trs
 

@@ -195,9 +195,9 @@ c  = 299792458.d0
 
 ! forces in the inertial frame
 !-------------------------------
-   fx = -(f_ant)*er(1)
-   fy = -(f_ant)*er(2)
-   fz = -(f_ant)*er(3)
+   fx = (f_ant)*er(1)
+   fy = (f_ant)*er(2)
+   fz = (f_ant)*er(3)
 !print*,fx, fy, fz
    
 

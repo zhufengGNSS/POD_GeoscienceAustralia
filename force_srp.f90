@@ -1,5 +1,5 @@
 
-SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
+SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
 
 
 ! ----------------------------------------------------------------------
@@ -15,14 +15,16 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
 ! - GM           : the earth gravitational constant  
 ! - prnnum       : satellite PRN number
 ! - satsvn       : satellite SVN
-! - eclpf        : =0: in the sun illumination; 
-!                  =1: in the satellite eclipse
+! - eclpf        : =1: in the orbit eclipse; 
+!                  =2: in the sun illumination;
 ! - srpid        : =1: a simply cannonball model; 
 !                  =2: box-wing model;
 !                  =3: ECOM model
 ! - r            : satellite position vector (m)
 ! - v            : satellite velocity vector
 ! - r_sun        : Sun position vector
+! - lambda       : shadow coefficient
+! - eBX_ecl      : dynamic ex of satellite body frame
 ! 
 ! Output arguments:
 ! - fx,fy,fz:		Acceleration's cartesian components (m)
@@ -41,6 +43,9 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
 !                                         dividing the length of ey
 !               20-02-2019 Tzupang Tseng: create a functionality for switching
 !                                         on and off some particular coefficients in ECOM models
+!               22-03-2019 Tzupang Tseng: set a simple condition for the eclipsed satellites
+!                                         where only the D0 accelerations are setup to zero 
+!               02-05-2019 Tzupang Tseng: use the coefficient from the shadow.f90 for scaling the SRP effect
 !
 ! Copyright:  GEOSCIENCE AUSTRALIA, AUSTRALIA
 ! ----------------------------------------------------------------------
@@ -54,7 +59,10 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
 ! ----------------------------------------------------------------------
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
-      INTEGER                           :: eclpf,srpid,ECOM
+      INTEGER (KIND=4), INTENT(IN)      :: eclpf
+      REAL (KIND = prec_q), INTENT (IN) :: lambda
+      REAL (KIND = prec_d) , Dimension(3), INTENT(IN) :: eBX_ecl
+      INTEGER                           :: srpid,ECOM
       INTEGER                           :: prnnum,BLKNUM
       REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
       REAL (KIND = prec_q)               :: fx,fy,fz
@@ -67,10 +75,11 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
       REAL (KIND = prec_q) :: Cr
       REAL (KIND = prec_q) :: ANG,GM
       REAL (KIND = prec_q) :: Ds,sclfa
+      REAL (KIND = prec_q) :: fxo,fyo,fzo
 
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
       REAL (KIND = prec_q) :: surforce(4,3)
-      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,en,ev,ez
+      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,en,ev,ez,ECOM_ey
       REAL (KIND = prec_q), DIMENSION(3) :: yy
       REAL (KIND = prec_q), DIMENSION(3) :: fsrp
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
@@ -79,6 +88,7 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
       REAL (KIND = prec_q), DIMENSION(4) :: AREA1,REFL1,DIFU1,ABSP1
       INTEGER (KIND = prec_int2) :: AllocateStatus,DeAllocateStatus
       INTEGER              :: zta
+      INTEGER              :: ex_i
       INTEGER              :: i,j,k,m
       INTEGER              :: N_param, PD_Param_ID
 ! ----------------------------------------------------------------------
@@ -102,6 +112,9 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
       Cr = 1.4 ! SRP coefficient ranges from 1.3 to 1.5
       AU = 1.496d11 ! (m)
       Pi = 4*atan(1.0d0)
+    ex_i = 0 ! change the definition of the unit vector ex 
+             ! ex_i = 0 (default)
+             !      = 1 (using dynamic ex vector from attitude routine)
 ! ---------------------------------------------------------------------
 
 ! initialize the SRP force
@@ -192,17 +205,28 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
       ed(2)=((r_sun(2)-r(2))/Ds)
       ed(3)=((r_sun(3)-r(3))/Ds)
 ! The unit vector ey = ez x ed/|ez x ed|, parallel to the rotation axis of solar panel
-      CALL cross_product (ez,ed,yy)
+
+      CALL productcross (ez,ed,yy)
       ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
       ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
       ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+! The unit vector of x side, which is always illuminated by the sun.
+
+      CALL productcross (ey,ez,ex)
+
+! Using the BODY-X univector from Kouba routine to redefine the ey for the satellite eclipsed
+IF(ex_i .gt. 0) THEN
+      ex(1)=eBX_ecl(1)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
+      ex(2)=eBX_ecl(2)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
+      ex(3)=eBX_ecl(3)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
+
+      CALL productcross (ez,ex,ey)
+END IF
 ! The unit vector eb = ed x ey
-      CALL cross_product (ed,ey,eb)
 
-! The unit vector of x side, which is always illuminated by the
-! sun.
+      CALL productcross (ed,ey,eb)
 
-      CALL cross_product (ey,ez,ex)
 
 ! the orbit normal vector
 !------------------------
@@ -211,18 +235,7 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
       ev(2)=v(2)/sqrt(v(1)**2+v(2)**2+v(3)**2)
       ev(3)=v(3)/sqrt(v(1)**2+v(2)**2+v(3)**2)
 
-     Call cross_product(er,ev,en)
-
-! computation of the factor zta related to the Sun illumination
-      if (eclpf.eq.0) then
-         zta=1 ! in the sun light area
-      else
-         zta=0 ! in the eclipse
-         fx=0.0d0
-         fy=0.0d0
-         fz=0.0d0
-      return
-      end if
+     CALL productcross (er,ev,en)
 
 ! computation of the satellite argument of latitude and orbit inclination
       CALL kepler_z2k (r,v,GM,kepler)
@@ -294,6 +307,13 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
 
 !print*, 'COSANG1=', cosang(1)
 
+! computation of the factor zta related to the Sun illumination
+      IF (eclpf.eq.1) THEN ! in the eclipse
+         zta=0
+      ELSE
+         zta=1
+      END IF
+
       IF (srpid == 1) THEN
 ! A simply cannonball model
 ! *********************************
@@ -313,16 +333,6 @@ SUBROUTINE force_srp (GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
       fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
       fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
       fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
-
-!      fx = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(1)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-!      fy = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(2)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-!      fz = -zta*Cr/MASS*Ps*(AU/Ds)**2*ed(3)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-
-!      if (abs(ANG) .le. 14 ) then
-!         fx=0.0d0
-!         fy=0.0d0
-!         fz=0.0d0
-!      end if
 
 ! end of the cannonball model
 !--------------------------------------------------------------------------
@@ -589,15 +599,67 @@ End If
      fy=-fsrp(2)
      fz=-fsrp(3)
 
+
+! use the shadow coefficient for scaling the SRP effect
+!-------------------------------------------------------
+
+!IF (abs(beta*180.0d0/Pi) .lt. 13.87 .and. del_u*180.0d0/Pi .gt. 167 .and. del_u*180.0d0/Pi .lt. 193) then
+IF (lambda .lt. 1)THEN
+
+DO i=1,3
+ fsrp(i)=0.0d0
+END DO
+
+srpcoef(1) = lambda*srpcoef(1)
+
+        IF (ECOM_param_glb == 1 ) then
+DO i=1,3
+     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
+                       +   srpcoef(2)*sclfa*ey(i)              &
+                       +   srpcoef(3)*sclfa*eb(i)              &
+                       +   srpcoef(4)*sclfa*DCOS(del_u)*ed(i)  &
+                       +   srpcoef(5)*sclfa*DSIN(del_u)*ed(i)  &
+                       +   srpcoef(6)*sclfa*DCOS(del_u)*ey(i)  &
+                       +   srpcoef(7)*sclfa*DSIN(del_u)*ey(i)  &
+                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)  &
+                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)  
+
+END DO
+
+       ELSE 
+
+DO i=1,3
+     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
+                       +   srpcoef(2)*sclfa*ey(i)              &
+                       +   srpcoef(3)*sclfa*eb(i)              &
+                       +   srpcoef(4)*sclfa*DCOS(2*del_u)*ed(i)  &
+                       +   srpcoef(5)*sclfa*DSIN(2*del_u)*ed(i)  &
+                       +   srpcoef(6)*sclfa*DCOS(4*del_u)*ed(i)  &
+                       +   srpcoef(7)*sclfa*DSIN(4*del_u)*ed(i)  &
+                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)  &
+                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)
+
+END DO
+     
+       END IF
+
+     fx=-fsrp(1)
+     fy=-fsrp(2)
+     fz=-fsrp(3)
+
+END IF
+
+!----------------------------------------------------------------------------------------------
+
 ! Implement BW + ECOM model (To be worked on)
 ! ***********************************************************************
 ! IF (SRP_MOD == 4) THEN
-!      fxo =-Cr/MASS*Ps*sclfa*ed(1)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-!      fyo =-Cr/MASS*Ps*sclfa*ed(2)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-!      fzo =-Cr/MASS*Ps*sclfa*ed(3)*(X_SIDE*cosang(1)+Z_SIDE*cosang(3)+A_SOLAR*cosang(4))
-!     fx=-(fsrp(1) + fxo)
-!     fy=-(fsrp(2) + fyo)
-!     fz=-(fsrp(3) + fzo)
+    !  fxo =Cr/MASS*Ps*sclfa*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+A_SOLAR*cosang(4)*ed(1))
+    !  fyo =Cr/MASS*Ps*sclfa*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+A_SOLAR*cosang(4)*ed(2))
+    !  fzo =Cr/MASS*Ps*sclfa*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+A_SOLAR*cosang(4)*ed(3))
+    ! fx=-(fsrp(1) + lambda*fxo)
+    ! fy=-(fsrp(2) + lambda*fyo)
+    ! fz=-(fsrp(3) + lambda*fzo)
 
 ! END IF
      END IF 

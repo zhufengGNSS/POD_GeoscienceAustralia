@@ -8,7 +8,7 @@ MODULE m_satinfo
 Contains
 
 
-SUBROUTINE satinfo(mjd,prnnum, satsvn)
+SUBROUTINE satinfo(mjd,prnnum, satsvn, satblk)
 
 ! ------------------------------------------------------------------------------
 ! Purpose:    This subroutine is used to read the satellite info file satinfo.txt
@@ -20,9 +20,28 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
 !                 Satellite PRN
 !                         
 !        out:     Satellite SVN 
+!                 Satellite Block type
 !
+! Remarks:   BLOCK NUMBER (GPS):
+!                               1: BLOCK I
+!                               2: BLOCK II
+!                               3: BLOCK IIA
+!                               4: BLOCK IIR
+!                               5: BLOCK IIR-A
+!                               6: BLOCK IIR-B
+!                               7: BLOCK IIR-M
+!                               8: BLOCK IIF
 !
-! Remarks:
+!            BLOCK NUMBER (GLONASS):
+!                               101: GLONASS
+!                               102: GLONASS-M
+!                               103: GLONASS-K1
+!
+!            BLOCK NUMBER (BDS): 
+!                                21: MEO
+!                                22: IGSO
+!                                23: GEO
+!          
 !
 ! Author:     Tzupang Tseng
 !
@@ -39,11 +58,12 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
   !USE mdl_param, ONLY: satinfoplace ! Temporary deactivated
   IMPLICIT NONE
 
-! Dummy variables
+! variables
 ! ---------------
   REAL (KIND = prec_q)       :: mjd
   INTEGER(KIND = 4)          :: prnnum
   INTEGER(KIND = 4)          :: satsvn
+  INTEGER(KIND = 4)          :: satblk
 !
 ! Local Variables
 ! ---------------
@@ -163,10 +183,12 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn)
 
         if ( mjd .ge. st_time .and. mjd .le. end_time) then
          satsvn = satellite(icrx)%svn
+         satblk = satellite(icrx)%iblock
          exit
 
         elseif (st_time .gt. end_time .and. mjd .ge. st_time) then
          satsvn = satellite(icrx)%svn
+         satblk = satellite(icrx)%iblock
          exit
 
         end if
