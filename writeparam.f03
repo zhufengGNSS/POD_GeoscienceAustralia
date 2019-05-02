@@ -103,6 +103,7 @@ READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 !READ (line_ith, * , IOSTAT=ios_data) word1_ln, charN 
 ! ----------------------------------------------------------------------
 !PRINT *, "word1_ln: ", word1_ln
+!PRINT *, "line_ith: ", TRIM(ADJUSTL(line_ith))
 !print *,"param_id ", param_id
 
 ! ----------------------------------------------------------------------
@@ -110,16 +111,18 @@ READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 IF (word1_ln == param_id) THEN
 
 ! Write data to file | Write data line 
-WRITE (UNIT=UNIT_IN2, FMT=*, IOSTAT=ios) TRIM(ADJUSTL(param_id)), TRIM(param_aposteriori)
-!PRINT *, "param_aposteriori: ", param_aposteriori
+WRITE (UNIT=UNIT_IN2, FMT=*, IOSTAT=ios) TRIM(ADJUSTL(param_id)), '			', TRIM(param_aposteriori)
+!PRINT *, "WRITE Line: param_aposteriori: ", param_aposteriori
 
 Else
 
 ! Write data to file | Write data line 
 WRITE (UNIT=UNIT_IN2, FMT=*, IOSTAT=ios) TRIM(ADJUSTL(line_ith))
+!PRINT *, "WRITE Line: ", line_ith
  
 END IF
 ! ----------------------------------------------------------------------
+word1_ln = ''
 
 END DO
 

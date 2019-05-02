@@ -18,9 +18,9 @@
 ! - Dr. Thomas Papanikolaou, 25 June 2018
 ! 	Version with minor revisions
 ! - Dr. Thomas Papanikolaou, 30 November 2018
-! 	Precise Orbit Determination (POD) version including the estimation of empirical parameters (forces related)
+! 	Precise Orbit Determination (POD) version: Estimation of empirical forces parameters (bias, cycle-per-rev) that lead to mm-cm level orbital accuracy w.r.t. IGS precise orbits
 ! - Dr. Thomas Papanikolaou, 30 January 2019
-! 	POD version including the upgrade of the ocean tides effect with impact on longer orbit arcs e.g. 3 days 
+! 	POD version upgrade: Ocean tides effect revision that has significant impact on longer orbit arcs e.g. 3 days 
 ! ----------------------------------------------------------------------
 
 
@@ -31,7 +31,9 @@
       USE m_orbext
       USE m_writearray
       USE m_statorbit
-      USE m_readmatrixfile
+      !USE m_readmatrixfile
+      USE m_writeorbit
+      USE m_writesp3_hd
       IMPLICIT NONE
 
 	  
@@ -56,6 +58,8 @@
       INTEGER (KIND = prec_int2) :: AllocateStatus
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: planet_matrix
+      CHARACTER (LEN=3) :: sat_prn
+      INTEGER (KIND = prec_int2) :: sat_vel	  
 
 	  
 ! CPU Time
@@ -100,10 +104,19 @@ CALL cpu_time (CPU_t0)
  
 ! ----------------------------------------------------------------------
 ! Configuration files triples
-orbconfig = 0
-EQMfname1 = 'IGS_test_G01_EQM_wot.in'
-!EQMfname1 = 'IGS_test_G02_EQM_wot.in'
+! ----------------------------------------------------------------------
+! Single or Triple
+orbconfig = 1
 
+! WOT
+!EQMfname1 = 'IGS_test_G01_EQM_wot.in'
+!EQMfname1 = 'IGS_test_G02_EQM_wot.in'
+! NOT-NST
+EQMfname1 = 'IGS_test_G01_gfm_egm2008.in'
+EQMfname1 = 'IGS_test_G02_gfm_egm2008.in'
+
+
+! Configuration files triples
 if (orbconfig == 1) then 
 ! G01
 EQMfname1 = 'IGS_test_G01_EQM_not_nst.in'
@@ -351,9 +364,11 @@ PRINT *,"Write orbit matrices to output files"
 ! ----------------------------------------------------------------------
 ! Estimated Orbit or Predicted Orbit
 filename = "orb_icrf.out"
-Call writearray (orb_icrf, filename)
+!Call writearray (orb_icrf, filename)
+Call writeorbit (orb_icrf, filename)
 filename = "orb_itrf.out"
-Call writearray (orb_itrf, filename)
+!Call writearray (orb_itrf, filename)
+Call writeorbit (orb_itrf, filename)
 
 ! Variational Equations matrices
 If (ESTIM_mode_glb > 0) then
@@ -362,6 +377,20 @@ Call writearray (veqSmatrix, filename)
 filename = "VEQ_Pmatrix.out"
 Call writearray (veqPmatrix, filename)
 End IF
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Write orbit matrices to ouput files in sp3 format
+PRINT *,"Write orbit matrices in sp3 format files"
+! ----------------------------------------------------------------------
+! Estimated Orbit or Predicted Orbit
+filename = "G01.sp3"
+!SUBROUTINE writesp3_hd (wrtArray, filename, sat_prn, sat_vel)
+!Call writearray (orb_icrf, filename)
+sat_prn = 'G01'
+sat_vel = 1
+Call writesp3_hd (orb1, filename,sat_prn, sat_vel)
 ! ----------------------------------------------------------------------
 
 

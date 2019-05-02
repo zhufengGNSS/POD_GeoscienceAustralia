@@ -5,8 +5,8 @@ SUBROUTINE crf_bff (r_CRS, v_CRS, Yangle, Rcrf_bff, Rrtn_bff)
 ! SUBROUTINE: crf_bff.f90
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Transformation between inertial frame and body-fixed frame (vice-versa)
-!  Computation of the Sun angle with respect to the orbital plane
+!  Transformation between inertial frame and body-fixed frame
+!  Transformation between orbital frame and body-fixed frame 
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - r_sat: 			Satellite position vector (m) 
@@ -14,8 +14,8 @@ SUBROUTINE crf_bff (r_CRS, v_CRS, Yangle, Rcrf_bff, Rrtn_bff)
 ! - Yangle:			Yaw angle (degrees)
 !
 ! Output arguments:
-! - R_crf_bf:		Tranformation matrix: Inertial frame (GCRF) to Body-fixed frame
-! 
+! - Rcrf_bff:		Transformation matrix: Inertial frame (GCRF) to Body-fixed frame
+! - Rrtn_bff:		Transformation matrix: Orbital frame to Body-fixed frame
 ! ----------------------------------------------------------------------
 ! Thomas D. Papanikolaou, Geoscience Australia                 June 2016
 ! ----------------------------------------------------------------------
@@ -23,7 +23,7 @@ SUBROUTINE crf_bff (r_CRS, v_CRS, Yangle, Rcrf_bff, Rrtn_bff)
 
       USE mdl_precision
       USE mdl_num
-      USE mdl_arr
+      !USE mdl_arr
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -92,31 +92,31 @@ SUBROUTINE crf_bff (r_CRS, v_CRS, Yangle, Rcrf_bff, Rrtn_bff)
 
 ! ----------------------------------------------------------------------
 ! Allocatable arrays
-      ALLOCATE (R1(3,3), STAT = AllocateStatus)
-      ALLOCATE (R2(3,3), STAT = AllocateStatus)
-      ALLOCATE (R3(3,3), STAT = AllocateStatus)
-      IF (AllocateStatus /= 0) THEN
-         PRINT *, "Error: Not enough memory"
-         PRINT *, "Error: SUBROUTINE crf_bff.f90"
+!      ALLOCATE (R1(3,3), STAT = AllocateStatus)
+!      ALLOCATE (R2(3,3), STAT = AllocateStatus)
+!      ALLOCATE (R3(3,3), STAT = AllocateStatus)
+!      IF (AllocateStatus /= 0) THEN
+!         PRINT *, "Error: Not enough memory"
+!         PRINT *, "Error: SUBROUTINE crf_bff.f90"
 !         STOP "*** Not enough memory ***"
-      END IF  
+!      END IF  
 ! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
 ! Orbital to body-fixed frame
-      R1 = Rz_yaw
-      R2 = Drtn_bff
-      CALL matrix_RxR
-      Rrtn_bff = R3
+      !R1 = Rz_yaw
+      !R2 = Drtn_bff
+      !CALL matrixRxR (R1, R2, R3)								
+      !Rrtn_bff = R3
       ! matrix_RxR equivalent to MATMUL 
       Rrtn_bff = MATMUL(Rz_yaw, Drtn_bff)
 	  
 ! Inertial to body-fixed frame
-      R1 = Rrtn_bff
-      R2 = Rcrf_rtn
-      CALL matrix_RxR
-      Rcrf_bff = R3
+      !R1 = Rrtn_bff
+      !R2 = Rcrf_rtn
+      !CALL matrix_RxR (R1, R2, R3)
+      !Rcrf_bff = R3
       ! matrix_RxR equivalent to MATMUL 
       Rcrf_bff = MATMUL(Rrtn_bff, Rcrf_rtn)
 ! ----------------------------------------------------------------------

@@ -809,7 +809,7 @@ C values of the nominal yaw angle (YANGLE) and the eclipsing yaw angle (PHI)
       yaw_angle(1) = YANGLE
       yaw_angle(2) = PHI
 	  
-	  
+      
 1     RETURN
 C
       END

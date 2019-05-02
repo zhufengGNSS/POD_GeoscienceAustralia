@@ -12,15 +12,15 @@
 ! Created:	13 September 2017
 ! ----------------------------------------------------------------------
 ! POD version major modifications highlights: 
-! Last modified 
+! Last modified  
 ! - Dr. Thomas Papanikolaou, 3 May 2018
 ! 	Preliminary version of GNSS dynamic orbit determination	
 ! - Dr. Thomas Papanikolaou, 25 June 2018
 ! 	Version with minor revisions
 ! - Dr. Thomas Papanikolaou, 30 November 2018
-! 	Precise Orbit Determination (POD) version including the estimation of empirical parameters (forces related)
+! 	Precise Orbit Determination (POD) version: Estimation of empirical forces parameters (bias, cycle-per-rev) that lead to mm-cm level orbital accuracy w.r.t. IGS precise orbits
 ! - Dr. Thomas Papanikolaou, 30 January 2019
-! 	POD version including the upgrade of the ocean tides effect with impact on longer orbit arcs e.g. 3 days 
+! 	POD version upgrade: Ocean tides effect revision that has significant impact on longer orbit arcs e.g. 3 days 
 ! ----------------------------------------------------------------------
 
 
@@ -30,6 +30,7 @@
       USE m_orbdet
       USE m_orbext
       USE m_writearray
+      USE m_writeorbit
       IMPLICIT NONE
 
 	  
@@ -94,9 +95,11 @@ PRINT *,"Write orbit matrices to output files"
 ! ----------------------------------------------------------------------
 ! Estimated Orbit or Predicted Orbit
 filename = "orb_icrf.out"
-Call writearray (orb_icrf, filename)
+!Call writearray (orb_icrf, filename)
+Call writeorbit (orb_icrf, filename)
 filename = "orb_itrf.out"
-Call writearray (orb_itrf, filename)
+!Call writearray (orb_itrf, filename)
+Call writeorbit (orb_itrf, filename)
 
 ! Variational Equations matrices
 If (ESTIM_mode_glb > 0) then
