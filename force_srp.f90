@@ -99,17 +99,18 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
       REAL (KIND = prec_q) :: A_SOLAR
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
-
+      REAL (KIND = 8)      :: II, KN, U
 ! ----------------------------------------------------------------------
 ! Sun-related variables
 ! ----------------------------------------------------------------------
-       REAL (KIND = prec_q) :: u_sun,beta,del_u
+       REAL (KIND = prec_q) :: u_sun
+       REAL (KIND = prec_q) :: beta,del_u
        REAL (KIND = prec_q), DIMENSION(3) :: r_sun1,r_sun2
 
 ! ----------------------------------------------------------------------
 ! Numerical Constants
-      Ps = 4.56D-6 ! (Nm^-2)
-      Cr = 1.4 ! SRP coefficient ranges from 1.3 to 1.5
+      Ps = 4.5567D-6 ! (Nm^-2)
+      Cr = 1.5 ! SRP coefficient ranges from 1.3 to 1.5
       AU = 1.496d11 ! (m)
       Pi = 4*atan(1.0d0)
     ex_i = 0 ! change the definition of the unit vector ex 
@@ -217,6 +218,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
 
 ! Using the BODY-X univector from Kouba routine to redefine the ey for the satellite eclipsed
 IF(ex_i .gt. 0) THEN
+
       ex(1)=eBX_ecl(1)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
       ex(2)=eBX_ecl(2)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
       ex(3)=eBX_ecl(3)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
@@ -242,7 +244,10 @@ END IF
       u_sat = kepler(9)*Pi/180.d0
       i_sat = kepler(3)*Pi/180.d0
       omega_sat = kepler(4)*Pi/180.d0
-
+!      CALL XYZELE(GM, r, v, II, U, KN)
+!      u_sat = U
+!      i_sat = II
+!      omega_sat = KN      
 ! compute the sun position in the satellite orbit plane by rotating omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
       do i=1,3
@@ -291,7 +296,8 @@ END IF
       else if(del_u*180/Pi .lt.0.0d0) then
       del_u=del_u+2*Pi
       end if
-!print*,'del_u=',del_u*180/Pi
+
+!print*,'del_u=, lambda=',del_u*180/Pi, lambda
 
 !========================================
 ! angles between ed and each surface(k)
@@ -600,11 +606,14 @@ End If
      fz=-fsrp(3)
 
 
+
 ! use the shadow coefficient for scaling the SRP effect
 !-------------------------------------------------------
 
 !IF (abs(beta*180.0d0/Pi) .lt. 13.87 .and. del_u*180.0d0/Pi .gt. 167 .and. del_u*180.0d0/Pi .lt. 193) then
 IF (lambda .lt. 1)THEN
+!print*,'beta=, lambda=, del_u=', beta*180/Pi, lambda, del_u*180/Pi
+
 
 DO i=1,3
  fsrp(i)=0.0d0
@@ -612,7 +621,13 @@ END DO
 
 srpcoef(1) = lambda*srpcoef(1)
 
+
         IF (ECOM_param_glb == 1 ) then
+ fxo=lambda*sclfa*Ps/MASS*(0.7*X_SIDE*cosang(1)*ex(1)+0.3*Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
+ fyo=lambda*sclfa*Ps/MASS*(0.7*X_SIDE*cosang(1)*ex(2)+0.3*Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
+ fzo=lambda*sclfa*Ps/MASS*(0.7*X_SIDE*cosang(1)*ex(3)+0.3*Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
+
+
 DO i=1,3
      fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
                        +   srpcoef(2)*sclfa*ey(i)              &
@@ -627,6 +642,10 @@ DO i=1,3
 END DO
 
        ELSE 
+ fxo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(1)+0.5*Z_SIDE*cosang(3)*ez(1)+0.1*A_SOLAR*cosang(4)*ed(1))
+ fyo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(2)+0.5*Z_SIDE*cosang(3)*ez(2)+0.1*A_SOLAR*cosang(4)*ed(2))
+ fzo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(3)+0.5*Z_SIDE*cosang(3)*ez(3)+0.1*A_SOLAR*cosang(4)*ed(3))
+
 
 DO i=1,3
      fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
@@ -646,22 +665,16 @@ END DO
      fx=-fsrp(1)
      fy=-fsrp(2)
      fz=-fsrp(3)
+!     fx=-(fsrp(1) + fxo)
+!     fy=-(fsrp(2) + fyo)
+!     fz=-(fsrp(3) + fzo)
+
 
 END IF
 
 !----------------------------------------------------------------------------------------------
 
-! Implement BW + ECOM model (To be worked on)
-! ***********************************************************************
-! IF (SRP_MOD == 4) THEN
-    !  fxo =Cr/MASS*Ps*sclfa*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+A_SOLAR*cosang(4)*ed(1))
-    !  fyo =Cr/MASS*Ps*sclfa*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+A_SOLAR*cosang(4)*ed(2))
-    !  fzo =Cr/MASS*Ps*sclfa*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+A_SOLAR*cosang(4)*ed(3))
-    ! fx=-(fsrp(1) + lambda*fxo)
-    ! fy=-(fsrp(2) + lambda*fyo)
-    ! fz=-(fsrp(3) + lambda*fzo)
 
-! END IF
      END IF 
 
 ! end of ECOM-based model

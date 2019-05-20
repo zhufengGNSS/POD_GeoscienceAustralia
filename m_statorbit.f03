@@ -119,7 +119,8 @@ Nepochs = sz1
 sz3 = size(ds2, DIM = 1)
 sz4 = size(ds2, DIM = 2)
 Nepochs2 = sz3
-
+!print*,'sz1, sz2 = ',sz1, sz2
+!print*,'sz3, sz4 = ',sz3, sz4
 ! ----------------------------------------------------------------------
 ! Test collumns dimension
 If (sz2 .NE. sz4) Then

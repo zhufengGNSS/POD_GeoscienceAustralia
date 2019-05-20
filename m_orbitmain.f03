@@ -20,7 +20,7 @@ MODULE m_orbitmain
 Contains
 	  
 	  
-SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
+SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, orbdiff)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE:	orbitmain.f03
@@ -45,6 +45,7 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
 !				- Velocity vector (m/sec)
 ! - veqSmatrix:	State trasnition matrix obtained from the Variational Equations solution based on numerical integration methods
 ! - veqPmatrix: Sensitivity matrix obtained from the Variational Equations solution based on numerical integration methods
+! - orbdiff   : [MJD PRN BLOCKTYPE lambda beta(deg) del_u(deg) yaw(deg) ANGX(deg) ANGY(deg) ANGZ(deg) dR(m) dT(m) dN(m) FR(m^2/s) FT(m^2/s) FN(m^2/s)] 
 ! ----------------------------------------------------------------------
 ! Note 1:
 ! The time scale of the 2 first collumns of the orbit arrays (MJD and Seoncds since 00h) 
@@ -54,6 +55,8 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
 ! Author :	Dr. Thomas Papanikolaou
 !			Geoscience Australia, Frontier-SI
 ! Created:	21 March 2019
+!
+! Changes:      20-05-2019 Tzupang Tseng: output the orbital information for data analysis
 ! ----------------------------------------------------------------------
 
 
@@ -88,6 +91,7 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
 	  CHARACTER (LEN=3), ALLOCATABLE :: PRN_array(:)
 	  CHARACTER (LEN=3) :: PRN_isat
 	  INTEGER :: ios
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbdiff
 ! ----------------------------------------------------------------------
 
 
@@ -105,7 +109,7 @@ WRITE (*,FMT='(A9, 3F17.4)'),"RMS XYZ", Vrms
 If (ORBEXT_glb > 0) Then
 ! ----------------------------------------------------------------------
 ! External Orbit Comparison (optional)
-Call orbext(EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT)
+Call orbext(EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT, orbdiff)
 ! ----------------------------------------------------------------------
 PRINT *,"External Orbit comparison"
 print *,"Orbit comparison: ICRF"

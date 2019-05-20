@@ -84,7 +84,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
 
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
      ! REAL (KIND = prec_q) :: Asrp(3,9)
-      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,ez,ECOM_ey
+      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,ez,ev,en
       REAL (KIND = prec_q), DIMENSION(3) :: yy
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
       INTEGER              :: i,j,k,ECOM
@@ -103,7 +103,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
       INTEGER (KIND = prec_int8) :: N_param, PD_Param_ID
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE,INTENT(OUT) :: Asrp
 ! ----------------------------------------------------------------------
-
+      REAL (KIND = 8)      :: II, KN, U
 
 ! ----------------------------------------------------------------------
 ! Numerical Constants
@@ -145,12 +145,26 @@ END IF
 
       CALL productcross (ed,ey,eb)
 
+! the orbit normal vector
+!------------------------
+
+      ev(1)=v(1)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+      ev(2)=v(2)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+      ev(3)=v(3)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+
+     CALL productcross (er,ev,en)
+
+
 
 ! computation of the satellite argument of latitude and orbit inclination
       CALL kepler_z2k (r,v,GM,kepler)
       u_sat = kepler(9)*Pi/180.d0
       i_sat = kepler(3)*Pi/180.d0
       omega_sat = kepler(4)*Pi/180.d0
+!      CALL XYZELE(GM, r, v, II, U, KN)
+!      u_sat = U
+!      i_sat = II
+!      omega_sat = KN
 
 ! compute the sun position in the satellite orbit plane by rotating big Omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
@@ -202,10 +216,6 @@ END IF
       ELSE IF(del_u*180/Pi .LT.0.0d0) THEN
       del_u=del_u+2*Pi
       END IF 
-     !write (*,*) beta*180.0d0/Pi, del_u*180.0d0/Pi
-
-
-
 
 ! ----------------------------------------------------------------------
 ! Partial derivatives w.r.t. unknown parameters
@@ -431,7 +441,7 @@ End If
 !-------------------------------------------------------
 IF (lambda .lt. 1) THEN
 !IF (abs(beta*180.0d0/Pi) .lt. 13.87 .and. del_u*180.0d0/Pi .gt. 167 .and. del_u*180.0d0/Pi .lt. 193) then
-
+!print*,'lambda=, del_u=', lambda, del_u*180/Pi
 Asrp(1:3,1) = lambda*Asrp(1:3,1)
 
 END IF
