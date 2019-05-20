@@ -58,6 +58,8 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! ----------------------------------------------------------------------
 ! OUT
       REAL (KIND = prec_d), INTENT(OUT) :: SFx, SFy, SFz
+
+      REAL (KIND = prec_q) :: lambda
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -133,7 +135,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
       INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
       REAL (KIND = prec_d) :: Yawangle
-      REAL (KIND = prec_q) :: lambda
+   
 
 
 
@@ -616,7 +618,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 srpid =  SRP_MOD_glb
 
 
-CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, satsvn, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
+CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, satsvn, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
@@ -631,7 +633,7 @@ if (FMOD_NONGRAV(2) > 0) Then
 
 CALL force_erp (mjd, PRN_no, satsvn, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
 Ferp_icrf = (/ fx, fy, fz /)
-
+!print*,'force_erp=', sqrt(fx**2+fy**2+fz**2)
 Else IF (FMOD_NONGRAV(2) == 0) Then
 
         Ferp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)

@@ -23,6 +23,8 @@
 ! 	POD version upgrade: Ocean tides effect revision that has significant impact on longer orbit arcs e.g. 3 days 
 ! - Dr. Thomas Papanikolaou, 29 March 2019
 ! 	POD version upgrade to a multi-GNSS multi-satellite POD version 
+! - Dr. Tzupang Tseng, 20 May 2019
+!       Output the orbital information for data analysis (orbdiff2.out)
 ! ----------------------------------------------------------------------
 
 
@@ -34,6 +36,7 @@
       USE m_orbdet
       USE m_orbext
       USE m_writearray
+      USE m_writearray2
 !      USE m_writeorbit
 	  USE mdl_planets
 	  USE mdl_tides
@@ -84,6 +87,8 @@
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbit_resR  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbit_resT  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbit_resN  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbdiff
+      REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbdiff2
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -266,14 +271,14 @@ Call write_prmfile (ORBMODfname, fname_id, param_id, param_value)
 !print *,"param_value ", param_value
 
 
-
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 ! Precise Orbit Determination :: Multi-GNSS multi-satellites POD loop
 ! ----------------------------------------------------------------------
+!Nsat = 12
 ! ----------------------------------------------------------------------
 Do isat = 1 , Nsat
- !Do isat = 18,18 
+! Do isat = 1,4
 ! ----------------------------------------------------------------------
 ! Modify/Rewrite the Configuration files
 ! ----------------------------------------------------------------------
@@ -322,9 +327,8 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 
 ! ----------------------------------------------------------------------
 ! Precise Orbit Determination :: main subroutine
-CAll orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
+CAll orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, orbdiff)
 ! ----------------------------------------------------------------------
-
 print *," "
 print *," "
 
@@ -363,6 +367,11 @@ orbit_resR(:,1:2) = Vres(:,1:2)
 orbit_resT(:,1:2) = Vres(:,1:2)
 orbit_resN(:,1:2) = Vres(:,1:2)
 
+sz1 = size(orbdiff, DIM = 1)
+sz2 = size(orbdiff, DIM = 2)
+
+ALLOCATE (orbdiff2(Nsat, sz1, sz2), STAT = AllocateStatus)
+orbdiff2=0.0d0
 !print *,"isat", isat
 !print *,"orbit_veq", orbit_veq
 !print *,"Nepochs", Nepochs
@@ -373,7 +382,7 @@ orbit_resN(:,1:2) = Vres(:,1:2)
 end if
 ! ----------------------------------------------------------------------
 
-
+orbdiff2 (isat,:,:) = orbdiff(:,:)
 ! ----------------------------------------------------------------------
 ! Orbit & Partial Derivatives matrix :: Write Orbit/Partials results from Satellite(isat) 
 ! ----------------------------------------------------------------------
@@ -416,6 +425,7 @@ End Do
 End Do
 
 
+
 ! ----------------------------------------------------------------------
 ! Write satellite orbits and partial derivatives to one .orb output file (internal format)
 ! ----------------------------------------------------------------------
@@ -442,6 +452,8 @@ Call writearray (orbit_resT, filename)
 filename = "orbit_residuals_N.out"
 Call writearray (orbit_resN, filename)
 ! ----------------------------------------------------------------------
+filename = "orbdiff2.out"
+Call writearray2 (orbdiff2, filename)
 
 
 !isat = 1

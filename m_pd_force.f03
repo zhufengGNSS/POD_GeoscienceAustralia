@@ -88,7 +88,7 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       REAL (KIND = prec_d), DIMENSION(3) :: SF, SFgrav, SFnongrav, SFemp    
       REAL (KIND = prec_q), DIMENSION(3) :: Fgrav_itrf , Fgrav_icrf, Fplanets_icrf, Ftides_icrf, Frelativity_icrf
       REAL (KIND = prec_d), DIMENSION(3) :: Fsrp_icrf
-      REAL (KIND = prec_d) :: fx, fy, fz
+      REAL (KIND = prec_d) :: fx, fy, fz, mjd_sav
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: GMearth, aEarth
       INTEGER (KIND = prec_int8) :: n_max, m_max
@@ -147,7 +147,7 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
       REAL (KIND = prec_d) :: Yawangle
       REAL (KIND = prec_q) :: lambda
-
+!      SAVE :: mjd_sav
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -561,7 +561,7 @@ CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
 !                 0 < lambda < 1 : In PENUMBRA AREA
 ! ----------------------------------------------------------------------
 CALL shadow (rsat_icrf, rSun, rMoon, lambda)
- 
+!print*, mjd, lambda 
 ! ----------------------------------------------------------------------
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
@@ -587,7 +587,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 ! SRP model
 srpid =  SRP_MOD_glb
 
-CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, satsvn, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
+CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, satsvn, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 ALLOCATE (PD_ECOM_param(3,NPARAM_glb), STAT = AllocateStatus)

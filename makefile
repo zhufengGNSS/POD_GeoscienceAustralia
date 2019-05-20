@@ -10,6 +10,7 @@ FCFLAGS = -llapack -lblas
 FLFLAGS = -L/usr/lib64
 
 SRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_planets.f90 mdl_tides.f90 mdl_arr.f90 m_writearray.f03 \
+m_writearray2.f03 XYZELE.f \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
 m_writeorbit_multi.f03 m_write_orb2sp3.f03\
 m_matrixinv.f03 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
@@ -67,7 +68,8 @@ m_writedata.f03 m_orbC2T.f03 m_orbT2C.f03 m_obsorbT2C.f03 \
 prm_read.f03 prm_gravity.f03 prm_planets.f03 prm_ocean.f03 \
 prm_orbext.f03 prm_pseudobs.f03 \
 prm_main.f03 prm_grav.f03 prm_nongrav.f03 \
-m_statist.f03 m_statdelta.f03 m_statorbit.f03 \
+m_statist.f03 m_statdelta.f03 m_statorbit.f03 m_statorbit2.f03 \
+m_orbinfo.f90 \
 m_orbitmain.f03 \
 m_orbdet.f03 m_orbext.f03 \
 main_pod.f03
