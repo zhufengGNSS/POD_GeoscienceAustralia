@@ -20,7 +20,9 @@ MODULE m_orbitmain
 Contains
 	  
 	  
-SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
+!SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
+SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, &
+					  dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE:	orbitmain.f03
@@ -62,6 +64,7 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
       USE mdl_param
       USE m_orbdet
       USE m_orbext
+      USE m_orbext2
       USE m_writearray
       USE m_writeorbit
       IMPLICIT NONE
@@ -89,6 +92,9 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
 	  CHARACTER (LEN=3) :: PRN_isat
 	  INTEGER :: ios
 ! ----------------------------------------------------------------------
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_icrf, dorb_itrf 
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_RTN, dorb_Kepler
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -105,7 +111,9 @@ WRITE (*,FMT='(A9, 3F17.4)'),"RMS XYZ", Vrms
 If (ORBEXT_glb > 0) Then
 ! ----------------------------------------------------------------------
 ! External Orbit Comparison (optional)
-Call orbext(EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT)
+!Call orbext (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT)
+CALL orbext2(EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT, &
+              dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf)
 ! ----------------------------------------------------------------------
 PRINT *,"External Orbit comparison"
 print *,"Orbit comparison: ICRF"

@@ -67,8 +67,12 @@ param_aposteriori = param_value
 
 ! ----------------------------------------------------------------------
 ! Open files
-OPEN (UNIT=UNIT_IN , FILE=TRIM(fname1), ACTION="READ", IOSTAT = ios)
-OPEN (UNIT=UNIT_IN2, FILE=TRIM(fname2), ACTION="WRITE", IOSTAT = ios)
+OPEN (UNIT=UNIT_IN , FILE=fname1, ACTION="READ", IOSTAT = ios)
+OPEN (UNIT=UNIT_IN2, FILE=fname2, ACTION="READWRITE", POSITION="REWIND", IOSTAT = ios)
+
+!OPEN (UNIT=UNIT_IN , FILE=TRIM(fname1), ACTION="READ", IOSTAT = ios)
+!OPEN (UNIT=UNIT_IN2, FILE=TRIM(fname2), ACTION="READWRITE", POSITION="REWIND", IOSTAT = ios)
+!OPEN (UNIT=UNIT_IN2, FILE=TRIM(fname2), ACTION="WRITE", IOSTAT = ios)
 !OPEN (UNIT=UNIT_IN2, FILE=TRIM(fname2), ACTION="WRITE", POSITION="REWIND", IOSTAT = ios)
 !OPEN (UNIT=UNIT_IN , FILE=TRIM(fname1), IOSTAT = ios)
 !OPEN (UNIT=UNIT_IN2, FILE=TRIM(fname2), IOSTAT = ios)
@@ -126,9 +130,9 @@ word1_ln = ''
 
 END DO
 
-CLOSE (UNIT=UNIT_IN)
-
 ENDFILE (UNIT=UNIT_IN2) 
+
+CLOSE (UNIT=UNIT_IN)
 CLOSE (UNIT=UNIT_IN2)
 ! Close of files
 ! ----------------------------------------------------------------------

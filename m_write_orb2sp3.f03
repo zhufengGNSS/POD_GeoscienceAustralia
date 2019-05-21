@@ -19,7 +19,7 @@ MODULE m_write_orb2sp3
 Contains
 
 
-SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, filename, sat_vel)
+SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, sp3_fname, sat_vel)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: writesp3_hd 
@@ -28,8 +28,8 @@ SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, filename, sat_vel)
 !  Write orbit sp3 format header 
 ! ----------------------------------------------------------------------
 ! Input arguments:
-! - ORBmatrix:       Input allocatable array
-! - filename:       file name to be used for writing array data
+! - ORBmatrix:       Orbits dynamic allocatable array (3-dimensional)
+! - PRNmatrix:       Satellites' PRN numbers allocatable array
 !
 ! Output arguments:
 !
@@ -48,8 +48,7 @@ SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, filename, sat_vel)
 ! IN
       REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:,:), ALLOCATABLE :: ORBmatrix 
 	  CHARACTER (LEN=3), ALLOCATABLE, INTENT(IN) :: PRNmatrix(:)
-      CHARACTER (LEN=100), INTENT(IN) :: filename
-      !CHARACTER (LEN=3), INTENT(IN) :: sat_prn
+      CHARACTER (LEN=100), INTENT(IN) :: sp3_fname
       INTEGER (KIND = prec_int2), INTENT(IN) :: sat_vel	  
 ! OUT
 ! ----------------------------------------------------------------------
@@ -69,7 +68,7 @@ SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, filename, sat_vel)
       REAL (KIND = prec_q) :: wrtArrayLN 
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int2) :: vel
-      CHARACTER (LEN=100) :: fmt_epoch, fmt_pos, fmt_vel
+      CHARACTER (LEN=100) :: fmt_epoch, fmt_pos, fmt_vel, fmt_line
 
       REAL (KIND = prec_q) :: MJD_ti, Sec_00
       CHARACTER (LEN=3) :: PRN_ti
@@ -87,9 +86,57 @@ SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, filename, sat_vel)
       INTEGER (KIND = prec_int8) :: Nepochs, Nelem, Nsat
       INTEGER (KIND = prec_int8) :: i_sat
 ! ----------------------------------------------------------------------
+      CHARACTER (LEN=1) :: orbvector
+      CHARACTER (LEN=5) :: REFRAME
+      CHARACTER (LEN=3) :: TIMESYS
+      CHARACTER (LEN=3) :: ORBTYPE
+      CHARACTER (LEN=4) :: Agency
+      CHARACTER(LEN=11) :: PCV_sol
+      CHARACTER (LEN=9) :: OceanTide_Load, AtmTide_Load
+      CHARACTER (LEN=3) :: ORB_C, CLK_C
+! ----------------------------------------------------------------------
+      CHARACTER (LEN=3) :: PRN_write
+      CHARACTER (LEN=300) :: wrt_line
+      CHARACTER (LEN=6) :: wrt_line_0
+      INTEGER (KIND = prec_int8) :: GPS_week, GPSweek_mod1024
+      REAL (KIND = prec_d) :: GPS_wsec
+      REAL (KIND = prec_d) :: Interval
+      INTEGER (KIND = prec_int8) :: Nsat_17frac, Nsat_lines, j17
+      CHARACTER (LEN=1) :: char1
+      INTEGER (KIND = prec_int2) :: num1
+! ----------------------------------------------------------------------
 
 
 UNIT_IN = 7  												
+
+
+! ----------------------------------------------------------------------
+! Orbit Features to be written in the sp3 orbit header
+! ----------------------------------------------------------------------
+! Orbit position or velocity vector Flag
+If (sat_vel == 0) Then
+	orbvector = 'P'
+Elseif (sat_vel == 1) Then
+	orbvector = 'V'
+End IF 	
+
+! Orbit Reference Frame
+!REFRAME = 'IGS08'
+REFRAME = 'ITRF '
+! Time System
+TIMESYS = 'GPS'
+! Orbit Type
+ORBTYPE = 'FIT'
+ORBTYPE = 'INT'
+
+Agency  = '  GA'
+
+PCV_sol =        'N/A        '
+OceanTide_Load = 'FES2004  '
+AtmTide_Load =   'NONE     '
+ORB_C = 'CoM'
+CLK_C = 'N/A'
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -97,13 +144,13 @@ UNIT_IN = 7
 ! ----------------------------------------------------------------------
 !*  2010 12 25  0  0  0.0000 
 !PG01  -6582.270015  18452.592641 -17946.851511    -67.214659  6  9  8  87       
-fmt_epoch = '(A3,I5.4,4I3.2,F11.8)'
+!fmt_epoch = '(A3,I5.4,4I3.2,F11.8)'
+fmt_epoch = '(A3,I4,A1, I2,A1, I2,A1, I2,A1 I2,A1 , F11.8)'
 !fmt_pos = '(A1,A1,I2.2,4F14.6,A)'
 !fmt_vel = '(A1,A1,I2.2,4F14.6,A)'
-fmt_pos = '(A1,A3,A1,4F14.6)'
-fmt_vel = '(A1,A3,A1,4F14.6)'
+fmt_pos = '(A1,A3,4F14.6)'
+fmt_vel = '(A1,A3,4F14.6)'
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Orbit array dimensions
@@ -115,26 +162,204 @@ Nelem   = sz2
 Nsat    = sz3
 ! ----------------------------------------------------------------------
 
- 
-
 ! ----------------------------------------------------------------------
 ! Writing satellite velocity vector (optional)
+! ----------------------------------------------------------------------
 vel = sat_vel
 ! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
 ! Open file
-      OPEN (UNIT=UNIT_IN,FILE=filename,ACTION="WRITE",POSITION="REWIND", IOSTAT=ios)
+      OPEN (UNIT=UNIT_IN,FILE=sp3_fname,ACTION="WRITE",POSITION="REWIND", IOSTAT=ios)
       IF (ios /= 0) THEN
-         PRINT *, "Error in opening file:", filename
+         PRINT *, "Error in opening file:", sp3_fname
          PRINT *, "OPEN IOSTAT=", ios
       END IF
 ! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
-! Write data to file | Line by line	  
+! Write Header of the sp3 file
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Initial Epoch 
+! ----------------------------------------------------------------------
+! MJD of epoch (including fraction of the day)
+MJD_ti = ORBmatrix(1,1,1)
+! Sec of Day (since 0h)
+Sec_00 = ORBmatrix(1,2,1)
+
+! MJD of Epoch (including fraction of the day)
+DJ1 = 2400000.5D0
+DJ2 = MJD_ti
+Call iau_JD2CAL ( DJ1, DJ2, IY, IM, ID, FD, J )
+
+year  = IY
+month = IM
+day   = ID
+
+if (1<0) then
+hour_ti = INT(FD * 24.0D0) 
+min_ti  = INT(FD * 24.0D0 * 60.0D0)
+sec_ti  = (FD * 24.0D0 * 60.0D0 * 60.0D0)
+else
+hour_ti = INT(Sec_00 / (60.0D0 * 60.0D0))
+min_ti  = INT(Sec_00/60.0D0 - hour_ti*60.0D0)  
+sec_ti  = (Sec_00 - hour_ti*3600.0D0 - min_ti*60.D0)
+end if
+
+! GPS Week number and seconds
+CALL time_GPSweek (MJD_ti , GPS_week, GPS_wsec, GPSweek_mod1024)
+! ----------------------------------------------------------------------
+! Epochs Interval
+Interval = ORBmatrix(2,2,1) - ORBmatrix(1,2,1)
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Line 1
+! ----------------------------------------------------------------------
+!fmt_line = '(A2,A1,I4,A1, I2.2,A1, I2.2,A1, I2.2,A1, I2.2,A1, F11.8)'
+!WRITE (UNIT=UNIT_IN,FMT=*,IOSTAT=ios_ith) '#d', orbvector, year,' ', month,' ',day,' ', hour_ti,' ', min_ti,' ', sec_ti
+!fmt_line = '(A2, I5.4, 4I3.2, F11.8,A1, I7,A1, A5,A1, A5,A1, A4)'
+fmt_line = '(A2, A1, I4,A1, I2,A1,I2,A1,I2,A1,I2,A1, F11.8,A1, I7,A1, A5,A1, A5,A1, A3,A1, A4)'
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '#d', orbvector, year,' ',   & 
+       month,' ', day,' ', hour_ti,' ', min_ti,' ', sec_ti,' ', Nepochs,' ', 'ORBIT',' ', REFRAME,' ', ORBTYPE,' ', Agency 
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Line 2 :: GPS Week and Seconds, Modified Julian Day Number and fraction of the day
+! ----------------------------------------------------------------------
+fmt_line = '(A2,A1, I4,A1, F15.8,A1, F14.8,A1, I5,A1, F15.13)'
+!WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '##',' ', GPS_week,' ',  GPS_wsec,' ', INT(MJD_ti),' ', (MJD_ti-INT(MJD_ti))    
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '##',' ', &
+       GPS_week,' ',  GPS_wsec,' ', Interval,' ', INT(MJD_ti),' ', (MJD_ti-INT(MJD_ti))    
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Lines 3 to 7 (or more if Satellites>85) :: Satellites number and PRNs
+! ----------------------------------------------------------------------
+Nsat_17frac = INT(Nsat / 17)
+If (Nsat > (Nsat_17frac * 17) )  Nsat_17frac = Nsat_17frac + 1
+
+! Nsat_lines: 5 for satellites <=85
+If (Nsat_17frac > 5) Then 
+	Nsat_lines = Nsat_17frac
+Else 
+	Nsat_lines = 5
+End IF
+
+
+Do i = 1 , Nsat_lines
+
+WRITE(wrt_line  ,FMT=*,IOSTAT=ios_ith) ''
+
+Do j17 = 1 , 17
+	i_sat = (i-1)*17 + j17
+	IF (i_sat <= Nsat) THEN	
+		PRN_write = PRNmatrix(i_sat)
+		!WRITE(wrt_line,FMT=*,IOSTAT=ios_ith) ADJUSTL(TRIM(wrt_line)),PRN_write
+	ELSE IF (i_sat > Nsat) THEN
+		PRN_write = '  0'
+		!WRITE(wrt_line,FMT=*,IOSTAT=ios_ith) ADJUSTL(TRIM(wrt_line)),'  0'
+	END IF
+	
+	If (j17 == 1) Then
+		IF (PRN_write == '  0') THEN
+			num1 = 0
+		Else
+			num1 = 1
+		END IF
+	End IF
+	!PRINT *,"num1", num1
+
+	WRITE(wrt_line,FMT=*,IOSTAT=ios_ith) (TRIM(wrt_line)), ADJUSTR(PRN_write)
+END DO
+
+! Write Line to sp3 file
+if (i==1) then
+	fmt_line = '(A2,A1,I3,A3,A)'
+	WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '+ ',' ', Nsat,'   ', ADJUSTL(TRIM(wrt_line)) 
+ELSE
+	!fmt_line = '(A9,A)'
+	!WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '+        ', ADJUSTL(TRIM(wrt_line)) 	
+	IF (num1 == 0) THEN
+		fmt_line = '(A11,A)'
+		WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '+          ', ADJUSTL(TRIM(wrt_line)) 	
+	Else
+		fmt_line = '(A9,A)'
+		WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '+        ', ADJUSTL(TRIM(wrt_line)) 		
+	END IF
+END IF
+!print *,"wrt_line final", wrt_line	
+End Do
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Lines 8-12 (SAT<=85) :: Orbit accuracy (5 or more lines for satellites>85)  
+! ----------------------------------------------------------------------
+Do i = 1 , Nsat_lines
+	WRITE(wrt_line,FMT=*,IOSTAT=ios_ith) '++', '       '
+	DO j17 = 1 , 17
+		WRITE(wrt_line,FMT=*,IOSTAT=ios_ith) wrt_line, '  0'		
+	END DO
+
+! Write Line to sp3 file
+!WRITE (UNIT=UNIT_IN,FMT=*,IOSTAT=ios_ith) TRIM(wrt_line) 
+
+fmt_line = '(A60)'
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) &
+       ADJUSTL(TRIM('++         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0'))   
+       !'++         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0'   
+	   
+END DO
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Lines 13-14 (SAT<=85) :: Time System
+! ----------------------------------------------------------------------
+fmt_line = '(A3,A3,A3,A3,A48)'
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '%c ','M  ','cc ', TIMESYS,' ccc cccc cccc cccc cccc ccccc ccccc ccccc ccccc' 
+fmt_line = '(A60)'
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '%c cc cc ccc ccc cccc cccc cccc cccc ccccc ccccc ccccc ccccc' 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Lines 15-16 (SAT<=85) :: Base for Pos/Vel and Base for Clk/Rate  
+! ----------------------------------------------------------------------
+fmt_line = '(A60)'
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '%f  1.2500000  1.025000000  0.00000000000  0.000000000000000' 
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '%f  0.0000000  0.000000000  0.00000000000  0.000000000000000' 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Lines 17-18 (SAT<=85) :: 
+! ----------------------------------------------------------------------
+fmt_line = '(A60)'
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '%i    0    0    0    0      0      0      0      0         0' 
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '%i    0    0    0    0      0      0      0      0         0' 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Lines 19-22 (SAT<=85) :: comment lines
+! ----------------------------------------------------------------------
+fmt_line = '(A60)'
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '/* GEOSCIENCE AUSTRALIA                                     ' 
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '/* Precise Orbit Determination (POD) Tool                   ' 
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) '/*                                                          ' 
+
+fmt_line = '(A7,A11,A6,A9,A9,A3,A4,A3,A5,A3)'
+WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) & 
+       '/* PCV:', PCV_sol, 'OL/AL:', OceanTide_Load, AtmTide_Load, 'Y  ','ORB:', ORB_C, ' CLK:', CLK_C 
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Write Orbits matrix to the sp3 file	  
 ! ----------------------------------------------------------------------
 ! Epochs loop
 DO i_write = 1 , Nepochs       
@@ -150,7 +375,7 @@ MJD_ti = ORBmatrix(i_write,1, i_sat)
 Sec_00 = ORBmatrix(i_write,2, i_sat)
 
 ! Satellite PRN number 
-!PRN_ti = filename(1:3)
+!PRN_ti = sp3_fname(1:3)
 !PRN_ti = sat_prn
 PRN_ti = PRNmatrix(i_sat)
 
@@ -206,8 +431,9 @@ end if
 ! Epoch line
 !*  2010 12 25  0  0  0.0000 
 !READ (line_ith, * , IOSTAT=ios_data) char3, year, month, day, hr, minute, sec  
-WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year, month, day, hour_ti, min_ti, sec_ti
 !WRITE (UNIT=UNIT_IN,FMT=*,IOSTAT=ios_ith) '*  ', year,' ', month,' ',day,' ',hour_ti,' ',min_ti,' ',sec_ti,' '
+!WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year, month, day, hour_ti, min_ti, sec_ti
+WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year,' ', month,' ', day,' ', hour_ti,' ', min_ti,' ', sec_ti
 
 END IF
 ! ----------------------------------------------------------------------
@@ -218,18 +444,18 @@ if (1>0) then
 ! Write Satellite Position and Velocity Vector per PRN 	  
 ! ----------------------------------------------------------------------
 ! Position per epoch	  
-WRITE (UNIT=UNIT_IN,FMT=fmt_pos,IOSTAT=ios_ith) 'P',PRN_ti,' ', r_ti, cl_ti
+WRITE (UNIT=UNIT_IN,FMT=fmt_pos,IOSTAT=ios_ith) 'P',PRN_ti, r_ti, cl_ti
 
 ! Velocity per epoch	  
 if (vel>0) then
-WRITE (UNIT=UNIT_IN,FMT=fmt_vel,IOSTAT=ios_ith) 'V',PRN_ti,' ', v_ti, Dcl_ti
+WRITE (UNIT=UNIT_IN,FMT=fmt_vel,IOSTAT=ios_ith) 'V',PRN_ti, v_ti, Dcl_ti
 end if
 ! ----------------------------------------------------------------------
 end if
 
 
 IF (ios_ith /= 0) THEN
-    PRINT *, "Error in writing to file: ", TRIM (filename)
+    PRINT *, "Error in writing to file: ", TRIM (sp3_fname)
     PRINT *, "WRITE IOSTAT=", ios_ith
 END IF
 ! ----------------------------------------------------------------------
@@ -239,6 +465,10 @@ END IF
  END DO
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Last Line :: EOF
+WRITE (UNIT=UNIT_IN,FMT='(A3)',IOSTAT=ios_ith) 'EOF'
+! ----------------------------------------------------------------------
 
 ENDFILE (UNIT = UNIT_IN) 
 CLOSE (UNIT = UNIT_IN)

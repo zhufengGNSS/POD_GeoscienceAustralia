@@ -12,7 +12,8 @@ SUBROUTINE time_GPSweek (mjd , GPS_week, GPS_wsec, GPSweek_mod1024)
 !
 ! Output arguments:
 ! - GPS_week:		GPS Week number 
-! - GPS_wsec:		GPS Week seconds 
+! - GPS_day :		Day since start of GPS Week
+! - GPS_wsec:		Seconds since start of GPS Week 
 ! ----------------------------------------------------------------------
 ! Dr. Thomas Papanikolaou, Geoscience Australia            December 2015
 ! ----------------------------------------------------------------------
@@ -29,6 +30,7 @@ SUBROUTINE time_GPSweek (mjd , GPS_week, GPS_wsec, GPSweek_mod1024)
 ! OUT
       INTEGER (KIND = prec_int8) , INTENT(OUT) :: GPS_week, GPSweek_mod1024
       REAL (KIND = prec_d), INTENT(OUT) :: GPS_wsec
+      !REAL (KIND = prec_d), INTENT(OUT) :: GPS_day
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -78,12 +80,25 @@ SUBROUTINE time_GPSweek (mjd , GPS_week, GPS_wsec, GPSweek_mod1024)
 ! ----------------------------------------------------------------------
 	  
 	  
-      GPS_day =  (GPS_week_0 - INT(GPS_week_0)) * 7.0D0 
+! ----------------------------------------------------------------------
+! Day since start of GPS week (including fraction of the day)
+      !GPS_day =  (GPS_week_0 - INT(GPS_week_0)) * 7D0 
+      GPS_day = delta_days - GPS_week * 7.D0 
+! ----------------------------------------------------------------------
 	  
 ! ----------------------------------------------------------------------
-! Seconds of GPS week 	  
-      GPS_wsec = (GPS_week_0 - INT(GPS_week_0)) * 7.0D0 * 86400D0	  
+! Seconds since start of GPS week 	  
+      !GPS_wsec = (GPS_week_0 - INT(GPS_week_0)) * 7.0D0 * 86400.0D0	  
+      GPS_wsec = GPS_day * 	86400.0D0	        
 ! ----------------------------------------------------------------------
+	  !print *,"mjd       ", mjd	  
+      !print *,"mjd_1980  ", mjd_1980	  
+      !print *,"delta_days", delta_days	  
+      !print *,"GPS_week_0", GPS_week_0	  
+      !print *,"GPS_week  ", GPS_week	  
+      !print *,"GPS_wsec  ", GPS_wsec	  
+      !print *,"GPS_day   ", GPS_day	  
+      !print *,"          " 	  
 
 
 END

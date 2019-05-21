@@ -15,6 +15,12 @@ MODULE mdl_param
       IMPLICIT NONE
       SAVE 			
 	  
+
+! ---------------------------------------------------------------------------
+! POD Mode : Orbit Determination, Propagation, Prediction, .. (1,2,3,4)
+      INTEGER (KIND = prec_int2) :: POD_MODE_glb	  	  
+      REAL (KIND = prec_d) :: ORBPRED_ARC_glb
+! ---------------------------------------------------------------------------
 	  
 ! ---------------------------------------------------------------------------
 ! Time System of orbit ouput files defined by the input configuration file
@@ -128,6 +134,8 @@ INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces_glb
 ! ----------------------------------------------------------------------
 ! Variational Equations
 ! ----------------------------------------------------------------------
+! Numerical Integration of Variational Equations
+      INTEGER (KIND = prec_int2) :: VEQ_integration_glb 
 ! Number of parameters to be estimated
 !INTEGER (KIND = prec_int8) ::	N_PARAM 
 INTEGER (KIND = prec_int8) :: NPARAM_glb
