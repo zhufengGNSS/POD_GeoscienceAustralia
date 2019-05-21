@@ -1,0 +1,48 @@
+---------------------------------------------------------------------------
+%% Precise Orbit Determination (POD) Tool configuration %%                                       
+---------------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+%% POD Tool mode:
+! ----------------------------------------------------------------------
+! 1. Orbit Determination (pseudo-observations; orbit fitting)
+! 2. Orbit Determination and Prediction
+! 3. Orbit Integration (Equation of Motion only)
+! 4. Orbit Integration and Partials (Equation of Motion and Variational Equations)
+! ----------------------------------------------------------------------
+POD_mode                  2
+
+! ----------------------------------------------------------------------
+%% Initial Conditions input mode
+! ----------------------------------------------------------------------
+! 1. Input a-priori orbit in sp3 format (applied as pseudo-observations)
+! 2. Input file with Initial Conditions (State Vector and Parameters at initial epoch per satellite) 
+! ----------------------------------------------------------------------
+IC_input                   1
+! Initial Conditions Reference Frame: ITRF, ICRF
+IC_refsys                  ITRF		
+
+
+! ----------------------------------------------------------------------
+%% Configuration files of Orbit modelling (2 basic initial files):
+! ----------------------------------------------------------------------
+EQM_filename          EQM.in	! Equation of Motion
+VEQ_filename          VEQ.in	! Variational Equations
+
+! ----------------------------------------------------------------------
+%% Orbit arc length (in hours) 
+! ----------------------------------------------------------------------
+! Orbit Estimation arc
+Orbit_arc_length          24  
+
+! Orbit Prediction arc
+orbit_prediction_arc      12
+
+---------------------------------------------------------------------------
+%% Observation Model                                                       
+! External orbit as pseudo-observations                                                
+pseudobs_filename		  igs19424.sp3
+ 
+---------------------------------------------------------------------------
+%% External Orbit Comparison  
+orbit_filename		  	  igs19424.sp3					
