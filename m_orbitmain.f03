@@ -118,7 +118,6 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
 	  CHARACTER (LEN=3), ALLOCATABLE :: PRN_array(:)
 	  CHARACTER (LEN=3) :: PRN_isat
 	  INTEGER :: ios
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbdiff
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_icrf, dorb_itrf 
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_RTN, dorb_Kepler
