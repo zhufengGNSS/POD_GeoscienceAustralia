@@ -35,7 +35,7 @@ SUBROUTINE integr_EQM (MJDo, tsec_start, ro, vo, arc, integID, step, orbc)
 ! - vo: 		Satellite velocity vector (m/sec) in ICRF
 ! - arc:		Orbit arc lenth (seconds)
 ! - integID: 	Numerical integration method ID number
-! 				1. RKN7(6)8:	Runge-Kutta-Nystrom 7th order   
+! 				1. RKN7(6)8:	Runge-Kutta-Nystrom 7th order (default)   
 ! 				2. RK4:			Runge-Kutta 4th order
 ! 				3. RK8(7)13:	Runge-Kutta 8th order
 ! - step: 		Numerical Integrator Stepsize (seconds)
@@ -125,7 +125,7 @@ orbc(1,6:8) = vo
 ! Numerical integration methods
 ! ----------------------------------------------------------------------
 
-
+!print*,'integID=',integID
 ! ----------------------------------------------------------------------
 ! Runge-Kutta-Nystrom RKN7(6)-8 method
 ! ----------------------------------------------------------------------

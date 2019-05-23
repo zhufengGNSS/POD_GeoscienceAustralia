@@ -62,6 +62,7 @@ SUBROUTINE pd_forceZ (mjd, rsat, vsat, Fvec, PDr, PDv)
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: GMearth, aEarth
       INTEGER (KIND = prec_int8) :: n_max, m_max
+      INTEGER(KIND = 4)          :: satsvn
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q), DIMENSION(3) :: aPlanets_icrf, a_perturb, a_iJ2, a_iJ2_icrf
       DOUBLE PRECISION  JD, Zbody(6)
@@ -586,7 +587,7 @@ eclpf = 0
 ! SRP model
 srpid =  SRP_MOD_glb
 
-CALL force_srp (GMearth, PRN_no, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
+CALL force_srp (GMearth, PRN_no, satsvn, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then

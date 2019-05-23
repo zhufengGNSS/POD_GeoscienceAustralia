@@ -1,129 +1,118 @@
-
-SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
+MODULE m_orbinfo
 
 
 ! ----------------------------------------------------------------------
-! SUBROUTINE: force_srp.f90
+! MODULE: m_orbinfo.f90
 ! ----------------------------------------------------------------------
 ! Purpose:
-! Acceleration due to the solar radiation pressure 
-! Computation of SRP acceleration using various SRP models, 
-! such as a simply cannonball model (srpid=1),a box-wing model (srpid=2) 
-! and a ECOM model (srpid=3) 
+!  Module for calling statorbit subroutine
 ! ----------------------------------------------------------------------
-! Input arguments:
-! - GM           : the earth gravitational constant  
-! - prnnum       : satellite PRN number
-! - satsvn       : satellite SVN
-! - eclpf        : =1: in the orbit eclipse; 
-!                  =2: in the sun illumination;
-! - srpid        : =1: a simply cannonball model; 
-!                  =2: box-wing model;
-!                  =3: ECOM model
-! - r            : satellite position vector (m)
-! - v            : satellite velocity vector
-! - r_sun        : Sun position vector
-! - lambda       : shadow coefficient
-! - eBX_ecl      : dynamic ex of satellite body frame
-! 
-! Output arguments:
-! - fx,fy,fz:		Acceleration's cartesian components (m)
-! ----------------------------------------------------------------------
-! Author :	Dr. Tzupang Tseng
+! Author :      Dr. Tzupang Tseng
 !
-! Created:	01-10-2017
-! 
-! Changes:      10-10-2018 Tzupang Tseng: modify the Cannonball model to be 
-!                                            similar to the box-wing model in
-!                                            preparation for BDS with the ON
-!                                            attitude mode.
-!               11-12-2018 Tzupang Tseng: make the force matrix dynamic
-!               23-01-2019 Tzupang Tseng: add the ECOM2 model
-!               31-01-2019 Tzupang Tseng: change the definition of ey by
-!                                         dividing the length of ey
-!               20-02-2019 Tzupang Tseng: create a functionality for switching
-!                                         on and off some particular coefficients in ECOM models
-!               22-03-2019 Tzupang Tseng: set a simple condition for the eclipsed satellites
-!                                         where only the D0 accelerations are setup to zero 
-!               02-05-2019 Tzupang Tseng: use the coefficient from the shadow.f90 for scaling the SRP effect
+! Copyright: GEOSCIENCE AUSTRALIA, AUSTRALIA
 !
-! Copyright:  GEOSCIENCE AUSTRALIA, AUSTRALIA
+! Created:      07-05-2019
 ! ----------------------------------------------------------------------
-
-      USE mdl_precision
-      USE mdl_num
-      USE mdl_param
-      USE m_satinfo
       IMPLICIT NONE
 
-! ----------------------------------------------------------------------
-! Dummy arguments declaration
-! ----------------------------------------------------------------------
-      INTEGER (KIND=4), INTENT(IN)      :: eclpf
-      REAL (KIND = prec_q), INTENT (IN) :: lambda
-      REAL (KIND = prec_d) , Dimension(3), INTENT(IN) :: eBX_ecl
-      INTEGER                           :: srpid,ECOM
-      INTEGER                           :: prnnum,BLKNUM
-      REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
-      REAL (KIND = prec_q)               :: fx,fy,fz
-      INTEGER                            :: satsvn
 
-! ----------------------------------------------------------------------
-! Local variables declaration
-! ----------------------------------------------------------------------
-      REAL (KIND = prec_q) :: Ps,AU,Pi
-      REAL (KIND = prec_q) :: Cr
-      REAL (KIND = prec_q) :: ANG,GM
-      REAL (KIND = prec_q) :: Ds,sclfa
-      REAL (KIND = prec_q) :: fxo,fyo,fzo
+      Contains
 
-      REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
-      REAL (KIND = prec_q) :: surforce(4,3)
-      REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,en,ev,ez,ECOM_ey
+SUBROUTINE orbinfo (mjd, prnnum, satsvn, rsat, vsat, beta, del_u, yaw, lambda, angX, angY, angZ, &
+                    fr, ft, fn )
+! ----------------------------------------------------------------------
+! SUBROUTINE: orbinfo.f90
+! ----------------------------------------------------------------------
+! Purpose:
+! Compute the required information for orbital analysis in terms of
+! satellite argument of latitude, beta angle, attitude yaw angle, angles
+! between the solar radiation direction and the surface normal vectors
+! ----------------------------------------------------------------------
+! Input parameters:
+! - mjd:               Time in MJD
+! - prnnum:            Satellite PRN number
+! - satsvn:            Satellite SVN number
+! - rsat:              Satellite position vector in ICRF
+! - vsat:              Satellite velocity vector in ICRF
+!
+! Output parameters:
+! - beta (rad) :       BETA angle 
+! - del_u (rad):       Satellite argument of latitude wrt the SUN
+! - yaw (rad)  :       Nominal yaw angle  
+! - lambda:            Shadow coefficient
+! - angX (rad) :       Incident angle between the solar radiation and the X surface normal vector
+! - angY (rad) :       Incident angle between the solar radiation and the Y surface normal vector
+! - angZ (rad) :       Incident angle between the solar radiation and the Z surface normal vector
+! - fr:                SRP-induced acceleration in radial
+! - ft:                SRP-induced acceleration in along-track
+! - fn:                SRP-induced acceleration in cross-track
+! ----------------------------------------------------------------------
+! Author :      Dr. Tzupang Tseng
+!
+! Copyright: GEOSCIENCE AUSTRALIA,AUSTRALIA
+!
+! Created:      07-05-2019
+! ----------------------------------------------------------------------
+      USE mdl_precision
+      USE mdl_num
+      USE mdl_planets
+      USE m_shadow
+      USE mdl_param
+      IMPLICIT NONE
+
+
+!-------------------------------------------------------------------
+      INTEGER (KIND = prec_int4) :: prnnum
+      INTEGER (KIND = 4)         :: satsvn
+      REAL (KIND = prec_d), INTENT(IN) :: mjd
+      REAL (KIND = prec_d), DIMENSION(3), INTENT(IN) :: rsat, vsat
+      REAL (KIND = prec_q), INTENT(OUT) :: angX, angY, angZ
+      REAL (KIND = prec_q), INTENT(OUT) :: beta, del_u, yaw
+      REAL (KIND = prec_q), INTENT(OUT) :: lambda
+!--------------------------------------------------------------------
+      DOUBLE PRECISION  JD, Zbody(6)
+      INTEGER (KIND = 4) :: i, j
+      REAL (KIND = prec_q), DIMENSION(3) :: rbody
+      REAL (KIND = prec_q), DIMENSION(3) :: rSun, rMoon
+      REAL (KIND = prec_q), DIMENSION(3) :: r_sun1, r_sun2
+      REAL (KIND = prec_q) :: u_sun, yaw2
+      INTEGER  NTARG_SUN, NTARG_MOON, NCTR
+      REAL (KIND = prec_q), DIMENSION(3) :: ed, ey, eb, ex, en, ev, ez, et
       REAL (KIND = prec_q), DIMENSION(3) :: yy
-      REAL (KIND = prec_q), DIMENSION(3) :: fsrp
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
-      REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: srpcoef 
       REAL (KIND = prec_q), DIMENSION(4) :: cosang
-      REAL (KIND = prec_q), DIMENSION(4) :: AREA1,REFL1,DIFU1,ABSP1
-      INTEGER (KIND = prec_int2) :: AllocateStatus,DeAllocateStatus
-      INTEGER              :: zta
-      INTEGER              :: ex_i
-      INTEGER              :: i,j,k,m
-      INTEGER              :: N_param, PD_Param_ID
+      REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
+      REAL (KIND = prec_q) :: Pi, Ps, AU, sclfa
+      REAL (KIND = prec_d) :: GM, Ds
+      REAL (KIND = prec_d) :: u_sat, i_sat, omega_sat
+      REAL (KIND = prec_q) :: fxo,fyo,fzo
+      REAL (KIND = prec_q) :: fx,fy,fz
+      REAL (KIND = prec_q) :: fr,ft,fn
+      REAL (KIND = prec_q), DIMENSION(3) :: fsrp
+      REAL (KIND = prec_q), DIMENSION(:),ALLOCATABLE :: srpcoef
+      INTEGER (KIND = prec_int2) :: AllocateStatus
+      INTEGER              :: PD_Param_ID
+      REAL (KIND = 8)      :: II, KN, U
 ! ----------------------------------------------------------------------
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: X_SIDE,Z_SIDE
       REAL (KIND = prec_q) :: MASS,AREA
       REAL (KIND = prec_q) :: A_SOLAR
-! ----------------------------------------------------------------------
-      REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
-      REAL (KIND = 8)      :: II, KN, U
-! ----------------------------------------------------------------------
-! Sun-related variables
-! ----------------------------------------------------------------------
-       REAL (KIND = prec_q) :: u_sun
-       REAL (KIND = prec_q) :: beta,del_u
-       REAL (KIND = prec_q), DIMENSION(3) :: r_sun1,r_sun2
 
-! ----------------------------------------------------------------------
 ! Numerical Constants
+
+      GM = 0.39860044150D+15
       Ps = 4.5567D-6 ! (Nm^-2)
-      Cr = 1.5 ! SRP coefficient ranges from 1.3 to 1.5
       AU = 1.496d11 ! (m)
       Pi = 4*atan(1.0d0)
-    ex_i = 0 ! change the definition of the unit vector ex 
-             ! ex_i = 0 (default)
-             !      = 1 (using dynamic ex vector from attitude routine)
-! ---------------------------------------------------------------------
-
 ! initialize the SRP force
 ! -------------------------
      DO i=1,3
      fsrp(i)=0.0d0
      END DO
 
+! ---------------------------------------------------------------------
 ! GPS constellation
 ! -----------------
       if(prnnum.le.100)then
@@ -191,63 +180,75 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
 !         end if
       end if
 
+! Julian Day Number of the input epoch
+      JD = mjd + 2400000.5D0
 
-! The unit vector ez SAT->EARTH
-      er(1)=r(1)/sqrt(r(1)**2+r(2)**2+r(3)**2)
-      er(2)=r(2)/sqrt(r(1)**2+r(2)**2+r(3)**2)
-      er(3)=r(3)/sqrt(r(1)**2+r(2)**2+r(3)**2)
-      ez(1)=-er(1)
-      ez(2)=-er(2)
-      ez(3)=-er(3)
+! Center celestial body: Earth (NCTR = 3)
+      NCTR = 3
+      NTARG_MOON= 10
+      NTARG_SUN = 11
+! MOON
+! Celestial body's (NTARG) Cartesian coordinates w.r.t. Center body
+! (NCTR)
+      CALL  PLEPH ( JD, NTARG_MOON, NCTR, Zbody )
+! Cartesian coordinates of the celestial body in meters: KM to M
+      rbody(1) = Zbody(1) * 1000.D0
+      rbody(2) = Zbody(2) * 1000.D0
+      rbody(3) = Zbody(3) * 1000.D0
+      rMoon = rbody
+! SUN
+      CALL  PLEPH ( JD, NTARG_SUN, NCTR, Zbody )
+      rbody(1) = Zbody(1) * 1000.D0
+      rbody(2) = Zbody(2) * 1000.D0
+      rbody(3) = Zbody(3) * 1000.D0
+      rSun = rbody
 
-! The unit vector ed SAT->SUN (where is just opposite to the solar radiation vector)
-      Ds=sqrt((r_sun(1)-r(1))**2+(r_sun(2)-r(2))**2+(r_sun(3)-r(3))**2)
-      ed(1)=((r_sun(1)-r(1))/Ds)
-      ed(2)=((r_sun(2)-r(2))/Ds)
-      ed(3)=((r_sun(3)-r(3))/Ds)
-! The unit vector ey = ez x ed/|ez x ed|, parallel to the rotation axis of solar panel
+      CALL shadow (rsat, rSun, rMoon, lambda)
 
+!! The unit vector ez SAT->EARTH
+      ez(1)=-rsat(1)/sqrt(rsat(1)**2+rsat(2)**2+rsat(3)**2)
+      ez(2)=-rsat(2)/sqrt(rsat(1)**2+rsat(2)**2+rsat(3)**2)
+      ez(3)=-rsat(3)/sqrt(rsat(1)**2+rsat(2)**2+rsat(3)**2)
+
+! The unit vector ed SAT->SUN
+! vector)
+      Ds=sqrt((rSun(1)-rsat(1))**2+(rSun(2)-rsat(2))**2+(rSun(3)-rsat(3))**2)
+      ed(1)=((rSun(1)-rsat(1))/Ds)
+      ed(2)=((rSun(2)-rsat(2))/Ds)
+      ed(3)=((rSun(3)-rsat(3))/Ds)
+
+! The unit vector ey = ez x ed/|ez x ed|
       CALL productcross (ez,ed,yy)
       ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
       ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
       ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 
-! The unit vector of x side, which is always illuminated by the sun.
-
+! The unit vector of x surface
       CALL productcross (ey,ez,ex)
 
-! Using the BODY-X univector from Kouba routine to redefine the ey for the satellite eclipsed
-IF(ex_i .gt. 0) THEN
-
-      ex(1)=eBX_ecl(1)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
-      ex(2)=eBX_ecl(2)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
-      ex(3)=eBX_ecl(3)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
-
-      CALL productcross (ez,ex,ey)
-END IF
 ! The unit vector eb = ed x ey
-
       CALL productcross (ed,ey,eb)
-
 
 ! the orbit normal vector
 !------------------------
+      ev(1)=vsat(1)/sqrt(vsat(1)**2+vsat(2)**2+vsat(3)**2)
+      ev(2)=vsat(2)/sqrt(vsat(1)**2+vsat(2)**2+vsat(3)**2)
+      ev(3)=vsat(3)/sqrt(vsat(1)**2+vsat(2)**2+vsat(3)**2)
 
-      ev(1)=v(1)/sqrt(v(1)**2+v(2)**2+v(3)**2)
-      ev(2)=v(2)/sqrt(v(1)**2+v(2)**2+v(3)**2)
-      ev(3)=v(3)/sqrt(v(1)**2+v(2)**2+v(3)**2)
+      CALL productcross (-ez,ev,en)
 
-     CALL productcross (er,ev,en)
+! the along track direction
+  CALL productcross (en,-ez,et)
 
-! computation of the satellite argument of latitude and orbit inclination
-      CALL kepler_z2k (r,v,GM,kepler)
+! computation of the satellite argument of latitude and orbit
+! inclination
+!      CALL XYZELE(GM, rsat, vsat, II, U, KN)
+!print*,'BERNESE=', II*180/Pi, U*180/Pi, KN*180/Pi
+      CALL kepler_z2k (rsat, vsat, GM, kepler)
       u_sat = kepler(9)*Pi/180.d0
       i_sat = kepler(3)*Pi/180.d0
       omega_sat = kepler(4)*Pi/180.d0
-!      CALL XYZELE(GM, r, v, II, U, KN)
-!      u_sat = U
-!      i_sat = II
-!      omega_sat = KN      
+!print*,'ACS POD=', kepler(3), kepler(9), kepler(4)
 ! compute the sun position in the satellite orbit plane by rotating omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
       do i=1,3
@@ -272,159 +273,50 @@ END IF
       R11(2,1)=0.0d0
       R11(3,1)=0.0d0
 
-! rotate big omega to make the X-axis of the celestial frame consistent with the
+! rotate big omega to make the X-axis of the celestial frame consistent
+! with the
 ! direction of right ascension of ascending node
       CALL R3(omega_sat,R33)
-
-! rotate inclination to make the XY plane of the celestial frame consistent with
+! rotate inclination to make the XY plane of the celestial frame
+! consistent with
 ! the orbit plane
       CALL R1(i_sat,R11)
-
 ! convert the sun position in the celestial frame to the orbit plane
-      CALL matrix_Rr(R33,r_sun,r_sun1)
+      CALL matrix_Rr(R33,rSun,r_sun1)
       CALL matrix_Rr(R11,r_sun1,r_sun2)
 
       beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2)) ! in rad
 !write (*,*) beta*180.0d0/Pi
 
       u_sun = atan2(r_sun2(2),r_sun2(1)) ! in rad
-
       del_u = u_sat - u_sun
-
       if (del_u*180/Pi .gt.360.0d0) then
       del_u=del_u-2*Pi
       else if(del_u*180/Pi .lt.0.0d0) then
       del_u=del_u+2*Pi
       end if
 
-!print*,'del_u=, lambda=',del_u*180/Pi, lambda
+! yaw angle
+      yaw= acos(ex(1)*et(1)+ex(2)*et(2)+ex(3)*et(3))
+
+IF (beta*180/Pi .gt. 0.d0) yaw= -yaw ! In accordance with the IGS convention
+
 
 !========================================
 ! angles between ed and each surface(k)
 ! k=1: +X
 !   2: +Y
 !   3: +Z
-!   4: solar panels
 !=======================================
-     cosang(1)=ed(1)*ex(1)+ed(2)*ex(2)+ed(3)*ex(3)
-     cosang(2)=ed(1)*ey(1)+ed(2)*ey(2)+ed(3)*ey(3)
-     cosang(3)=ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3)
-     cosang(4)=ed(1)*ed(1)+ed(2)*ed(2)+ed(3)*ed(3)
+      cosang(1)=ed(1)*ex(1)+ed(2)*ex(2)+ed(3)*ex(3)
+      cosang(2)=ed(1)*ey(1)+ed(2)*ey(2)+ed(3)*ey(3)
+      cosang(3)=ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3)
 
-!print*, 'COSANG1=', cosang(1)
+      angX = acos(cosang(1))
+      angY = acos(cosang(2))
+      angZ = acos(cosang(3))
 
-! computation of the factor zta related to the Sun illumination
-      IF (eclpf.eq.1) THEN ! in the eclipse
-         zta=0
-      ELSE
-         zta=1
-      END IF
-
-      IF (srpid == 1) THEN
-! A simply cannonball model
-! *********************************
-!  a=-zta*Cr*(A/m)P(1AU/r)^2*Dr(i)
-! ********************************
-
-! The main surface area face toward to the Sun using the SAT->SUN and SAT->EARTH
-! vectors
-     ANG=acos(ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3))*180.0d0/Pi
-
-     if (abs(ANG) .lt. 30.0d0) then
-     AREA=Z_SIDE+A_SOLAR
-     else
-     AREA=X_SIDE+A_SOLAR
-     end if
-! Cartesian counterparts (fx,fy,fz) of acceleration fr
-      fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
-      fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
-      fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
-
-! end of the cannonball model
-!--------------------------------------------------------------------------
-
-
-! Box-wing model
-! **************
-     ELSE IF (srpid == 2) THEN
-
-!      CALL surfprop(BLKNUM,AREA1,REFL1,DIFU1,ABSP1)
-
-! Forces caused by different interactions between optical properties and the
-! satellite surface
-
-!write(*,*)Ps/MASS
-     do k=1,4
-     if (k .eq. 1) then
-! Judge the positive surface or negative surface facing to the Sun
-        IF(cosang(k).GE.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*ex(i))+2*cosang(k)**2*REFL1(k)*ex(i)
-      end do
-        ELSEIF(cosang(k).LT.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*(-ex(i)))+2*cosang(k)**2*REFL1(k)*(-ex(i))
-      end do
-        END IF
-
-     elseif (k .eq. 2) then
-        IF(cosang(k).GE.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*ey(i))+2*cosang(k)**2*REFL1(k)*ey(i)
-      end do
-        ELSEIF(cosang(k).LT.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*(-ey(i)))+2*cosang(k)**2*REFL1(k)*(-ey(i))
-      end do
-        END IF
-
-     elseif (k .eq. 3) then
-        IF(cosang(k).GE.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*ez(i))+2*cosang(k)**2*REFL1(k)*ez(i)
-      end do
-        ELSEIF(cosang(k).LT.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*(-ez(i)))+2*cosang(k)**2*REFL1(k)*(-ez(i))
-      end do
-        END IF
-
-     elseif (k .eq. 4) then
-      do i=1,3
-! Here the normal of the soalr panels is assumed to be parallel to ed
-      surforce(k,i)=AREA1(k)*ed(i)+REFL1(k)*ed(i)+(2/3)*DIFU1(k)*ed(i)
-      end do
-
-
-     end if
-     end do
-
-! Compute the total forces
-!
-     do i=1,3
-     fsrp(i)=0.0d0
-     end do
-
-     do i=1,3
-        do k=1,4
-     fsrp(i)=fsrp(i)+(Ps/MASS)*surforce(k,i)
-        end do
-     end do
-
-! forces in inertial frame
-!-------------------------
-     fx=-fsrp(1)
-     fy=-fsrp(2)
-     fz=-fsrp(3)
-
-! end of the box-wing model
-! =======================================================================
-
-
-     ELSE IF (srpid == 3) THEN
-! A scaling factor 
-!*************************************************************************
-     sclfa=(AU/Ds)**2
+sclfa=(AU/Ds)**2
 
 ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
 
@@ -439,8 +331,7 @@ If (ECOM_Bias_glb(1) == 1) Then
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)
         END DO
 !print*,'ECOM1-caused accelerations'
-!print*,'D0'
-Else 
+Else
         PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
@@ -449,7 +340,6 @@ If (ECOM_Bias_glb(2) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)
         END DO
-!print*,'Y0'
 Else
         PD_Param_ID = PD_Param_ID
 End IF
@@ -459,7 +349,6 @@ If (ECOM_Bias_glb(3) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
         END DO
-!print*,'B0'
 Else
         PD_Param_ID = PD_Param_ID
 End IF
@@ -470,14 +359,12 @@ If (ECOM_CPR_glb(1) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ed(i)
         END DO
-!print*,'DC'
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ed(i)
         END DO
-!print*,'DS'
 Else
         PD_Param_ID = PD_Param_ID
 End IF
@@ -488,14 +375,12 @@ If (ECOM_CPR_glb(2) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ey(i)
         END DO
-!print*,'YC'
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ey(i)
         END DO
-!print*,'YS'
 Else
         PD_Param_ID = PD_Param_ID
 End IF
@@ -506,18 +391,15 @@ If (ECOM_CPR_glb(3) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)
         END DO
-!print*,'BC'
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)
         END DO
-!print*,'BS'
 Else
         PD_Param_ID = PD_Param_ID
 End If
-
 ! ECOM2 model
 ! **********************************************************************
 
@@ -598,7 +480,7 @@ If (ECOM_CPR_glb(3) == 1) THEN
 Else
         PD_Param_ID = PD_Param_ID
 End If
-      END IF 
+      END IF
 
 
      fx=-fsrp(1)
@@ -606,27 +488,17 @@ End If
      fz=-fsrp(3)
 
 
-
-! use the shadow coefficient for scaling the SRP effect
-!-------------------------------------------------------
-
-!IF (abs(beta*180.0d0/Pi) .lt. 13.87 .and. del_u*180.0d0/Pi .gt. 167 .and. del_u*180.0d0/Pi .lt. 193) then
 IF (lambda .lt. 1)THEN
-!print*,'beta=, lambda=, del_u=', beta*180/Pi, lambda, del_u*180/Pi
-
 
 DO i=1,3
  fsrp(i)=0.0d0
 END DO
 
 srpcoef(1) = lambda*srpcoef(1)
-
-
         IF (ECOM_param_glb == 1 ) then
- fxo=lambda*sclfa*Ps/MASS*(0.7*X_SIDE*cosang(1)*ex(1)+0.3*Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
- fyo=lambda*sclfa*Ps/MASS*(0.7*X_SIDE*cosang(1)*ex(2)+0.3*Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
- fzo=lambda*sclfa*Ps/MASS*(0.7*X_SIDE*cosang(1)*ex(3)+0.3*Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
-
+ fxo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(1)+0.3*Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
+ fyo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(2)+0.3*Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
+ fzo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(3)+0.3*Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
 
 DO i=1,3
      fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
@@ -637,15 +509,14 @@ DO i=1,3
                        +   srpcoef(6)*sclfa*DCOS(del_u)*ey(i)  &
                        +   srpcoef(7)*sclfa*DSIN(del_u)*ey(i)  &
                        +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)  &
-                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)  
+                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)
 
 END DO
 
-       ELSE 
+       ELSE
  fxo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(1)+0.5*Z_SIDE*cosang(3)*ez(1)+0.1*A_SOLAR*cosang(4)*ed(1))
  fyo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(2)+0.5*Z_SIDE*cosang(3)*ez(2)+0.1*A_SOLAR*cosang(4)*ed(2))
  fzo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(3)+0.5*Z_SIDE*cosang(3)*ez(3)+0.1*A_SOLAR*cosang(4)*ed(3))
-
 
 DO i=1,3
      fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
@@ -659,25 +530,26 @@ DO i=1,3
                        +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)
 
 END DO
-     
+
        END IF
 
-     fx=-fsrp(1)
-     fy=-fsrp(2)
-     fz=-fsrp(3)
-!     fx=-(fsrp(1) + fxo)
-!     fy=-(fsrp(2) + fyo)
-!     fz=-(fsrp(3) + fzo)
+     fx=-fsrp(1) 
+     fy=-fsrp(2) 
+     fz=-fsrp(3) 
+
+    !fx=-(fsrp(1) + fxo)
+    !fy=-(fsrp(2) + fyo)
+    !fz=-(fsrp(3) + fzo)
 
 
 END IF
 
-!----------------------------------------------------------------------------------------------
+   fr = fx*(-ez(1))+fy*(-ez(2))+fz*(-ez(3))
+   ft = fx*et(1)+fy*et(2)+fz*et(3)
+   fn = fx*en(1)+fy*en(2)+fz*en(3)
+
+       END SUBROUTINE
+        END MODULE
 
 
-     END IF 
 
-! end of ECOM-based model
-! ---------------------------------------------------------
-
-END

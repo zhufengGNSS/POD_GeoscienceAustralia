@@ -43,6 +43,8 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
 ! Author :	Dr. Thomas Papanikolaou
 ! 			Cooperative Research Centre for Spatial Information, Australia
 ! Created:	September 2018
+!
+! Changes:     02-05-2019 Tzupang Tseng: use the coefficient from the shadow.f90 for scaling the SRP effect
 ! ----------------------------------------------------------------------
 
 
@@ -58,6 +60,9 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       USE m_pd_geopotential
       USE m_matrixRxR
       USE m_pd_empirical
+      USE m_pd_ECOM
+      USE m_satinfo
+      USE m_shadow
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -83,10 +88,11 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       REAL (KIND = prec_d), DIMENSION(3) :: SF, SFgrav, SFnongrav, SFemp    
       REAL (KIND = prec_q), DIMENSION(3) :: Fgrav_itrf , Fgrav_icrf, Fplanets_icrf, Ftides_icrf, Frelativity_icrf
       REAL (KIND = prec_d), DIMENSION(3) :: Fsrp_icrf
-      REAL (KIND = prec_d) :: fx, fy, fz
+      REAL (KIND = prec_d) :: fx, fy, fz, mjd_sav
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: GMearth, aEarth
       INTEGER (KIND = prec_int8) :: n_max, m_max
+      INTEGER(KIND = 4)          :: satsvn
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q), DIMENSION(3) :: aPlanets_icrf, a_perturb, a_iJ2, a_iJ2_icrf
       DOUBLE PRECISION  JD, Zbody(6)
@@ -130,17 +136,19 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       REAL (KIND = prec_d), DIMENSION(3,3) :: Ugrav_icrf, Ugrav_itrf, Ugrav
       REAL (KIND = prec_d) :: PD_EMP_r(3,3), PD_EMP_v(3,3)
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: PD_EMP_param
+      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: PD_ECOM_param
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=3)  :: PRN_GNSS
       INTEGER (KIND = 4) :: satblk
       CHARACTER (LEN=5)  :: BDSorbtype
       INTEGER (KIND = 4) :: eclipsf
       REAL (KIND = prec_d) :: beta, Mangle, Yangle(2)
-	  REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
+      REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
       INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
       REAL (KIND = prec_d) :: Yawangle
+      REAL (KIND = prec_q) :: lambda
+!      SAVE :: mjd_sav
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Global variables used
@@ -521,42 +529,71 @@ SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf
 ! Variables "satblk" and "BDSorbtype" are temporary manually configured 
 ! in the main program file (main_pod.f03) through setting the global variables:  
 
-! GPS case: Satellite Block ID:	1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
-satblk = SATblock_glb
+! GPS case: Satellite Block ID:        1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
+!satblk = SATblock_glb
 
 ! Beidou case: 'IGSO', 'MEO'
 BDSorbtype = BDSorbtype_glb
 
+fmt_line = '(A1,I2.2)'
+READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
+
+CALL prn_shift (GNSSid, PRN_no, PRN_no)
+!print*,GNSSid, PRN_no
+
+CALL satinfo (mjd, PRN_no, satsvn, satblk)
+!print*,satsvn
+IF (satblk .eq. 6 .OR. satblk .eq. 7) satblk = 5
+!satblk = 6 
+IF (satblk .eq. 8 ) satblk = 6
 ! Yaw-attitude model
 PRN_GNSS = PRN
 CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
                      eclipsf, beta, Mangle, Yangle, eBX_nom, eBX_ecl)
 ! ----------------------------------------------------------------------
+!print*,'MJD=, PRN=, satblk=, eclipsf= ', mjd, PRN, satblk, eclipsf
 
- 
+
+! ----------------------------------------------------------------------
+! shadow model :: A conical model is applied.
+!                 lambda = 1     : In SUN LIGHT AREA
+!                        = 0     : In UMBRA AREA (full eclipse)
+!                 0 < lambda < 1 : In PENUMBRA AREA
+! ----------------------------------------------------------------------
+CALL shadow (rsat_icrf, rSun, rMoon, lambda)
+!print*, mjd, lambda 
 ! ----------------------------------------------------------------------
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
+if (FMOD_NONGRAV(1) > 0 .OR. FMOD_NONGRAV(2) > 0 .or. FMOD_NONGRAV (3) > 0) Then
+! PRN: GNSS constellation ID letter + Satellite number
+fmt_line = '(A1,I2.2)'
+READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
+
+CALL prn_shift (GNSSid, PRN_no, PRN_no)
+!print*,GNSSid, PRN_no
+
+CALL satinfo (mjd, PRN_no, satsvn, satblk)
+!print*,satsvn
+
+END IF
 
 ! ----------------------------------------------------------------------
 ! Solar Radiation
 ! ----------------------------------------------------------------------
 if (FMOD_NONGRAV(1) > 0) Then
 
-! PRN: GNSS constellation ID letter + Satellite number
-fmt_line = '(A1,I2.2)'
-READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
-
-! Eclipse status		!! Temporary !!  Upgrade for calling the Yaw attitude library
-eclpf = 0
 
 ! SRP model
 srpid =  SRP_MOD_glb
 
-CALL prn_shift (GNSSid, PRN_no, PRN_no)
-!print*,GNSSid, PRN_no
-CALL force_srp (GMearth, PRN_no, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
+CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, satsvn, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
+
+ALLOCATE (PD_ECOM_param(3,NPARAM_glb), STAT = AllocateStatus)
+
+CALL pd_ECOM (lambda, eBX_ecl, GMearth, PRN_no, eclipsf, rsat_icrf, vsat_icrf, rSun, PD_ECOM_param )
+
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
 
@@ -617,6 +654,16 @@ PDr = Ugrav_icrf + PD_EMP_r
 IF (EMP_param_glb == 1) Then
 PD_param = PD_EMP_param
 End IF
+
+
+IF (ECOM_param_glb == 1 .or.  ECOM_param_glb == 2) Then
+PD_param = PD_ECOM_param
+END IF
+!print*,'ECOM_param_glb=',ECOM_param_glb
+!print*,'PD_param=',PD_param
+!print*,'NPARAM_glb=',NPARAM_glb
+!pause
+
 ! ----------------------------------------------------------------------
 
 END SUBROUTINE

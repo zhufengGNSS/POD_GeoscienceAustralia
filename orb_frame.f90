@@ -83,8 +83,8 @@ Vz = v(3)
 ! Radial component
       er = (1D0 / r_norm) * r
 	  
-! Along-track or tangential component
-      et = (1D0 / v_norm) * v
+! Along-track or tangential component (only for the perfect circular orbit)
+!      et = (1D0 / v_norm) * v
 	 
 ! cross product of r,v : angular momentum per unit mass
       CALL productcross(r,v , h)
@@ -96,7 +96,7 @@ Vz = v(3)
 ! ----------------------------------------------------------------------
 
 !! Along-track or tangential component
-!      CALL productcross(en, er , et)
+      CALL productcross(en, er , et)
 !print *,"eT", et
    
 ! ----------------------------------------------------------------------

@@ -35,6 +35,11 @@ SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbd
 ! yaw_angle.f90
 ! beta_angle.f90 (required for the computation of the input 'beta_angle')
 ! ----------------------------------------------------------------------
+!
+! Chnages:  02-05-2019 Tzupang Tseng : The unit vector SANTXYZ from Kouba is not correctly defined.
+!                                      The unit vector SANTXYZ is re-defined by using the nominal yaw attitude. 
+!
+!
 ! Dr. Thomas D. Papanikolaou, Geoscience Australia             June 2016
 ! ----------------------------------------------------------------------
 
@@ -117,6 +122,9 @@ SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbd
       REAL (KIND = prec_d) :: BETAINI(MAXSAT) 
 	  
 	  INTEGER (KIND = 4) :: Nsat
+      
+      REAL (KIND = prec_q), DIMENSION(3) :: ed, ey
+      REAL (KIND = prec_q) :: Ds
 ! ----------------------------------------------------------------------
 	 
 
@@ -218,9 +226,21 @@ SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbd
 !C                   THE  BODY-X REVERSED FOR IIR (SEE BELOW) & RETURNED
 ! ----------------------------------------------------------------------
 !      SANTXYZ = - ( (Xsun x Xsat) x Xsat )  							! see Kouba (2009), Eq.1
-      CALL productcross (Xsun,Xsat , pcross)
-      CALL productcross (pcross,Xsat , pcross2 )
-      santxyz = -1.0D0 * pcross2	  
+!      CALL productcross (Xsun,Xsat , pcross)
+!      CALL productcross (pcross,Xsat , pcross2 )
+!      santxyz = -1.0D0 * pcross2
+      Ds=sqrt((r_sun(1)-r_sat(1))**2+(r_sun(2)-r_sat(2))**2+(r_sun(3)-r_sat(3))**2)
+      ed(1)=((r_sun(1)-r_sat(1))/Ds)
+      ed(2)=((r_sun(2)-r_sat(2))/Ds)
+      ed(3)=((r_sun(3)-r_sat(3))/Ds)
+
+      CALL productcross (-Xsat,ed, pcross)
+      ey(1)=pcross(1)/sqrt(pcross(1)**2+pcross(2)**2+pcross(3)**2)
+      ey(2)=pcross(2)/sqrt(pcross(1)**2+pcross(2)**2+pcross(3)**2)
+      ey(3)=pcross(3)/sqrt(pcross(1)**2+pcross(2)**2+pcross(3)**2)
+
+      CALL productcross (ey,-Xsat,pcross2)
+	   santxyz = pcross2/sqrt(pcross2(1)**2+pcross2(2)**2+pcross(3)**2)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -230,15 +250,15 @@ SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbd
 	  !print *,"eBX_nom", eBX_nom
 	  
 ! GPS Block IIR: Body-X unit vector reversal
-if (satblk == 4 .or. satblk==5) then
-      eBX_nom = -1.0D0 * eBX_nom
+!if (satblk == 4 .or. satblk==5) then
+!      eBX_nom = -1.0D0 * eBX_nom
 	  !print *,"eBX_nom", eBX_nom
 
       !DO i = 1 , 3
 	  !	eBX_nom(i) = -1.0D0 * eBX_nom(i)
       !END DO
 	  !print *,"eBX_nom", eBX_nom
-end if
+!end if
 ! ----------------------------------------------------------------------
 
 

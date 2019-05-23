@@ -35,6 +35,7 @@
       !USE m_orbdet
       !USE m_orbext
       USE m_writearray
+      USE m_writearray2
       USE m_writeorbit
 	  !USE mdl_planets
 	  !USE mdl_tides
@@ -103,6 +104,8 @@
       REAL (KIND = prec_d) :: orb_est_arc
       INTEGER (KIND = prec_int2) :: IC_MODE	  	  
       CHARACTER (LEN=500) :: IC_REF				
+      REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbdiff2
+
 	  
 	  
 	  
@@ -363,7 +366,8 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 ! POD of the GNSS satellites constellations
 ! ----------------------------------------------------------------------
-CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, orbit_resR, orbit_resT, orbit_resN)
+CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, &
+               orbit_resR, orbit_resT, orbit_resN, orbdiff2)
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 
@@ -384,7 +388,7 @@ mjd = orbits_partials_itrf(2,1,1)
 CALL time_GPSweek  (mjd, GPS_week, GPS_wsec, GPSweek_mod1024)
 !CALL time_GPSweek2 (mjd, GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
 GPS_day = ( GPS_wsec/86400.0D0 )  
-write (ORB2sp3_fname, FMT='(A2,I4,I1,A4)') 'ga', (GPS_week), INT(GPS_day) ,'.sp3'
+write (ORB2sp3_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.sp3'
 
 ! ICRF
 !CALL write_orb2sp3 (orbits_partials_icrf, PRNmatrix, ORB2sp3_fname, sat_vel)
@@ -402,6 +406,11 @@ Call writearray (orbit_resT, filename)
 filename = "orbit_residuals_N.out"
 Call writearray (orbit_resN, filename)
 ! ----------------------------------------------------------------------
+
+
+filename = "orbdiff2.out"
+Call writearray2 (orbdiff2, filename)
+
 
 
 CALL cpu_time (CPU_t1)

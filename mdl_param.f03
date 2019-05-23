@@ -8,6 +8,8 @@ MODULE mdl_param
 ! Author :	Dr. Thomas Papanikolaou
 !			Cooperative Research Centre for Spatial Information, Australia
 ! Created:	November 2017
+! Changes:      12-12-2018 Dr. Tzupang Tseng : added specific global parameters
+!                                              for ECOM-based SRP model
 ! ----------------------------------------------------------------------
 
 
@@ -117,6 +119,19 @@ INTEGER (KIND = prec_int2) :: FMOD_NONGRAV(3)
 INTEGER (KIND = prec_int2) :: SRP_MOD_glb
 ! ----------------------------------------------------------------------
 
+
+! ECOM-based solar radiation pressure model
+! ----------------------------------------------------------------------
+INTEGER (KIND = prec_int2) :: ECOM_param_glb
+INTEGER (KIND = prec_int2) :: ECOM_Bias_glb(3)
+INTEGER (KIND = prec_int2) :: ECOM_CPR_glb(3)
+!REAL (KIND = prec_q) :: ECOM_accel_glb(9)
+!REAL (KIND = prec_q) :: ECOM_accel_aposteriori(9)
+REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_glb
+REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_aposteriori
+
+! ----------------------------------------------------------------------
+
 ! ----------------------------------------------------------------------
 ! Empirical forces
 INTEGER (KIND = prec_int2) :: EMP_param_glb
@@ -146,7 +161,6 @@ INTEGER (KIND = prec_int8) :: NPARAM_glb
       INTEGER (KIND = prec_int2) :: ESTIM_mode_glb 
       INTEGER (KIND = prec_int2) :: ESTIM_iter_glb 
 ! ----------------------------------------------------------------------
-
 ! ----------------------------------------------------------------------
 ! Attitude models
       INTEGER (KIND = 4) :: SATblock_glb

@@ -20,7 +20,8 @@ MODULE m_pod_gnss
 Contains
 
 
-SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, orbit_resR, orbit_resT, orbit_resN)
+SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, &
+                     orbit_resR, orbit_resT, orbit_resN, orbdiff2)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE:	pod_gnss.f03
@@ -147,6 +148,9 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
       !REAL (KIND = prec_d) :: orbarc_sum
       !INTEGER (KIND = prec_int2) :: IC_MODE	  	  
       !CHARACTER (LEN=500) :: IC_REF				
+! ----------------------------------------------------------------------
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbdiff
+      REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbdiff2
 
 	  
 	  
@@ -269,7 +273,7 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! Precise Orbit Determination :: main subroutine
 !CAll orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
 CALL orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, &
-				dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf) 
+		dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf,orbdiff) 
 ! ----------------------------------------------------------------------
 
 print *," "
@@ -323,8 +327,16 @@ orbit_resT(:,1:2) = dorb_RTN(:,1:2)
 orbit_resN(:,1:2) = dorb_RTN(:,1:2)
 ! ----------------------------------------------------------------------
 
+sz1 = size(orbdiff, DIM = 1)
+sz2 = size(orbdiff, DIM = 2)
+
+ALLOCATE (orbdiff2(Nsat, sz1, sz2), STAT = AllocateStatus)
+orbdiff2=0.0d0
+
 end if
 ! ----------------------------------------------------------------------
+
+orbdiff2 (isat,:,:) = orbdiff(:,:)
 
 
 ! ----------------------------------------------------------------------

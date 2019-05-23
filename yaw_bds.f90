@@ -346,13 +346,13 @@ End If
 
 if (1>0) then
 
-PRINT *, "eclipsf  ", eclipsf
-PRINT *, "Yangle(1)", Yangle(1)
-PRINT *, "Yangle(2)", Yangle(2)
-PRINT *, "Mangle", Mangle
+!PRINT *, "eclipsf  ", eclipsf
+!PRINT *, "Yangle(1)", Yangle(1)
+!PRINT *, "Yangle(2)", Yangle(2)
+!PRINT *, "Mangle", Mangle
 !PRINT *, "beta0", beta0
-PRINT *, "beta", beta
-PRINT *, "beta_t0", beta_t0
+!PRINT *, "beta", beta
+!PRINT *, "beta_t0", beta_t0
 
 end if
 

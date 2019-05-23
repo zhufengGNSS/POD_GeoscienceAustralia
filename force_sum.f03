@@ -25,8 +25,10 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! Changes: 03-12-2018 Dr. Tzupang Tseng: Added the models of solar radiation
 !                                        pressure, earth radiation pressure 
 !                                        and antenna thrust
+!          02-05-2019 Dr. Tzupang Tseng: added shadow model (shadow.f90) for scaling the SRP effect
+!
 ! - Dr. Thomas Papanikolaou, 25 March 2019:
-!	The satellite attitude models have now been integrated into POD through
+!      The satellite attitude models have now been integrated into POD through
 !   the "attitude.f03 subroutine" obtained from the conversion of the 
 !   "GNSS yaw-attitude program" to subroutine 
 ! ----------------------------------------------------------------------
@@ -44,6 +46,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       USE m_pd_empirical
       USE m_satinfo
       USE m_writedata
+      USE m_shadow
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -55,6 +58,8 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! ----------------------------------------------------------------------
 ! OUT
       REAL (KIND = prec_d), INTENT(OUT) :: SFx, SFy, SFz
+
+      REAL (KIND = prec_q) :: lambda
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -127,7 +132,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       CHARACTER (LEN=5)  :: BDSorbtype
       INTEGER (KIND = 4) :: eclipsf
       REAL (KIND = prec_d) :: beta, Mangle, Yangle(2)
-	  REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
+  REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
       INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
       REAL (KIND = prec_d) :: Yawangle
 ! ----------------------------------------------------------------------
@@ -550,19 +555,39 @@ SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf
 ! Attitude model :: GNSS Yaw-attitude models
 ! ----------------------------------------------------------------------
 ! Variables "satblk" and "BDSorbtype" are temporary manually configured 
-! in the main program file (main_pod.f03) through setting the global variables:  
+! in the main program file (main_pod.f03) through setting the global variables: 
 
-! GPS case: Satellite Block ID:	1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
-satblk = SATblock_glb
+! GPS case: Satellite Block ID:        1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
+!satblk = SATblock_glb
 
 ! Beidou case: 'IGSO', 'MEO'
 BDSorbtype = BDSorbtype_glb
 
+fmt_line = '(A1,I2.2)'
+READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
+
+CALL prn_shift (GNSSid, PRN_no, PRN_no)
+!print*,GNSSid, PRN_no
+
+CALL satinfo (mjd, PRN_no, satsvn, satblk)
+!print*,satsvn
+IF (satblk .eq. 6 .OR. satblk .eq. 7) satblk = 5
+IF (satblk .eq. 8 ) satblk = 6
 ! Yaw-attitude model
 PRN_GNSS = PRN
 CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
                      eclipsf, beta, Mangle, Yangle, eBX_nom, eBX_ecl)
 ! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! shadow model :: A conical model is applied.
+!                 lambda = 1     : In SUN LIGHT AREA
+!                        = 0     : In UMBRA AREA (full eclipse)
+!                 0 < lambda < 1 : In PENUMBRA AREA
+! ----------------------------------------------------------------------
+CALL shadow (rsat_icrf, rSun, rMoon, lambda)
+!print*,'lambda =', lambda
 
 
 ! ----------------------------------------------------------------------
@@ -577,7 +602,7 @@ READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
 CALL prn_shift (GNSSid, PRN_no, PRN_no)
 !print*,GNSSid, PRN_no
 
-CALL satinfo (mjd, PRN_no, satsvn)
+CALL satinfo (mjd, PRN_no, satsvn, satblk)
 !print*,satsvn
 
 END IF
@@ -588,14 +613,11 @@ END IF
 if (FMOD_NONGRAV(1) > 0) Then
 
 
-! Eclipse status		!! Temporary !!  Upgrade for calling the Yaw attitude library
-eclpf = 0
-
 ! SRP model
 srpid =  SRP_MOD_glb
 
 
-CALL force_srp (mjd, GMearth, PRN_no, satsvn, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
+CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, satsvn, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
@@ -610,7 +632,7 @@ if (FMOD_NONGRAV(2) > 0) Then
 
 CALL force_erp (mjd, PRN_no, satsvn, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
 Ferp_icrf = (/ fx, fy, fz /)
-
+!print*,'force_erp=', sqrt(fx**2+fy**2+fz**2)
 Else IF (FMOD_NONGRAV(2) == 0) Then
 
         Ferp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
@@ -643,11 +665,11 @@ SFnongrav = Fsrp_icrf + Ferp_icrf + Fant_icrf
 IF (EMP_param_glb == 1) Then
 
 !Call pd_empirical (rsat_icrf, vsat_icrf, GMearth, SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)
-Frame_EmpiricalForces = Frame_EmpiricalForces_glb	
+Frame_EmpiricalForces = Frame_EmpiricalForces_glb      
 Yawangle = Yangle(2)
-CALL pd_empirical (rsat_icrf, vsat_icrf, GMearth, Yawangle, Frame_EmpiricalForces, & 
+CALL pd_empirical (rsat_icrf, vsat_icrf, GMearth, Yawangle,Frame_EmpiricalForces, & 
                    SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)
-	
+       
 Else IF (EMP_param_glb == 0) Then
 	SFemp = (/ 0.0D0, 0.0D0, 0.0D0 /)
 End IF
