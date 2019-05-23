@@ -5,7 +5,7 @@ MODULE m_sp3_PRN
 ! MODULE: m_sp3_PRN.f03
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Module for calling the subroutine 'sp3' for reading GNSS orbits in sp3 format
+!  Module for calling the subroutine 'sp3_PRN'
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
 ! Created:	13 November 2017
@@ -26,11 +26,11 @@ SUBROUTINE sp3_PRN (fname, PRNmatrix, year, month, day, Sec_00)
 ! SUBROUTINE: sp3
 ! ----------------------------------------------------------------------
 ! Purpose:
-!  Read sp3 orbit data file format (including multi-GNSS orbits)
+!  Read the input sp3 orbit data file format (including multi-GNSS orbits) 
+!  for outputting the satellites PRN numbers
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - fname:			sp3 file name
-! - PRNid:			PRN number (e.g. G21)
 !
 ! Output allocatable arrays:
 ! - PRNmatrix: 		PRN array of all the satellites included in the sp3 file

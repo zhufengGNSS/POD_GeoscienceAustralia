@@ -1,8 +1,8 @@
-MODULE m_orbext
+MODULE m_orbext2
 
 
 ! ----------------------------------------------------------------------
-! MODULE: m_orbext.f03
+! MODULE: m_orbext2.f03
 ! ----------------------------------------------------------------------
 ! Purpose:
 !  Module for external orbit comparison 
@@ -11,7 +11,10 @@ MODULE m_orbext
 !			Geoscience Australia, CRC-SI
 ! Created:	24 April 2018
 ! ----------------------------------------------------------------------
-
+! Last Modified
+! 09/05/2019 	Dr. Thomas Papanikolaou ::
+! 				Orbit comparison matrices have been declared now as output arguments
+! ----------------------------------------------------------------------
 
       IMPLICIT NONE
       !SAVE 			
@@ -20,7 +23,8 @@ MODULE m_orbext
 Contains
 	  
 	  
-SUBROUTINE orbext (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT, orbdiff)
+SUBROUTINE orbext2 (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT, &
+                    dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf)
 
 
 ! ----------------------------------------------------------------------
@@ -45,7 +49,6 @@ SUBROUTINE orbext (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, s
 ! Output arguments:
 ! - veqSmatrix:	State trasnition matrix obtained from the Variational Equations solution based on numerical integration methods
 ! - veqPmatrix: Sensitivity matrix obtained from the Variational Equations solution based on numerical integration methods
-! - orbdiff:  : [MJD PRN BLOCKTYPE lambda beta(deg) del_u(deg) yaw(deg) ANGX(deg) ANGY(deg) ANGZ(deg) dR(m) dT(m) dN(m) FR(m^2/s) FT(m^2/s) FN(m^2/s)]
 ! ----------------------------------------------------------------------
 ! Note 1:
 ! The time scale of the 2 first collumns of the orbit arrays (MJD and Seoncds since 00h) 
@@ -55,8 +58,6 @@ SUBROUTINE orbext (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, s
 ! Author :	Dr. Thomas Papanikolaou
 !			Geoscience Australia, CRC-SI
 ! Created:	24 April 2018
-!
-! Changes:      20-05-219  Tzupang Tseng: Output the orbital information for data analysis
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -65,7 +66,6 @@ SUBROUTINE orbext (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, s
       USE mdl_param
       USE m_statdelta
       USE m_statorbit
-      USE m_statorbit2
       USE m_writearray
       IMPLICIT NONE
 	  
@@ -80,13 +80,15 @@ SUBROUTINE orbext (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, s
 ! OUT
 	  REAL (KIND = prec_d), DIMENSION(5,6), INTENT(OUT) :: stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC
 	  REAL (KIND = prec_d), DIMENSION(5,6), INTENT(OUT) :: stat_XYZ_extT
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_icrf, dorb_itrf 
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_RTN, dorb_Kepler
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb, dorb_icrf, dorb_itrf, orbdiff, orbang
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_XYZ, dorb_RTN, dorb_Kepler
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb 
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_XYZ
 !	  REAL (KIND = prec_d), DIMENSION(5,6) :: stat_XYZ, stat_RTN, stat_Kepler
       REAL (KIND = prec_d), DIMENSION(:), ALLOCATABLE :: RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr 	  
       CHARACTER (LEN=100) :: filename				
@@ -103,7 +105,7 @@ CALL prm_orbext (EQMfname)
 ! ----------------------------------------------------------------------
 ! Orbit comparison statistics
 ! ICRF
-CALL statorbit2 (orbext_ICRF, orb_icrf, orbdiff)
+!CALL statorbit (orbext_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
 CALL statorbit (orbext_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC)
 
 ! ITRF
@@ -153,13 +155,6 @@ Call writearray (dorb_Kepler, filename)
 filename = "dorb_itrf.out"
 Call writearray (dorb_itrf, filename)
 ! ----------------------------------------------------------------------
-! With all orbital information
-filename = "orbdiff.rtn"
-Call writearray (orbdiff, filename)
-
-!filename = "orbang.rtn"
-!Call writearray (orbang, filename)
-
 
 
 END SUBROUTINE

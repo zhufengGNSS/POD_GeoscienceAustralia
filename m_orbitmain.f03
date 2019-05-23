@@ -20,7 +20,9 @@ MODULE m_orbitmain
 Contains
 	  
 	  
-SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, orbdiff)
+!SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
+SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, &
+					  dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf,orbdiff)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE:	orbitmain.f03
@@ -45,6 +47,30 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
 !				- Velocity vector (m/sec)
 ! - veqSmatrix:	State trasnition matrix obtained from the Variational Equations solution based on numerical integration methods
 ! - veqPmatrix: Sensitivity matrix obtained from the Variational Equations solution based on numerical integration methods
+! - Vres:               Orbit residuals matrix in ICRF
+! - Vrms:               RMS (in XYZ) of orbit residuals in ICRF
+! - dorb_icrf:          Orbit differences in the intertial frame (position and
+! velocity vector differences)
+!                               dorb_icrf = [Time_MJD Time_Seconds00h r(X) r(Y)
+!                               r(Z) v(X) v(Y) v(Z)] 
+! - dorb_itrf:          Orbit differences in the terrestrial frame (position and
+! velocity vector differences)
+!                               dorb_itrf = [Time_MJD Time_Seconds00h r(X) r(Y)
+!                               r(Z) v(X) v(Y) v(Z)] 
+! - dorb_RTN:           Orbit differences in the orbital frame (RTN: radial,
+! along-track and cross-track differences)
+!                               dorb_RTN = [Time_MJD Time_Seconds00h R(X) T(Y)
+!                               N(Z) R(vX) T(vY) N(vZ)]
+! - dorb_Kepler:        Orbit differences for the Keplerian elements
+!                               dorb_Kepler = [Time_MJD Time_Seconds00h a e i
+!                               Omega omega E]
+!                               a:              semi-major axis  (m)
+!                               e:              eccentricity
+!                               i:              inclination (degrees)
+!                               Omega:  right ascension of the ascending node
+!                               (degrees)
+!                               omega:  argument of perigee (degrees)
+!                               E:              eccentric anomaly (degrees)
 ! - orbdiff   : [MJD PRN BLOCKTYPE lambda beta(deg) del_u(deg) yaw(deg) ANGX(deg) ANGY(deg) ANGZ(deg) dR(m) dT(m) dN(m) FR(m^2/s) FT(m^2/s) FN(m^2/s)] 
 ! ----------------------------------------------------------------------
 ! Note 1:
@@ -65,8 +91,9 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
       USE mdl_param
       USE m_orbdet
       USE m_orbext
+      USE m_orbext2
       USE m_writearray
-!      USE m_writeorbit
+      USE m_writeorbit
       IMPLICIT NONE
 
 	  
@@ -93,6 +120,12 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
 	  INTEGER :: ios
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbdiff
 ! ----------------------------------------------------------------------
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_icrf, dorb_itrf 
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_RTN, dorb_Kepler
+! ----------------------------------------------------------------------
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbdiff
+! ----------------------------------------------------------------------
+
 
 
 ! ----------------------------------------------------------------------
@@ -110,6 +143,9 @@ If (ORBEXT_glb > 0) Then
 ! ----------------------------------------------------------------------
 ! External Orbit Comparison (optional)
 Call orbext(EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT, orbdiff)
+!Call orbext (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT)
+CALL orbext2(EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT, &
+              dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf)
 ! ----------------------------------------------------------------------
 PRINT *,"External Orbit comparison"
 print *,"Orbit comparison: ICRF"
@@ -130,10 +166,10 @@ End If
 ! Estimated Orbit or Predicted Orbit
 filename = "orb_icrf.out"
 !Call writearray (orb_icrf, filename)
-!Call writeorbit (orb_icrf, filename)
+Call writeorbit (orb_icrf, filename)
 filename = "orb_itrf.out"
 !Call writearray (orb_itrf, filename)
-!Call writeorbit (orb_itrf, filename)
+Call writeorbit (orb_itrf, filename)
 
 ! Variational Equations matrices
 If (ESTIM_mode_glb > 0) then

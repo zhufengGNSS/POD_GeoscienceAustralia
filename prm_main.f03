@@ -287,6 +287,15 @@ END IF
 
 
 ! ----------------------------------------------------------------------
+! Numerical Integration of Variational Equations
+! ----------------------------------------------------------------------
+IF (word1_ln == "VEQ_integration") THEN
+   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, VEQ_integration_glb 
+END IF
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
 ! Orbit parameters estimation
 ! ----------------------------------------------------------------------
 IF (word1_ln == "Estimator_procedure") THEN

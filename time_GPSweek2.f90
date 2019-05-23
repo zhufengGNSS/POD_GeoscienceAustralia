@@ -1,8 +1,8 @@
-SUBROUTINE time_GPSweek (mjd , GPS_week, GPS_wsec, GPSweek_mod1024)
+SUBROUTINE time_GPSweek2 (mjd , GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
 
 
 ! ----------------------------------------------------------------------
-! Subroutine:	time_GPSweek.f90
+! Subroutine:	time_GPSweek2.f90
 ! ----------------------------------------------------------------------
 ! Purpose:
 !  Convert GPS time to GPS Week number and seconds
@@ -30,13 +30,13 @@ SUBROUTINE time_GPSweek (mjd , GPS_week, GPS_wsec, GPSweek_mod1024)
 ! OUT
       INTEGER (KIND = prec_int8) , INTENT(OUT) :: GPS_week, GPSweek_mod1024
       REAL (KIND = prec_d), INTENT(OUT) :: GPS_wsec
-      !REAL (KIND = prec_d), INTENT(OUT) :: GPS_day
+      REAL (KIND = prec_d), INTENT(OUT) :: GPS_day
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_d) :: GPS_day
+      !REAL (KIND = prec_d) :: GPS_day
       INTEGER IY, IM, ID, J_flag
       DOUBLE PRECISION DJM0  
       DOUBLE PRECISION mjd_1980, mjd_1999, delta_days, GPS_week_0

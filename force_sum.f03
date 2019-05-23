@@ -21,7 +21,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! Last modified:
 ! - Dr. Thomas Papanikolaou, 3 October 2018:
 !	Empirical forces of bias & cycle per revolution accelerations have been added 
-! ----------------------------------------------------------------------
+!
 ! Changes: 03-12-2018 Dr. Tzupang Tseng: Added the models of solar radiation
 !                                        pressure, earth radiation pressure 
 !                                        and antenna thrust
@@ -132,11 +132,10 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       CHARACTER (LEN=5)  :: BDSorbtype
       INTEGER (KIND = 4) :: eclipsf
       REAL (KIND = prec_d) :: beta, Mangle, Yangle(2)
-      REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
+  REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
       INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
       REAL (KIND = prec_d) :: Yawangle
-   
-
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -252,10 +251,10 @@ NCTR = 3
 ! Planets perturbation loop
 aPlanets_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 DO NTARG_body = 1 , 11
-   IF (NTARG_body /= 3) THEN 
+   IF (NTARG_body /= 3) THEN
    !IF (NTARG_body /= 3 .and. &
-   !(NTARG_body==2 .or. NTARG_body==5 .or. NTARG_body==10 .or. NTARG_body==11)) THEN 
-   !print *,"NTARG_body", NTARG_body !IF (NTARG_body/=3 .and. NTARG_body/=1.and. ) THEN 
+   !(NTARG_body==2 .or. NTARG_body==5 .or. NTARG_body==10 .or. NTARG_body==11) ) THEN 
+   !print *,"NTARG_body", NTARG_body !IF (NTARG_body/=3 .and. NTARG_body/=1 .and. ) THEN 
 		
 ! Celestial body's (NTARG) Cartesian coordinates w.r.t. Center body (NCTR)
       NTARG = NTARG_body

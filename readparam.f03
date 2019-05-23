@@ -1,8 +1,8 @@
-SUBROUTINE writeparam (fname1, fname2, param_id, param_value)
+SUBROUTINE readparam (fname1, param_id, param_value)
 
 
 ! ----------------------------------------------------------------------
-! SUBROUTINE: writeparam.f03
+! SUBROUTINE: readparam.f03
 ! ----------------------------------------------------------------------
 ! Purpose:
 !  Update the input parameters of the configuration files with the estimated parameters values
@@ -23,21 +23,16 @@ SUBROUTINE writeparam (fname1, fname2, param_id, param_value)
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      CHARACTER (LEN=100), INTENT(IN) :: fname1, fname2				
+      CHARACTER (LEN=100), INTENT(IN) :: fname1				
       CHARACTER (LEN=100), INTENT(IN) :: param_id				
-      CHARACTER (LEN=500), INTENT(IN) :: param_value				
 ! OUT
-
+      CHARACTER (LEN=500), INTENT(OUT) :: param_value				
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Variables declaration
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int2) :: ForceMod  
-! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: filename				
-      INTEGER (KIND = prec_int2) :: AllocateStatus,DeAllocateStatus
       INTEGER (KIND = prec_int8) :: i, read_i
       INTEGER (KIND = prec_int2) :: UNIT_IN, UNIT_IN2, ios
       INTEGER (KIND = prec_int2) :: ios_line, ios_key, ios_data
@@ -45,17 +40,9 @@ SUBROUTINE writeparam (fname1, fname2, param_id, param_value)
       CHARACTER (LEN=7) :: Format1, Format2, Format3
       CHARACTER (LEN=500) :: line_ith	  
       CHARACTER (LEN=150) :: word1_ln, word_i, t0	  
-! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int2) :: bias_r, bias_t, bias_n
-      INTEGER (KIND = prec_int2) :: cpr_r, cpr_t, cpr_n, cpr_freq
-      REAL (KIND = prec_q) :: Bias_radial, Bias_along, Bias_cross
-      REAL (KIND = prec_q) :: Cterm, Sterm
-! ----------------------------------------------------------------------
       CHARACTER (LEN=500) :: param_apriori, param_aposteriori 	  
+! ----------------------------------------------------------------------
 
-
-
-param_aposteriori = param_value
 
 ! ----------------------------------------------------------------------
       UNIT_IN  = 9  												
@@ -68,14 +55,6 @@ param_aposteriori = param_value
 ! ----------------------------------------------------------------------
 ! Open files
 OPEN (UNIT=UNIT_IN , FILE=fname1, ACTION="READ", IOSTAT = ios)
-OPEN (UNIT=UNIT_IN2, FILE=fname2, ACTION="READWRITE", POSITION="REWIND", IOSTAT = ios)
-
-!OPEN (UNIT=UNIT_IN , FILE=TRIM(fname1), ACTION="READ", IOSTAT = ios)
-!OPEN (UNIT=UNIT_IN2, FILE=TRIM(fname2), ACTION="READWRITE", POSITION="REWIND", IOSTAT = ios)
-!OPEN (UNIT=UNIT_IN2, FILE=TRIM(fname2), ACTION="WRITE", IOSTAT = ios)
-!OPEN (UNIT=UNIT_IN2, FILE=TRIM(fname2), ACTION="WRITE", POSITION="REWIND", IOSTAT = ios)
-!OPEN (UNIT=UNIT_IN , FILE=TRIM(fname1), IOSTAT = ios)
-!OPEN (UNIT=UNIT_IN2, FILE=TRIM(fname2), IOSTAT = ios)
 
 !IF (ios /= 0) THEN
 !   PRINT *, "Error in opening file:", filename
@@ -114,27 +93,16 @@ READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 ! Parameters Keyword read 
 IF (word1_ln == param_id) THEN
 
-! Write data to file | Write data line 
-WRITE (UNIT=UNIT_IN2, FMT=*, IOSTAT=ios) TRIM(ADJUSTL(param_id)), '			', TRIM(param_aposteriori)
-!PRINT *, "WRITE Line: param_aposteriori: ", param_aposteriori
+! Parameter Value
+READ (line_ith, * , IOSTAT=ios_data) word1_ln, param_value
 
-Else
-
-! Write data to file | Write data line 
-WRITE (UNIT=UNIT_IN2, FMT=*, IOSTAT=ios) TRIM(ADJUSTL(line_ith))
-!PRINT *, "WRITE Line: ", line_ith
- 
 END IF
 ! ----------------------------------------------------------------------
 word1_ln = ''
 
 END DO
 
-ENDFILE (UNIT=UNIT_IN2) 
-
 CLOSE (UNIT=UNIT_IN)
-CLOSE (UNIT=UNIT_IN2)
-! Close of files
 ! ----------------------------------------------------------------------
 
 

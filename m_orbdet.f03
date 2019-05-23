@@ -124,6 +124,13 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
 	  REAL (KIND = prec_q) :: CPR_CS_0(3,2)
       REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_0_coef,ECOM_coef
 ! ----------------------------------------------------------------------
+      CHARACTER (LEN=100) :: EQMfname_pred, VEQfname_pred
+      REAL (KIND = prec_d) :: orbarc_sum
+! ----------------------------------------------------------------------
+
+	  
+	  
+! ----------------------------------------------------------------------
 ! Read orbit parameterization											
 ! ----------------------------------------------------------------------
 Call prm_main (EQMfname)
@@ -171,9 +178,9 @@ CALL prm_pseudobs (EQMfname)
 ! ----------------------------------------------------------------------
 ! Dynamic Orbit Determination 
 ! ----------------------------------------------------------------------
-! Orbit estimation or propagation
-!ESTmode = 1
-
+! POD modes :: 1, 2
+! 1. Orbit Determination (pseudo-observations; orbit fitting)
+! 2. Orbit Determination and Prediction
 ! ----------------------------------------------------------------------
 If (ESTmode > 0) then
 ! Orbit Estimation
@@ -456,15 +463,50 @@ End If
 End Do
 ! ----------------------------------------------------------------------
 
-End If
+! ----------------------------------------------------------------------
+! Orbit Integration :: Orbit final solution (after parameter estimation)
+! ----------------------------------------------------------------------
 
+IF (POD_MODE_glb == 2) THEN
+! ----------------------------------------------------------------------
+! Rewrite Configuration files :: Add the Orbit Prediction arc length
+! POD mode 4 : Orbit Determination and Orbit Prediction
+
+! Copy Configuration files 
+fname_id = 'pred'
+CALL write_prmfile2 (EQMfname, fname_id, EQMfname_pred)
+!CALL write_prmfile2 (VEQfname, fname_id, VEQfname_pred)
+
+! Orbit arc length (estimated part) :: "orbarc" via module mdl_param.f03
+!Call prm_main (EQMfname)
+
+! Orbit arc length: Estimation + Prediction arc (in seconds)
+orbarc_sum = orbarc + ORBPRED_ARC_glb
+!print *,"POD_MODE_glb, EQMfname_pred ", POD_MODE_glb, EQMfname_pred
+!print *,"orbit arc lengths           ", orbarc_sum, orbarc, ORBPRED_ARC_glb
+
+param_id = 'Orbit_arc_length'
+write (param_value, *) orbarc_sum
+Call write_prmfile (EQMfname_pred, fname_id, param_id, param_value)
+!Call write_prmfile (VEQfname_pred, fname_id, param_id, param_value)
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
-! Orbit Propagation
+! Orbit Integration 
+VEQmode = 0
+Call orbinteg (EQMfname_pred, VEQmode, orb_icrf, veq0, veq1)
 ! ----------------------------------------------------------------------
+
+ELSE 
+
+! ----------------------------------------------------------------------
+! Orbit Integration 
 VEQmode = 0
 Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
 ! ----------------------------------------------------------------------
+
+END IF
+
 
 ! ----------------------------------------------------------------------
 ! Orbit residuals; statistics ! ICRF
@@ -476,6 +518,42 @@ Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3)
 ! ----------------------------------------------------------------------
 !print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
+
+! End Of Orbit Determination
+End If
+
+
+
+! ----------------------------------------------------------------------
+! POD modes :: 3, 4
+! 3. Orbit Integration (Equation of Motion only)
+! 4. Orbit Integration and Partials (Equation of Motion and Variational Equations)
+! ----------------------------------------------------------------------
+If (ESTmode == 0) then
+! ----------------------------------------------------------------------
+! POD mode 3
+! ----------------------------------------------------------------------
+IF      (VEQ_integration_glb == 0) THEN
+! Numerical Integration: Equation of Motion
+VEQmode = 0
+Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! POD mode 4
+! ----------------------------------------------------------------------
+ELSE IF (VEQ_integration_glb == 1) THEN
+! Numerical Integration: Variational Equations
+VEQmode = 1
+Call orbinteg (VEQfname, VEQmode, orb0, veqSmatrix, veqPmatrix)
+! Numerical Integration: Equation of Motion
+VEQmode = 0
+Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
+! ----------------------------------------------------------------------
+END IF
+END IF
+! ----------------------------------------------------------------------
+
 
 ! ----------------------------------------------------------------------
 ! Orbit transformation to terrestrial frame: ICRF to ITRF

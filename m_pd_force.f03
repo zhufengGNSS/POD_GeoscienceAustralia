@@ -612,13 +612,13 @@ SFnongrav = Fsrp_icrf
 ! Empirical forces
 ! ----------------------------------------------------------------------
 IF (EMP_param_glb == 1) Then
-!Call pd_empirical (rsat_icrf, vsat_icrf, GMearth, SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)	
 
-Frame_EmpiricalForces = Frame_EmpiricalForces_glb      
+!Call pd_empirical (rsat_icrf, vsat_icrf, GMearth, SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)	
+Frame_EmpiricalForces = Frame_EmpiricalForces_glb	
 Yawangle = Yangle(2)
 CALL pd_empirical (rsat_icrf, vsat_icrf, GMearth, Yawangle, Frame_EmpiricalForces, & 
                    SFemp, PD_EMP_r, PD_EMP_v, PD_EMP_param)
-
+	
 Else IF (EMP_param_glb == 0) Then
 	SFemp = (/ 0.0D0, 0.0D0, 0.0D0 /)
 	Do i = 1 , 3
