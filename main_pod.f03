@@ -28,19 +28,13 @@
 
       USE mdl_precision
       USE mdl_num
+      USE mdl_config
       USE mdl_param
       USE m_pod_gnss
-      !USE m_orbitmain
       USE m_writeorbit_multi
-      !USE m_orbdet
-      !USE m_orbext
       USE m_writearray
       USE m_writearray2
       USE m_writeorbit
-	  !USE mdl_planets
-	  !USE mdl_tides
-	  !USE mdl_eop
-	  !USE m_sp3_PRN
 	  USE m_write_orb2sp3
       IMPLICIT NONE
 
@@ -104,11 +98,11 @@
       REAL (KIND = prec_d) :: orb_est_arc
       INTEGER (KIND = prec_int2) :: IC_MODE	  	  
       CHARACTER (LEN=500) :: IC_REF				
+! ----------------------------------------------------------------------
       REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbdiff2
+! ----------------------------------------------------------------------
 
-	  
-	  
-	  
+
 ! CPU Time
 CALL cpu_time (CPU_t0)
 
@@ -120,57 +114,33 @@ CALL cpu_time (CPU_t0)
 PODfname = 'POD.in'
 ! ----------------------------------------------------------------------
 
-
-
-
 ! ----------------------------------------------------------------------  ! 999999999999999999999999999
 ! ----------------------------------------------------------------------
-! Temporary:: manual configuration of 4 global parameters
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! Write option for Satellite Velocity vector in computed orbit to output sp3 format 
-! ----------------------------------------------------------------------
-! 0. sat_vel = 0 :: Do not write Velocity vector to sp3 orbit
-! 1. sat_vel > 0 :: Write Velocity vector to sp3 orbit
-sat_vel = 1
-! ----------------------------------------------------------------------
-
-
-! ----------------------------------------------------------------------
-! "GPS satellite Block" and "Beidou Orbit Type"
-! ----------------------------------------------------------------------
-! GPS case: Satellite Block ID:	1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
-SATblock_glb = 2
+! Temporary:: manual configuration 
 ! ----------------------------------------------------------------------
 ! Beidou case:
 ! 1. BDSorbtype = 'IGSO'
 ! 2. BDSorbtype = 'MEO'
 BDSorbtype_glb = 'MEO'
-! ----------------------------------------------------------------------
+
 ! Empirical Forces reference frame:
 ! 1. Orbital Frame
 ! 2. Body-fixed frame
 Frame_EmpiricalForces_glb = 1
-! ----------------------------------------------------------------------
+
 !print *,"Frame_EmpiricalForces_glb ", Frame_EmpiricalForces_glb
-!print *,"SATblock_glb              ", SATblock_glb
 !print *,"BDSorbtype_glb            ", BDSorbtype_glb
 !print *,"              "
-
 ! ----------------------------------------------------------------------
 ! Temporary :: End of input POD configuration
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------  ! 999999999999999999999999999
 
 
-
-
 ! ----------------------------------------------------------------------
-! Form (rewrite) the two orbit integration configuration files for 
-! Equation of Motion and Variational Equations: EQM.in and VEQ.in 
 ! ----------------------------------------------------------------------
-
+! Start :: Read major configuration file POD.in
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! POD Tool mode:
@@ -180,11 +150,187 @@ Frame_EmpiricalForces_glb = 1
 ! 3. Orbit Integration (Equation of Motion only)
 ! 4. Orbit Integration and Partials (Equation of Motion and Variational Equations)
 ! ----------------------------------------------------------------------
-!POD_MODE_glb = 2 
-param_id = 'POD_mode'
+param_id = 'POD_MODE_cfg'
 CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) POD_MODE_glb 
-!print *, "POD_MODE_glb", POD_MODE_glb
+READ ( param_value, FMT = * , IOSTAT=ios_key ) POD_MODE_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Initial Conditions input mode
+! ----------------------------------------------------------------------
+! 1. Input a-priori orbit in sp3 format (applied as pseudo-observations)
+! 2. Input file with Initial Conditions (State Vector and Parameters at initial epoch per satellite) 
+! ----------------------------------------------------------------------
+param_id = 'IC_input'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) IC_MODE 
+
+! Initial Conditions reference frame
+param_id = 'IC_refsys'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) IC_REF 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Configuration files of Orbit modelling (2 Basic initial files):
+! ----------------------------------------------------------------------
+! Equation of Motion
+param_id = 'EQM_fname_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) EQM_fname_cfg 
+
+! Variational Equations
+param_id = 'VEQ_fname_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) VEQ_fname_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! POD_MODE Cases: 1 or 2  
+! ----------------------------------------------------------------------
+! A-priori orbit sp3 as pseudo-observations :: sp3 file name
+! ----------------------------------------------------------------------
+param_id = 'pseudobs_orbit_filename_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) pseudobs_orbit_filename_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! POD_MODE Cases: ALL  (IF orbit_external_opt .NE. 0 see EQM.in configuration file)
+! ----------------------------------------------------------------------
+! External Orbit Comparison :: sp3 file name
+! ----------------------------------------------------------------------
+param_id = 'ext_orbit_filename_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) ext_orbit_filename_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Orbit Determination arc length
+! ----------------------------------------------------------------------
+param_id = 'orbit_determination_arc_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) orbit_determination_arc_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! POD_MODE Cases: 2  
+! ----------------------------------------------------------------------
+! Orbit Prediction arc length (Seconds)
+! ----------------------------------------------------------------------
+param_id = 'orbit_prediction_arc_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) orbit_prediction_arc_cfg 
+! ----------------------------------------------------------------------
+
+
+! ---------------------------------------------------------------------------
+! Earth Orientation Parameters (EOP)
+! ---------------------------------------------------------------------------
+! EOP data solution options:
+! 1. IERS C04 										: EOP_sol=1
+! 2. IERS RS/PC Daily 								: EOP_sol=2
+! 3. IGS ultra-rapid ERP + IERS RS/PC Daily (dX,dY)	: EOP_sol=3
+param_id = 'EOP_solution_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) EOP_solution_cfg 
+
+! EOP filename by IERS EOP :: Solutions 1 and 2
+param_id = 'EOP_fname_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) EOP_fname_cfg 
+
+! ERP filename (Earth Rotation Parameters by IGS) :: Solution 3 (requires also finals2000A.daily data from EOP_sol=2 for Precession-Nutation corrections)
+param_id = 'ERP_fname_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) ERP_fname_cfg 
+
+! EOP data interpolation number of points	  
+param_id = 'EOP_Nint_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) EOP_Nint_cfg 
+! ---------------------------------------------------------------------------
+
+! ---------------------------------------------------------------------------
+! IAU Precession-Nutation model:
+! ---------------------------------------------------------------------------
+! 1. IAU2000A:		iau_pn_model = 2000
+! 2. IAU2006/2000A:	iau_pn_model = 2006
+param_id = 'iau_model_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) iau_model_cfg 
+! ---------------------------------------------------------------------------
+
+! ---------------------------------------------------------------------------
+! Orbit Parameter Estimation
+! ---------------------------------------------------------------------------
+! Number of iterations
+param_id = 'Estimator_Iterations_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) Estimator_Iterations_cfg 
+! ---------------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Write to sp3 orbit format: Option for write Satellite Velocity vector 
+! ----------------------------------------------------------------------
+! 0. sat_vel = 0 :: Do not write Velocity vector to sp3 orbit
+! 1. sat_vel > 0 :: Write Velocity vector to sp3 orbit
+param_id = 'sp3_velocity_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) sp3_velocity_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! End :: Read major configuration file POD.in
+! ----------------------------------------------------------------------
+! ----------------------------------------------------------------------
+
+
+
+! ----------------------------------------------------------------------
+! Major configuration parameters via "POD.in configuration file" and "Module mdl_config.f03" 
+! ----------------------------------------------------------------------
+! POD_MODE_cfg
+! EQM_fname_cfg
+! VEQ_fname_cfg
+! pseudobs_orbit_filename_cfg 
+! ext_orbit_filename_cfg
+! orbit_determination_arc_cfg
+! orbit_prediction_arc_cfg
+! EOP_solution_cfg
+! EOP_fname_cfg
+! ERP_fname_cfg
+! EOP_Nint_cfg
+! iau_model_cfg
+! Estimator_Iterations_cfg 
+! sp3_velocity_cfg
+! ----------------------------------------------------------------------
+
+
+
+! ----------------------------------------------------------------------
+! Form (rewrite) the two orbit integration configuration files for 
+! Equation of Motion and Variational Equations: EQM.in and VEQ.in 
+! ----------------------------------------------------------------------
+
+POD_MODE_glb      = POD_MODE_cfg
+EQMfname_initial  = EQM_fname_cfg
+VEQfname_initial  = VEQ_fname_cfg
+ORBpseudobs_fname = pseudobs_orbit_filename_cfg 
+ORBEXT_fname      = ext_orbit_filename_cfg
+
+! Convert Hours to Seconds
+orb_est_arc       = orbit_determination_arc_cfg * 3600.D0
+ORBPRED_ARC_glb   = orbit_prediction_arc_cfg * 3600.D0
+
+! EOP_solution_cfg
+! EOP_fname_cfg
+! ERP_fname_cfg
+! EOP_Nint_cfg
+! iau_model_cfg
+! Estimator_Iterations_cfg
+sat_vel           = sp3_velocity_cfg
+
 
 If      (POD_MODE_glb == 1) then
 Print *,"POD Tool mode: 1 :: Orbit Determination"
@@ -196,91 +342,24 @@ Else IF (POD_MODE_glb == 4) then
 Print *,"POD Tool mode: 2 :: Orbit Integration and Partials"
 End IF
 Print *," "
-! ----------------------------------------------------------------------
 
-! ----------------------------------------------------------------------
-! Initial Conditions input mode
-! ----------------------------------------------------------------------
-! 1. Input a-priori orbit in sp3 format (applied as pseudo-observations)
-! 2. Input file with Initial Conditions (State Vector and Parameters at initial epoch per satellite) 
-! ----------------------------------------------------------------------
-!IC_MODE = 1
-param_id = 'IC_input'
-CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) IC_MODE 
+if (1<0) then
+print *, "POD_MODE_glb", POD_MODE_glb
+print *, "EQMfname_initial  ", EQMfname_initial
+print *, "VEQfname_initial  ", VEQfname_initial
+print *, "ORBpseudobs_fname ", ORBpseudobs_fname
+print *, "ORBEXT_fname      ", ORBEXT_fname
+print *, "orb_est_arc", orb_est_arc
+print *, "ORBPRED_ARC_glb", ORBPRED_ARC_glb
+print *, "EOP_solution_cfg", EOP_solution_cfg
+print *, "EOP_fname_cfg     ", EOP_fname_cfg
+print *, "ERP_fname_cfg     ", ERP_fname_cfg
+print *, "EOP_Nint_cfg      ", EOP_Nint_cfg
+print *, "Estimator_Iterations_cfg", Estimator_Iterations_cfg
+print *, "Orbit sp3 write sat_vel", sat_vel
+Print *," "
+end if
 
-! Initial Conditions reference frame
-!IC_REF  = 'ITRF'
-param_id = 'IC_refsys'
-CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) IC_REF 
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! Configuration files of Orbit modelling (2 Basic initial files):
-! ----------------------------------------------------------------------
-!EQMfname_initial = 'EQM.in'
-!VEQfname_initial = 'VEQ.in'
-
-! Equation of Motion
-param_id = 'EQM_filename'
-CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) EQMfname_initial 
-!print *, "EQMfname_initial", EQMfname_initial
-
-! Variational Equations
-param_id = 'VEQ_filename'
-CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) VEQfname_initial 
-!print *, "VEQfname_initial", VEQfname_initial
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! POD_MODE Cases: 1 or 2  
-! ----------------------------------------------------------------------
-! A-priori orbit sp3 as pseudo-observations :: sp3 file name
-! ----------------------------------------------------------------------
-param_id = 'pseudobs_filename'
-CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) ORBpseudobs_fname 
-!print *, "ORBpseudobs_fname", ORBpseudobs_fname
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! POD_MODE Cases: ALL  (IF orbit_external_opt .NE. 0 see EQM.in configuration file)
-! ----------------------------------------------------------------------
-! External Orbit Comparison :: sp3 file name
-! ----------------------------------------------------------------------
-!ORBEXT_fname = ORBpseudobs_fname
-param_id = 'orbit_filename'
-CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) ORBEXT_fname 
-!print *, "ORBEXT_fname", ORBEXT_fname
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! Orbit Estimation arc length
-! ----------------------------------------------------------------------
-param_id = 'Orbit_arc_length'
-CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) orb_est_arc 
-! Convert Hours to Seconds
-orb_est_arc = orb_est_arc * 3600.D0
-!print *, "orb_est_arc", orb_est_arc
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! POD_MODE Cases: 2  
-! ----------------------------------------------------------------------
-! Orbit Prediction arc length (Seconds)
-! ----------------------------------------------------------------------
-param_id = 'orbit_prediction_arc'
-CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) ORBPRED_ARC_glb 
-! Convert Hours to Seconds
-ORBPRED_ARC_glb = ORBPRED_ARC_glb * 3600.D0
-!print *, "ORBPRED_ARC_glb", ORBPRED_ARC_glb
-! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -294,6 +373,11 @@ CALL write_prmfile2 (VEQfname_initial, fname_id, VEQfname)
 !print *,"VEQfname ", VEQfname
 !print *,"              "
 
+
+! ----------------------------------------------------------------------
+! ----------------------------------------------------------------------
+! Start :: Rewrite configuration files
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Rewrite Configuration files :: Set POD_MODE
@@ -360,11 +444,57 @@ Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Rewrite Configuration files :: Set Earth Orientation Modelling 
+! ----------------------------------------------------------------------
+fname_id = '1'
+param_id = 'EOP_data_sol'
+write (param_value, *) EOP_solution_cfg
+Call write_prmfile (EQMfname, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname, fname_id, param_id, param_value)
+
+param_id = 'EOP_filename'
+write (param_value, *) EOP_fname_cfg
+Call write_prmfile (EQMfname, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname, fname_id, param_id, param_value)
+
+param_id = 'ERP_filename'
+write (param_value, *) ERP_fname_cfg
+Call write_prmfile (EQMfname, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname, fname_id, param_id, param_value)
+
+param_id = 'EOP_interpolation_points'
+write (param_value, *) EOP_Nint_cfg
+Call write_prmfile (EQMfname, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname, fname_id, param_id, param_value)
+
+param_id = 'iau_pn_model'
+write (param_value, *) iau_model_cfg
+Call write_prmfile (EQMfname, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname, fname_id, param_id, param_value)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Rewrite Configuration files :: Set Orbit Parameter Estimator number of iterations 
+! ----------------------------------------------------------------------
+fname_id = '1'
+param_id = 'Estimator_Iterations'
+write (param_value, *) Estimator_Iterations_cfg
+Call write_prmfile (EQMfname, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname, fname_id, param_id, param_value)
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! End :: Rewrite configuration files
+! ----------------------------------------------------------------------
+! ----------------------------------------------------------------------
+
 
 
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
-! POD of the GNSS satellites constellations
+! POD of the GNSS satellite constellations
 ! ----------------------------------------------------------------------
 CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, &
                orbit_resR, orbit_resT, orbit_resN, orbdiff2)
