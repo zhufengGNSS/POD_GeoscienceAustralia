@@ -1,4 +1,4 @@
-BIN = ./bin
+BIN = ../bin
 # Fortan compiler
 #FC = /opt/intel/bin/ifort
 FC = gfortran
@@ -45,11 +45,7 @@ m_force_tides.f03 \
 rel_schwarzschild.f90 rel_LenseThirring.f90 rel_deSitter.f90 \
 force_srp.f90 prn_shift.f03 surfprop.f90 cross_product.f90 R3.for R1.for \
 force_erp.f90 force_ant.f90 \
-<<<<<<< HEAD
-m_pd_empirical.f03 empirical_init.f03 empirical_cor.f03 \
-=======
 m_pd_empirical.f03 empirical_init_file.f03 empirical_init.f03 empirical_cor.f03 \
->>>>>>> thomas
 beta_angle.f90 yaw_nom.f90 yaw_angle.f90 \
 yaw_attitude.f90 eclips.f eclips2017.f eclips201707.f \
 beta_pred.f90 \
@@ -73,10 +69,6 @@ prm_main.f03 prm_grav.f03 prm_nongrav.f03 prm_emp.f03 prm_srp.f03 \
 prm_read.f03 prm_gravity.f03 prm_planets.f03 prm_ocean.f03 \
 prm_orbext.f03 prm_pseudobs.f03 \
 main_pod.f03
-<<<<<<< HEAD
-=======
-
->>>>>>> thomas
 
 CRS2TRSSRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
@@ -98,7 +90,7 @@ era_matrix.f90 \
 main_crs2trs.f03
 
 #PROGRAM = main_orb.e
-PROGRAM = main_pod.e
+PROGRAM = pod
 
 all: $(PROGRAM) crs2trs
 
