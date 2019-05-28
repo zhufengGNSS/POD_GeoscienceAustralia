@@ -55,6 +55,11 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
 ! Author :	Dr. Thomas Papanikolaou
 !			Geoscience Australia, CRC-SI
 ! Created:	20 April 2018
+!
+! Changes:  18-12-2018  Tzupang Tseng : enabled the function of the ECOM SRP estimation and added some conditions to judge which model
+!                                       is used to improve the GNSS orbit modelling (Currently the ECOM model is only estimated with full
+!                                       9 coefficients or 3 bias terms. The adjustable function has not been ready yet)
+!           21-02-2019  Tzupang Tseng : The adjustable function of the ECOM model has been activated.
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -92,8 +97,8 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
       CHARACTER (LEN=100) :: filename
       INTEGER (KIND = prec_int2) :: VEQmode 
       INTEGER (KIND = prec_int2) :: ESTmode 
-      INTEGER (KIND = prec_int2) :: Niter 
-      INTEGER (KIND = prec_int8) :: i 
+      INTEGER (KIND = prec_int2) :: Niter,srp_i 
+      INTEGER (KIND = prec_int8) :: i, ii, PD_Param_ID 
       INTEGER (KIND = prec_int8) :: sz1, sz2 
       INTEGER (KIND = prec_int8) :: Nepochs	  
       !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix  
@@ -117,6 +122,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
       REAL (KIND = prec_d) :: apriori_3(3), apriori_2(2) 				
 	  REAL (KIND = prec_q) :: Bias_0(3)
 	  REAL (KIND = prec_q) :: CPR_CS_0(3,2)
+      REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_0_coef,ECOM_coef
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: EQMfname_pred, VEQfname_pred
       REAL (KIND = prec_d) :: orbarc_sum
@@ -188,8 +194,47 @@ Bias_0 = (/ 0.0D0, 0.0D0, 0.0D0/)
 CPR_CS_0(1,:) = (/ 0.0D0, 0.0D0/)
 CPR_CS_0(2,:) = (/ 0.0D0, 0.0D0/)
 CPR_CS_0(3,:) = (/ 0.0D0, 0.0D0/)
-Call empirical_init (i, Bias_0, CPR_CS_0)
+!Call empirical_init (i, Bias_0, CPR_CS_0)
+Call empirical_init_file (i, Bias_0, CPR_CS_0)
 ! ----------------------------------------------------------------------
+! ----------------------------------------------------------------------
+! Initial conditions for solar radiation pressure
+! ----------------------------------------------------------------------
+IF (ECOM_param_glb /= 0) THEN
+
+ IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
+ IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
+
+ALLOCATE (ECOM_0_coef(NPARAM_glb), STAT = AllocateStatus)
+ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
+ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
+
+srp_i = ECOM_param_glb
+
+DO ii=1,NPARAM_glb
+ECOM_0_coef(ii) = 0.0D0
+END DO
+
+
+IF (srp_i == 1) THEN
+fname = 'ECOM1_srp.in'
+param_id = 'ECOM1'
+write (param_value, *) ECOM_0_coef
+Call write_prmfile (fname, fname_id, param_id, param_value)
+END IF
+
+IF (srp_i == 2) THEN
+fname = 'ECOM2_srp.in'
+param_id = 'ECOM2'
+write (param_value, *) ECOM_0_coef
+Call write_prmfile (fname, fname_id, param_id, param_value)
+END IF
+
+ELSE
+
+ PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
+
+END IF
 
 ! Iterations number of parameter estimation algorithm
 !Niter = 1
@@ -244,7 +289,11 @@ Xo_estim(1:6) = Xmatrix(1:6,1)
 SVEC_Zo_ESTIM = SVEC_Zo + Xo_estim
 !print *, "SVEC_Zo_ESTIM Zo+Xmatrix", SVEC_Zo_ESTIM
 
-If (NPARAM_glb /=0) Then
+! ----------------------------------------------------------------------
+! Empirical model
+! **********************************************************************
+!If (NPARAM_glb /=0) Then !(remarked by Dr. Tzupang Tseng 11-12-2018)
+  If (EMP_param_glb == 1) Then
 If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 1) Then
 ! Bias & CPR
 Bias_corr = Xmatrix(7:9,1)
@@ -266,9 +315,9 @@ Else If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 0) Then
 ! Bias 
 Bias_corr = Xmatrix(7:9,1)
 End If
-End IF
 
 Bias_accel_aposteriori = Bias_accel_glb + Bias_corr
+
 !print *, "Bias_accel_aposteriori", Bias_accel_aposteriori
 !print *, "Bias_accel_glb", Bias_accel_glb
 !print *, "Bias_corr", Bias_corr
@@ -277,6 +326,109 @@ CPR_CS_aposteriori = CPR_CS_glb + CPR_corr
 !print *, "CPR_CS_aposteriori", CPR_CS_aposteriori
 !print *, "CPR_CS_glb", CPR_CS_glb
 !print *, "CPR_corr", CPR_corr
+
+! ----------------------------------------------------------------------
+! Empirical parameters
+! Bias and CPR terms
+Bias_0 = Bias_accel_aposteriori
+CPR_CS_0 = CPR_CS_aposteriori
+Call empirical_init (i, Bias_0, CPR_CS_0)
+
+End If  ! End of empirical model
+! **********************************************************************
+
+! ----------------------------------------------------------------------
+! ECOM-based SRP model
+! **********************************************************************
+! added by Dr. Tzupang Tseng 11-12-2018
+If ( ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
+
+      PD_Param_ID = 0
+If (ECOM_Bias_glb(1) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+ELSE
+        PD_Param_ID = PD_Param_ID
+End IF
+If (ECOM_Bias_glb(2) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+ELSE    
+        PD_Param_ID = PD_Param_ID
+End IF
+If (ECOM_Bias_glb(3) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+ELSE
+        PD_Param_ID = PD_Param_ID
+End IF
+If (ECOM_CPR_glb(1) == 1) THEN
+! C term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+! S term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+ELSE
+        PD_Param_ID = PD_Param_ID
+End IF
+If (ECOM_CPR_glb(2) == 1) THEN
+! C term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+! S term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+ELSE
+        PD_Param_ID = PD_Param_ID
+End IF
+If (ECOM_CPR_glb(3) == 1) THEN
+! C term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+! S term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+ELSE
+        PD_Param_ID = PD_Param_ID
+End If
+
+IF (NPARAM_glb /= PD_Param_ID) THEN
+PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+PRINT*,           'NPARAM_glb  =', NPARAM_glb
+PRINT*,           'PD_Param_ID =', PD_Param_ID
+END IF
+
+ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
+
+!print*,'ECOM_coef=',ECOM_coef
+!print*,'ECOM_accel_glb=',ECOM_accel_glb
+!print*,'ECOM_accel_aposteriori=',ECOM_accel_aposteriori
+
+! ----------------------------------------------------------------------
+! SRP parameters
+IF (ECOM_param_glb /= 0) THEN
+ECOM_0_coef = ECOM_accel_aposteriori
+
+IF (srp_i == 1) THEN
+fname = 'ECOM1_srp.in'
+param_id = 'ECOM1'
+write (param_value, *) ECOM_0_coef
+Call write_prmfile (fname, fname_id, param_id, param_value)
+END IF
+
+IF (srp_i == 2) THEN
+fname = 'ECOM2_srp.in'
+param_id = 'ECOM2'
+write (param_value, *) ECOM_0_coef
+Call write_prmfile (fname, fname_id, param_id, param_value)
+END IF
+END IF
+! End of ECOM-based SRP model
+! **********************************************************************
+  
+   END IF
+
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -306,13 +458,8 @@ write (param_value, *) SVEC_Zo_ESTIM
 Call write_prmfile (fname, fname_id, param_id, param_value)
 
 End If
-! ----------------------------------------------------------------------
-! Empirical parameters
-! Bias and CPR terms
-Bias_0 = Bias_accel_aposteriori
-CPR_CS_0 = CPR_CS_aposteriori
-Call empirical_init (i, Bias_0, CPR_CS_0)
-! ----------------------------------------------------------------------
+
+
 
 End Do
 ! ----------------------------------------------------------------------

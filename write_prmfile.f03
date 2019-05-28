@@ -48,7 +48,7 @@ fname_len = LEN(TRIM(ADJUSTL(fname)))
 !fname1 = 'emp_bias.in'
 !fname2 = 'emp_bias0.in'
 fname1 = fname
-write (fname2, *) TRIM(ADJUSTL(fname(1:fname_len-3))),TRIM(ADJUSTL(fname_id)),".in"
+write (fname2, FMT='(a)') TRIM(ADJUSTL(fname(1:fname_len-3)))//TRIM(ADJUSTL(fname_id))//".in"
 !print *, "fname2", fname2
 param_id0 =    '999'
 param_value0 = '999'
