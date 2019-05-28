@@ -49,7 +49,7 @@ fname1 = fname
 !fname2 = fname_out
 
 ! fname2
-write (fname2, *) TRIM(ADJUSTL(fname(1:fname_len-3))),TRIM(ADJUSTL(fname_id)),".in"
+write (fname2, FMT='(a)') TRIM(ADJUSTL(fname(1:fname_len-3)))//TRIM(ADJUSTL(fname_id))//".in"
 !print *, "fname2", fname2
 
 ! Copy input file data to fname2

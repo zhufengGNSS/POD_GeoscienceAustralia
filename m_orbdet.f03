@@ -194,7 +194,8 @@ Bias_0 = (/ 0.0D0, 0.0D0, 0.0D0/)
 CPR_CS_0(1,:) = (/ 0.0D0, 0.0D0/)
 CPR_CS_0(2,:) = (/ 0.0D0, 0.0D0/)
 CPR_CS_0(3,:) = (/ 0.0D0, 0.0D0/)
-Call empirical_init (i, Bias_0, CPR_CS_0)
+!Call empirical_init (i, Bias_0, CPR_CS_0)
+Call empirical_init_file (i, Bias_0, CPR_CS_0)
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 ! Initial conditions for solar radiation pressure

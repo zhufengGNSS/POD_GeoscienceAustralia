@@ -10,7 +10,7 @@ FCFLAGS = -llapack -lblas
 FLFLAGS = -L/usr/lib64
 
 SRCS = mdl_precision.f90 mdl_num.f90 mdl_config.f03 mdl_param.f03 mdl_eop.f90 mdl_planets.f90 mdl_tides.f90 mdl_arr.f90 \
-m_writearray.f03 m_writearray2.f03 writeparam.f03 writeparam1.f03 write_prmfile.f03 write_prmfile2.f03 readparam.f03 m_writedata.f03 m_writeorbit.f03 m_writeorbit_multi.f03 m_write_orb2sp3.f03 \
+m_writearray.f03 m_writearray2.f03 write_prmfile_init0.f03  m_write_prmfile_init.f03 writeparam.f03 writeparam1.f03 write_prmfile.f03 write_prmfile2.f03 readparam.f03 m_writedata.f03 m_writeorbit.f03 m_writeorbit_multi.f03 m_write_orb2sp3.f03 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
 m_matrixinv.f03 matrix_inv3.f90 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
 jd2cal.for cal2jd.for dat.for \
@@ -45,7 +45,11 @@ m_force_tides.f03 \
 rel_schwarzschild.f90 rel_LenseThirring.f90 rel_deSitter.f90 \
 force_srp.f90 prn_shift.f03 surfprop.f90 cross_product.f90 R3.for R1.for \
 force_erp.f90 force_ant.f90 \
+<<<<<<< HEAD
 m_pd_empirical.f03 empirical_init.f03 empirical_cor.f03 \
+=======
+m_pd_empirical.f03 empirical_init_file.f03 empirical_init.f03 empirical_cor.f03 \
+>>>>>>> thomas
 beta_angle.f90 yaw_nom.f90 yaw_angle.f90 \
 yaw_attitude.f90 eclips.f eclips2017.f eclips201707.f \
 beta_pred.f90 \
@@ -69,6 +73,10 @@ prm_main.f03 prm_grav.f03 prm_nongrav.f03 prm_emp.f03 prm_srp.f03 \
 prm_read.f03 prm_gravity.f03 prm_planets.f03 prm_ocean.f03 \
 prm_orbext.f03 prm_pseudobs.f03 \
 main_pod.f03
+<<<<<<< HEAD
+=======
+
+>>>>>>> thomas
 
 CRS2TRSSRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
