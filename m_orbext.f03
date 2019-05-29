@@ -157,9 +157,6 @@ Call writearray (dorb_itrf, filename)
 filename = "orbdiff.rtn"
 Call writearray (orbdiff, filename)
 
-!filename = "orbang.rtn"
-!Call writearray (orbang, filename)
-
 
 
 END SUBROUTINE
