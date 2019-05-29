@@ -48,8 +48,6 @@ SUBROUTINE write_prmfile_init0 (fname, param_id, param_value)
       !INTEGER (KIND = prec_int8) :: Nparam, Nparam2
       !CHARACTER (LEN=100) :: param_id				
       !CHARACTER (LEN=500) :: param_value				
-
-	  
 ! ----------------------------------------------------------------------
 ! Parameters arrays size
 ! ----------------------------------------------------------------------
@@ -101,7 +99,6 @@ WRITE (UNIT=UNIT_IN, FMT=*, IOSTAT=ios) TRIM(ADJUSTL(param_id)), '			', TRIM(par
 
 
 ENDFILE (UNIT=UNIT_IN) 
-
 CLOSE (UNIT=UNIT_IN)
 ! Close of files
 ! ----------------------------------------------------------------------
