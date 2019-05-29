@@ -48,7 +48,6 @@ SUBROUTINE write_prmfile_init0 (fname, param_id, param_value)
       !INTEGER (KIND = prec_int8) :: Nparam, Nparam2
       !CHARACTER (LEN=100) :: param_id				
       !CHARACTER (LEN=500) :: param_value				
-
 ! ----------------------------------------------------------------------
 ! Parameters arrays size
 ! ----------------------------------------------------------------------
