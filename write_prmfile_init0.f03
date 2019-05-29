@@ -99,7 +99,6 @@ WRITE (UNIT=UNIT_IN, FMT=*, IOSTAT=ios) TRIM(ADJUSTL(param_id)), '			', TRIM(par
 
 
 ENDFILE (UNIT=UNIT_IN) 
-
 CLOSE (UNIT=UNIT_IN)
 ! Close of files
 ! ----------------------------------------------------------------------
