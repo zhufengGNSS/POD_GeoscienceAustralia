@@ -49,7 +49,6 @@ SUBROUTINE write_prmfile_init0 (fname, param_id, param_value)
       !CHARACTER (LEN=100) :: param_id				
       !CHARACTER (LEN=500) :: param_value				
 
-	  
 ! ----------------------------------------------------------------------
 ! Parameters arrays size
 ! ----------------------------------------------------------------------

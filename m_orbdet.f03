@@ -201,40 +201,22 @@ Call empirical_init_file (i, Bias_0, CPR_CS_0)
 ! Initial conditions for solar radiation pressure
 ! ----------------------------------------------------------------------
 IF (ECOM_param_glb /= 0) THEN
-
- IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
- IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
-
+IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
+IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
 ALLOCATE (ECOM_0_coef(NPARAM_glb), STAT = AllocateStatus)
 ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
 ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
-
-srp_i = ECOM_param_glb
-
-DO ii=1,NPARAM_glb
-ECOM_0_coef(ii) = 0.0D0
-END DO
-
-
-IF (srp_i == 1) THEN
-fname = 'ECOM1_srp.in'
-param_id = 'ECOM1'
-write (param_value, *) ECOM_0_coef
-Call write_prmfile (fname, fname_id, param_id, param_value)
-END IF
-
-IF (srp_i == 2) THEN
-fname = 'ECOM2_srp.in'
-param_id = 'ECOM2'
-write (param_value, *) ECOM_0_coef
-Call write_prmfile (fname, fname_id, param_id, param_value)
-END IF
-
+!srp_i = ECOM_param_glb
+!DO ii=1,NPARAM_glb
+!ECOM_0_coef(ii) = 0.0D0
+!END DO
+ECOM_0_coef = 0.d0
+!print*,'ECOM_0_coef=',ECOM_0_coef
+CALL ecom_init (i,ECOM_0_coef)
 ELSE
-
- PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
-
+PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
 END IF
+! ----------------------------------------------------------------------
 
 ! Iterations number of parameter estimation algorithm
 !Niter = 1
@@ -336,7 +318,6 @@ Call empirical_init (i, Bias_0, CPR_CS_0)
 
 End If  ! End of empirical model
 ! **********************************************************************
-
 ! ----------------------------------------------------------------------
 ! ECOM-based SRP model
 ! **********************************************************************
@@ -409,15 +390,15 @@ ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
 ! SRP parameters
 IF (ECOM_param_glb /= 0) THEN
 ECOM_0_coef = ECOM_accel_aposteriori
-
-IF (srp_i == 1) THEN
+fname_id = PRN
+IF (ECOM_param_glb == 1) THEN
 fname = 'ECOM1_srp.in'
 param_id = 'ECOM1'
 write (param_value, *) ECOM_0_coef
 Call write_prmfile (fname, fname_id, param_id, param_value)
 END IF
 
-IF (srp_i == 2) THEN
+IF (ECOM_param_glb == 2) THEN
 fname = 'ECOM2_srp.in'
 param_id = 'ECOM2'
 write (param_value, *) ECOM_0_coef

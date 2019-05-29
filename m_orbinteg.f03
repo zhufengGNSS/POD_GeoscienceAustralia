@@ -49,7 +49,10 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqSmatrix, veqPmatrix)
 ! according to the input parameterization file 
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
+!
 ! Created:	5 October 2017
+!
+! Chnages:  22-05-2019  Tzupang Tseng: compute the beta angle for setting the integration step size for the eclipsed satellites    
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -58,6 +61,7 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqSmatrix, veqPmatrix)
       USE m_integrEQM
       USE m_integrVEQ
       USE mdl_param
+      USE m_betainfo
       IMPLICIT NONE
 
 	  
@@ -101,7 +105,7 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqSmatrix, veqPmatrix)
 	  INTEGER (KIND = prec_int8) :: Nparam
 
       REAL (KIND = prec_d) :: Xmatrix(6)
-
+      REAL (KIND = prec_d) :: beta0
 
 
 
@@ -129,7 +133,13 @@ integID = integmeth
 step = integstep
 arc = orbarc
 ! ----------------------------------------------------------------------
-
+! compute the beta angle for setting the integration step size for the eclipsed
+! satellite
+CALL betainfo (MJDo, ro, vo, beta0)
+IF (ABS(beta0)-14.d0 .lt. 0.d0)THEN
+step = 120
+END IF
+!-----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
