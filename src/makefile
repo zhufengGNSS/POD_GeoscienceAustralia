@@ -63,10 +63,10 @@ ecom_init.f03 \
 prm_srp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.f03 \
 prm_orbext.f03 prm_planets.f03 prm_pseudobs.f03 \
 m_pod_gnss.f03 m_pd_ECOM.f90 m_orbitmain.f03 m_orbdet.f03 \
-m_orbinteg.f03 m_integreqm.f03 m_integrveq.f03 m_veq_rkn768.f03 \
-m_betainfo.f90 m_orb_estimator.f03 m_orbc2t.f03 m_orbt2c.f03 m_statdelta.f03 \
+m_orbinteg.f03 m_integrEQM.f03 m_integrVEQ.f03 m_veq_rkn768.f03 \
+m_betainfo.f90 m_orb_estimator.f03 m_orbC2T.f03 m_orbT2C.f03 m_statdelta.f03 \
 m_statist.f03 m_statorbit.f03 m_orbext.f03 m_orbext2.f03 m_statorbit2.f03 \
-m_orbinfo.f90 m_gfc.f03 m_gfc3.f03 m_obsorbt2c.f03 \
+m_orbinfo.f90 m_gfc.f03 m_gfc3.f03 m_obsorbT2C.f03 \
 main_pod.f03
 
 CRS2TRSSRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
