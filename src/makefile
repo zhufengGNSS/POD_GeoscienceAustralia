@@ -67,6 +67,7 @@ m_orbinteg.f03 m_integreqm.f03 m_integrveq.f03 m_veq_rkn768.f03 \
 m_betainfo.f90 m_orb_estimator.f03 m_orbc2t.f03 m_orbt2c.f03 m_statdelta.f03 \
 m_statist.f03 m_statorbit.f03 m_orbext.f03 m_orbext2.f03 m_statorbit2.f03 \
 m_orbinfo.f90 m_gfc.f03 m_gfc3.f03 m_obsorbt2c.f03 \
+f90getopt.F90 read_cmdline.f03 \
 main_pod.f03
 
 CRS2TRSSRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
