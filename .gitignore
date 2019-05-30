@@ -8,3 +8,5 @@
 *.out
 *.mod
 *.e
+pod
+crs2trs
