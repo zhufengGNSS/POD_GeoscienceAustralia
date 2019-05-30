@@ -66,7 +66,7 @@ m_pod_gnss.f03 m_pd_ECOM.f90 m_orbitmain.f03 m_orbdet.f03 \
 m_orbinteg.f03 m_integrEQM.f03 m_integrVEQ.f03 m_veq_rkn768.f03 \
 m_betainfo.f90 m_orb_estimator.f03 m_orbC2T.f03 m_orbT2C.f03 m_statdelta.f03 \
 m_statist.f03 m_statorbit.f03 m_orbext.f03 m_orbext2.f03 m_statorbit2.f03 \
-m_orbinfo.f90 m_gfc.f03 m_gfc3.f03 m_obsorbt2c.f03 \
+m_orbinfo.f90 m_gfc.f03 m_gfc3.f03 m_obsorbT2C.f03 \
 f90getopt.F90 read_cmdline.f03 \
 main_pod.f03
 
@@ -98,7 +98,7 @@ directories: $(BIN)
 $(BIN): 
 	mkdir -p $(BIN)
 
-$(PROGRAM): $(SRCS)
+$(PROGRAM): $(SRCS) 
 	$(FC) $(FCFLAGS) -o $@ $^
 
 %.o: %.F
