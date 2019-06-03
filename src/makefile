@@ -4,8 +4,8 @@ BIN = ../bin
 FC = gfortran
 
 # Compiler flags
-FCFLAGS = -llapack -lblas
-
+FCFLAGS = -O2 -llapack -lblas
+#-O3 -Wuninitialized -fno-f2c -ffast-math -fno-automatic -fno-backslash -m64 -mcmodel=large 
 # Linker flags
 FLFLAGS = -L/usr/lib64
 
@@ -67,7 +67,7 @@ $(BIN):
 	mkdir -p $(BIN)
 
 $(PROGRAM): $(SRCS) 
-	$(FC) $(FCFLAGS) -o $@ $^
+	$(FC) $(FCFLAGS) -o $(BIN)/$@ $^
 
 %.o: %.F
 	$(FC) $(FLFLAGS) -o $@ $<
