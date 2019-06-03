@@ -1,0 +1,101 @@
+#!/bin/csh -f      
+#
+#  Script to link tables required by the POD to the local directory.
+#
+if ($#argv == 0) then
+   echo ' '
+   echo '    sh_links.pod creates links necessary to run the POD in the current directory'
+   echo ' ' 
+   echo ' FORMAT' 
+   echo ' '
+   echo '    sh_links.pod -default -gravity [static file] -ocean [tide file] -planet [ephem file] -eop [eop file] -satinfo [satinfo file]'
+   echo ' '
+   echo ' -default : Link default  set of files from ~/pod/tables directory to local directory'
+   echo '    ln -s ~/pd/tables/ascp1950.430         ./ascp1950.430        '
+   echo '    ln -s ~/pd/tables/fes2004_Cnm-Snm.dat  ./fes2004_Cnm-Snm.dat '
+   echo '    ln -s ~/pd/tables/goco05s.gfc          ./goco05s.gfc         '
+   echo '    ln -s ~/pd/tables/header.430_229       ./header.430_229      '
+   echo '    ln -s ~/pd/tables/satinfo.dat          ./satinfo.dat         '
+   echo ' '
+   echo ' OPTIONAL'                                               
+   echo ' '        
+   echo '    -eop    = eop file to link '
+   echo '    -static = static gravity field file to link'
+   echo '    -ocean  = ocean tide file to link'
+   echo '    -ephem  = planetary ephemeris file to link'
+   echo '    -satinfo = satellite info file to link' 
+   echo ' '
+   echo ' EXAMPLES'                               
+   echo '    sh_links.pod -d'
+   echo '    sh_links.pod -eop eopc04_14_IAU2000.62-now'
+   echo ' '
+   exit
+endif
+      
+# create standard links in a working directory
+#
+set grav    = ''
+set eop     = ''
+set ocean   = ''
+set satinfo = ''
+set ephem   = ''
+#
+# Decode the command line
+  while ($#argv > 0 )
+    set input = ( $argv )
+    switch($input[1])
+      case -d*:
+        set default = 'Y'
+      breaksw       
+      case -g*:
+        set grav = $input[2]
+      breaksw       
+      case -o*:
+        set ocean = $input[2]  
+      breaksw 
+      case -e*:
+        set eop = $input[2]  
+      breaksw 
+      case -s*:
+        set satinfo = $input[2]  
+      breaksw 
+      case -p*:
+        set ephem = $input[2]  
+      breaksw 
+    endsw
+    if ( $#argv > 0 ) shift argv
+  end
+alldone:
+         
+# Remove broken links
+if ( ! -e ascp1950.430        )    \rm -r ascp1950.430        >& /dev/null
+if ( ! -e fes2004_Cnm-Snm.dat )    \rm -r fes2004_Cnm-Snm.dat >& /dev/null
+if ( ! -e goco05s.gfc         )    \rm -r goco05s.gfc         >& /dev/null
+if ( ! -e header.430_229      )    \rm -r header.430_229      >& /dev/null
+if ( ! -e satinfo.dat         )    \rm -r satinfo.dat         >& /dev/null       
+
+# Make new set of default lionks links if necessary
+ln -s ~/pod/tables/ascp1950.430         ascp1950.430        >& /dev/null
+ln -s ~/pod/tables/fes2004_Cnm-Snm.dat  fes2004_Cnm-Snm.dat >& /dev/null
+ln -s ~/pod/tables/goco05s.gfc          goco05s.gfc         >& /dev/null
+ln -s ~/pod/tables/header.430_229       header.430_229      >& /dev/null
+ln -s ~/pod/tables/satinfo.dat          satinfo.dat         >& /dev/null     
+
+if (${grav} != '') then
+  ln -s ~/pod/tables/${grav}         ${grav}        >& /dev/null 
+endif
+if (${ocean} != '') then
+  ln -s ~/pod/tables/${ocean}        ${ocean}        >& /dev/null 
+endif
+if (${satinfo} != '') then
+  ln -s ~/pod/tables/${satinfo}      ${satinfo}      >& /dev/null 
+endif
+if (${ephem} != '') then
+  ln -s ~/pod/tables/${ephem}        ${ephem}        >& /dev/null 
+endif
+if (${eop} != '') then
+  ln -s ~/pod/data/${eop}            ${eop}          >& /dev/null 
+endif
+
+if ( `find  . -type l -print | wc | awk '{print $1}'` > 0 ) ls -l `find  . -type l -print`
+
