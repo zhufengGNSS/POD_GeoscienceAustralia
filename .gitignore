@@ -8,5 +8,7 @@
 *.out
 *.mod
 *.e
+*.??n
+*.rnx
 pod
 crs2trs
