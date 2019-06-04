@@ -218,7 +218,7 @@ Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 
 param_id = 'Seconds'
-write (param_value, FMT='(F19.17)') Sec_00
+write (param_value, *) Sec_00
 Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
