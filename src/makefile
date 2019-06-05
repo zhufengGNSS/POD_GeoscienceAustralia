@@ -59,14 +59,14 @@ main_crs2trs.f03
 
 PROGRAM = pod
 
-all: $(PROGRAM) crs2trs
+all: $(BIN) $(PROGRAM) crs2trs
 
 directories: $(BIN)
 
 $(BIN): 
 	mkdir -p $(BIN)
 
-$(PROGRAM): $(SRCS) 
+$(PROGRAM): $(SRCS)  
 	$(FC) $(FCFLAGS) -o $(BIN)/$@ $^
 
 %.o: %.F
