@@ -192,7 +192,7 @@ ORBpseudobs_fname = param_value
 CALL sp3_PRN (ORBpseudobs_fname, PRNmatrix, Iyear, Imonth, Iday, Sec_00)
 Nsat = size(PRNmatrix, DIM = 1)
 ! ----------------------------------------------------------------------
-print *,"Satellites number: ", Nsat
+print *,"Satellites number: ", Nsat, Iyear, Imonth, Iday, Sec_00
 print *," "
 
 
@@ -218,7 +218,8 @@ Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 
 param_id = 'Seconds'
-write (param_value, FMT='(F19.17)') Sec_00
+write (param_value, *) Sec_00
+! SCM 20190604 allow second > 10 to be written  - write (param_value, FMT='(F19.17)') Sec_00
 Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
