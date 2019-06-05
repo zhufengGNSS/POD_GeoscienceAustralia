@@ -63,7 +63,7 @@
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
 	  CHARACTER (LEN=3) :: PRN_isat
 	  INTEGER :: ios
-      CHARACTER (LEN=100) :: orbits_partials_fname				
+      CHARACTER (LEN=100) :: orbits_fname, orbits_partials_fname				
       CHARACTER (LEN=100) :: fname_write				
       CHARACTER (LEN=100) :: filename				
 ! ----------------------------------------------------------------------
@@ -101,17 +101,38 @@
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbdiff2
 ! ----------------------------------------------------------------------
-
-
-! CPU Time
+      LOGICAL :: pod_config_exists
+	  CHARACTER (LEN=100) :: pgm_name
+! ----------------------------------------------------------------------
+	  
+! CPU Times
 CALL cpu_time (CPU_t0)
-
-
 
 ! ----------------------------------------------------------------------
 ! POD major configuration file
 ! ----------------------------------------------------------------------
+! Default master POD configureation file
 PODfname = 'POD.in'
+
+! Read command line to see if non default master configration file given
+CALL read_cmdline
+
+! Check if non-default config file given on the command line
+If ( trim(POD_fname_cfg) .ne. 'DEFAULT' ) then
+	PODfname = trim(POD_fname_cfg)
+End If
+
+! Check for existance of POD config file
+pod_config_exists = .true.
+INQUIRE(FILE=PODfname, EXIST=pod_config_exists)
+
+If ( .not. pod_config_exists) then
+	call get_command_argument( 0, pgm_name )
+    write(*,'(3a)') 'No Default config file found (POD.in)  - Type: ',trim(pgm_name),' --help'
+    write(*,'(3a)') 'If using a non-default config.filename - Type: ',trim(pgm_name),' -c config.filename'
+	STOP
+End If
+
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------  ! 999999999999999999999999999
@@ -135,7 +156,6 @@ Frame_EmpiricalForces_glb = 1
 ! Temporary :: End of input POD configuration
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------  ! 999999999999999999999999999
-
 
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
@@ -223,7 +243,6 @@ CALL readparam (PODfname, param_id, param_value)
 READ ( param_value, FMT = * , IOSTAT=ios_key ) orbit_prediction_arc_cfg 
 ! ----------------------------------------------------------------------
 
-
 ! ---------------------------------------------------------------------------
 ! Earth Orientation Parameters (EOP)
 ! ---------------------------------------------------------------------------
@@ -284,53 +303,43 @@ READ ( param_value, FMT = * , IOSTAT=ios_key ) sp3_velocity_cfg
 ! End :: Read major configuration file POD.in
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
-
-
-
-! ----------------------------------------------------------------------
-! Major configuration parameters via "POD.in configuration file" and "Module mdl_config.f03" 
-! ----------------------------------------------------------------------
-! POD_MODE_cfg
-! EQM_fname_cfg
-! VEQ_fname_cfg
-! pseudobs_orbit_filename_cfg 
-! ext_orbit_filename_cfg
-! orbit_determination_arc_cfg
-! orbit_prediction_arc_cfg
-! EOP_solution_cfg
-! EOP_fname_cfg
-! ERP_fname_cfg
-! EOP_Nint_cfg
-! iau_model_cfg
-! Estimator_Iterations_cfg 
-! sp3_velocity_cfg
-! ----------------------------------------------------------------------
-
-
+! Read command line to oerwrite POD.in configfile options
+CALL read_cmdline
 
 ! ----------------------------------------------------------------------
-! Form (rewrite) the two orbit integration configuration files for 
-! Equation of Motion and Variational Equations: EQM.in and VEQ.in 
+! Major configuration parameters via "read_cmdline routine", "POD.in configuration file" and "Module mdl_config.f03" 
+! ----------------------------------------------------------------------
+! Debug
+if (1<0) then
+print*, 'Master configuration parameters:'
+print*, 'POD_MODE_cfg: '               ,POD_MODE_cfg
+print*, 'EQM_fname_cfg: '              ,trim(EQM_fname_cfg)
+print*, 'VEQ_fname_cfg: '              ,trim(VEQ_fname_cfg)
+print*, 'pseudobs_orbit_filename_cfg: ',trim(pseudobs_orbit_filename_cfg) 
+print*, 'ext_orbit_filename_cfg: '     ,trim(ext_orbit_filename_cfg)
+print*, 'orbit_determination_arc_cfg: ',orbit_determination_arc_cfg
+print*, 'orbit_prediction_arc_cfg: '   ,orbit_prediction_arc_cfg
+print*, 'EOP_solution_cfg: '           ,EOP_solution_cfg
+print*, 'EOP_fname_cfg: '              ,trim(EOP_fname_cfg)
+print*, 'ERP_fname_cfg: '              ,trim(ERP_fname_cfg)
+print*, 'EOP_Nint_cfg: '               ,EOP_Nint_cfg
+print*, 'iau_model_cfg: '              ,iau_model_cfg
+print*, 'Estimator_Iterations_cfg: '   ,Estimator_Iterations_cfg 
+print*, 'sp3_velocity_cfg: '           ,sp3_velocity_cfg
+end if
 ! ----------------------------------------------------------------------
 
 POD_MODE_glb      = POD_MODE_cfg
-EQMfname_initial  = EQM_fname_cfg
-VEQfname_initial  = VEQ_fname_cfg
-ORBpseudobs_fname = pseudobs_orbit_filename_cfg 
-ORBEXT_fname      = ext_orbit_filename_cfg
-
-! Convert Hours to Seconds
 orb_est_arc       = orbit_determination_arc_cfg * 3600.D0
 ORBPRED_ARC_glb   = orbit_prediction_arc_cfg * 3600.D0
 
-! EOP_solution_cfg
-! EOP_fname_cfg
-! ERP_fname_cfg
-! EOP_Nint_cfg
-! iau_model_cfg
-! Estimator_Iterations_cfg
-sat_vel           = sp3_velocity_cfg
-
+! Debug
+if (1<0) then
+print *, "POD_MODE_glb", POD_MODE_glb
+print *, "orb_est_arc", orb_est_arc
+print *, "ORBPRED_ARC_glb", ORBPRED_ARC_glb
+Print *," "
+end if
 
 If      (POD_MODE_glb == 1) then
 Print *,"POD Tool mode: 1 :: Orbit Determination"
@@ -343,36 +352,21 @@ Print *,"POD Tool mode: 2 :: Orbit Integration and Partials"
 End IF
 Print *," "
 
-if (1<0) then
-print *, "POD_MODE_glb", POD_MODE_glb
-print *, "EQMfname_initial  ", EQMfname_initial
-print *, "VEQfname_initial  ", VEQfname_initial
-print *, "ORBpseudobs_fname ", ORBpseudobs_fname
-print *, "ORBEXT_fname      ", ORBEXT_fname
-print *, "orb_est_arc", orb_est_arc
-print *, "ORBPRED_ARC_glb", ORBPRED_ARC_glb
-print *, "EOP_solution_cfg", EOP_solution_cfg
-print *, "EOP_fname_cfg     ", EOP_fname_cfg
-print *, "ERP_fname_cfg     ", ERP_fname_cfg
-print *, "EOP_Nint_cfg      ", EOP_Nint_cfg
-print *, "Estimator_Iterations_cfg", Estimator_Iterations_cfg
-print *, "Orbit sp3 write sat_vel", sat_vel
-Print *," "
-end if
-
-
+! ----------------------------------------------------------------------
+! Form (rewrite) the two orbit integration configuration files for 
+! Equation of Motion and Variational Equations: EQM.in and VEQ.in 
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Copy Initial Configuration files 
 ! ----------------------------------------------------------------------
 fname_id = '0'
-CALL write_prmfile2 (EQMfname_initial, fname_id, EQMfname)
-CALL write_prmfile2 (VEQfname_initial, fname_id, VEQfname)
+CALL write_prmfile2 (EQM_fname_cfg, fname_id, EQMfname)
+CALL write_prmfile2 (VEQ_fname_cfg, fname_id, VEQfname)
 ! ----------------------------------------------------------------------
 !print *,"EQMfname ", EQMfname
 !print *,"VEQfname ", VEQfname
 !print *,"              "
-
 
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
@@ -434,12 +428,12 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 fname_id = '1'
 param_id = 'pseudobs_filename'
-param_value = ORBpseudobs_fname
+param_value = pseudobs_orbit_filename_cfg
 Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 
 param_id = 'orbit_filename'
-param_value = ORBEXT_fname
+param_value = ext_orbit_filename_cfg
 Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
@@ -484,13 +478,10 @@ Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 ! End :: Rewrite configuration files
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
-
-
 
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
@@ -500,9 +491,6 @@ CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_parti
                orbit_resR, orbit_resT, orbit_resN, orbdiff2)
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
-
-
-
 
 ! ----------------------------------------------------------------------
 ! Output filenames prefix
@@ -549,16 +537,12 @@ write (filename, FMT='(A3,I4,I1,A16)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits
 Call writearray (orbit_resN, filename)
 ! ----------------------------------------------------------------------
 
-
 !filename = "orbdiff2.out"
 write (filename, FMT='(A3,I4,I1,A16)') 'gag', (GPS_week), INT(GPS_day) ,'_orbdiff_rtn.out'
 Call writearray2 (orbdiff2, filename)
 
-
-
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
-
 
 End Program
 
