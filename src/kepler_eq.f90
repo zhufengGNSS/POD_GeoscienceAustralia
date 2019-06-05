@@ -35,7 +35,7 @@ SUBROUTINE kepler_eq (M, ec, E)
 ! Local variables declaration
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: Mrad, Eo, f_E
-      REAL (KIND = prec_q) :: E_arr(7)
+      REAL (KIND = prec_q) :: E_arr(8)
       INTEGER (KIND = prec_int8) :: Niter, i, sz1	  
 ! ----------------------------------------------------------------------
 
