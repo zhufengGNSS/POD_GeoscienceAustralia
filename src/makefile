@@ -4,7 +4,7 @@ BIN = ../bin
 FC = gfortran
 
 # Compiler flags
-FCFLAGS = -O2 -llapack -lblas
+FCFLAGS = -O3 -llapack -lblas
 #-O3 -Wuninitialized -fno-f2c -ffast-math -fno-automatic -fno-backslash -m64 -mcmodel=large 
 # Linker flags
 FLFLAGS = -L/usr/lib64
@@ -79,5 +79,5 @@ crs2trs: $(CRS2TRSSRCS) $(BIN)
 	$(FC) $(FCFLAGS) $(FLFLAGS) $(CRS2TRSSRCS) -o $(BIN)/crs2trs
 
 clean:
-	rm -f *.o *.mod $(PROGRAM) $(BIN)/crs2trs
+	rm -f *.o *.mod $(BIN)/$(PROGRAM) $(BIN)/crs2trs
 
