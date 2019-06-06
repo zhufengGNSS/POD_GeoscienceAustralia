@@ -104,7 +104,9 @@
       LOGICAL :: pod_config_exists
 	  CHARACTER (LEN=100) :: pgm_name
 ! ----------------------------------------------------------------------
-	  
+      CHARACTER (len=300) :: str
+      INTEGER (KIND = prec_int2) :: j
+      
 ! CPU Times
 CALL cpu_time (CPU_t0)
 
@@ -524,21 +526,27 @@ CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sat_vel)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
+! Extract residual filename tag from input .sp3 filename
+! ----------------------------------------------------------------------
+str = trim(adjustl(pseudobs_orbit_filename_cfg))
+i = index(str, '.sp3')
+j = len(str(1:i-1))
+
+! ----------------------------------------------------------------------
 ! Write Orbit residuals
 ! ----------------------------------------------------------------------
-!filename = "orbit_residuals_R.out"
-write (filename, FMT='(A3,I4,I1,A16)') 'gag', (GPS_week), INT(GPS_day) ,'_orbitstat_R.out'
+! Radial
+write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j), '_orbitstat_R.out'
 Call writearray (orbit_resR, filename)
-!filename = "orbit_residuals_T.out"
-write (filename, FMT='(A3,I4,I1,A16)') 'gag', (GPS_week), INT(GPS_day) ,'_orbitstat_T.out'
+! Transverse
+write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbitstat_T.out'
 Call writearray (orbit_resT, filename)
-!filename = "orbit_residuals_N.out"
-write (filename, FMT='(A3,I4,I1,A16)') 'gag', (GPS_week), INT(GPS_day) ,'_orbitstat_N.out'
+! Normal
+write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbitstat_N.out'
 Call writearray (orbit_resN, filename)
 ! ----------------------------------------------------------------------
-
-!filename = "orbdiff2.out"
-write (filename, FMT='(A3,I4,I1,A16)') 'gag', (GPS_week), INT(GPS_day) ,'_orbdiff_rtn.out'
+! Write combined orbit residuals file (RTN)
+write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbdiff_rtn.out'
 Call writearray2 (orbdiff2, filename)
 
 CALL cpu_time (CPU_t1)

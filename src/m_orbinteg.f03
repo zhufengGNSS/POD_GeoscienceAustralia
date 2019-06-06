@@ -61,7 +61,7 @@ SUBROUTINE orbinteg (INfname, VEQmode, orbC, veqSmatrix, veqPmatrix)
       USE m_integrEQM
       USE m_integrVEQ
       USE mdl_param
-      USE m_betainfo
+!      USE m_betainfo
       IMPLICIT NONE
 
 	  
@@ -135,10 +135,10 @@ arc = orbarc
 ! ----------------------------------------------------------------------
 ! compute the beta angle for setting the integration step size for the eclipsed
 ! satellite
-CALL betainfo (MJDo, ro, vo, beta0)
-IF (ABS(beta0)-14.d0 .lt. 0.d0)THEN
-step = 120
-END IF
+!CALL betainfo (MJDo, ro, vo, beta0)
+!IF (ABS(beta0)-14.d0 .lt. 0.d0)THEN
+!step = 120
+!END IF
 !-----------------------------------------------------------------------
 
 
