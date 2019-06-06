@@ -5,7 +5,7 @@ FC = gfortran
 
 # Compiler flags
 
-FCFLAGS = -O2 -llapack -lblas
+FCFLAGS = -llapack -lblas
 #-O3 -Wuninitialized -fno-f2c -ffast-math -fno-automatic -fno-backslash -m64 -mcmodel=large 
 # Linker flags
 FLFLAGS = -L/usr/lib64
