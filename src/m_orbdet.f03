@@ -46,6 +46,8 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
 !				- Velocity vector (m/sec)
 ! - veqSmatrix:	State trasnition matrix obtained from the Variational Equations solution based on numerical integration methods
 ! - veqPmatrix: Sensitivity matrix obtained from the Variational Equations solution based on numerical integration methods
+! - Vres:		Orbit residuals matrix
+! - Vrms: 		RMS values of the orbit residuals per X,Y,Z components 
 ! ----------------------------------------------------------------------
 ! Note 1:
 ! The time scale of the 2 first collumns of the orbit arrays (MJD and Seoncds since 00h) 
@@ -60,6 +62,17 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
 !                                       is used to improve the GNSS orbit modelling (Currently the ECOM model is only estimated with full
 !                                       9 coefficients or 3 bias terms. The adjustable function has not been ready yet)
 !           21-02-2019  Tzupang Tseng : The adjustable function of the ECOM model has been activated.
+!
+! Last modified:
+! 20 May 2019,	Dr. Thomas Papanikolaou
+!				General upgrade for supporting the POD Tool modes of orbit determination and prediction 
+! 				1. Orbit Determination (pseudo-observations; orbit fitting)
+! 				2. Orbit Determination and Prediction
+! 				3. Orbit Integration (Equation of Motion only)
+! 				4. Orbit Integration and Partials (Equation of Motion and Variational Equations)
+! 30 May 2019,	Dr. Thomas Papanikolaou
+! 				Minor modification for the case of Orbit Determination and Prediction (POD mode 2) 
+!				for computing the orbit residuals of the estimated part only of the orbits without the predicted part 
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -126,6 +139,8 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: EQMfname_pred, VEQfname_pred
       REAL (KIND = prec_d) :: orbarc_sum
+      INTEGER (KIND = prec_int8) :: Nepochs_estim	  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf_estim
 ! ----------------------------------------------------------------------
 
 	  
@@ -256,9 +271,9 @@ Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MI
 Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
 
 filename = "Amatrix.out"
-Call writearray (Amatrix, filename)
+!Call writearray (Amatrix, filename)
 filename = "Wmatrix.out"
-Call writearray (Wmatrix, filename)
+!Call writearray (Wmatrix, filename)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -449,11 +464,19 @@ End Do
 ! Orbit Integration :: Orbit final solution (after parameter estimation)
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Orbit Determination and Prediction mode
 IF (POD_MODE_glb == 2) THEN
+
+! Orbit Determination number of epochs (without predicted orbit epochs)
+sz1 = size(orb_icrf, DIM = 1)
+sz2 = size(orb_icrf, DIM = 2)
+Nepochs_estim = sz1
+
 ! ----------------------------------------------------------------------
 ! Rewrite Configuration files :: Add the Orbit Prediction arc length
 ! POD mode 4 : Orbit Determination and Orbit Prediction
-
+! ----------------------------------------------------------------------
 ! Copy Configuration files 
 fname_id = 'pred'
 CALL write_prmfile2 (EQMfname, fname_id, EQMfname_pred)
@@ -479,6 +502,19 @@ VEQmode = 0
 Call orbinteg (EQMfname_pred, VEQmode, orb_icrf, veq0, veq1)
 ! ----------------------------------------------------------------------
 
+! Orbit estimated part without predicted part
+ALLOCATE (orb_icrf_estim(Nepochs_estim,sz2), STAT = AllocateStatus)
+orb_icrf_estim = orb_icrf(1:Nepochs_estim,1:sz2)
+
+! Orbit residuals; statistics ! ICRF
+Call statdelta(pseudobs_ICRF, orb_icrf_estim, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr)
+sz1 = size(dorb_icrf, DIM = 1)
+sz2 = size(dorb_icrf, DIM = 2)
+ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
+Vres = dorb_icrf(1:sz1,1:5)
+Vrms  = RMSdsr(1:3)
+!print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
+
 ELSE 
 
 ! ----------------------------------------------------------------------
@@ -486,9 +522,6 @@ ELSE
 VEQmode = 0
 Call orbinteg (EQMfname, VEQmode, orb_icrf, veq0, veq1)
 ! ----------------------------------------------------------------------
-
-END IF
-
 
 ! ----------------------------------------------------------------------
 ! Orbit residuals; statistics ! ICRF
@@ -500,6 +533,8 @@ Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3)
 ! ----------------------------------------------------------------------
 !print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
+
+END IF
 
 ! End Of Orbit Determination
 End If

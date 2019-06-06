@@ -590,10 +590,13 @@ srpid =  SRP_MOD_glb
 CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, satsvn, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
+IF (ECOM_param_glb /= 0) THEN ! Condition added 5/6/2019 in order to avoid program segment fault
+
 ALLOCATE (PD_ECOM_param(3,NPARAM_glb), STAT = AllocateStatus)
 
 CALL pd_ECOM (lambda, eBX_ecl, GMearth, PRN_no, eclipsf, rsat_icrf, vsat_icrf, rSun, PD_ECOM_param )
 
+END IF
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
 
