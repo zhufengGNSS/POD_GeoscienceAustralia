@@ -137,25 +137,28 @@ stat_XYZ_extT(5,:) = MAXdsr
 ! ----------------------------------------------------------------------
 ! External orbit
 filename = "orbext_ICRF.out"
-Call writearray (orbext_ICRF, filename)
+!Call writearray (orbext_ICRF, filename)
 filename = "orbext_ITRF.out"
-Call writearray (orbext_ITRF, filename)
+!Call writearray (orbext_ITRF, filename)
 ! ----------------------------------------------------------------------
 ! Orbit comparison residuals
 ! ICRF
 filename = "dorb_icrf.out"
-Call writearray (dorb_icrf, filename)
+!Call writearray (dorb_icrf, filename)
 filename = "dorb_RTN.out"
-Call writearray (dorb_RTN, filename)
+!Call writearray (dorb_RTN, filename)
 filename = "dorb_Kepler.out"
-Call writearray (dorb_Kepler, filename)
+!Call writearray (dorb_Kepler, filename)
 ! ITRF
 filename = "dorb_itrf.out"
-Call writearray (dorb_itrf, filename)
+!Call writearray (dorb_itrf, filename)
 ! ----------------------------------------------------------------------
 ! With all orbital information
 filename = "orbdiff.rtn"
-Call writearray (orbdiff, filename)
+!Call writearray (orbdiff, filename)
+
+!filename = "orbang.rtn"
+!Call writearray (orbang, filename)
 
 
 

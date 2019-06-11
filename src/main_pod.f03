@@ -63,7 +63,7 @@
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
 	  CHARACTER (LEN=3) :: PRN_isat
 	  INTEGER :: ios
-      CHARACTER (LEN=100) :: orbits_fname				
+      CHARACTER (LEN=100) :: orbits_fname, orbits_partials_fname				
       CHARACTER (LEN=100) :: fname_write				
       CHARACTER (LEN=100) :: filename				
 ! ----------------------------------------------------------------------
@@ -104,7 +104,9 @@
       LOGICAL :: pod_config_exists
 	  CHARACTER (LEN=100) :: pgm_name
 ! ----------------------------------------------------------------------
-	  
+      CHARACTER (len=300) :: str
+      INTEGER (KIND = prec_int2) :: j
+      
 ! CPU Times
 CALL cpu_time (CPU_t0)
 
@@ -493,40 +495,58 @@ CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_parti
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
-! Write satellite orbits and partial derivatives to one .orb output file (internal format)
-! ----------------------------------------------------------------------
-orbits_fname = 'orbits_partials_icrf.orb'
-CALL writeorbit_multi (orbits_partials_icrf, PRNmatrix, orbits_fname)
-! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! Write satellite orbits to sp3 format
+! Output filenames prefix
 ! ----------------------------------------------------------------------
 !mjd = orbits_partials_icrf(1,1,1)
 mjd = orbits_partials_itrf(2,1,1)
 CALL time_GPSweek  (mjd, GPS_week, GPS_wsec, GPSweek_mod1024)
 !CALL time_GPSweek2 (mjd, GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
 GPS_day = ( GPS_wsec/86400.0D0 )  
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+! Write satellite orbits and partial derivatives to one .orb output file (internal format)
+! ----------------------------------------------------------------------
+!orbits_partials_fname = 'orbits_partials_icrf.orb'
+write (orbits_partials_fname, FMT='(A3,I4,I1,A25)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits_partials_icrf.out'
+CALL writeorbit_multi (orbits_partials_icrf, PRNmatrix, orbits_partials_fname)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Write satellite orbits to sp3 format
+! ----------------------------------------------------------------------
+! Orbit sp3 filename
 write (ORB2sp3_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.sp3'
 
 ! ICRF
-!CALL write_orb2sp3 (orbits_partials_icrf, PRNmatrix, ORB2sp3_fname, sp3_velocity_cfg)
+!CALL write_orb2sp3 (orbits_partials_icrf, PRNmatrix, ORB2sp3_fname, sat_vel)
 ! ITRF
-CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sp3_velocity_cfg)
+CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sat_vel)
 ! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Extract residual filename tag from input .sp3 filename
+! ----------------------------------------------------------------------
+str = trim(adjustl(pseudobs_orbit_filename_cfg))
+i = index(str, '.sp3')
+j = len(str(1:i-1))
 
 ! ----------------------------------------------------------------------
 ! Write Orbit residuals
 ! ----------------------------------------------------------------------
-filename = "orbit_residuals_R.out"
+! Radial
+write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j), '_orbitstat_R.out'
 Call writearray (orbit_resR, filename)
-filename = "orbit_residuals_T.out"
+! Transverse
+write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbitstat_T.out'
 Call writearray (orbit_resT, filename)
-filename = "orbit_residuals_N.out"
+! Normal
+write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbitstat_N.out'
 Call writearray (orbit_resN, filename)
 ! ----------------------------------------------------------------------
-
-filename = "orbdiff2.out"
+! Write combined orbit residuals file (RTN)
+write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbdiff_rtn.out'
 Call writearray2 (orbdiff2, filename)
 
 CALL cpu_time (CPU_t1)
