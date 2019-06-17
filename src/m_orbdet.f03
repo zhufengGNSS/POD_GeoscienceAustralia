@@ -20,7 +20,7 @@ MODULE m_orbdet
 Contains
 	  
 	  
-SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
+SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatrix_final, veqPmatrix_final, Vres, Vrms)
 
 
 ! ----------------------------------------------------------------------
@@ -73,6 +73,9 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
 ! 30 May 2019,	Dr. Thomas Papanikolaou
 ! 				Minor modification for the case of Orbit Determination and Prediction (POD mode 2) 
 !				for computing the orbit residuals of the estimated part only of the orbits without the predicted part 
+! 11 June 2019,	Dr. Thomas Papanikolaou
+! 				Modification of the orbit integrator step in case of eclipse seasons; 
+!               Resize the orbit and partials matrices according to the initial integrator step prior passing to output arguments 
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -87,6 +90,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
       USE m_statdelta
       USE m_statorbit
       USE m_writearray
+      USE m_orbresize
       IMPLICIT NONE
 	  
 	  
@@ -97,8 +101,8 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
       CHARACTER (LEN=100), INTENT(IN)  :: EQMfname, VEQfname				
 ! ----------------------------------------------------------------------
 ! OUT
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orb_icrf, orb_itrf  
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: veqSmatrix, veqPmatrix  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orb_icrf_final, orb_itrf_final  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: veqSmatrix_final, veqPmatrix_final  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Vres  
       REAL (KIND = prec_d), DIMENSION(3), INTENT(OUT) :: Vrms 
 ! ----------------------------------------------------------------------
@@ -111,7 +115,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
       INTEGER (KIND = prec_int2) :: VEQmode 
       INTEGER (KIND = prec_int2) :: ESTmode 
       INTEGER (KIND = prec_int2) :: Niter,srp_i 
-      INTEGER (KIND = prec_int8) :: i, ii, PD_Param_ID 
+      INTEGER (KIND = prec_int8) :: i, j, k, ii, PD_Param_ID 
       INTEGER (KIND = prec_int8) :: sz1, sz2 
       INTEGER (KIND = prec_int8) :: Nepochs	  
       !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix  
@@ -142,7 +146,16 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
       INTEGER (KIND = prec_int8) :: Nepochs_estim	  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf_estim
 ! ----------------------------------------------------------------------
-
+      REAL (KIND = prec_d) :: mjd, r_sat(3), v_sat(3)
+      LOGICAL :: integstep_flag
+      REAL (KIND = prec_d) :: integstep_initial, integstep_reduced
+      INTEGER (KIND = prec_int8) :: integstep_rate 
+      INTEGER (KIND = prec_int8) :: Nepochs_0, Nepochs_stepsmall, n2_orb, n2_veqs, n2_veqp 
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_stepsmall, veqSmatrix_stepsmall, veqPmatrix_stepsmall
+! ----------------------------------------------------------------------
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf, orb_itrf  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix  
+! ----------------------------------------------------------------------
 	  
 	  
 ! ----------------------------------------------------------------------
@@ -189,6 +202,16 @@ CALL prm_pseudobs (EQMfname)
 !CALL prm_orbext (EQMfname)												
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+!  Control of orbit integrator step during eclipse seasons 
+! ----------------------------------------------------------------------
+! Global variables via mdl_param.f90
+mjd = MJD_to
+r_sat(1:3) = SVEC_Zo(1:3)
+v_sat(1:3) = SVEC_Zo(4:6)
+CALL eclipse_integstep (EQMfname, VEQfname, mjd, r_sat, v_sat, integstep_flag, integstep_initial, integstep_reduced)
+! ----------------------------------------------------------------------
+!print *,"integstep_flag,integstep_initial, integstep_reduced", integstep_flag,integstep_initial, integstep_reduced 
 
 ! ----------------------------------------------------------------------
 ! Dynamic Orbit Determination 
@@ -234,12 +257,10 @@ END IF
 ! ----------------------------------------------------------------------
 
 ! Iterations number of parameter estimation algorithm
-!Niter = 1
+Do i = 0 , Niter
+!PRINT *,"Iteration:", i
 
 ! Orbit Numerical Integration: Equation of Motion and Variational Equations
-Do i = 0 , Niter
-
-!PRINT *,"Iteration:", i
 
 ! ----------------------------------------------------------------------
 ! Numerical Integration: Variational Equations
@@ -454,10 +475,10 @@ write (param_value, *) SVEC_Zo_ESTIM
 Call write_prmfile (fname, fname_id, param_id, param_value)
 
 End If
-
-
+! ----------------------------------------------------------------------
 
 End Do
+! End of Orbit estimator iterations
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -536,9 +557,9 @@ Vrms  = RMSdsr(1:3)
 
 END IF
 
-! End Of Orbit Determination
 End If
-
+! End Of Orbit Determination & Parameter estimation
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -571,15 +592,39 @@ END IF
 END IF
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Control of orbit matrices dimensions in case that orbit integrator step
+! has been reduced due to eclipse seasons 
+! ----------------------------------------------------------------------
+!CALL eclipse_integstep (EQMfname, VEQfname, mjd, r_sat, v_sat, integstep_flag, integstep_initial, integstep_reduced)
+IF (integstep_flag) THEN
+	integstep_rate = INT(integstep_initial/integstep_reduced) 
+ELSE
+	integstep_rate = 0
+END IF
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Resize matrices; in case of no changes of the initial orbit integrator step
+! the output matrix is a copy of the input one
+! ----------------------------------------------------------------------
+! Orbit Matrix 
+CALL orbresize (orb_icrf, integstep_rate, orb_icrf_final) 
+! Partials matrices
+IF (ESTmode > 1 .OR. VEQ_integration_glb == 1) THEN
+CALL orbresize (veqSmatrix, integstep_rate, veqSmatrix_final) 
+CALL orbresize (veqPmatrix, integstep_rate, veqPmatrix_final) 
+END IF
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Orbit transformation to terrestrial frame: ICRF to ITRF
 ! ----------------------------------------------------------------------
 ! Time System according to global variable TIME_Scale (Module mdl_param.f03)
 time_sys = TIME_SCALE
-CALL orbC2T (orb_icrf, time_sys, orb_itrf)
+!CALL orbC2T (orb_icrf, time_sys, orb_itrf)
+CALL orbC2T (orb_icrf_final, time_sys, orb_itrf_final)
 ! ----------------------------------------------------------------------
-
 
 END SUBROUTINE
 
