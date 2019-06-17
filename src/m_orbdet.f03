@@ -124,7 +124,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb0, veq0, veq1  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb, dorb_icrf, dorb_itrf 
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb_XYZ, dorb_RTN, dorb_Kepler
-!	  REAL (KIND = prec_d), DIMENSION(5,6) :: stat_XYZ, stat_RTN, stat_Kepler
+	  REAL (KIND = prec_d), DIMENSION(5,6) :: stat_XYZ, stat_RTN, stat_Kepler
       REAL (KIND = prec_d), DIMENSION(:), ALLOCATABLE :: RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr 	  
       INTEGER (KIND = prec_int2) :: AllocateStatus,DeAllocateStatus
       CHARACTER (LEN=3) :: time_sys, time 
@@ -536,6 +536,11 @@ Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3)
 !print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
 
+! Orbit residuals in orbital frame; statistics ! ICRF
+CALL statorbit (pseudobs_ICRF, orb_icrf_estim, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
+print *,"Orbit residuals in orbital frame (ICRF):" 
+WRITE (*,FMT='(A9, 3F17.4)'),"RMS RTN", stat_RTN(1, 1:3)
+
 ELSE 
 
 ! ----------------------------------------------------------------------
@@ -552,8 +557,13 @@ sz2 = size(dorb_icrf, DIM = 2)
 ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
 Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3)
-! ----------------------------------------------------------------------
 !print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
+
+! Orbit residuals in orbital frame; statistics ! ICRF
+CALL statorbit (pseudobs_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
+print *,"Orbit residuals in orbital frame (ICRF):" 
+WRITE (*,FMT='(A9, 3F17.4)'),"RMS RTN", stat_RTN(1, 1:3)
+! ----------------------------------------------------------------------
 
 END IF
 
