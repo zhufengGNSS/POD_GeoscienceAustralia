@@ -227,7 +227,7 @@ ft1(k)  = ft0
 fn1(k)  = fn0
 !print*,del_u0*180/Pi, fr0, ft0, fn0
    
-CALL orbinfo (ds2(i,1), PRN_no, satsvn, ds2(i,3:5), ds2(i,6:8), beta0, del_u0, yaw0, lambda0, & 
+CALL orbinfo (ds2(j,1), PRN_no, satsvn, ds2(j,3:5), ds2(j,6:8), beta0, del_u0, yaw0, lambda0, & 
              angX0, angY0, angZ0, fr0, ft0, fn0)
 beta2(k)  = beta0
 del_u2(k) = del_u0
@@ -245,7 +245,7 @@ fn2(k)  = fn0
 		 dr = ds2(j,3:5) - ds1(i,3:5)
 		 CALL orb_frame(r1i, v1i, Rrtn)
 		 CALL matrix_Rr(Rrtn, dr, dr_RTN)
-	 orbdiff(k,1)   = ds2(i,1)
+	 orbdiff(k,1)   = ds2(j,1)
          orbdiff(k,2)   = PRN_no 
          orbdiff(k,3)   = satblk
          orbdiff(k,4)   = lambda2(k)

@@ -192,7 +192,7 @@ ORBpseudobs_fname = param_value
 CALL sp3_PRN (ORBpseudobs_fname, PRNmatrix, Iyear, Imonth, Iday, Sec_00)
 Nsat = size(PRNmatrix, DIM = 1)
 ! ----------------------------------------------------------------------
-print *,"Satellites number: ", Nsat, Iyear, Imonth, Iday, Sec_00
+print *,"Satellites number: ", Nsat, "IC Eopch: ", Iyear, Imonth, Iday, Sec_00
 print *," "
 
 
