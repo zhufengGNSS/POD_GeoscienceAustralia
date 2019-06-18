@@ -249,7 +249,7 @@ print *,"Satellite: ", PRNmatrix(isat) ! isat
 ! Copy Initial Configuration files 
 write (fname_id, FMT='(A1,A3)') '_', PRN_isat
 CALL write_prmfile2 (EQMfname, fname_id, EQMfname_PRN)
-CALL write_prmfile2 (EQMfname, fname_id, VEQfname_PRN)
+CALL write_prmfile2 (VEQfname, fname_id, VEQfname_PRN)
 ! ----------------------------------------------------------------------
 
 write (fname_id, *) '_imd' !isat
