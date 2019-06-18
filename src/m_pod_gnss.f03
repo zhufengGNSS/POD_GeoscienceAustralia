@@ -194,7 +194,7 @@ ORBpseudobs_fname = param_value
 CALL sp3_PRN (ORBpseudobs_fname, PRNmatrix, Iyear, Imonth, Iday, Sec_00)
 Nsat = size(PRNmatrix, DIM = 1)
 ! ----------------------------------------------------------------------
-print *,"Satellites number: ", Nsat
+print *,"Satellites number: ", Nsat, "IC Eopch: ", Iyear, Imonth, Iday, Sec_00
 print *," "
 
 
@@ -220,7 +220,8 @@ Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 
 param_id = 'Seconds'
-write (param_value, FMT= *) Sec_00
+write (param_value, *) Sec_00
+! SCM 20190604 allow second > 10 to be written  - write (param_value, FMT='(F19.17)') Sec_00
 Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
@@ -248,7 +249,7 @@ print *,"Satellite: ", PRNmatrix(isat) ! isat
 ! Copy Initial Configuration files 
 write (fname_id, FMT='(A1,A3)') '_', PRN_isat
 CALL write_prmfile2 (EQMfname, fname_id, EQMfname_PRN)
-CALL write_prmfile2 (EQMfname, fname_id, VEQfname_PRN)
+CALL write_prmfile2 (VEQfname, fname_id, VEQfname_PRN)
 ! ----------------------------------------------------------------------
 
 write (fname_id, *) '_imd' !isat
