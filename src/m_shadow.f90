@@ -1,6 +1,5 @@
 MODULE m_shadow
 
-
 ! ----------------------------------------------------------------------
 ! MODULE: m_shadow
 ! ----------------------------------------------------------------------
@@ -16,12 +15,9 @@ MODULE m_shadow
       IMPLICIT NONE
       !SAVE
 
-
 Contains
 
-
-SUBROUTINE shadow ( r_sat, r_sun, r_moon, lambda )
-
+SUBROUTINE shadow ( r_sat, r_sun, r_moon, lambda, ECLTYP )
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: shadow.f90
@@ -51,18 +47,17 @@ SUBROUTINE shadow ( r_sat, r_sun, r_moon, lambda )
 !                  0 < lambda < 1 : In PENUMBRA AREA 
 !- ECLTYP        : ECLIPSE TYPE = 'E' : eclipsed by the earth shadow
 !                                 'M' : eclipsed by the moon  shadow 
+!                                 ' ' : no eclipse
 !
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Tzupang Tseng
 !
 ! Created:	16-04-2019
 !
-! Changes:    
+! Changes:      Simon McClusky 19/06/2019 (Fixed bug in lunar eclipse logic)
 ! 
 ! Copyright:  GEOSCIENCE AUSTRALIA
 ! ----------------------------------------------------------------------
-
-
       USE mdl_precision
       USE mdl_num
       USE mdl_param
@@ -70,10 +65,10 @@ SUBROUTINE shadow ( r_sat, r_sun, r_moon, lambda )
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
-
       REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r_sat,r_moon
       REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r_sun
       REAL (KIND = prec_q), INTENT(OUT) :: lambda
+      
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
@@ -89,35 +84,36 @@ SUBROUTINE shadow ( r_sat, r_sun, r_moon, lambda )
       REAL (KIND = prec_q), DIMENSION(3) :: Rmoonsun, Rsatmoon
       INTEGER              :: i,j,k
       INTEGER (KIND = 4) :: idbprt,idebug
-! ----------------------------------------------------------------------
-
+      
 ! ----------------------------------------------------------------------
 ! Numerical Constants
-      Pi = 4*atan(1.0d0)
-      sunrad = 696.d6         !Units = m
-      moonrad = 1738.d3       !Units = m
-      ertrad = 6378.13630d3   !Units = m
-      lambda = 1.0d0
+! ----------------------------------------------------------------------
+Pi = 4*atan(1.0d0)
+sunrad = 696.d6         !Units = m
+moonrad = 1738.d3       !Units = m
+ertrad = 6378.13630d3   !Units = m
+lambda = 1.0d0
+ECLTYP = ' '
+
 ! ---------------------------------------------------------------------
-! The distance between the earth and sun
-      Dsun=sqrt(r_sun(1)**2+r_sun(2)**2+r_sun(3)**2)
+! The distance between the Earth and Sun
+Dsun = norm2(r_sun)
+
+! The distance between the Satellite and the Sun
+Ds = norm2(r_sun - r_sat)
 
 ! The unit vector of the satellite wrt the sun (SUN->SAT)
-      Ds=sqrt((r_sun(1)-r_sat(1))**2+(r_sun(2)-r_sat(2))**2+(r_sun(3)-r_sat(3))**2)
-      ud(1)=(r_sat(1)-r_sun(1))/Ds
-      ud(2)=(r_sat(2)-r_sun(2))/Ds
-      ud(3)=(r_sat(3)-r_sun(3))/Ds
+ud=(r_sat-r_sun)/Ds
 
-! The satellite is in the sunlight area.
-IF(Ds.le.Dsun) return
+! Check if an Earth  Eclipse is possible. Ie satellite is in the sunlit area?
+IF (Ds .gt. Dsun) THEN
 
 ! Project the satellite position vector onto the unit vector SUN->SAT
-      
-      CALL productdot(r_sat,ud,AB)
-
+   AB = dot_product(r_sat,ud)
+   
 ! A vector resulted from the cross product of the position vector EARTH->SAT and the unit vector SUN->SAT 
 
-      CALL productcross(r_sat,ud,yy)
+   CALL productcross(r_sat,ud,yy)
 
 ! rs  : apparent angle of sun as viewed from satellite (radians)
 ! rp  : apparent angle of eclipsing body as viewed from satellite (radians)
@@ -126,43 +122,47 @@ IF(Ds.le.Dsun) return
 !    
 !     rp-rs >= xx : full eclipse
 
-     xx=sqrt(yy(1)**2+yy(2)**2+yy(3)**2)/AB
-     rs=sunrad/Ds 
-     rp=ertrad/AB 
+   xx = norm2(yy)/AB
+   rs=sunrad/Ds 
+   rp=ertrad/AB 
 
 ! Check the earth shadow  
 
-      CALL get_lambda(rs, rp, xx, lambda, idbprt, idebug) 
+   CALL get_lambda(rs, rp, xx, lambda, idbprt, idebug) 
 
-    IF (lambda .lt. 1.0d0) THEN
-    ECLTYP = 'E'
-!    PRINT*,' ECLTYP =  ', ECLTYP
-    RETURN
+   IF (lambda .lt. 1.0d0) THEN
+      ECLTYP = 'E'
+!     PRINT*,' ECLTYP =  ', ECLTYP
+      RETURN
+   ENDIF
 
-    ELSE
-! Check the lunar eclipse
-          DO i=1,3
-          Rmoonsun(i) = r_moon(i) - r_sun(i)
-          Rsatmoon(i) = r_sat(i) - r_moon(i)
-          END DO 
+ENDIF
 
-          Dmoonsun = dsqrt(Rmoonsun(1)**2+Rmoonsun(2)**2+Rmoonsun(3)**2)
+! Now check if a lunar eclipse is possible? Ie is the moon closer to the Sun than the Satellite?
+Rmoonsun = r_moon - r_sun
+Rsatmoon = r_sat - r_moon
 
-          IF(Ds.le.Dmoonsun) return
+!Dmoonsun = dsqrt(Rmoonsun(1)**2+Rmoonsun(2)**2+Rmoonsun(3)**2)
+Dmoonsun = norm2(Rmoonsun)
+    
+IF (Ds .gt. Dmoonsun) THEN
 
-          CALL productdot(Rsatmoon,ud,CD)
-          CALL productcross (Rsatmoon,ud,yy)
-          xx=sqrt(yy(1)**2+yy(2)**2+yy(3)**2)/CD
+   CD = dot_product(Rsatmoon,ud)
+   CALL productcross (Rsatmoon,ud,yy)
+   xx=norm2(yy)/CD
 
-          rs=sunrad/Ds 
-          rp=moonrad/CD 
-          CALL get_lambda(rs, rp, xx, lambda, idbprt, idebug)
+   rs=sunrad/Ds 
+   rp=moonrad/CD 
 
-          IF( lambda.lt.1.d0 ) ECLTYP = 'M'
-!          PRINT*,' ECLTYP =  ', ECLTYP
+   CALL get_lambda(rs, rp, xx, lambda, idbprt, idebug)
 
-    END IF
+   IF( lambda.lt.1.d0 ) THEN
+      ECLTYP = 'M'
+!     PRINT*,' ECLTYP =  ', ECLTYP
+      RETURN
+   ENDIF
 
+END IF
 
 END SUBROUTINE
 
