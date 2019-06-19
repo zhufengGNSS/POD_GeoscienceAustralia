@@ -9,5 +9,6 @@
 *.mod
 *.e
 data/
+bin/
 pod
 crs2trs
