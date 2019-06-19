@@ -69,6 +69,8 @@ SUBROUTINE orbinfo (mjd, prnnum, satsvn, rsat, vsat, beta, del_u, yaw, lambda, a
       REAL (KIND = prec_q), INTENT(OUT) :: angX, angY, angZ
       REAL (KIND = prec_q), INTENT(OUT) :: beta, del_u, yaw
       REAL (KIND = prec_q), INTENT(OUT) :: lambda
+      CHARACTER (KIND = 1) :: ECLTYP
+
 !--------------------------------------------------------------------
       DOUBLE PRECISION  JD, Zbody(6)
       INTEGER (KIND = 4) :: i, j
@@ -203,7 +205,7 @@ SUBROUTINE orbinfo (mjd, prnnum, satsvn, rsat, vsat, beta, del_u, yaw, lambda, a
       rbody(3) = Zbody(3) * 1000.D0
       rSun = rbody
 
-      CALL shadow (rsat, rSun, rMoon, lambda)
+      CALL shadow (rsat, rSun, rMoon, lambda, ECLTYP )
 
 !! The unit vector ez SAT->EARTH
       ez(1)=-rsat(1)/sqrt(rsat(1)**2+rsat(2)**2+rsat(3)**2)

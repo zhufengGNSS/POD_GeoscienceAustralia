@@ -59,9 +59,10 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 ! OUT
       REAL (KIND = prec_d), INTENT(OUT) :: SFx, SFy, SFz
 
-      REAL (KIND = prec_q) :: lambda
 ! ----------------------------------------------------------------------
-
+      REAL (KIND = prec_q) :: lambda
+      CHARACTER (KIND = 1) :: ECLTYP
+      
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
@@ -586,7 +587,7 @@ CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
 !                        = 0     : In UMBRA AREA (full eclipse)
 !                 0 < lambda < 1 : In PENUMBRA AREA
 ! ----------------------------------------------------------------------
-CALL shadow (rsat_icrf, rSun, rMoon, lambda)
+CALL shadow (rsat_icrf, rSun, rMoon, lambda, ECLTYP )
 !print*,'lambda =', lambda
 
 
