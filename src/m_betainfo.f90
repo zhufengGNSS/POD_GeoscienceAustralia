@@ -183,7 +183,7 @@ SUBROUTINE betainfo (mjd, rsat, vsat, beta )
       CALL matrix_Rr(R11,r_sun1,r_sun2)
 
       beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2))*180.d0/Pi ! in deg
-!write (*,*) beta*180.0d0/Pi
+!write (*,*) beta
 
       u_sun = atan2(r_sun2(2),r_sun2(1)) ! in rad
       del_u = u_sat - u_sun

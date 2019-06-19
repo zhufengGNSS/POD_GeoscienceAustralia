@@ -4,8 +4,12 @@ BIN = ../bin
 FC = gfortran
 
 # Compiler flags
+<<<<<<< Updated upstream
 
 FCFLAGS = -llapack -lblas
+=======
+FCFLAGS = -O3 -llapack -lblas
+>>>>>>> Stashed changes
 #-O3 -Wuninitialized -fno-f2c -ffast-math -fno-automatic -fno-backslash -m64 -mcmodel=large 
 # Linker flags
 FLFLAGS = -L/usr/lib64
@@ -67,7 +71,11 @@ directories: $(BIN)
 $(BIN): 
 	mkdir -p $(BIN)
 
+<<<<<<< Updated upstream
 $(PROGRAM): $(SRCS)
+=======
+$(PROGRAM): $(SRCS)  
+>>>>>>> Stashed changes
 	$(FC) $(FCFLAGS) -o $(BIN)/$@ $^
 
 %.o: %.F
@@ -81,5 +89,8 @@ crs2trs: $(CRS2TRSSRCS) $(BIN)
 
 clean:
 	rm -f *.o *.mod $(BIN)/$(PROGRAM) $(BIN)/crs2trs
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 

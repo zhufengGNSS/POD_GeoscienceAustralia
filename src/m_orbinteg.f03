@@ -135,10 +135,18 @@ arc = orbarc
 ! ----------------------------------------------------------------------
 ! compute the beta angle for setting the integration step size for the eclipsed
 ! satellite
+<<<<<<< Updated upstream
 !CALL betainfo (MJDo, ro, vo, beta0)
 !IF (ABS(beta0)-14.d0 .lt. 0.d0)THEN
 !step = 120
 !END IF
+=======
+CALL betainfo (MJDo, ro, vo, beta0)
+IF (ABS(beta0)-14.d0 .lt. 0.d0)THEN
+step = 120
+!print*,PRN
+END IF
+>>>>>>> Stashed changes
 !-----------------------------------------------------------------------
 
 
