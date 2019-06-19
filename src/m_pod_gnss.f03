@@ -151,6 +151,8 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbdiff
       REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbdiff2
+! ----------------------------------------------------------------------
+      CHARACTER (LEN=100) :: EQMfname_PRN, VEQfname_PRN				
 
 	  
 	  
@@ -192,7 +194,7 @@ ORBpseudobs_fname = param_value
 CALL sp3_PRN (ORBpseudobs_fname, PRNmatrix, Iyear, Imonth, Iday, Sec_00)
 Nsat = size(PRNmatrix, DIM = 1)
 ! ----------------------------------------------------------------------
-print *,"Satellites number: ", Nsat, Iyear, Imonth, Iday, Sec_00
+print *,"Satellites number: ", Nsat, "IC Eopch: ", Iyear, Imonth, Iday, Sec_00
 print *," "
 
 
@@ -243,27 +245,34 @@ Do isat = 1 , Nsat
 PRN_isat = PRNmatrix(isat)
 print *,"Satellite: ", PRNmatrix(isat) ! isat
 
-write (fname_id, *) isat
+! ----------------------------------------------------------------------
+! Copy Initial Configuration files 
+write (fname_id, FMT='(A1,A3)') '_', PRN_isat
+CALL write_prmfile2 (EQMfname, fname_id, EQMfname_PRN)
+CALL write_prmfile2 (VEQfname, fname_id, VEQfname_PRN)
+! ----------------------------------------------------------------------
+
+write (fname_id, *) '_imd' !isat
 param_id = 'Satellite_PRN'
 param_value = PRN_isat
-Call write_prmfile (EQMfname, fname_id, param_id, param_value)
-Call write_prmfile (VEQfname, fname_id, param_id, param_value)
+Call write_prmfile (EQMfname_PRN, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname_PRN, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Rewrite :: Initial State vector
 ! ----------------------------------------------------------------------
 ! Interpolated Orbit: Read sp3 orbit data and apply Lagrange interpolation
-Call prm_main     (EQMfname)
-CALL prm_pseudobs (EQMfname)
+Call prm_main     (EQMfname_PRN)
+CALL prm_pseudobs (EQMfname_PRN)
 Zo = pseudobs_ITRF(1,3:8)
 !print *,"Zo", Zo
 
-write (fname_id, *) isat
+write (fname_id, *) '_imd' !isat
 param_id = 'state_vector'
 write (param_value, *) Zo
-Call write_prmfile (EQMfname, fname_id, param_id, param_value)
-Call write_prmfile (VEQfname, fname_id, param_id, param_value)
+Call write_prmfile (EQMfname_PRN, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname_PRN, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
 ! End of update/rewrite configuration files
@@ -273,7 +282,7 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 ! Precise Orbit Determination :: main subroutine
 !CAll orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
-CALL orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, &
+CALL orbitmain (EQMfname_PRN, VEQfname_PRN, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, &
 		dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf,orbdiff) 
 ! ----------------------------------------------------------------------
 

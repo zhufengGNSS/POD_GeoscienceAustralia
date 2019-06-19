@@ -86,12 +86,12 @@ SUBROUTINE eop_igu (mjd, ERP_fname, EOP_days, EOP_int)
       CALL erp_igu (ERP_fname, mjd, ERP_igu_data, igu_flag)
       !if (igu_flag == .FALSE.) then
       if (igu_flag .EQV. .FALSE.) then
-         PRINT *,"--------------------------------------------------------"
-         PRINT *, "Warning error: Subroutine erp_igu.f90"
-         PRINT *, "Input epoch is out of the range covered by the IGS ultra-rapid ERP file" 
-         PRINT *, "Check the input iguwwwwd_hh.erp file"
-         PRINT *,"--------------------------------------------------------"
-         STOP  ! END PROGRAM
+         !PRINT *,"--------------------------------------------------------"
+         !PRINT *, "Warning error: Subroutine erp_igu.f90"
+         !PRINT *, "Input epoch is out of the range covered by the IGS ultra-rapid ERP file" 
+         !PRINT *, "Check the input iguwwwwd_hh.erp file"
+         !PRINT *,"--------------------------------------------------------"
+         !!STOP  ! END PROGRAM
       end if		 
 ! ----------------------------------------------------------------------
 
