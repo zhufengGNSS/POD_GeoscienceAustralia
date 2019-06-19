@@ -147,6 +147,8 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
       REAL (KIND = prec_d) :: Yawangle
       REAL (KIND = prec_q) :: lambda
+      CHARACTER (KIND = 1) :: ECLTYP
+
 !      SAVE :: mjd_sav
 ! ----------------------------------------------------------------------
 
@@ -560,8 +562,11 @@ CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
 !                        = 0     : In UMBRA AREA (full eclipse)
 !                 0 < lambda < 1 : In PENUMBRA AREA
 ! ----------------------------------------------------------------------
-CALL shadow (rsat_icrf, rSun, rMoon, lambda)
-!print*, mjd, lambda 
+CALL shadow (rsat_icrf, rSun, rMoon, lambda, ECLTYP )
+!if ( ECLTYP .ne. ' ') then
+!   print*, mjd, lambda, ECLTYP
+!endif
+
 ! ----------------------------------------------------------------------
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
