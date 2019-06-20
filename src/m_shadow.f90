@@ -99,8 +99,11 @@ SUBROUTINE shadow ( r_sat, r_sun, r_moon, lambda )
       ertrad = 6378.13630d3   !Units = m
       lambda = 1.0d0
 ! ---------------------------------------------------------------------
-! The distance between the earth and sun
-      Dsun=sqrt(r_sun(1)**2+r_sun(2)**2+r_sun(3)**2)
+! The distance between the Earth and Sun
+Dsun = sqrt(r_sun(1)**2+r_sun(2)**2+r_sun(3)**2)
+
+! The distance between the Satellite and the Sun
+Ds = sqrt((r_sun(1)-r_sat(1))**2+(r_sun(2)-r_sat(2))**2+(r_sun(3)-r_sat(3))**2)
 
 ! The unit vector of the satellite wrt the sun (SUN->SAT)
       Ds=sqrt((r_sun(1)-r_sat(1))**2+(r_sun(2)-r_sat(2))**2+(r_sun(3)-r_sat(3))**2)
@@ -109,12 +112,12 @@ SUBROUTINE shadow ( r_sat, r_sun, r_moon, lambda )
       ud(3)=(r_sat(3)-r_sun(3))/Ds
 
 ! The satellite is in the sunlight area.
-IF(Ds.le.Dsun) return
 
 ! Project the satellite position vector onto the unit vector SUN->SAT
       
-      CALL productdot(r_sat,ud,AB)
 
+   CALL productdot(r_sat,ud,AB)
+   
 ! A vector resulted from the cross product of the position vector EARTH->SAT and the unit vector SUN->SAT 
 
       CALL productcross(r_sat,ud,yy)
@@ -126,9 +129,9 @@ IF(Ds.le.Dsun) return
 !    
 !     rp-rs >= xx : full eclipse
 
-     xx=sqrt(yy(1)**2+yy(2)**2+yy(3)**2)/AB
-     rs=sunrad/Ds 
-     rp=ertrad/AB 
+   xx = sqrt(yy(1)**2+yy(2)**2+yy(3)**2)/AB
+   rs=sunrad/Ds 
+   rp=ertrad/AB 
 
 ! Check the earth shadow  
 
@@ -146,13 +149,15 @@ IF(Ds.le.Dsun) return
           Rsatmoon(i) = r_sat(i) - r_moon(i)
           END DO 
 
-          Dmoonsun = dsqrt(Rmoonsun(1)**2+Rmoonsun(2)**2+Rmoonsun(3)**2)
 
-          IF(Ds.le.Dmoonsun) return
+Dmoonsun = dsqrt(Rmoonsun(1)**2+Rmoonsun(2)**2+Rmoonsun(3)**2)
 
-          CALL productdot(Rsatmoon,ud,CD)
-          CALL productcross (Rsatmoon,ud,yy)
-          xx=sqrt(yy(1)**2+yy(2)**2+yy(3)**2)/CD
+    
+IF (Ds .gt. Dmoonsun) THEN
+
+   CALL productdot(Rsatmoon,ud,CD) 
+   CALL productcross (Rsatmoon,ud,yy)
+   xx=sqrt(yy(1)**2+yy(2)**2+yy(3)**2)/CD
 
           rs=sunrad/Ds 
           rp=moonrad/CD 
