@@ -10,7 +10,9 @@
 # Date: 11-06-2019
 
 import os
-import sys
+import sys, getopt
+import argparse
+from argparse import ArgumentParser
 import time
 import numpy as np
 import matplotlib as mpl
@@ -22,17 +24,29 @@ import gc
 import math
 os.chdir('/data/test/')
 
+# Command line argument
+parser = argparse.ArgumentParser()
+   
+parser.add_argument('-i', type=str, required=True, help='Input file name')
 
-infile = open('gag20560_igu20561_18_orbdiff_rtn.out', 'r')
+args = parser.parse_args()
+
+inputfile = args.i
+
+# End of command line argument
+
+infile = open(inputfile,'r')
 mat_1 = np.loadtxt(infile)
+prn = mat_1[:,1]
 year  = time.strftime("%Y")
 doy   = time.strftime("%j")
 hr    = time.strftime("%H")
 minu  = time.strftime("%M")
+
 # Output file name format as year+DOY+hour(system time)
 file_plt_1='Orbres'+year+doy+'_'+hr+'.png'
 #-------plot 1-1------------------------------------------------------------
-prn = mat_1[:,1]
+   #prn = mat_1[:,1]
 f1 = plt.figure(figsize=(13,8))
 ax1 = f1.add_subplot(311)
 plt.title("Satellite orbit residuals",fontsize=20)

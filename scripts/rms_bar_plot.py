@@ -13,6 +13,8 @@
 
 import os
 import sys
+import argparse
+from argparse import ArgumentParser
 import time
 import numpy as np
 import matplotlib as mpl
@@ -23,7 +25,20 @@ import math
 
 # File-related statements
 os.chdir('/data/test/')
-infile = open('gag20560_igu20561_18_orbdiff_rtn.out', 'r')
+
+# Command line argument
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-i', type=str, required=True, help='Input file name')
+
+args = parser.parse_args()
+
+inputfile = args.i
+
+# End of command line argument
+
+
+infile = open(inputfile, 'r')
 mat_1 = np.loadtxt(infile)
 year = time.strftime("%Y")
 doy  = time.strftime("%j")
