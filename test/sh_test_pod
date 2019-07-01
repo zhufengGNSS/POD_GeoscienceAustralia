@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Test script for POD install
+
+# Remove old test files
+\rm -r gag19424.sp3 pod.out >& /dev/null
+
+# Create necessary links
+ln -s ../tables/ascp1950.430 .        >& /dev/null
+ln -s ../tables/fes2004_Cnm-Snm.dat . >& /dev/null
+ln -s ../tables/goco05s.gfc .         >& /dev/null
+ln -s ../tables/header.430_229 .      >& /dev/null
+ln -s ../tables/satinfo.dat .         >& /dev/null
+
+# Run the POD
+../bin/pod > pod.out
+
+# Diff output
+diff pod.out pod.out.good
+diff gag19424.sp3 gag19424.sp3.good
+
+# Cleanup 
+\rm -r VEQ?.in EQM?.in VEQ??.in EQM??.in VEQ???.in EQM???.in ECOM*.in emp*.in DE.430 *.out 
+
+exit 
