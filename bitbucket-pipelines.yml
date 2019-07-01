@@ -3,10 +3,23 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: atlassian/default-image:2
+image: geoscienceaustralia/pod-pipelines
+
+options:
+  docker: true
 
 pipelines:
   default:
     - step:
         script:
-          - echo "Everything is awesome!"
+          - ./build-pipelines-docker-image.sh
+          - aws/deploy.sh
+
+
+  custom:
+    build-pipelines-docker-image:
+      - step:
+          name: Build and deploy pipelines docker image
+          script:
+            - ./build-pipelines-docker-image.sh
+

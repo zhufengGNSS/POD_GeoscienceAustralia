@@ -1,0 +1,38 @@
+-------------------------------------
+Program GYT v.2 (GYT_v2.f03, Formerly Num_yaw.f90)
+-------------------------------------
+
+Compilation:
+
+gfortran \
+mdl_precision.f90 mdl_num.f90 mdl_eop.f90 m_writearray.f03 \
+coord_r2sph.f90 \
+jd2cal.for cal2jd.for dat.for \
+fad03.for  faf03.for   fal03.for   fama03.for  fane03.for  fapa03.for  faur03.for \
+fae03.for  faju03.for  falp03.for  fame03.for  faom03.for  fasa03.for  fave03.for \
+xy06.for s06.for c2ixys.for \
+xys00a.for pnm00a.for bpn2xy.for s00.for pn00a.for nut00a.for pn00.for pr00.for obl80.for bp00.for numat.for bi00.for \
+ir.for rz.for ry.for rx.for \
+era00.for anp.for \
+sp00.for pom00.for \
+ORTHO_EOP.F CNMTX.F UTLIBR.F PMSDNUT2.F FUNDARG.F RG_ZONT2.F \
+interp_iers.f \
+rxr.for tr.for cr.for cp.for \
+time_TT.f90 time_GPS.f90 time_UTC.f90 time_TAI.f90 time_GPSweek.f90 \
+m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03 \
+crs_trs.f90 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 interp_lin.f90 EOP.f90 \
+era_matrix.f90 \
+orb_frame.f90 \
+kepler_eq.f90 kepler_k2z.f90 kepler_z2k.f90 m_keplerorb.f03 \
+m_rso.f03 m_sp3.f03 \
+m_lagrange.f03 m_interporb.f03 \
+matrix_Rr.f90 arctan.f90 productdot.f90 productcross.f90 \
+mdl_planets.f90 CATfile.f90 asc2eph.f90 STATE.f90 PLEPH.f CONST.f SPLIT.f INTERP.f FSIZER3.f \
+beta_angle.f90 yaw_nom.f90 yaw_angle.f90 \
+eclips.f eclips2017.f eclips201707.f \
+yaw_attitude.f90 \
+beta_pred.f90 \
+yaw_bds.f90 yaw_gal.f90 yawdyn.f90 \
+pwindup.f90 ENU.f90 \
+GYT_v2.f03 -o GYT_v2.e
+
