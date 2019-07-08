@@ -4,12 +4,8 @@ BIN = ../bin
 FC = gfortran
 
 # Compiler flags
-<<<<<<< Updated upstream
 
-FCFLAGS = -llapack -lblas
-=======
 FCFLAGS = -O3 -llapack -lblas
->>>>>>> Stashed changes
 #-O3 -Wuninitialized -fno-f2c -ffast-math -fno-automatic -fno-backslash -m64 -mcmodel=large 
 # Linker flags
 FLFLAGS = -L/usr/lib64
@@ -62,20 +58,28 @@ crs_trs.f90 m_eop_data.f03 m_eop_cor.f03 m_eop_igu.f03 eop_rd.f90 eop_c04.f90 eo
 era_matrix.f90 \
 main_crs2trs.f03
 
+BRDC2ECEF = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
+arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
+m_matrixinv.f03 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
+m_write_brd2sp3.f03 prn2str.f03 chkbrdc.f \
+readbrdcheader.f03 readbrdcmessg.f90 brdcinfo.f03 reformbrdc.f brdc2ecef.f \
+time_GPSweek.f90 jd2cal.for cal2jd.for time_GPSweek2.f90 \
+main_brdcorbit.f90
+#readbrdcmessg.f90 brdcinfo.f03 reformbrdc.f  \
+jd2cal.for cal2jd.for dat.for \
+main_brdcorbit.f90
+
+
 PROGRAM = pod
 
-all: $(BIN) $(PROGRAM) crs2trs
+all: $(BIN) $(PROGRAM) crs2trs brd2ecef
 
 directories: $(BIN)
 
 $(BIN): 
 	mkdir -p $(BIN)
 
-<<<<<<< Updated upstream
-$(PROGRAM): $(SRCS)
-=======
 $(PROGRAM): $(SRCS)  
->>>>>>> Stashed changes
 	$(FC) $(FCFLAGS) -o $(BIN)/$@ $^
 
 %.o: %.F
@@ -86,11 +90,9 @@ $(PROGRAM): $(SRCS)
 
 crs2trs: $(CRS2TRSSRCS) $(BIN)
 	$(FC) $(FCFLAGS) $(FLFLAGS) $(CRS2TRSSRCS) -o $(BIN)/crs2trs
+brd2ecef: $(BRDC2ECEF) $(BIN)
+	$(FC) $(FCFLAGS) $(FLFLAGS) $(BRDC2ECEF) -o $(BIN)/brd2ecef
 
 clean:
 	rm -f *.o *.mod $(BIN)/$(PROGRAM) $(BIN)/crs2trs
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 
