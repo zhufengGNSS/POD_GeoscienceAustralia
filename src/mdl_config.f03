@@ -111,5 +111,9 @@ MODULE mdl_config
       INTEGER (KIND = prec_int2) :: sp3_velocity_cfg	  	  
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Leap Second filename (leapsec_filename)
+      CHARACTER (LEN=100) :: leapsec_filename_cfg				
+! ----------------------------------------------------------------------
 
 END

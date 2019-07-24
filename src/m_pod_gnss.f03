@@ -21,7 +21,7 @@ Contains
 
 
 SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, &
-                     orbit_resR, orbit_resT, orbit_resN, orbdiff2)
+                     orbits_ics_icrf, orbit_resR, orbit_resT, orbit_resN, orbdiff2)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE:	pod_gnss.f03
@@ -85,6 +85,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  CHARACTER (LEN=3), ALLOCATABLE, INTENT(OUT) :: PRNmatrix(:)
       REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE, INTENT(OUT) :: orbits_partials_icrf  
       REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE, INTENT(OUT) :: orbits_partials_itrf  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbits_ics_icrf  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbit_resR  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbit_resT  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbit_resN  
@@ -107,7 +108,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  INTEGER (KIND = prec_int8) :: Nsat, isat
 	  INTEGER (KIND = prec_int8) :: iepoch, iparam
 	  INTEGER (KIND = prec_int8) :: i
-	  INTEGER (KIND = prec_int8) :: sz1, sz2, Nepochs, N2_orb, N2_veqSmatrix, N2_veqPmatrix, N2sum  
+	  INTEGER (KIND = prec_int8) :: sz1, sz2, Nepochs, N2_orb, N2_veqSmatrix, N2_veqPmatrix, N2sum , N2ics
       !REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbits_partials_icrf  
       !REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbits_partials_itrf  
 	  !CHARACTER (LEN=3), ALLOCATABLE :: PRNmatrix(:)
@@ -283,7 +284,7 @@ Call write_prmfile (VEQfname_PRN, fname_id, param_id, param_value)
 ! Precise Orbit Determination :: main subroutine
 !CAll orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
 CALL orbitmain (EQMfname_PRN, VEQfname_PRN, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, &
-		dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf,orbdiff) 
+		dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf, orbdiff) 
 ! ----------------------------------------------------------------------
 
 print *," "
@@ -308,6 +309,8 @@ sz2 = size(veqPmatrix, DIM = 2)
 N2_veqPmatrix = sz2
 
 N2sum = 2 + (N2_orb-2) + (N2_veqSmatrix-2) + (N2_veqPmatrix-2)
+N2ics = 2 + (N2_veqSmatrix-2)/6 + (N2_veqPmatrix-2)/6
+print*,'N2ics: ',N2ics
 
 ! ----------------------------------------------------------------------
 ! Orbits matrix in ICRF
@@ -316,8 +319,9 @@ orbits_partials_icrf = 0.0D0
 ! Orbits matrix in ITRF
 ALLOCATE (orbits_partials_itrf(Nepochs, N2sum , Nsat), STAT = AllocateStatus)
 orbits_partials_itrf = 0.0D0
+ALLOCATE (orbits_ics_icrf(N2ics , Nsat), STAT = AllocateStatus)
+orbits_ics_icrf = 0.0D0
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Orbit comparison/residuals matrices
@@ -348,6 +352,13 @@ end if
 
 orbdiff2 (isat,:,:) = orbdiff(:,:)
 
+! ----------------------------------------------------------------------
+! Create Orbit IC's matrix :: Write estimates for Satellite(isat) SVEC_Zo_ESTIM and ECOM_accel_aposteriori
+! ----------------------------------------------------------------------
+orbits_ics_icrf(1:2,isat) = orb_icrf(1,1:2)
+orbits_ics_icrf(3:8,isat) = SVEC_Zo_ESTIM
+orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_aposteriori*1.0D9
+!write(*,fmt='(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))') PRN_isat,orbits_ics_icrf(:,isat)
 
 ! ----------------------------------------------------------------------
 ! Orbit & Partial Derivatives matrix :: Write Orbit/Partials results from Satellite(isat) 

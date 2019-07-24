@@ -53,7 +53,9 @@ SUBROUTINE time_TAI (mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC)
 ! ----------------------------------------------------------------------
 !SUBROUTINE iau_DAT ( IY, IM, ID, FD, DELTAT, J )
 !*     DELTAT   d     TAI minus UTC, seconds
-      CALL iau_DAT ( IY, IM, ID, FD, TAI_UTC, J_flag )
+!      CALL iau_DAT ( IY, IM, ID, FD, TAI_UTC, J_flag )
+! SCM replaced SOFA hardwire with tai-utc (leap second, read from file).
+      CALL taiutc ( IY, IM, ID, FD, TAI_UTC, J_flag )
 ! ----------------------------------------------------------------------
       !PRINT *,"TAI_UTC", TAI_UTC
 
