@@ -51,7 +51,7 @@ SUBROUTINE prn2str (PRN_no, STR)
             ELSE
                WRITE(STR(2:3),'(I2)') PRN_no
             END IF
-         ELSE IF (PRN_no <= 200 .and. PRN_no >= 100)THEN
+         ELSE IF (PRN_no < 200 .and. PRN_no > 100)THEN
             WRITE(STR(1:1),'(1A)') 'R'
             IF (PRN_no-100 <= 9) THEN
                WRITE(STR(2:2),'(1A)') '0'
@@ -59,7 +59,7 @@ SUBROUTINE prn2str (PRN_no, STR)
             ELSE
                WRITE(STR(2:3),'(I2)') PRN_no-100
             END IF
-         ELSE IF (PRN_no <= 300 .and. PRN_no >= 200)THEN
+         ELSE IF (PRN_no < 300 .and. PRN_no > 200)THEN
             WRITE(STR(1:1),'(1A)') 'E'
             IF (PRN_no-200 <= 9) THEN
                WRITE(STR(2:2),'(1A)') '0'
@@ -67,7 +67,7 @@ SUBROUTINE prn2str (PRN_no, STR)
             ELSE
                WRITE(STR(2:3),'(I2)') PRN_no-200
             END IF
-         ELSE IF (PRN_no <= 400 .and. PRN_no >= 300)THEN
+         ELSE IF (PRN_no < 400 .and. PRN_no > 300)THEN
             WRITE(STR(1:1),'(1A)') 'C'
             IF (PRN_no-300 <= 9) THEN
                WRITE(STR(2:2),'(1A)') '0'
@@ -75,7 +75,7 @@ SUBROUTINE prn2str (PRN_no, STR)
             ELSE
                WRITE(STR(2:3),'(I2)') PRN_no-300
             END IF
-         ELSE IF (PRN_no <= 500 .and. PRN_no >= 400)THEN
+         ELSE IF (PRN_no < 500 .and. PRN_no > 400)THEN
             WRITE(STR(1:1),'(1A)') 'J'
             IF (PRN_no-400 <= 9) THEN
                WRITE(STR(2:2),'(1A)') '0'

@@ -49,14 +49,14 @@ SUBROUTINE  readbrdcmessg(UNIT_IN,VERSION,MAXNSAT,MAXNPAR,MAXEPO, &
       INTEGER (KIND = prec_int4) :: ISVN
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int4) :: I,J,K,IEPO
-      INTEGER (KIND = prec_int4) :: N2,IOS_LINE
-      INTEGER (KIND = prec_int2) :: iSec
-      INTEGER (KIND = prec_int2) :: iSvn2
+      INTEGER (KIND = prec_int4) :: N2,IOS_LINE, NG
+      INTEGER (KIND = prec_int4) :: iSec
+      INTEGER (KIND = prec_int4) :: iSvn2
       INTEGER (KIND = prec_int2) :: LIMYR
       INTEGER (KIND = prec_int4) :: IYEAR, IHOUR,MINUTE
       REAL (KIND = prec_q)       :: SEC
       REAL (KIND = prec_q)       :: LIMYR2, LIMYR0
-      REAL (KIND = prec_q)       :: DAY, TOC
+      REAL (KIND = prec_q)       :: DAY, TOC, T1, DTT
       CHARACTER (LEN=7) :: FORMAT1
       CHARACTER (LEN=7) :: cSvn
       CHARACTER (LEN=500) :: line_ith
@@ -79,11 +79,14 @@ CLKV3  = 0.d0
 !-------------------------------
 
 IF(VERSION.EQ.1) THEN
-   N2=25
-ELSE
+   N2 = 25
+ELSE IF(VERSION.EQ.2) THEN
+   N2 = MAXNPAR
+ELSE IF(VERSION.EQ.3) THEN
+   NG = 16
    N2 = MAXNPAR
 ENDIF
-
+T1 = 0.d0
 IEPO = 0
 DO WHILE(.TRUE.)
 ! Read input file
@@ -108,63 +111,101 @@ READ(line_ith,'(I2,5I3,F5.1,3D19.12)') ISVN,IYEAR,MONTH,IDAY,IHOUR,MINUTE,SEC,&
 
 IEPO = IEPO + 1
 ISAT = ISVN
-!PRINT*,'IEPO =', IEPO
-!PRINT*,'ISAT =', ISAT
-!print*,'IEPO=', IEPO, line_ith
        ! Convert 2-digit year to 4-digit year
          LIMYR2 = MOD(LIMYR,100)
          LIMYR0 = (LIMYR/100)*100
          IYEAR4 = IYEAR
          IF (IYEAR4.LT.LIMYR2) IYEAR4=IYEAR4+LIMYR0+100
          IF (IYEAR4.LT.100)    IYEAR4=IYEAR4+LIMYR0
+
+       ! Convert the calender time to MJD time system
+         CALL iau_CAL2JD ( IYEAR4, MONTH, IDAY, MJD0, MJD, J )
+         ! print*,'MJD =, J =',MJD, J
+          TOC = MJD + (IHOUR/24.D0+MINUTE/1440.D0+SEC/86400.D0)
+          !print*,'TOC =', TOC
+
 
 ELSE IF(VERSION.EQ.3) THEN
 READ(line_ith,'(A1,I2,I5,5I3,3D19.12)') cSvn,iSvn2,IYEAR,MONTH,IDAY,IHOUR,&
                                      MINUTE,iSec,(EPHDAT(K),K=2,4)
 IEPO = IEPO + 1
+!print*,'IEPO =', IEPO
+IYEAR4 = IYEAR
 
-       ! Convert 2-digit year to 4-digit year
-         LIMYR2 = MOD(LIMYR,100)
-         LIMYR0 = (LIMYR/100)*100
-         IYEAR4 = IYEAR
-         IF (IYEAR4.LT.LIMYR2) IYEAR4=IYEAR4+LIMYR0+100
-         IF (IYEAR4.LT.100)    IYEAR4=IYEAR4+LIMYR0
+        ! Convert the calender time to MJD time system
+          CALL iau_CAL2JD ( IYEAR4, MONTH, IDAY, MJD0, MJD, J )
+          !print*,'MJD =, J =',MJD, J
+         
+           TOC = MJD + (IHOUR/24.D0+MINUTE/1440.D0+iSEC/86400.D0)
+        ! The following critierion only works for GALILEO broadcast records.
+        ! -----------------------------------------------------------------
+           DTT = TOC - T1
+           IF (DTT == 0.d0) THEN
+           IEPO = IEPO - 1
+!           PRINT*, 'SATELLITE PRN =',TRIM(cSvn),iSvn2 
+!           PRINT*, 'THE EPOCH NUMBER IS ASSIGNED TO THE PREVIOUS ONE : IEPO =', IEPO
+           END IF
+        ! -----------------------------------------------------------------
 
-! Convert the cSvn to the ACS internal prn??
+!IF (cSvn == 'R') EXIT
+IF (cSvn == 'S') EXIT ! exclude the SBAS satellites
+! Convert the cSvn to the ACS internal prn
+         CALL prn_shift (cSvn, iSvn2, ISAT)
+!PRINT*,'SAT PRN =',cSvn,iSvn2,'==>','ACS/PRN',ISAT
+
 ELSE
 PRINT*,'THE RINEX VERSION OF BROADCAST EPHEMERIS CANNOT BE RECOGNIZED!'
 END IF
-
-!print*,'TIME LINE =', IYEAR4, MONTH ,IDAY
-
-! Convert the calender time to MJD time system
-CALL iau_CAL2JD ( IYEAR4, MONTH, IDAY, MJD0, MJD, J )
-!print*,'MJD0 =', MJD0
-!print*,'MJD =, J =',MJD, J
-TOC = MJD + (IHOUR/24.D0+MINUTE/1440.D0+SEC/86400.D0)
-!print*,'TOC =', TOC
+T1 = TOC
 
 
+IF (ISAT < 100 .OR.  ISAT > 200 .AND. ISAT < 300 .OR. & 
+    ISAT > 300 .AND. ISAT < 400 .OR.  ISAT > 400) THEN
 ! Convert MJD to the GPS week
-CALL time_GPSweek2 (TOC , GPS_week, EPHDAT(1), GPSweek_mod1024, GPS_day)
+    CALL time_GPSweek2 (TOC , GPS_week, EPHDAT(1), GPSweek_mod1024, GPS_day)
 !print*,'GPS_week=, GPS_day=',GPS_week,GPS_day
 !print*,'EPHDAT(1-4) =',EPHDAT(1),EPHDAT(2),EPHDAT(3),EPHDAT(4)
 
-DO  I=5,N2,4
-READ (UNIT=UNIT_IN,FMT=FORMAT1,IOSTAT=IOS_LINE) line_ith
-!print*,line_ith
+     DO  I=5,N2,4
+     READ (UNIT=UNIT_IN,FMT=FORMAT1,IOSTAT=IOS_LINE) line_ith
+!     print*,line_ith
 
-READ(line_ith,'(3X,4D19.12)') (EPHDAT(K),K=I,I+3)
-!PRINT*,'EPHDAT=',  EPHDAT(I),EPHDAT(I+1),EPHDAT(I+2),EPHDAT(I+3)
+     IF (VERSION == 2) READ(line_ith,'(3X,4D19.12)') (EPHDAT(K),K=I,I+3)
+     IF (VERSION == 3) READ(line_ith,'(4X,4D19.12)') (EPHDAT(K),K=I,I+3)
+!     PRINT*,'EPHDAT=',  EPHDAT(I),EPHDAT(I+1),EPHDAT(I+2),EPHDAT(I+3)
 
-END DO
+     END DO
 
-CALL reformbrdc (EPHDAT,EPHV3,CLKV3)
-    DO I=1,20
-    EPH(I,IEPO,ISAT)=EPHV3(I)
-!print*,'EPH(1:2,:,:), GPSWEEK, TOE', EPH(1,IEPO,ISAT), EPH(2,IEPO,ISAT)
-    CLK(I,IEPO,ISAT)=CLKV3(I)
-    END DO
+     CALL reformbrdc (EPHDAT,EPHV3,CLKV3)
+     DO I=1,20
+     EPH(I,IEPO,ISAT)=EPHV3(I)
+     !print*,'EPH(1:2,:,:), GPSWEEK, TOE', EPH(1,IEPO,ISAT), EPH(2,IEPO,ISAT)
+     CLK(I,IEPO,ISAT)=CLKV3(I)
+     END DO
+
+ELSE IF (ISAT > 100 .AND. ISAT < 200 )THEN
+     CALL time_GPSweek2 (TOC , GPS_week, EPHDAT(1), GPSweek_mod1024, GPS_day)
+     !print*,'GPS_week=, GPS_day=',GPS_week,GPS_day
+!     print*,'EPHDAT(1-4) =',EPHDAT(1),EPHDAT(2),EPHDAT(3),EPHDAT(4)
+
+     DO  I=5,NG,4
+     READ (UNIT=UNIT_IN,FMT=FORMAT1,IOSTAT=IOS_LINE) line_ith
+!     print*,line_ith
+     IF (VERSION == 2) READ(line_ith,'(3X,4D19.12)') (EPHDAT(K),K=I,I+3)
+     IF (VERSION == 3) READ(line_ith,'(4X,4D19.12)') (EPHDAT(K),K=I,I+3)
+!     print*,'EPHDAT =', EPHDAT(I), EPHDAT(I+1),EPHDAT(I+2),EPHDAT(I+3)
+     END DO
+
+
+     DO I=1,16
+     EPH(I,IEPO,ISAT)=EPHDAT(I)
+!     print*,'EPH(1:2,:,:), UTC, SECONDS', EPH(1,IEPO,ISAT), EPH(4,IEPO,ISAT)
+     !   CLK(I,IEPO,ISAT)
+     END DO
+
+
+
+END IF
 
 END DO
 END SUBROUTINE  

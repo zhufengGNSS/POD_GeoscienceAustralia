@@ -8,26 +8,22 @@ CC               WGS-84 SYSTEM FOR A SATELLITE WITH BROADCAST EPHEMERIS
 CC               PARAMETERS GIVEN IN ARRAY EPH(I),I=1,2,..,20 
 CC
 CC PARAMETERS :
-CC         IN :  T     :  ACTUAL TIME IN GPS-TIME                  R*8
-CC               EPH   :  ARRAY WITH 20 ELEMENTS CONTAINING THE    R*8
+CC         IN :  T     :  ACTUAL TIME IN GPS-TIME                  
+CC               EPH   :  ARRAY WITH 20 ELEMENTS CONTAINING THE    
 CC                        BROADCAST PARAMETERS
-CC        OUT :  X(I),I=1,2,3:  EARTH FIXED SATELLITE COOR-        R*8
-CC                        DINATES IN WGS - 84 SYSTEM
+CC        OUT :  X(I),I=1,2,3:  EARTH FIXED SATELLITE COORDINATES 
 CC
 CC
 CC
 C*
       IMPLICIT NONE
-C
-C DECLARATIONS INSTEAD OF IMPLICIT
-C --------------------------------
+
       INTEGER*4 I
 C
       REAL*8    A    , CP   , DI   , DR   , DT   , DU   , E    , EX   ,
      1          PHI  , R    , SP   , T    , U    , V    , XI   , XM   ,
      2          XN   , XNODE, XP   , YP
 C
-CCC       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 EPH(20),X(3)
       REAL*8 GM, OMEGA
 
@@ -40,7 +36,6 @@ C --------------------------
       A=EPH(3)
       XN=DSQRT(GM/A**3)
       DT=T-EPH(2)
-      !  IF (DT .LT. 0.d0) RETURN
       IF(DT.GT. 302400.D0)DT=DT-604800.D0
       IF(DT.LT.-302400.D0)DT=DT+604800.D0
       XN=XN+EPH(9)
@@ -66,6 +61,5 @@ C --------------------------
       X(1)=XP*DCOS(XNODE)-YP*DCOS(XI)*DSIN(XNODE)
       X(2)=XP*DSIN(XNODE)+YP*DCOS(XI)*DCOS(XNODE)
       X(3)=YP*DSIN(XI)
-      !  print*,'X =', X(1),X(2),X(3)
       RETURN
       END SUBROUTINE

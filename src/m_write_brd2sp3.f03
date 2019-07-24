@@ -1,16 +1,16 @@
 MODULE m_write_brd2sp3
 
-
 ! ----------------------------------------------------------------------
-! MODULE: m_write_orb2sp3.f03
+! MODULE: m_write_brd2sp3.f03
 ! ----------------------------------------------------------------------
 ! Purpose:
 !  Module for write the POD *.orb format to sp3 orbit format 
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou, Geoscience Australia
+!               Dr. Tzupang Tseng
+!
 ! Created:	21 February 2019
 ! ----------------------------------------------------------------------
-
 
       IMPLICIT NONE
       !SAVE 			
@@ -19,22 +19,38 @@ MODULE m_write_brd2sp3
 Contains
 
 
-SUBROUTINE write_brd2sp3 (IGNSS,SAMPLE,IY,IM,ID,NEWEPOCH,ORBmatrix,sp3_fname,sat_vel)
+SUBROUTINE write_brd2sp3 (IPRN,IGNSS,IG,IR,IE,IC,IJ,SATTYPE,SAMPLE,IY,IM,ID,NEWEPOCH,ORBmatrix,sp3_fname,sat_vel)
 
 ! ----------------------------------------------------------------------
-! SUBROUTINE: writesp3_hd 
+! SUBROUTINE: write_brd2sp3 
 ! ----------------------------------------------------------------------
 ! Purpose:
 !  Write orbit sp3 format header 
 ! ----------------------------------------------------------------------
 ! Input arguments:
+! - IPRN     :       Array containing the processed satellites 
+! - IGNSS    :       Number of satellites in a specific constellation
+! - IG,IR,IE,IC,IJ:  Number of each satellite constellation (G:GPS, R:GLONASS,
+!                                                            E:GALILEO, C:BDS, J:QZSS)
+! - SATTYPE  :       The satellite constellation selected for processing
+! - SAMPLE   :       Sampling rate in SP3 format
+! - IY, IM, ID :     Time line
+! - NEWEPOCH :       Number of epochs with satellite positions
 ! - ORBmatrix:       Orbits dynamic allocatable array (3-dimensional)
-! - PRNmatrix:       Satellites' PRN numbers allocatable array
+! - sp3_fname:       Output filename of SP3 file
+! - sat_vel  :       Option for outputing satellite velocity
 !
 ! Output arguments:
 !
 ! ----------------------------------------------------------------------
 ! Dr. Thomas Papanikolaou, Geoscience Australia         21 February 2019
+!
+!Changes: 08-07-2019 Tzupang Tseng: modify this routine that can be used for the
+!                                   SP3 file creation from the broadcast orbits
+!         12-07-2019 Tzupang Tseng: include multi-GNSS in SP3 file creation,
+!                                   except for GLONASS
+!         23-07-2019 Tzupang Tseng: modify the header information of PRN number
+!                                   consistent with the PRN number in the content
 ! ----------------------------------------------------------------------
 
 
@@ -46,15 +62,15 @@ SUBROUTINE write_brd2sp3 (IGNSS,SAMPLE,IY,IM,ID,NEWEPOCH,ORBmatrix,sp3_fname,sat
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:,:), ALLOCATABLE :: ORBmatrix 
-      REAL (KIND = prec_d),DIMENSION(:,:),ALLOCATABLE,INTENT(IN) ::NEWEPOCH
-!      CHARACTER (LEN=3), ALLOCATABLE, INTENT(IN) :: PRNmatrix(:)
+      REAL (KIND = prec_q), DIMENSION(:,:,:),ALLOCATABLE,INTENT(IN) :: ORBmatrix 
+      REAL (KIND = prec_d), DIMENSION(:,:),ALLOCATABLE,INTENT(IN) ::NEWEPOCH
+      CHARACTER (LEN=3),   INTENT(IN) :: SATTYPE
       CHARACTER (LEN=100), INTENT(IN) :: sp3_fname
-      INTEGER (KIND = prec_d),DIMENSION(:),ALLOCATABLE :: PRNmatrix
-      INTEGER (KIND = 4), INTENT(IN) :: sat_vel	  
+      INTEGER (KIND = 4), INTENT(IN) :: sat_vel
       INTEGER (KIND = prec_int4),INTENT(IN) ::IY, IM, ID
       INTEGER (KIND = 4), INTENT(IN) :: SAMPLE
-      INTEGER (KIND = 4), INTENT(IN) :: IGNSS
+      INTEGER (KIND = 4), INTENT(IN) :: IGNSS,IG,IR,IE,IC,IJ
+      INTEGER (KIND = prec_d),DIMENSION(:),ALLOCATABLE :: IPRN
 ! OUT
 ! ----------------------------------------------------------------------
 
@@ -67,29 +83,27 @@ SUBROUTINE write_brd2sp3 (IGNSS,SAMPLE,IY,IM,ID,NEWEPOCH,ORBmatrix,sp3_fname,sat
       INTEGER (KIND = prec_int2) :: wrt_opt
       INTEGER (KIND = prec_int2) :: FMT_opt
 ! ----------------------------------------------------------------------
-      CHARACTER (LEN=1) :: RealT
       INTEGER (KIND = prec_int2) :: RealW, RealD
+      INTEGER (KIND = prec_int2) :: vel
+      CHARACTER (LEN=1) :: RealT
       CHARACTER (LEN=70) :: fmt_wrt, fmt_wrt0, fmt_sz2
+      CHARACTER (LEN=100) :: fmt_epoch, fmt_pos, fmt_vel, fmt_line
+      CHARACTER (LEN=3) :: PRN_ti
       REAL (KIND = prec_q) :: wrtArrayLN 
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int2) :: vel
-      CHARACTER (LEN=100) :: fmt_epoch, fmt_pos, fmt_vel, fmt_line
-
       REAL (KIND = prec_q) :: MJD_ti, Sec_00, MJD0
-      CHARACTER (LEN=3) :: PRN_ti
       REAL (KIND = prec_q) :: r_ti(3), v_ti(3), cl_ti, Dcl_ti
 
       DOUBLE PRECISION DJ1, DJ2
-!      INTEGER IY, IM, ID
       DOUBLE PRECISION FD
       INTEGER J
 
-      !INTEGER (KIND = prec_int4) :: year, month, day, hour_ti, min_ti 
+ 
       INTEGER :: year, month, day, hour_ti, min_ti 
       REAL (KIND = prec_q) :: sec_ti 	  
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int8) :: Nepochs, Nelem, Nsat
-      INTEGER (KIND = prec_int8) :: i_sat
+      INTEGER (KIND = prec_int8) :: i_sat, II
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=1) :: orbvector
       CHARACTER (LEN=5) :: REFRAME
@@ -109,6 +123,7 @@ SUBROUTINE write_brd2sp3 (IGNSS,SAMPLE,IY,IM,ID,NEWEPOCH,ORBmatrix,sp3_fname,sat
       INTEGER (KIND = prec_int8) :: Nsat_17frac, Nsat_lines, j17
       CHARACTER (LEN=1) :: char1
       INTEGER (KIND = prec_int2) :: num1
+      INTEGER (KIND = prec_int8) :: ICON
 ! ----------------------------------------------------------------------
 
 
@@ -162,21 +177,22 @@ fmt_vel = '(A1,A3,4F14.6)'
 !sz1 = SIZE (ORBmatrix,DIM=1)
 sz1 = SIZE(NEWEPOCH,DIM =1)
 sz2 = SIZE (ORBmatrix,DIM=2)
-!sz3 = SIZE (ORBmatrix,DIM=3)
+sz3 = SIZE (ORBmatrix,DIM=3)
 Nepochs = sz1
-
 Nelem   = sz2
-!Nsat    = sz3
 Nsat = IGNSS
+IF (SATTYPE == 'G') Nsat = IG
+IF (SATTYPE == 'R') Nsat = IR
+IF (SATTYPE == 'E') Nsat = IE
+IF (SATTYPE == 'C') Nsat = IC
+IF (SATTYPE == 'J') Nsat = IJ
+IF (SATTYPE == 'A') Nsat = IGNSS
 
-! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Writing satellite velocity vector (optional)
 ! ----------------------------------------------------------------------
 vel = sat_vel
-! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Open file
@@ -185,9 +201,6 @@ vel = sat_vel
          PRINT *, "Error in opening file:", sp3_fname
          PRINT *, "OPEN IOSTAT=", ios
       END IF
-! ----------------------------------------------------------------------
-
-!print*,'Output filename =', sp3_fname
  
 ! ----------------------------------------------------------------------
 ! Write Header of the sp3 file
@@ -197,19 +210,12 @@ vel = sat_vel
 ! Initial Epoch 
 ! ----------------------------------------------------------------------
 ! MJD of epoch (including fraction of the day)
-!MJD_ti = ORBmatrix(1,1,1)
 ! Sec of Day (since 0h)
-!Sec_00 = ORBmatrix(1,2,1)
-Sec_00 = NEWEPOCH(1,1)
-! MJD of Epoch (including fraction of the day)
-!DJ1 = 2400000.5D0
-!DJ2 = MJD_ti
-!Call iau_JD2CAL ( DJ1, DJ2, IY, IM, ID, FD, J )
+Sec_00 = MOD(NEWEPOCH(1,1),86400.d0)*86400
 
 year  = IY
 month = IM
 day   = ID
-
 
 CALL iau_CAL2JD ( year, month, day, MJD0, MJD_ti, J )
 
@@ -228,10 +234,7 @@ CALL time_GPSweek (MJD_ti , GPS_week, GPS_wsec, GPSweek_mod1024)
 
 ! ----------------------------------------------------------------------
 ! Epochs Interval
-!Interval = ORBmatrix(2,2,1) - ORBmatrix(1,2,1)
 Interval = SAMPLE
-! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Line 1
@@ -275,11 +278,29 @@ WRITE(wrt_line  ,FMT=*,IOSTAT=ios_ith) ''
 
 Do j17 = 1 , 17
 	i_sat = (i-1)*17 + j17
-	IF (i_sat <= Nsat) THEN	
-                CALL prn2str (i_sat, PRN_write)
-!                print*,'i_sat=, PRN_write=',i_sat, PRN_write
+	IF (i_sat <= Nsat) THEN
 
-!		PRN_write = PRNmatrix(i_sat)
+! Process the selected GNSS constellation type
+       IF (SATTYPE == 'G') THEN
+       i_sat = i_sat
+       ELSE IF (SATTYPE == 'R') THEN
+       i_sat = i_sat + 100
+       ELSE IF (SATTYPE == 'E') THEN 
+       i_sat = i_sat + 200
+       ELSE IF (SATTYPE == 'C') THEN
+       i_sat = i_sat + 300
+       ELSE IF (SATTYPE == 'J') THEN
+       i_sat = i_sat + 400
+       ELSE IF (SATTYPE == 'A') THEN
+       IF(i_sat <= IG) i_sat = i_sat
+!      IF(i_sat <= IG+IR .AND. i_sat > IG) i_sat = i_sat + 100
+       IF(i_sat <= IG+IE .AND. i_sat > IG) i_sat = i_sat-(IG) + 200
+       IF(i_sat <= IG+IE+IC .AND. i_sat > IG+IE) i_sat = i_sat-(IG+IE) + 300
+       IF(i_sat <= IG+IE+IC+IJ .AND. i_sat > IG+IE+IC) i_sat = i_sat-(IG+IE+IC) + 400
+       END IF
+	
+       CALL prn2str (IPRN(i_sat), PRN_write)
+!      print*,'i_sat=, PRN_write=',i_sat, PRN_write
 		!WRITE(wrt_line,FMT=*,IOSTAT=ios_ith) ADJUSTL(TRIM(wrt_line)),PRN_write
 	ELSE IF (i_sat > Nsat) THEN
 		PRN_write = '  0'
@@ -293,7 +314,6 @@ Do j17 = 1 , 17
 			num1 = 1
 		END IF
 	End IF
-!	PRINT *,"num1", num1
 
 	WRITE(wrt_line,FMT=*,IOSTAT=ios_ith) (TRIM(wrt_line)), ADJUSTR(PRN_write)
 END DO
@@ -376,42 +396,44 @@ WRITE (UNIT=UNIT_IN,FMT=fmt_line,IOSTAT=ios_ith) &
 ! ----------------------------------------------------------------------
 min_ti  = 0
 hour_ti = 0
+
+! Process the selected GNSS constellation type
+IF (SATTYPE == 'G') ICON = 1
+IF (SATTYPE == 'R') ICON = 101
+IF (SATTYPE == 'E') ICON = 201
+IF (SATTYPE == 'C') ICON = 301
+IF (SATTYPE == 'J') ICON = 401
+IF (SATTYPE == 'A') ICON = 1
+
+
 ! ----------------------------------------------------------------------
 ! Write Orbits matrix to the sp3 file	  
 ! ----------------------------------------------------------------------
 ! Epochs loop
 DO i_write = 1 , Nepochs       
 
-
 ! Satellites loop
-DO i_sat = 1 , Nsat       
+!DO i_sat = 1 , Nsat       
+DO i_sat = 1 , sz3
+     
+     IF(i_sat < 50 .OR. i_sat < 250 .AND.  i_sat > 200 .OR. &
+        i_sat < 350 .AND.  i_sat > 300 .OR. i_sat > 400 )THEN                ! GNSS BRDC 
+     IF( ORBmatrix(i_write,1, i_sat) /= 0.d0)THEN                            ! GNSS BRDC
 
-
-! MJD of epoch (including fraction of the day)
-!MJD_ti = ORBmatrix(i_write,1, i_sat)
-! Sec of Day (since 0h)
-!Sec_00 = ORBmatrix(i_write,2, i_sat)
 Sec_00 = NEWEPOCH(i_write,i_sat) -  NEWEPOCH(1,i_sat)
+!print*,'CURRENT EPOCH IN GPS WEEK =', NEWEPOCH(i_write,i_sat), 'REFERENCE EPOCH =', NEWEPOCH(1,i_sat),&
+!       'ISAT = ', i_sat, 'EXPECTED EPOCH DIFF =', 900*(i_write-1), 'REAL SEC_00=',SEC_00, 'POS =',ORBmatrix(i_write,1, i_sat)
 IF (Sec_00 .LT. 0.d0) EXIT
+
 ! Satellite PRN number 
-!PRN_ti = sp3_fname(1:3)
-!PRN_ti = sat_prn
-!PRN_ti = PRNmatrix(i_sat)
 CALL prn2str (i_sat, PRN_ti) 
 
 ! Position vector
-!r_ti(1) = ORBmatrix(i_write,3, i_sat) !/ 1.D03
-!r_ti(2) = ORBmatrix(i_write,4, i_sat) !/ 1.D03 
-!r_ti(3) = ORBmatrix(i_write,5, i_sat) !/ 1.D03
 
 r_ti(1) = ORBmatrix(i_write,1, i_sat) !/ 1.D03
 r_ti(2) = ORBmatrix(i_write,2, i_sat) !/ 1.D03
 r_ti(3) = ORBmatrix(i_write,3, i_sat) !/ 1.D03
-!if (i_sat == 32) then
-!print*,'i_write =, i_sat =', i_write, i_sat
-!print*,'ORBmatrix =',ORBmatrix(i_write,1:3,i_sat)
 
-!end if
 ! Unit conversion: m to Km                 
 r_ti = r_ti * 1.0D-3
 
@@ -431,13 +453,9 @@ Dcl_ti = 999999.999999D0
 
 
 ! ----------------------------------------------------------------------
-IF (i_sat == 1) THEN
+!IF (i_sat == 1) THEN
+IF (i_sat == ICON) THEN
 ! Write the Epoch line
-
-! MJD of Epoch (including fraction of the day)
-!DJ1 = 2400000.5D0
-!DJ2 = MJD_ti
-!Call iau_JD2CAL ( DJ1, DJ2, IY, IM, ID, FD, J )
 
 year  = IY
 month = IM
@@ -488,11 +506,10 @@ IF (ios_ith /= 0) THEN
     PRINT *, "WRITE IOSTAT=", ios_ith
 END IF
 ! ----------------------------------------------------------------------
-
- 
+                       END IF                    ! GNSS BRDC
+                       END IF                    ! GNSS BRDC 
  END DO
  END DO
-! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Last Line :: EOF
