@@ -309,7 +309,8 @@ sz2 = size(veqPmatrix, DIM = 2)
 N2_veqPmatrix = sz2
 
 N2sum = 2 + (N2_orb-2) + (N2_veqSmatrix-2) + (N2_veqPmatrix-2)
-N2ics = 2 + (N2_veqSmatrix-2)/6 + (N2_veqPmatrix-2)/6
+!N2ics = 2 + (N2_veqSmatrix-2)/6 + (N2_veqPmatrix-2)/6
+N2ics = 2 + 6 + NPARAM_glb
 print*,'N2ics: ',N2ics
 
 ! ----------------------------------------------------------------------
@@ -357,7 +358,7 @@ orbdiff2 (isat,:,:) = orbdiff(:,:)
 ! ----------------------------------------------------------------------
 orbits_ics_icrf(1:2,isat) = orb_icrf(1,1:2)
 orbits_ics_icrf(3:8,isat) = SVEC_Zo_ESTIM
-orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_aposteriori*1.0D9
+orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_aposteriori !*1.0D9
 !write(*,fmt='(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))') PRN_isat,orbits_ics_icrf(:,isat)
 
 ! ----------------------------------------------------------------------

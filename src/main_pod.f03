@@ -303,6 +303,16 @@ READ ( param_value, FMT = * , IOSTAT=ios_key ) sp3_velocity_cfg
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
+! Write partials of the velocity vector w.r.t. parameters into the orbits_partials output file 
+! ----------------------------------------------------------------------
+! 0. partials_velocity_cfg = 0 :: Do not write Velocity vector's partials elements
+! 1. partials_velocity_cfg > 0 :: Write Velocity vector's partials elements
+param_id = 'partials_velocity_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) partials_velocity_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
 ! Leap Second file name:
 ! ----------------------------------------------------------------------
 param_id = 'leapsec_filename_cfg'
