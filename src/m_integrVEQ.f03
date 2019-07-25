@@ -60,6 +60,7 @@ SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orb
       USE mdl_precision
       USE mdl_num
       !USE mdl_param
+      USE mdl_config
       USE m_veq_rkn768
       IMPLICIT NONE
 
@@ -96,8 +97,17 @@ SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orb
 ! ----------------------------------------------------------------------	  
       REAL (KIND = prec_d), DIMENSION(6,6) :: veqZo, veqZ  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqPo, veqP 
+      INTEGER (KIND = prec_int2) :: Nveq_rv
 
 
+
+! ----------------------------------------------------------------------
+! Matrices (Smatrix, Pmatrix) dimension of Variational Equations solution regarding the velocity vector rows 
+Nveq_rv = 6
+IF (partials_velocity_cfg == 0) THEN
+	Nveq_rv = 3
+END IF
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -120,11 +130,11 @@ Nepochs = INT(arc / step) + 1
 ! ----------------------------------------------------------------------
 ALLOCATE (orbc(Nepochs,8), STAT = AllocateStatus)
 
-!ALLOCATE (Smatrix(Nepochs*6,6), STAT = AllocateStatus)
-ALLOCATE (Smatrix(Nepochs,6*6+2), STAT = AllocateStatus)
+!ALLOCATE (Smatrix(Nepochs,6*6+2), STAT = AllocateStatus)
+ALLOCATE (Smatrix(Nepochs,6*Nveq_rv+2), STAT = AllocateStatus)
 
-!ALLOCATE (Pmatrix(Nepochs,Nparam*6), STAT = AllocateStatus)
-ALLOCATE (Pmatrix(Nepochs,Nparam*6+2), STAT = AllocateStatus)
+!ALLOCATE (Pmatrix(Nepochs,Nparam*6+2), STAT = AllocateStatus)
+ALLOCATE (Pmatrix(Nepochs,Nparam*Nveq_rv+2), STAT = AllocateStatus)
 
 If (Nparam /= 0) Then
 ALLOCATE (veqPo(6,Nparam), STAT = AllocateStatus)
@@ -171,9 +181,11 @@ Smatrix(1,2) = to_sec
 Smatrix(1,  3:8) = veqZo(1,1:6)
 Smatrix(1, 9:14) = veqZo(2,1:6)
 Smatrix(1,15:20) = veqZo(3,1:6)
+IF (Nveq_rv == 6) Then
 Smatrix(1,21:26) = veqZo(4,1:6)
 Smatrix(1,27:32) = veqZo(5,1:6)
 Smatrix(1,33:38) = veqZo(6,1:6)
+End IF
 
 ! Sensitivity matrix
 Pmatrix(1,1) = MJDo
@@ -186,7 +198,8 @@ Pmatrix(1,2) = to_sec
 !End Do
 i1 = 0
 iparam = 0	
-Do i1 = 1 , 6 
+!Do i1 = 1 , 6 
+Do i1 = 1 , Nveq_rv 
 Do iparam = 1 , Nparam
    Pmatrix(1, 2+(i1-1)*Nparam+iparam) = veqPo(i1,iparam) 
    !(/ veqP(1,iparam), veqP(2,iparam), veqP(3,iparam), veqP(4,iparam), veqP(5,iparam), veqP(6,iparam) /)
@@ -250,9 +263,11 @@ Do j = 1 , Nepochs-1
 	Smatrix(j+1,  3:8) = veqZ(1,1:6)
 	Smatrix(j+1, 9:14) = veqZ(2,1:6)
 	Smatrix(j+1,15:20) = veqZ(3,1:6)
+IF (Nveq_rv == 6) Then
 	Smatrix(j+1,21:26) = veqZ(4,1:6)
 	Smatrix(j+1,27:32) = veqZ(5,1:6)
 	Smatrix(j+1,33:38) = veqZ(6,1:6)
+END IF
 
 	! Sensitivity matrix
 	Pmatrix(j+1,1) = orbc(j+1,1)
@@ -264,7 +279,8 @@ Do j = 1 , Nepochs-1
 
 	i1 = 0
 	iparam = 0	
-	Do i1 = 1 , 6 
+	!Do i1 = 1 , 6 
+	Do i1 = 1 , Nveq_rv 
 	Do iparam = 1 , Nparam
 	   Pmatrix(j+1, 2+(i1-1)*Nparam+iparam) = veqP(i1,iparam) 
 	End Do
@@ -322,9 +338,11 @@ Do j = 1 , Nepochs-1
 	Smatrix(j+1,  3:8) = veqZ(1,1:6)
 	Smatrix(j+1, 9:14) = veqZ(2,1:6)
 	Smatrix(j+1,15:20) = veqZ(3,1:6)
+IF (Nveq_rv == 6) Then
 	Smatrix(j+1,21:26) = veqZ(4,1:6)
 	Smatrix(j+1,27:32) = veqZ(5,1:6)
 	Smatrix(j+1,33:38) = veqZ(6,1:6)
+END IF
 
 	! Sensitivity matrix
 	Pmatrix(j+1,1) = orbc(j+1,1)
@@ -335,7 +353,8 @@ Do j = 1 , Nepochs-1
 	!End Do
 	i1 = 0
 	iparam = 0	
-	Do i1 = 1 , 6 
+	!Do i1 = 1 , 6 
+	Do i1 = 1 , Nveq_rv 
 	Do iparam = 1 , Nparam
 	   Pmatrix(j+1, 2+(i1-1)*Nparam+iparam) = veqP(i1,iparam) 
 	End Do

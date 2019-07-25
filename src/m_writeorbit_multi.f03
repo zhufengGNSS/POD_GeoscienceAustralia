@@ -78,7 +78,7 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf,
       CHARACTER (LEN=70) :: fmt_wrt, fmt_wrt0, fmt_sz2
       REAL (KIND = prec_q) :: wrtArrayLN 
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int8) :: Nepochs, Nparam, Nsat 
+      INTEGER (KIND = prec_int8) :: Nepochs, Nparam, Nsat, Norbits_ics_icrf 
       INTEGER (KIND = prec_int8) :: i_epoch, i_sat
 ! ----------------------------------------------------------------------
 
@@ -98,6 +98,9 @@ Nsat    = sz3
    
 ! PRN
 Nsat = SIZE (PRN_array,DIM=1)
+
+! orbits_ics_icrf
+Norbits_ics_icrf = SIZE (orbits_ics_icrf,DIM=1)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -132,22 +135,43 @@ WRITE (UNIT=UNIT_IN,FMT='(a,i5)'           ,IOSTAT=ios_ith) '#INFO    Tabular in
 WRITE (UNIT=UNIT_IN,FMT='(a,i5)'           ,IOSTAT=ios_ith) '#INFO    Number of Epochs:           ',Nepochs
 WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    Model information:           [TIME_SYS] [GRAV_MODEL]&
                                            &[PN_MODEL] [EPH_MODEL] [ALBEDO_MODEL]'
-WRITE (UNIT=UNIT_IN,FMT='(a,a)'            ,IOSTAT=ios_ith) '#INFO    EOP file: ',trim(EOP_fname_cfg)
-WRITE (UNIT=UNIT_IN,FMT='(a,i3)'           ,IOSTAT=ios_ith) '#INFO    Number of Satellites:       ',Nsat
-WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of Partials:         ',Nparam-8
-WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    Satellite ICS:              '
+WRITE (UNIT=UNIT_IN,FMT='(a,a)'            ,IOSTAT=ios_ith) '#INFO    EOP file:                          ',trim(EOP_fname_cfg)
+WRITE (UNIT=UNIT_IN,FMT='(a,i3)'           ,IOSTAT=ios_ith) '#INFO    Number of Satellites:              ',Nsat
+WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of Parameters per satellite:',NPARAM_glb+6
+WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of Partials:                ',Nparam-8
+WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    Satellite ICS:                     '
 DO i_sat = 1 , Nsat
    WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,i3,a)' ,IOSTAT=ios_ith) '#IC_INFO ',PRN_array(i_sat),' [SVN] [BLK_TYP] [ANT_TH] &
-                                           &[ECOM1] ',(Nparam-8)/6, '[IC PARAM LIST - X Y Z XD YD ZD DRAD .....]'
-   WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,1x,f14.4,f14.6,1x,15(d17.10,1x))',IOSTAT=ios_ith) '#IC_XYZ  ',PRN_array(i_sat),&
-                                           &' [SVN] [BLK_TYP] ICRF ',orbits_ics_icrf(:,i_sat)   
+                                           &[ECOM1] ', NPARAM_glb+6, '[IC PARAM LIST - X Y Z XD YD ZD DRAD .....]'
+                                           !&[ECOM1] ',(Nparam-8)/6, '[IC PARAM LIST - X Y Z XD YD ZD DRAD .....]'
+   !WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,1x,f14.4,f14.6,1x,15(d17.10,1x))',IOSTAT=ios_ith) '#IC_XYZ  ',PRN_array(i_sat),&
+   !                                        &' [SVN] [BLK_TYP] ICRF ',orbits_ics_icrf(:,i_sat)   
+   !WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,1x,f14.4,f14.6,1x,15(f17.12,1x))',IOSTAT=ios_ith) '#IC_XYZ  ',PRN_array(i_sat),&
+   !                                        &' [SVN] [BLK_TYP] ICRF ',orbits_ics_icrf(:,i_sat)   										   
+   WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,1x)',ADVANCE="no",IOSTAT=ios_ith) '#IC_XYZ  ',PRN_array(i_sat),' [SVN] [BLK_TYP] ICRF '
+   WRITE (UNIT=UNIT_IN,FMT='(f14.4,f14.6)',ADVANCE="no",IOSTAT=ios_ith) orbits_ics_icrf(1,i_sat), orbits_ics_icrf(2,i_sat)
+   WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) orbits_ics_icrf(3:Norbits_ics_icrf,i_sat)
+   !DO i = 3 , Norbits_ics_icrf
+   !   WRITE (UNIT=UNIT_IN,FMT='(f27.12)',ADVANCE="no",IOSTAT=ios_ith) orbits_ics_icrf(i,i_sat)
+   !END DO
+   !WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) ' '
 ! orbitsmatrix_crf(1,3:8,i_sat), ' DR YR BR DC DS YC YS BC BS''(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))'
 END DO 
+IF (partials_velocity_cfg > 0) THEN
 WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
                                            &Partials [dx/dX dx/dY dx/dZ dx/dXD dx/dYD dx/dZD dY/dX dY/dY dY/dZ &
                                            &dY/dXD dY/dYD dY/dZD ... dx/dRAD1,dx/dRAD1,dx/dRAD3,dx/dRAD3 dx/dRAD4 &
                                            &... dx/dRADN ... dy/dRAD1,dx/dRAD2 ... dy/dRADN ... ]'   
-                                                       
+ELSE IF (partials_velocity_cfg == 0) THEN
+WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
+                                           &Partials [dx/dXo dx/dYo dx/dZo dx/dVxo dx/dVyo dx/dVzo &
+                                           &          dy/dXo dy/dYo dy/dZo dy/dVxo dy/dVyo dy/dVzo & 
+                                           &          dz/dXo dz/dYo dz/dZo dz/dVxo dz/dVyo dz/dVzo & 
+										   &          dx/dRAD1  dx/dRAD2  dx/dRAD3 .....  dx/dRADN &
+										   &          dy/dRAD1  dy/dRAD2  dy/dRAD3 .....  dy/dRADN &
+										   &          dz/dRAD1  dz/dRAD2  dz/dRAD3 .....  dz/dRADN ]' 
+END IF                                                       
+WRITE (UNIT=UNIT_IN,FMT= '(A13)' ,IOSTAT=ios_ith) 'End_of_Header'
 ! ----------------------------------------------------------------------
 ! Write data to file | Line by line	  
 ! ----------------------------------------------------------------------
@@ -161,9 +185,14 @@ DO i_epoch = 1 , Nepochs
 	
 ! Based on the format definition by fmt_wrt 
 !WRITE (UNIT=UNIT_IN,FMT=fmt_wrt,IOSTAT=ios_ith) PRN_array(i_sat),' ', orbitsmatrix_crf(i_epoch,:,i_sat)
-WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) PRN_array(i_sat),' ', orbitsmatrix_crf(i_epoch,1:8,i_sat), &
-                                            orbitsmatrix_trf(i_epoch,3:8,i_sat),orbitsmatrix_crf(i_epoch,9:NParam,i_sat)
-		 
+!WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) PRN_array(i_sat),' ', orbitsmatrix_crf(i_epoch,1:8,i_sat), &
+!                                            orbitsmatrix_trf(i_epoch,3:8,i_sat),orbitsmatrix_crf(i_epoch,9:NParam,i_sat)
+WRITE (UNIT=UNIT_IN,FMT='(A3,A1)',ADVANCE="no",IOSTAT=ios_ith) PRN_array(i_sat),' '
+WRITE (UNIT=UNIT_IN,FMT='(I9)',ADVANCE="no",IOSTAT=ios_ith)  INT(orbitsmatrix_crf(i_epoch,1,i_sat))
+WRITE (UNIT=UNIT_IN,FMT='(F25.12)',ADVANCE="no",IOSTAT=ios_ith) orbitsmatrix_crf(i_epoch,2,i_sat)
+WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) orbitsmatrix_crf(i_epoch,3:8,i_sat), orbitsmatrix_trf(i_epoch,3:8,i_sat), & 
+											orbitsmatrix_crf(i_epoch,9:NParam,i_sat)
+											
 IF (ios_ith /= 0) THEN
    PRINT *, "Error in writing to file: ", TRIM (filename)
    PRINT *, "WRITE IOSTAT=", ios_ith
