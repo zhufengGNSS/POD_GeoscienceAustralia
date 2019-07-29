@@ -128,9 +128,12 @@ fmt_wrt = '(A3,A1,F25.12,F25.9,3F25.4,3F25.9, A)'
 ! ----------------------------------------------------------------------
 WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    POD tabular ephemeris file: '
 WRITE (UNIT=UNIT_IN,FMT='(a,a)'            ,IOSTAT=ios_ith) '#INFO    Generated from: ',trim(pseudobs_orbit_filename_cfg)
-WRITE (UNIT=UNIT_IN,FMT='(a,f19.12,f13.6)' ,IOSTAT=ios_ith) '#INFO    Epoch initial conditions:   ',orbitsmatrix_crf(1,1:2,1)
-WRITE (UNIT=UNIT_IN,FMT='(a,f19.12,f13.6)' ,IOSTAT=ios_ith) '#INFO    Epoch Start:                ',orbitsmatrix_crf(1,1:2,1)
-WRITE (UNIT=UNIT_IN,FMT='(a,f19.12,f13.6)' ,IOSTAT=ios_ith) '#INFO    Epoch End:                  ',orbitsmatrix_crf(Nepochs,1:2,1)
+WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith)    '#INFO    Epoch initial conditions:   ', &
+                                                            INT(orbitsmatrix_crf(1,1,1)),orbitsmatrix_crf(1,2,1)
+WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith)    '#INFO    Epoch Start:                ', & 
+                                                            INT(orbitsmatrix_crf(1,1,1)),orbitsmatrix_crf(1,2,1) 
+WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith)    '#INFO    Epoch End:                  ', &
+                                                            INT(orbitsmatrix_crf(Nepochs,1,1)),orbitsmatrix_crf(Nepochs,2,1) 
 WRITE (UNIT=UNIT_IN,FMT='(a,i5)'           ,IOSTAT=ios_ith) '#INFO    Tabular interval (sec):     ',900
 WRITE (UNIT=UNIT_IN,FMT='(a,i5)'           ,IOSTAT=ios_ith) '#INFO    Number of Epochs:           ',Nepochs
 WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    Model information:           [TIME_SYS] [GRAV_MODEL]&
@@ -149,12 +152,8 @@ DO i_sat = 1 , Nsat
    !WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,1x,f14.4,f14.6,1x,15(f17.12,1x))',IOSTAT=ios_ith) '#IC_XYZ  ',PRN_array(i_sat),&
    !                                        &' [SVN] [BLK_TYP] ICRF ',orbits_ics_icrf(:,i_sat)   										   
    WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,1x)',ADVANCE="no",IOSTAT=ios_ith) '#IC_XYZ  ',PRN_array(i_sat),' [SVN] [BLK_TYP] ICRF '
-   WRITE (UNIT=UNIT_IN,FMT='(f14.4,f14.6)',ADVANCE="no",IOSTAT=ios_ith) orbits_ics_icrf(1,i_sat), orbits_ics_icrf(2,i_sat)
+   WRITE (UNIT=UNIT_IN,FMT='(I9,F25.10)',ADVANCE="no",IOSTAT=ios_ith) INT(orbits_ics_icrf(1,i_sat)), orbits_ics_icrf(2,i_sat)
    WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) orbits_ics_icrf(3:Norbits_ics_icrf,i_sat)
-   !DO i = 3 , Norbits_ics_icrf
-   !   WRITE (UNIT=UNIT_IN,FMT='(f27.12)',ADVANCE="no",IOSTAT=ios_ith) orbits_ics_icrf(i,i_sat)
-   !END DO
-   !WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) ' '
 ! orbitsmatrix_crf(1,3:8,i_sat), ' DR YR BR DC DS YC YS BC BS''(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))'
 END DO 
 IF (partials_velocity_cfg > 0) THEN
@@ -189,7 +188,7 @@ DO i_epoch = 1 , Nepochs
 !                                            orbitsmatrix_trf(i_epoch,3:8,i_sat),orbitsmatrix_crf(i_epoch,9:NParam,i_sat)
 WRITE (UNIT=UNIT_IN,FMT='(A3,A1)',ADVANCE="no",IOSTAT=ios_ith) PRN_array(i_sat),' '
 WRITE (UNIT=UNIT_IN,FMT='(I9)',ADVANCE="no",IOSTAT=ios_ith)  INT(orbitsmatrix_crf(i_epoch,1,i_sat))
-WRITE (UNIT=UNIT_IN,FMT='(F25.12)',ADVANCE="no",IOSTAT=ios_ith) orbitsmatrix_crf(i_epoch,2,i_sat)
+WRITE (UNIT=UNIT_IN,FMT='(F25.10)',ADVANCE="no",IOSTAT=ios_ith) orbitsmatrix_crf(i_epoch,2,i_sat)
 WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) orbitsmatrix_crf(i_epoch,3:8,i_sat), orbitsmatrix_trf(i_epoch,3:8,i_sat), & 
 											orbitsmatrix_crf(i_epoch,9:NParam,i_sat)
 											
