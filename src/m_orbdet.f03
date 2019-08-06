@@ -58,10 +58,11 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatri
 !			Geoscience Australia, CRC-SI
 ! Created:	20 April 2018
 !
-! Changes:  18-12-2018  Tzupang Tseng : enabled the function of the ECOM SRP estimation and added some conditions to judge which model
+! Changes:  18-12-2018  Tzupang Tseng : Enabled the function of the ECOM SRP estimation and added some conditions to judge which model
 !                                       is used to improve the GNSS orbit modelling (Currently the ECOM model is only estimated with full
 !                                       9 coefficients or 3 bias terms. The adjustable function has not been ready yet)
 !           21-02-2019  Tzupang Tseng : The adjustable function of the ECOM model has been activated.
+!           06-08-2019  Tzupang Tseng : Added a function to skip bad orbits with zero value in SP3 file
 !
 ! Last modified:
 ! 20 May 2019,	Dr. Thomas Papanikolaou
@@ -188,7 +189,18 @@ CALL prm_pseudobs (EQMfname)
 ! External Orbit comparison: Precise Orbit (sp3)
 !CALL prm_orbext (EQMfname)												
 ! ----------------------------------------------------------------------
-
+! Skip bad orbits with zero value in SP3 file
+CALL scan0orb
+! ----------------------------------------------------------------------
+!  Control of orbit integrator step during eclipse seasons 
+! ----------------------------------------------------------------------
+! Global variables via mdl_param.f90
+mjd = MJD_to
+r_sat(1:3) = SVEC_Zo(1:3)
+v_sat(1:3) = SVEC_Zo(4:6)
+CALL eclipse_integstep (EQMfname, VEQfname, mjd, r_sat, v_sat, integstep_flag, integstep_initial, integstep_reduced)
+! ----------------------------------------------------------------------
+!print *,"integstep_flag,integstep_initial, integstep_reduced", integstep_flag,integstep_initial, integstep_reduced 
 
 ! ----------------------------------------------------------------------
 ! Dynamic Orbit Determination 

@@ -57,6 +57,7 @@ SUBROUTINE orbext (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, s
 ! Created:	24 April 2018
 !
 ! Changes:      20-05-219  Tzupang Tseng: Output the orbital information for data analysis
+!               06-08-2019 Tzupang Tseng: Skip bad orbits with zero value in SP3 file
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -99,7 +100,8 @@ SUBROUTINE orbext (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, s
 ! External orbit: orbext_ICRF, orbext_ITRF, orbext_kepler
 CALL prm_orbext (EQMfname)												
 ! ----------------------------------------------------------------------
-
+! Skip bad orbits with zero value in SP3 file
+CALL scan0orbext
 ! ----------------------------------------------------------------------
 ! Orbit comparison statistics
 ! ICRF
