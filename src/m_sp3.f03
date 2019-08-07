@@ -238,6 +238,9 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
 				r(1) = r_x
 				r(2) = r_y
 				r(3) = r_z
+!                       IF (r(1) == 0.d0) CYCLE
+PRINT*,'SAT PRN = ', GNSSlet, PRN_i, 'orbsp3 =', r_x, r_y, r_z, 'number of epoch record', orb_i !orbsp3(orb_i , 3), orbsp3 (orb_i , 4), orbsp3 (orb_i , 5)
+                 
                 ! Unit conversion: Km to meters				
 				r = r * 1.0D3
 				! Write r 

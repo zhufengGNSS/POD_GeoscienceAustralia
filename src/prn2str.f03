@@ -9,11 +9,11 @@ SUBROUTINE prn2str (PRN_no, STR)
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - PRN_no:		ID for multi-GNSS constellations 
-!                          G:          GPS    < 100 
-!                          R: 100  < GLONASS  < 200 
-!                          E: 200  < GALILEO  < 300
-!                          C: 300  <   BDS    < 400
-!                          J: 400  <  QZSS    < 500
+!                          G:          GPS    < 50 
+!                          R:  50  < GLONASS  < 100 
+!                          E: 100  < GALILEO  < 150
+!                          C: 150  <   BDS    < 200
+!                          J: 200  <  QZSS    < 250
 ! 
 ! Output arguments:
 ! - STR:		
@@ -43,7 +43,7 @@ SUBROUTINE prn2str (PRN_no, STR)
 ! Shift PRN number for internally process
 ! ----------------------------------------------------------------------
 
-         IF (PRN_no <= 100) THEN
+         IF (PRN_no <= 50) THEN
             WRITE(STR(1:1),'(1A)') 'G'
             IF (PRN_no <= 9) THEN
                WRITE(STR(2:2),'(1A)') '0'
@@ -51,37 +51,37 @@ SUBROUTINE prn2str (PRN_no, STR)
             ELSE
                WRITE(STR(2:3),'(I2)') PRN_no
             END IF
-         ELSE IF (PRN_no < 200 .and. PRN_no > 100)THEN
+         ELSE IF (PRN_no < 100 .and. PRN_no > 50)THEN
             WRITE(STR(1:1),'(1A)') 'R'
+            IF (PRN_no-50 <= 9) THEN
+               WRITE(STR(2:2),'(1A)') '0'
+               WRITE(STR(3:3),'(I1)') PRN_no-50
+            ELSE
+               WRITE(STR(2:3),'(I2)') PRN_no-50
+            END IF
+         ELSE IF (PRN_no < 150 .and. PRN_no > 100)THEN
+            WRITE(STR(1:1),'(1A)') 'E'
             IF (PRN_no-100 <= 9) THEN
                WRITE(STR(2:2),'(1A)') '0'
                WRITE(STR(3:3),'(I1)') PRN_no-100
             ELSE
                WRITE(STR(2:3),'(I2)') PRN_no-100
             END IF
-         ELSE IF (PRN_no < 300 .and. PRN_no > 200)THEN
-            WRITE(STR(1:1),'(1A)') 'E'
+         ELSE IF (PRN_no < 200 .and. PRN_no > 150)THEN
+            WRITE(STR(1:1),'(1A)') 'C'
+            IF (PRN_no-150 <= 9) THEN
+               WRITE(STR(2:2),'(1A)') '0'
+               WRITE(STR(3:3),'(I1)') PRN_no-150
+            ELSE
+               WRITE(STR(2:3),'(I2)') PRN_no-150
+            END IF
+         ELSE IF (PRN_no < 250 .and. PRN_no > 200)THEN
+            WRITE(STR(1:1),'(1A)') 'J'
             IF (PRN_no-200 <= 9) THEN
                WRITE(STR(2:2),'(1A)') '0'
                WRITE(STR(3:3),'(I1)') PRN_no-200
             ELSE
                WRITE(STR(2:3),'(I2)') PRN_no-200
-            END IF
-         ELSE IF (PRN_no < 400 .and. PRN_no > 300)THEN
-            WRITE(STR(1:1),'(1A)') 'C'
-            IF (PRN_no-300 <= 9) THEN
-               WRITE(STR(2:2),'(1A)') '0'
-               WRITE(STR(3:3),'(I1)') PRN_no-300
-            ELSE
-               WRITE(STR(2:3),'(I2)') PRN_no-300
-            END IF
-         ELSE IF (PRN_no < 500 .and. PRN_no > 400)THEN
-            WRITE(STR(1:1),'(1A)') 'J'
-            IF (PRN_no-400 <= 9) THEN
-               WRITE(STR(2:2),'(1A)') '0'
-               WRITE(STR(3:3),'(I1)') PRN_no-400
-            ELSE
-               WRITE(STR(2:3),'(I2)') PRN_no-400
             END IF
          END IF         
 

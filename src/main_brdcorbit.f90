@@ -26,7 +26,7 @@ PROGRAM  main_brdcorbit
       IMPLICIT NONE
 
 !--------------------------------------------------------------------
-      INTEGER (KIND = 4) :: I, J, K, II, JJ, INEW
+      INTEGER (KIND = prec_int4) :: I, J, K, II, JJ, INEW
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
        
       !CHARACTER (LEN=100) :: INFILENAME, OUTFILENAME
@@ -38,8 +38,9 @@ PROGRAM  main_brdcorbit
       INTEGER (KIND = prec_int4) :: ISAT
       INTEGER (KIND = prec_int4) :: IYEAR4,MONTH,IDAY
       REAL (KIND = prec_d),DIMENSION(4)::IONALPHA, IONBETA
-      REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::EPH, CLK
 
+!      REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::EPH, CLK
+      REAL (KIND = prec_q) ::EPH(32,4000,220),CLK(32,4000,220)      
       REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::EPHNEW
       REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::EPHNEW2
       REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::ECEFPOS
@@ -50,11 +51,10 @@ PROGRAM  main_brdcorbit
       REAL (KIND = prec_d) :: DT, DA, DE, DI
       REAL (KIND = prec_d) :: DTGAL,XT, KKK
       
-      INTEGER (KIND = 4) :: MAXNSAT, MAXNPAR, MAXEPO
-      INTEGER (KIND = 4) :: sz1, sz2, sz3, IREC, NDT
-      INTEGER (KIND = 4) :: IG, IR, IE, IC, IJ, TOTG
-      INTEGER (KIND = 4) :: IGAL, IBDS, IQZSS
-      INTEGER (KIND = 4) :: MAXNGPS, MAXNGLN, MAXNGAL, MAXNBDS, MAXNQZSS
+      INTEGER (KIND = prec_int4) :: MAXNSAT, MAXNPAR, MAXEPO
+      INTEGER (KIND = prec_int4) :: sz1, sz2, sz3, IREC, NDT
+      INTEGER (KIND = prec_int4) :: IG, IR, IE, IC, IJ, TOTG
+      INTEGER (KIND = prec_int4) :: IGAL, IBDS, IQZSS
 !------------------------------------------------------------------
       REAL (KIND = prec_d) :: DELT, DELT2, PI, DWEEK
       REAL (KIND = prec_d) :: XM021, DM0
@@ -65,8 +65,8 @@ PROGRAM  main_brdcorbit
       REAL (KIND = prec_d)       :: GPS_day, GPS_wsec
       INTEGER (KIND = prec_int8) :: GPS_week, GPSweek_mod1024
 
-      INTEGER (KIND = 4) :: SAMPLE
-      INTEGER (KIND = prec_d),DIMENSION(:),ALLOCATABLE :: IPRN
+      INTEGER (KIND = prec_int4) :: SAMPLE
+      INTEGER (KIND = prec_d) :: IPRN(220),ISTR(220)
       INTEGER (KIND = prec_d),DIMENSION(:,:),ALLOCATABLE :: IBAD
 ! ----------------------------------------------------------------
 PI = 4*ATAN(1.D0)        
@@ -77,23 +77,16 @@ CALL cpu_time (CPU_t0)
 
 ! LOCAL VARIABLES
 ! ---------------
-MAXNGPS = 50
-MAXNGLN = 30
-MAXNGAL = 50
-MAXNBDS = 50
-MAXNQZSS = 10
-
-MAXNSAT = 500 ! MAXIMUM NUMBER OF SATELLITE RECORD IN BRDC ORBIT
+MAXNSAT = 220 ! MAXIMUM NUMBER OF SATELLITE RECORD IN BRDC ORBIT
 MAXNPAR = 32  ! MAXIMUM NUMBER OF BRDC ORBI PARAMETERS
 IREC = 2      ! SAMPLING RATE OF GPS BROADCAST ORBIT
-MAXEPO = MAXNSAT* 24/IREC ! MAXIMUM NUMBER OF EPOCH
+MAXEPO = 4000 ! MAXIMUM NUMBER OF EPOCHS WITHIN A FILE
 SAMPLE = 900    ! SAMPLING RATE FOR SP3 OUTPUT 
-
-ALLOCATE(CLK(MAXNPAR,MAXEPO,MAXNSAT), STAT = AllocateStatus)
-ALLOCATE(EPH(MAXNPAR,MAXEPO,MAXNSAT), STAT = AllocateStatus)
+!ALLOCATE(CLK(MAXNPAR,MAXEPO,MAXNSAT), STAT = AllocateStatus)
+!ALLOCATE(EPH(MAXNPAR,MAXEPO,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(EPHNEW(MAXNPAR,MAXEPO,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(EPHNEW2(MAXNPAR,MAXEPO,MAXNSAT), STAT = AllocateStatus)
-ALLOCATE(IPRN(MAXNSAT), STAT = AllocateStatus)
+!ALLOCATE(IPRN(MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(IBAD(MAXEPO,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(ECEFPOS(86400/SAMPLE,3,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(NEWEPOCH(86400/SAMPLE,MAXNSAT), STAT = AllocateStatus)
@@ -102,10 +95,8 @@ ALLOCATE(NEWEPOCH2(86400/SAMPLE,MAXNSAT), STAT = AllocateStatus)
 EPHNEW = 0.d0
 ECEFPOS = 0.d0
 NEWEPOCH= 0.d0
-!CLK = 0.d0
-!EPH = 0.d0
 IPRN= 0
-
+ISTR= 0
 CALL brdc_cmdline
 INPUT = TRIM(INFILENAME)
 UNIT_IN1 = 66
@@ -145,8 +136,6 @@ CALL iau_CAL2JD ( IYEAR4, MONTH, IDAY, MJD0, MJD_ti, J )
 ! ----------------------------
 CALL time_GPSweek (MJD_ti , GPS_week, GPS_wsec, GPSweek_mod1024)
 
-
-
 ! Assign a new array for each satellite with the epoch recounting (K value)
 ! and Detect the bad records in TOE by using an index of IBAD
 ! -------------------------------------------------------------------------
@@ -158,8 +147,8 @@ JJ = 0
 K = 0
 DO I=1, MAXNSAT
 
-IF (I < 100 .OR. I < 300 .AND. I > 200 .OR. &
-    I < 400 .AND. I > 300 .OR. I > 400) THEN
+IF (I < 50 .OR. I < 150 .AND. I > 100 .OR. &
+    I < 200 .AND. I > 150 .OR. I > 200) THEN
 
     DO  J =1,MAXEPO
         IF (EPH(3,J,I) .GT. 0.d0) THEN 
@@ -177,7 +166,7 @@ IF (I < 100 .OR. I < 300 .AND. I > 200 .OR. &
                DT =  EPHNEW(2,K,I)-EPHNEW(2,K-1,I)
                IF (DT .LT. 0.d0) EXIT
                ! For GPS and BDS case
-               IF (I < 100 .OR.  I < 400 .AND. I > 300) THEN
+               IF (I < 50 .OR.  I < 200 .AND. I > 150) THEN
                   IF (DT .LT. 1800.d0) THEN
 !                  PRINT*,'PREVIOUS EPOCH =',EPHNEW(2,K-1,I)
 !                  PRINT*,'CURRENT  EPOCH =',EPHNEW(2,K,I)
@@ -188,7 +177,7 @@ IF (I < 100 .OR. I < 300 .AND. I > 200 .OR. &
                   IBAD(K,I) = 0
                   END IF
                ! For Galileo case
-               ELSE IF (I < 300 .AND. I > 200 ) THEN
+               ELSE IF (I < 150 .AND. I > 100 ) THEN
                   IF (DT .LT. 600.d0) THEN
 !                  PRINT*,'PREVIOUS EPOCH =',EPHNEW(2,K-1,I)
 !                  PRINT*,'CURRENT  EPOCH =',EPHNEW(2,K,I)
@@ -199,7 +188,7 @@ IF (I < 100 .OR. I < 300 .AND. I > 200 .OR. &
                   IBAD(K,I) = 0
                   END IF
               ! For QZSS case
-               ELSE IF (I > 400 ) THEN
+               ELSE IF (I > 200 ) THEN
                   IF (DT .LT. 800.d0) THEN
 !                  PRINT*,'PREVIOUS EPOCH =',EPHNEW(2,K-1,I)
 !                  PRINT*,'CURRENT  EPOCH =',EPHNEW(2,K,I)
@@ -246,26 +235,31 @@ IJ = 0 ! QZSS
 ! Count how many satellites are recorded
 ! --------------------------------------
 DO I = 1,MAXNSAT 
-   IF (I <= 100 .AND. EPHNEW(3,1,I) > 0.d0) THEN
+   IF (I < 50 .AND. EPHNEW(3,1,I) > 0.d0) THEN
         IG = IG + 1 
-        IPRN(IG) = I
-!print*,'GPS PRN =', IG, IPRN(IG)
-   ELSE IF (I <= 200 .AND. I > 100 .AND. EPHNEW(6,1,I) > 0.d0) THEN
+        IPRN(I) = I ! used for SP3 orbital information
+        ISTR(IG)= I ! used for SP3 header information
+!print*,'GPS PRN =', IG, IPRN(I), ISTR(IG)
+   ELSE IF (I < 100 .AND. I > 50 .AND. EPHNEW(6,1,I) > 0.d0) THEN
        IR = IR + 1
-       IPRN(IR+100) = I 
-!print*,'GLONASS PRN =', IR, IPRN(IR+100)
-   ELSE IF (I <= 300 .AND. I > 200 .AND. EPHNEW(3,1,I) > 0.d0) THEN
+       IPRN(I) = I
+       ISTR(IR+50)= I 
+!print*,'GLONASS PRN =', IR, IPRN(I), ISTR(IR+50)
+   ELSE IF (I < 150 .AND. I > 100 .AND. EPHNEW(3,1,I) > 0.d0) THEN
        IE = IE + 1
-       IPRN(IE+200) = I 
-!print*,'GALILEO PRN =', IE, IPRN(IE+200)
-   ELSE IF (I <= 400 .AND. I > 300 .AND. EPHNEW(3,1,I) > 0.d0) THEN
+       IPRN(I) = I
+       ISTR(IE+100)= I 
+!print*,'GALILEO PRN =', IE, IPRN(I), ISTR(IE+100)
+   ELSE IF (I < 200 .AND. I > 150 .AND. EPHNEW(3,1,I) > 0.d0) THEN
        IC = IC + 1
-       IPRN(IC+300) = I 
-!print*,'BDS PRN =', IC, IPRN(IC+300)
-   ELSE IF (I <= 500 .AND. I > 400 .AND. EPHNEW(3,1,I) > 0.d0) THEN
+       IPRN(I) = I
+       ISTR(IC+150)= I 
+!print*,'BDS PRN =', IC, IPRN(I), ISTR(IC+150)
+   ELSE IF (I < 250 .AND. I > 200 .AND. EPHNEW(3,1,I) > 0.d0) THEN
        IJ = IJ + 1
-       IPRN(IJ+400) = I
-!print*,'OZSS PRN =', IJ, IPRN(IJ+400)
+       IPRN(I) = I
+       ISTR(IJ+200)= I
+!print*,'OZSS PRN =', IJ, IPRN(I), ISTR(IJ+200)
    END IF
 END DO
 
@@ -275,7 +269,7 @@ END DO
 IF (SATTYPE == 'G')THEN 
 TOTG = IG
 DO I =1, MAXNSAT
-   IF (I > 100) THEN
+   IF (I > 50) THEN
        EPHNEW(:,:,I) = 0.d0
        IPRN(I) = 0
    END IF
@@ -284,7 +278,7 @@ END DO
 ELSE IF (SATTYPE == 'R') THEN 
 TOTG = IR
 DO I =1, MAXNSAT
-   IF (I <= 100 .OR. I > 200) THEN
+   IF (I <= 50 .OR. I > 100) THEN
        EPHNEW(:,:,I) = 0.d0
        IPRN(I) = 0
    END IF
@@ -293,7 +287,7 @@ END DO
 ELSE IF (SATTYPE == 'E') THEN 
 TOTG = IE
 DO I =1, MAXNSAT
-   IF (I <= 200 .OR. I > 300) THEN
+   IF (I <= 100 .OR. I > 150) THEN
        EPHNEW(:,:,I) = 0.d0
        IPRN(I) = 0
    END IF
@@ -302,7 +296,7 @@ END DO
 ELSE IF (SATTYPE == 'C') THEN 
 TOTG = IC
 DO I =1, MAXNSAT
-   IF (I <= 300 .OR. I > 400) THEN
+   IF (I <= 150 .OR. I > 200) THEN
        EPHNEW(:,:,I) = 0.d0
        IPRN(I) = 0
    END IF
@@ -311,7 +305,7 @@ END DO
 ELSE IF (SATTYPE == 'J') THEN 
 TOTG = IJ
 DO I =1, MAXNSAT
-   IF (I <= 400 ) THEN 
+   IF (I <= 200 ) THEN 
        EPHNEW(:,:,I) = 0.d0
        IPRN(I) = 0
    END IF
@@ -332,7 +326,7 @@ IGAL = 0
 IBDS = 0
 IQZSS = 0
 KKK = 0
-IF (I < 100 .AND. EPHNEW(3,1,I) > 0.d0 ) THEN ! GNSS/GPS sampling rate: 2 hour
+IF (I < 50 .AND. EPHNEW(3,1,I) > 0.d0 ) THEN ! GPS/GNSS sampling rate: 2 hour
    DO K = 1, 15
          IF (IBAD(K,I) /= 1 )THEN
             INEW = INEW + 1
@@ -343,8 +337,8 @@ IF (I < 100 .AND. EPHNEW(3,1,I) > 0.d0 ) THEN ! GNSS/GPS sampling rate: 2 hour
                DELT2 = SAMPLE*(II-1) + GPS_wsec
                NEWEPOCH2(JJ,I) = DELT2
                CALL brdc2ecef(DELT2,EPHNEW2(1:20,INEW,I),ECEFPOS(JJ,1:3,I))
-!print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
-!       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
 
             END DO
            
@@ -352,15 +346,27 @@ IF (I < 100 .AND. EPHNEW(3,1,I) > 0.d0 ) THEN ! GNSS/GPS sampling rate: 2 hour
                  DT = EPHNEW2(2,INEW,I) - GPS_wsec 
                  IF (DT .LT. 0.d0) EXIT
                  IF (NINT(DT) - NINT(KKK) > 7200.d0) THEN
-!                 PRINT*,'ADD POINTS FOR INTERPOLATION'
+                 PRINT*,'MISSING EPOCHS AND INVALID ZONES'
                  NDT =  (NINT(DT) - NINT(KKK))/SAMPLE
-                 DO II=1,NDT-8
+                 PRINT*,' NDT = ', NDT
+                 !SSS = NDT/8-(NDT/8-1)
+                 DO II=1, NDT-16 ! Identify the invalid zone by remvoing valid
+                                 ! zones from the previous and current reference epoch
                  JJ = JJ + 1
-                 DELT2 = SAMPLE*(II-1) + NINT(KKK) + GPS_wsec + 7200 
+                 DELT2 = SAMPLE*(II-1) + NINT(KKK)+ GPS_wsec + 7200
+                 NEWEPOCH2(JJ,I) = DELT2
+                 ECEFPOS(JJ,1:3,I) = 0.d0
+print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE= NO REFERENCE EPOCH        ', &
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+                 END DO      
+           
+                 DO II=1,8!NDT-8
+                 JJ = JJ + 1
+                 DELT2 = SAMPLE*(II-1) + NINT(KKK)+ GPS_wsec + 7200*(NDT/8-1) 
                  NEWEPOCH2(JJ,I) = DELT2
                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,INEW,I),ECEFPOS(JJ,1:3,I))
-!print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
-!       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
 
                  END DO
                  END IF
@@ -372,8 +378,8 @@ IF (I < 100 .AND. EPHNEW(3,1,I) > 0.d0 ) THEN ! GNSS/GPS sampling rate: 2 hour
                IF (DELT2 > EPHNEW2(2,1,I)+86400-900 ) EXIT
                NEWEPOCH2(JJ,I) = DELT2
                CALL brdc2ecef(DELT2,EPHNEW2(1:20,INEW,I),ECEFPOS(JJ,1:3,I))
-!print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
-!       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
 
             END DO
          
@@ -381,7 +387,7 @@ IF (I < 100 .AND. EPHNEW(3,1,I) > 0.d0 ) THEN ! GNSS/GPS sampling rate: 2 hour
          END IF
    END DO
 
-ELSE IF (I < 300 .AND. I >= 200 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! GALILEO sampling rate: 10 minutes
+ELSE IF (I < 150 .AND. I > 100 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! GALILEO sampling rate: 10 minutes
 
    DO K = 1, 150
          IF (IBAD(K,I) /= 1 )THEN
@@ -389,62 +395,65 @@ ELSE IF (I < 300 .AND. I >= 200 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! GALILEO sampl
             EPHNEW2(1:20,IGAL,I) = EPHNEW(1:20,K,I)
         
             IF (IGAL == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
-               DO II=1,8
+               DO II=1,2!8
                   JJ = JJ + 1
                   DELT2 = SAMPLE*(II-1) + GPS_wsec
                   NEWEPOCH2(JJ,I) = DELT2
                   CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),ECEFPOS(JJ,1:3,I))
-!print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
-!       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
 
                END DO
             ELSE IF (IGAL > 1 .AND. EPHNEW2(2,IGAL,I)-EPHNEW2(2,IGAL-1,I) == 600.d0 &
-                     .AND.  MOD(EPHNEW2(2,IGAL,I),7200.d0) == 0) THEN
+                     .AND.  MOD(EPHNEW2(2,IGAL,I),1800.d0) == 0) THEN !.AND.  MOD(EPHNEW2(2,IGAL,I),7200.d0) == 0) THEN
                DT = EPHNEW2(2,IGAL,I) - GPS_wsec 
 !PRINT*,'DT =', NINT(DT), NINT(KKK), IGAL
-               IF (NINT(DT)-NINT(KKK) > 7200.d0) THEN
-!               print*,'ADD POINTS FOR INTERPOLATION' 
+               IF (NINT(DT)-NINT(KKK) > 1800.d0)THEN!7200.d0) THEN
+               !print*,'ADD POINTS FOR INTERPOLATION', (NINT(DT)-NINT(KKK))/SAMPLE - 2,'POINTS'
+               print*,'MISSING EPOCHS AND INVALID ZONES'
                NDT =  (NINT(DT) - NINT(KKK))/SAMPLE
-                       DO II = 1, NDT-8
+                       DO II = 1, NDT-2 !NDT-8
                           JJ = JJ + 1
-                       DELT2 = SAMPLE*(II-1) + NINT(KKK) + GPS_wsec + 7200  
+                       DELT2 = SAMPLE*(II-1) + NINT(KKK) + GPS_wsec + 1800 !7200  
                        NEWEPOCH2(JJ,I) = DELT2
-                       CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),ECEFPOS(JJ,1:3,I))
-!print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
-!       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+                       ECEFPOS(JJ,1:3,I) = 0.d0
 
-                       END DO
+!                       CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),ECEFPOS(JJ,1:3,I))
+print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+
+                      END DO
                END IF
                KKK = DT
-               DO II = 1, 8 
+               DO II = 1, 2!8 
                   JJ = JJ + 1
                   DELT2 = SAMPLE*(II-1) +  NINT(DT) + GPS_wsec 
                   NEWEPOCH2(JJ,I) = DELT2
                   CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),ECEFPOS(JJ,1:3,I))
-!print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
-!       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
 
                END DO
-            ELSE IF (EPHNEW2(2,IGAL,I) >= 79200.d0 + GPS_wsec ) THEN
-               IF (JJ < 96) THEN       
-               DO II = 1, 8
-                  JJ = JJ + 1
-                  DELT2 = SAMPLE*(II-1) +  79200.d0 + GPS_wsec
-                  NEWEPOCH2(JJ,I) = DELT2
-                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),ECEFPOS(JJ,1:3,I))
+!            ELSE IF (EPHNEW2(2,IGAL,I) >= 79200.d0 + GPS_wsec ) THEN
+!               IF (JJ < 96) THEN       
+!               DO II = 1, 8
+!                  JJ = JJ + 1
+!                  DELT2 = SAMPLE*(II-1) +  79200.d0 + GPS_wsec
+!                  NEWEPOCH2(JJ,I) = DELT2
+!                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),ECEFPOS(JJ,1:3,I))
 !print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
 !       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
                 
-               END DO
-               ELSE
-               EXIT 
-               END IF
+!               END DO
+!               ELSE
+!               EXIT 
+!               END IF
 
             END IF 
          END IF
    END DO
 
-ELSE IF (I < 400 .AND. I >= 300 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! BDS sampling rate: 1 hour
+ELSE IF (I < 200 .AND. I > 150 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! BDS sampling rate: 1 hour
 
    DO K = 1, 24
          IF (IBAD(K,I) /= 1 )THEN
@@ -491,7 +500,7 @@ ELSE IF (I < 400 .AND. I >= 300 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! BDS sampling 
          END IF
    END DO
 
-ELSE IF (I >= 400 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! QZSS sampling rate: 15 minutes
+ELSE IF (I > 200 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! QZSS sampling rate: 15 minutes
 
    DO K = 1, 100
          IF (IBAD(K,I) /= 1 )THEN
@@ -541,7 +550,7 @@ ELSE IF (I >= 400 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! QZSS sampling rate: 15 minu
          END IF
    END DO
 
-END IF ! GNSS/GPS
+END IF ! GPS/GNSS
   
 INEW = 0
 JJ = 0
@@ -550,21 +559,12 @@ END DO
 
 ! WRITE THE ECEF POSITIONS IN A SP3 FORMAT
 ! ----------------------------------------
-CALL write_brd2sp3 (IPRN,TOTG,IG,IR,IE,IC,IJ,SATTYPE, SAMPLE,IYEAR4,MONTH,IDAY,NEWEPOCH2, ECEFPOS, OUTPUT, 0)
+CALL write_brd2sp3 (ISTR,IPRN,TOTG,IG,IR,IE,IC,IJ,SATTYPE, SAMPLE,IYEAR4,MONTH,IDAY,NEWEPOCH2, ECEFPOS, OUTPUT, 0)
 
 
 ! SATELLITE CLOCK CORRRECTION (TO BE PROCESSED)
 ! ----------------------------------
 
-DEALLOCATE(EPHNEW,  STAT = DeAllocateStatus)
-DEALLOCATE(EPHNEW2, STAT = DeAllocateStatus)
-DEALLOCATE(CLK, STAT = DeAllocateStatus)
-DEALLOCATE(IPRN, STAT = DeAllocateStatus)
-DEALLOCATE(IBAD, STAT = DeAllocateStatus)
-DEALLOCATE(ECEFPOS,  STAT = DeAllocateStatus)
-DEALLOCATE(NEWEPOCH, STAT = DeAllocateStatus)
-DEALLOCATE(NEWEPOCH2, STAT = DeAllocateStatus)
-DEALLOCATE(EPH, STAT = DeAllocateStatus)
 
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0

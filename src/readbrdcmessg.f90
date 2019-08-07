@@ -42,7 +42,7 @@ SUBROUTINE  readbrdcmessg(UNIT_IN,VERSION,MAXNSAT,MAXNPAR,MAXEPO, &
       INTEGER (KIND = prec_int4),INTENT(IN) :: MAXNSAT, MAXNPAR,MAXEPO
       INTEGER (KIND = prec_int4),INTENT(OUT) :: IYEAR4,MONTH,IDAY
       INTEGER (KIND = prec_int4),INTENT(OUT) :: ISAT
-      REAL (KIND = prec_q),INTENT(OUT) :: EPH(MAXNPAR,MAXEPO,MAXNSAT),CLK(MAXNPAR,MAXEPO,MAXNSAT)
+      REAL (KIND = prec_q),INTENT(OUT) ::EPH(MAXNPAR,MAXEPO,MAXNSAT),CLK(MAXNPAR,MAXEPO,MAXNSAT)
       REAL (KIND = prec_q) :: EPHDAT(MAXNPAR)
       REAL (KIND = prec_q) :: EPHV3(MAXNPAR),CLKV3(MAXNPAR)
 
@@ -100,7 +100,7 @@ READ (UNIT=UNIT_IN,FMT=FORMAT1,IOSTAT=IOS_LINE) line_ith
        print*,'END OF BROADCAST ORBIT FILE'
        EXIT
    ELSE
-!      print*,line_ith
+     ! print*,line_ith
    END IF
      ! -----------------------
 
@@ -129,7 +129,6 @@ ELSE IF(VERSION.EQ.3) THEN
 READ(line_ith,'(A1,I2,I5,5I3,3D19.12)') cSvn,iSvn2,IYEAR,MONTH,IDAY,IHOUR,&
                                      MINUTE,iSec,(EPHDAT(K),K=2,4)
 IEPO = IEPO + 1
-!print*,'IEPO =', IEPO
 IYEAR4 = IYEAR
 
         ! Convert the calender time to MJD time system
@@ -142,16 +141,16 @@ IYEAR4 = IYEAR
            DTT = TOC - T1
            IF (DTT == 0.d0) THEN
            IEPO = IEPO - 1
-!           PRINT*, 'SATELLITE PRN =',TRIM(cSvn),iSvn2 
-!           PRINT*, 'THE EPOCH NUMBER IS ASSIGNED TO THE PREVIOUS ONE : IEPO =', IEPO
+           !PRINT*, 'SATELLITE PRN =',TRIM(cSvn),iSvn2 
+           !PRINT*, 'THE EPOCH NUMBER IS ASSIGNED TO THE PREVIOUS ONE : IEPO =', IEPO
            END IF
         ! -----------------------------------------------------------------
 
 !IF (cSvn == 'R') EXIT
 IF (cSvn == 'S') EXIT ! exclude the SBAS satellites
 ! Convert the cSvn to the ACS internal prn
-         CALL prn_shift (cSvn, iSvn2, ISAT)
-!PRINT*,'SAT PRN =',cSvn,iSvn2,'==>','ACS/PRN',ISAT
+         CALL prn_shift_brdc (cSvn, iSvn2, ISAT)
+!PRINT*,'SAT PRN =',cSvn,iSvn2,'==>','ACS/PRN',ISAT, 'IEPO =', IEPO
 
 ELSE
 PRINT*,'THE RINEX VERSION OF BROADCAST EPHEMERIS CANNOT BE RECOGNIZED!'
@@ -159,8 +158,8 @@ END IF
 T1 = TOC
 
 
-IF (ISAT < 100 .OR.  ISAT > 200 .AND. ISAT < 300 .OR. & 
-    ISAT > 300 .AND. ISAT < 400 .OR.  ISAT > 400) THEN
+IF (ISAT < 50 .OR.  ISAT > 100 .AND. ISAT < 150 .OR. & 
+    ISAT > 150 .AND. ISAT < 200 .OR.  ISAT > 200) THEN
 ! Convert MJD to the GPS week
     CALL time_GPSweek2 (TOC , GPS_week, EPHDAT(1), GPSweek_mod1024, GPS_day)
 !print*,'GPS_week=, GPS_day=',GPS_week,GPS_day
@@ -168,7 +167,7 @@ IF (ISAT < 100 .OR.  ISAT > 200 .AND. ISAT < 300 .OR. &
 
      DO  I=5,N2,4
      READ (UNIT=UNIT_IN,FMT=FORMAT1,IOSTAT=IOS_LINE) line_ith
-!     print*,line_ith
+     !print*,line_ith
 
      IF (VERSION == 2) READ(line_ith,'(3X,4D19.12)') (EPHDAT(K),K=I,I+3)
      IF (VERSION == 3) READ(line_ith,'(4X,4D19.12)') (EPHDAT(K),K=I,I+3)
@@ -183,7 +182,7 @@ IF (ISAT < 100 .OR.  ISAT > 200 .AND. ISAT < 300 .OR. &
      CLK(I,IEPO,ISAT)=CLKV3(I)
      END DO
 
-ELSE IF (ISAT > 100 .AND. ISAT < 200 )THEN
+ELSE IF (ISAT > 50 .AND. ISAT < 100 )THEN
      CALL time_GPSweek2 (TOC , GPS_week, EPHDAT(1), GPSweek_mod1024, GPS_day)
      !print*,'GPS_week=, GPS_day=',GPS_week,GPS_day
 !     print*,'EPHDAT(1-4) =',EPHDAT(1),EPHDAT(2),EPHDAT(3),EPHDAT(4)

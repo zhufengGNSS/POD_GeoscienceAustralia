@@ -19,7 +19,7 @@ MODULE m_write_brd2sp3
 Contains
 
 
-SUBROUTINE write_brd2sp3 (IPRN,IGNSS,IG,IR,IE,IC,IJ,SATTYPE,SAMPLE,IY,IM,ID,NEWEPOCH,ORBmatrix,sp3_fname,sat_vel)
+SUBROUTINE write_brd2sp3 (ISTR,IPRN,IGNSS,IG,IR,IE,IC,IJ,SATTYPE,SAMPLE,IY,IM,ID,NEWEPOCH,ORBmatrix,sp3_fname,sat_vel)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: write_brd2sp3 
@@ -28,7 +28,10 @@ SUBROUTINE write_brd2sp3 (IPRN,IGNSS,IG,IR,IE,IC,IJ,SATTYPE,SAMPLE,IY,IM,ID,NEWE
 !  Write orbit sp3 format header 
 ! ----------------------------------------------------------------------
 ! Input arguments:
-! - IPRN     :       Array containing the processed satellites 
+! - ISTR     :       Array containing the processed satellites only used for
+!                    header information
+! - IPRN     :       Array containing the processed satellites only used for
+!                    orbital information
 ! - IGNSS    :       Number of satellites in a specific constellation
 ! - IG,IR,IE,IC,IJ:  Number of each satellite constellation (G:GPS, R:GLONASS,
 !                                                            E:GALILEO, C:BDS, J:QZSS)
@@ -70,7 +73,7 @@ SUBROUTINE write_brd2sp3 (IPRN,IGNSS,IG,IR,IE,IC,IJ,SATTYPE,SAMPLE,IY,IM,ID,NEWE
       INTEGER (KIND = prec_int4),INTENT(IN) ::IY, IM, ID
       INTEGER (KIND = 4), INTENT(IN) :: SAMPLE
       INTEGER (KIND = 4), INTENT(IN) :: IGNSS,IG,IR,IE,IC,IJ
-      INTEGER (KIND = prec_d),DIMENSION(:),ALLOCATABLE :: IPRN
+      INTEGER (KIND = prec_d) :: IPRN(220),ISTR(220)
 ! OUT
 ! ----------------------------------------------------------------------
 
@@ -189,6 +192,7 @@ IF (SATTYPE == 'J') Nsat = IJ
 IF (SATTYPE == 'A') Nsat = IGNSS
 
 
+!PRINT*,'sz3 =', sz3, 'Nepochs =', Nepochs
 ! ----------------------------------------------------------------------
 ! Writing satellite velocity vector (optional)
 ! ----------------------------------------------------------------------
@@ -284,23 +288,23 @@ Do j17 = 1 , 17
        IF (SATTYPE == 'G') THEN
        i_sat = i_sat
        ELSE IF (SATTYPE == 'R') THEN
-       i_sat = i_sat + 100
+       i_sat = i_sat + 50
        ELSE IF (SATTYPE == 'E') THEN 
-       i_sat = i_sat + 200
+       i_sat = i_sat + 100
        ELSE IF (SATTYPE == 'C') THEN
-       i_sat = i_sat + 300
+       i_sat = i_sat + 150
        ELSE IF (SATTYPE == 'J') THEN
-       i_sat = i_sat + 400
+       i_sat = i_sat + 200
        ELSE IF (SATTYPE == 'A') THEN
-       IF(i_sat <= IG) i_sat = i_sat
-!      IF(i_sat <= IG+IR .AND. i_sat > IG) i_sat = i_sat + 100
-       IF(i_sat <= IG+IE .AND. i_sat > IG) i_sat = i_sat-(IG) + 200
-       IF(i_sat <= IG+IE+IC .AND. i_sat > IG+IE) i_sat = i_sat-(IG+IE) + 300
-       IF(i_sat <= IG+IE+IC+IJ .AND. i_sat > IG+IE+IC) i_sat = i_sat-(IG+IE+IC) + 400
+       IF(i_sat <= IG) i_sat = i_sat ! GPS
+!      IF(i_sat <= IG+IR .AND. i_sat > IG) i_sat = i_sat + 50 ! GLONASS
+       IF(i_sat <= IG+IE .AND. i_sat > IG) i_sat = i_sat-(IG) + 100 ! GALILEO
+       IF(i_sat <= IG+IE+IC .AND. i_sat > IG+IE) i_sat = i_sat-(IG+IE) + 150 ! BDS
+       IF(i_sat <= IG+IE+IC+IJ .AND. i_sat > IG+IE+IC) i_sat = i_sat-(IG+IE+IC) + 200 ! QZSS
        END IF
 	
-       CALL prn2str (IPRN(i_sat), PRN_write)
-!      print*,'i_sat=, PRN_write=',i_sat, PRN_write
+       CALL prn2str (ISTR(i_sat), PRN_write)
+!       print*,'i_sat=, PRN_write=',IPRN(i_sat),ISTR(i_sat),i_sat, PRN_write
 		!WRITE(wrt_line,FMT=*,IOSTAT=ios_ith) ADJUSTL(TRIM(wrt_line)),PRN_write
 	ELSE IF (i_sat > Nsat) THEN
 		PRN_write = '  0'
@@ -399,10 +403,10 @@ hour_ti = 0
 
 ! Process the selected GNSS constellation type
 IF (SATTYPE == 'G') ICON = 1
-IF (SATTYPE == 'R') ICON = 101
-IF (SATTYPE == 'E') ICON = 201
-IF (SATTYPE == 'C') ICON = 301
-IF (SATTYPE == 'J') ICON = 401
+IF (SATTYPE == 'R') ICON = 51
+IF (SATTYPE == 'E') ICON = 101
+IF (SATTYPE == 'C') ICON = 151
+IF (SATTYPE == 'J') ICON = 201
 IF (SATTYPE == 'A') ICON = 1
 
 
@@ -412,21 +416,52 @@ IF (SATTYPE == 'A') ICON = 1
 ! Epochs loop
 DO i_write = 1 , Nepochs       
 
+Sec_00 = 900*(i_write-1)
+
+year  = IY
+month = IM
+day   = ID
+!print*, 'year, month, day, Sec_00 =', year, month, day, Sec_00
+if (1<0) then
+hour_ti = INT(FD * 24.0D0)
+min_ti  = INT(FD * 24.0D0 * 60.0D0)
+sec_ti  = (FD * 24.0D0 * 60.0D0 * 60.0D0)
+else
+hour_ti = INT(Sec_00 / (60.0D0 * 60.0D0))
+min_ti  = INT(Sec_00/60.0D0 - hour_ti*60.0D0)
+sec_ti  = (Sec_00 - hour_ti*3600.0D0 - min_ti*60.D0)
+end if
+!print*,'time line=',year, month, day, Sec_00, hour_ti, min_ti,sec_ti
+!print *,"sec_ti print", sec_ti
+!WRITE (*,FMT='(A6,F17.6)'),"sec_ti", sec_ti
+!WRITE (*,FMT='(A6,F17.6)'),"sec_ti", sec_ti
+
+! Epoch line
+!*  2010 12 25  0  0  0.0000
+!READ (line_ith, * , IOSTAT=ios_data) char3, year, month, day, hr, minute, sec
+!WRITE (UNIT=UNIT_IN,FMT=*,IOSTAT=ios_ith) '*  ', year,' ', month,' ',day,'
+!',hour_ti,' ',min_ti,' ',sec_ti,' '
+!WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year, month, day,
+!hour_ti, min_ti, sec_ti
+WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year,' ', month,' ',day,' ', hour_ti,' ', min_ti,' ', sec_ti
+
 ! Satellites loop
 !DO i_sat = 1 , Nsat       
 DO i_sat = 1 , sz3
-     
-     IF(i_sat < 50 .OR. i_sat < 250 .AND.  i_sat > 200 .OR. &
-        i_sat < 350 .AND.  i_sat > 300 .OR. i_sat > 400 )THEN                ! GNSS BRDC 
-     IF( ORBmatrix(i_write,1, i_sat) /= 0.d0)THEN                            ! GNSS BRDC
 
-Sec_00 = NEWEPOCH(i_write,i_sat) -  NEWEPOCH(1,i_sat)
-!print*,'CURRENT EPOCH IN GPS WEEK =', NEWEPOCH(i_write,i_sat), 'REFERENCE EPOCH =', NEWEPOCH(1,i_sat),&
-!       'ISAT = ', i_sat, 'EXPECTED EPOCH DIFF =', 900*(i_write-1), 'REAL SEC_00=',SEC_00, 'POS =',ORBmatrix(i_write,1, i_sat)
-IF (Sec_00 .LT. 0.d0) EXIT
+IF(i_sat == IPRN(i_sat))THEN                  ! GNSS BRDC          
+
+!Sec_00 = NEWEPOCH(i_write,i_sat) -  NEWEPOCH(1,i_sat)
+!Sec_00 = 900*(i_write-1)
+IF (ORBmatrix(i_write,1, i_sat) /= 0.d0 )THEN
+print*,'CURRENT EPOCH (GPSWEEK) =', NEWEPOCH(i_write,i_sat), 'REFERENCE EPOCH =', NEWEPOCH(1,i_sat),&
+       'ISAT = ', i_sat,'IPRN(ISAT)=',IPRN(i_sat), 'EXPECTED EPOCH DIFF =', 900*(i_write-1), &
+       'REAL SEC_00=',SEC_00, 'POS =',ORBmatrix(i_write,1, i_sat)
+!IF (Sec_00 .LT. 0.d0) EXIT
 
 ! Satellite PRN number 
 CALL prn2str (i_sat, PRN_ti) 
+
 
 ! Position vector
 
@@ -454,22 +489,22 @@ Dcl_ti = 999999.999999D0
 
 ! ----------------------------------------------------------------------
 !IF (i_sat == 1) THEN
-IF (i_sat == ICON) THEN
+!IF (i_sat == ICON .OR. ORBmatrix(i_write,1, ICON) == 0.d0) THEN
 ! Write the Epoch line
 
-year  = IY
-month = IM
-day   = ID
+!year  = IY
+!month = IM
+!day   = ID
 !print*, 'year, month, day, Sec_00 =', year, month, day, Sec_00
-if (1<0) then
-hour_ti = INT(FD * 24.0D0) 
-min_ti  = INT(FD * 24.0D0 * 60.0D0)
-sec_ti  = (FD * 24.0D0 * 60.0D0 * 60.0D0)
-else
-hour_ti = INT(Sec_00 / (60.0D0 * 60.0D0)) 
-min_ti  = INT(Sec_00/60.0D0 - hour_ti*60.0D0)  
-sec_ti  = (Sec_00 - hour_ti*3600.0D0 - min_ti*60.D0)
-end if
+!if (1<0) then
+!hour_ti = INT(FD * 24.0D0) 
+!min_ti  = INT(FD * 24.0D0 * 60.0D0)
+!sec_ti  = (FD * 24.0D0 * 60.0D0 * 60.0D0)
+!else
+!hour_ti = INT(Sec_00 / (60.0D0 * 60.0D0)) 
+!min_ti  = INT(Sec_00/60.0D0 - hour_ti*60.0D0)  
+!sec_ti  = (Sec_00 - hour_ti*3600.0D0 - min_ti*60.D0)
+!end if
 !print*,'time line=',year, month, day, Sec_00, hour_ti, min_ti,sec_ti
 !print *,"sec_ti print", sec_ti 
 !WRITE (*,FMT='(A6,F17.6)'),"sec_ti", sec_ti
@@ -480,9 +515,9 @@ end if
 !READ (line_ith, * , IOSTAT=ios_data) char3, year, month, day, hr, minute, sec  
 !WRITE (UNIT=UNIT_IN,FMT=*,IOSTAT=ios_ith) '*  ', year,' ', month,' ',day,' ',hour_ti,' ',min_ti,' ',sec_ti,' '
 !WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year, month, day, hour_ti, min_ti, sec_ti
-WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year,' ', month,' ', day,' ', hour_ti,' ', min_ti,' ', sec_ti
+!WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year,' ', month,' ', day,' ', hour_ti,' ', min_ti,' ', sec_ti
 
-END IF
+!END IF
 ! ----------------------------------------------------------------------
 
 
@@ -506,8 +541,9 @@ IF (ios_ith /= 0) THEN
     PRINT *, "WRITE IOSTAT=", ios_ith
 END IF
 ! ----------------------------------------------------------------------
-                       END IF                    ! GNSS BRDC
-                       END IF                    ! GNSS BRDC 
+END IF                    ! GNSS BRDC
+END IF
+
  END DO
  END DO
 
