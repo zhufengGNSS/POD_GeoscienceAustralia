@@ -112,11 +112,14 @@ SUBROUTINE erp_igu (filename,mjd_t , erp, igu_flag)
       CLOSE (UNIT=UNIT_IN)
 ! ----------------------------------------------------------------------
 
+! Earth Rotation Parameters of .erp file
+         erp = igu_erp
 
 ! ----------------------------------------------------------------------
 ! Test the time coverage
       if ( mjd_t >= igu_erp(1,1) .and. mjd_t <= igu_erp(2,1) ) then
-         erp = igu_erp
+         !erp = igu_erp
+         igu_flag = .TRUE.
       else 
 	     igu_flag = .FALSE.
          !PRINT *,"d_mjd:", mjd_t-igu_erp(1,1), mjd_t-igu_erp(2,1)

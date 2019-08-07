@@ -101,9 +101,14 @@ mjd_TT = mjd
 		CALL eop_igu (mjd_TT, ERP_fname, EOP_day_glb, EOP_cr)
       END IF
 ! ----------------------------------------------------------------------
-EOP_cr(6)= 0.d0
-EOP_cr(7)= 0.d0
- 
+
+! ----------------------------------------------------------------------
+!SCM 20190606 Removed the nutation model correction terms from EOP array,
+!             These terms were adding noise to the orbit fits to IGS products.
+!             Add flag to turn on/off in the future!
+      EOP_cr(6) = 0.D0
+      EOP_cr(7) = 0.D0
+! ---------------------------------------------------------------------- 
  
 ! ----------------------------------------------------------------------
 ! Tranformation: ITRF to ICRF

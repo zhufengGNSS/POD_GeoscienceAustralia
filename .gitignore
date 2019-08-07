@@ -9,5 +9,8 @@
 *.mod
 *.e
 data/
+bin/
 pod
 crs2trs
+tp_test/
+fort.*

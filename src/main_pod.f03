@@ -30,6 +30,7 @@
       USE mdl_num
       USE mdl_config
       USE mdl_param
+      USE m_read_leapsec
       USE m_pod_gnss
       USE m_writeorbit_multi
       USE m_writearray
@@ -37,7 +38,6 @@
       USE m_writeorbit
 	  USE m_write_orb2sp3
       IMPLICIT NONE
-
 	  
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d) :: CPU_t0, CPU_t1
@@ -46,6 +46,7 @@
       INTEGER (KIND = prec_int2) :: ios_line, ios_key, ios_data
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf, orb_itrf  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbits_ics_icrf  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Vres  
       REAL (KIND = prec_d), DIMENSION(3) :: Vrms 	    
 	  !REAL (KIND = prec_d), DIMENSION(5,6) :: stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT
@@ -106,7 +107,7 @@
 ! ----------------------------------------------------------------------
       CHARACTER (len=300) :: str
       INTEGER (KIND = prec_int2) :: j
-      
+      	      
 ! CPU Times
 CALL cpu_time (CPU_t0)
 
@@ -302,11 +303,31 @@ READ ( param_value, FMT = * , IOSTAT=ios_key ) sp3_velocity_cfg
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
+! Write partials of the velocity vector w.r.t. parameters into the orbits_partials output file 
+! ----------------------------------------------------------------------
+! 0. partials_velocity_cfg = 0 :: Do not write Velocity vector's partials elements
+! 1. partials_velocity_cfg > 0 :: Write Velocity vector's partials elements
+param_id = 'partials_velocity_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) partials_velocity_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Leap Second file name:
+! ----------------------------------------------------------------------
+param_id = 'leapsec_filename_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) leapsec_filename_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
 ! End :: Read major configuration file POD.in
 ! ----------------------------------------------------------------------
+!
 ! ----------------------------------------------------------------------
 ! Read command line to oerwrite POD.in configfile options
 CALL read_cmdline
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Major configuration parameters via "read_cmdline routine", "POD.in configuration file" and "Module mdl_config.f03" 
@@ -328,6 +349,7 @@ print*, 'EOP_Nint_cfg: '               ,EOP_Nint_cfg
 print*, 'iau_model_cfg: '              ,iau_model_cfg
 print*, 'Estimator_Iterations_cfg: '   ,Estimator_Iterations_cfg 
 print*, 'sp3_velocity_cfg: '           ,sp3_velocity_cfg
+print*, 'leapsec_filename_cfg: '        ,leapsec_filename_cfg
 end if
 ! ----------------------------------------------------------------------
 
@@ -353,6 +375,11 @@ Else IF (POD_MODE_glb == 4) then
 Print *,"POD Tool mode: 2 :: Orbit Integration and Partials"
 End IF
 Print *," "
+
+! ----------------------------------------------------------------------
+! Read Leap Second File
+CALL read_leapsec(leapsec_filename_cfg)
+!Print*,'NDAT,IDAT,DATS: ',NDAT,IDAT,DATS
 
 ! ----------------------------------------------------------------------
 ! Form (rewrite) the two orbit integration configuration files for 
@@ -490,7 +517,7 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! POD of the GNSS satellite constellations
 ! ----------------------------------------------------------------------
 CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, &
-               orbit_resR, orbit_resT, orbit_resN, orbdiff2)
+               orbits_ics_icrf,orbit_resR, orbit_resT, orbit_resN, orbdiff2)
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 
@@ -510,7 +537,8 @@ GPS_day = ( GPS_wsec/86400.0D0 )
 ! ----------------------------------------------------------------------
 !orbits_partials_fname = 'orbits_partials_icrf.orb'
 write (orbits_partials_fname, FMT='(A3,I4,I1,A25)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits_partials_icrf.out'
-CALL writeorbit_multi (orbits_partials_icrf, PRNmatrix, orbits_partials_fname)
+!CALL writeorbit_multi (orbits_partials_icrf, PRNmatrix, orbits_partials_fname)
+CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_icrf, PRNmatrix, orbits_partials_fname)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
