@@ -169,9 +169,8 @@ End If
       EOP_cr(4) = UT1UTC_cor
       EOP_cr(5) = LOD
       EOP_cr(6) = dX_eop
-      EOP_cr(7) = dY_eop
+      EOP_cr(7) = dY_eop 
 ! ----------------------------------------------------------------------
-
 
 END SUBROUTINE
 

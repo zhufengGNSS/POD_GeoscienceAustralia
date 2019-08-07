@@ -111,5 +111,17 @@ MODULE mdl_config
       INTEGER (KIND = prec_int2) :: sp3_velocity_cfg	  	  
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Write partials of the velocity vector w.r.t. parameters into the orbits_partials output file 
+! ----------------------------------------------------------------------
+! 0. partials_velocity_cfg = 0 :: Do not write Velocity vector's partials elements
+! 1. partials_velocity_cfg > 0 :: Write Velocity vector's partials elements
+      INTEGER (KIND = prec_int2) :: partials_velocity_cfg	  	  
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Leap Second filename (leapsec_filename)
+      CHARACTER (LEN=100) :: leapsec_filename_cfg				
+! ----------------------------------------------------------------------
 
 END

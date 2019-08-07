@@ -12,12 +12,10 @@ MODULE mdl_param
 !                                              for ECOM-based SRP model
 ! ----------------------------------------------------------------------
 
-
       USE mdl_precision
       IMPLICIT NONE
       SAVE 			
 	  
-
 ! ---------------------------------------------------------------------------
 ! POD Mode : Orbit Determination, Propagation, Prediction, .. (1,2,3,4)
       INTEGER (KIND = prec_int2) :: POD_MODE_glb	  	  
@@ -71,6 +69,11 @@ MODULE mdl_param
       INTEGER (KIND = prec_int2) :: ORBEXT_glb
 ! ---------------------------------------------------------------------------
 
+! ---------------------------------------------------------------------------
+! Leap Second TAI-UTC Arrays 
+      INTEGER   (KIND = prec_int4),DIMENSION(:,:),ALLOCATABLE :: IDAT
+      INTEGER   (KIND = prec_int4)                            :: NDAT
+      REAL      (KIND = prec_q),DIMENSION(:),ALLOCATABLE      :: DATS
 
 ! ---------------------------------------------------------------------------
 ! Force Model
@@ -121,7 +124,6 @@ INTEGER (KIND = prec_int2) :: FMOD_NONGRAV(3)
 INTEGER (KIND = prec_int2) :: SRP_MOD_glb
 ! ----------------------------------------------------------------------
 
-
 ! ECOM-based solar radiation pressure model
 ! ----------------------------------------------------------------------
 INTEGER (KIND = prec_int2) :: ECOM_param_glb
@@ -146,7 +148,6 @@ REAL (KIND = prec_q) :: CPR_CS_glb(3,2), CPR_CS_aposteriori(3,2)
 
 INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces_glb
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Variational Equations

@@ -97,10 +97,10 @@ ECLTYP = ' '
 
 ! ---------------------------------------------------------------------
 ! The distance between the Earth and Sun
-Dsun = sqrt(r_sun(1)**2+r_sun(2)**2+r_sun(3)**2)
+Dsun = norm2(r_sun)
 
 ! The distance between the Satellite and the Sun
-Ds = sqrt((r_sun(1)-r_sat(1))**2+(r_sun(2)-r_sat(2))**2+(r_sun(3)-r_sat(3))**2)
+Ds = norm2(r_sun - r_sat)
 
 ! The unit vector of the satellite wrt the sun (SUN->SAT)
 ud=(r_sat-r_sun)/Ds
@@ -109,7 +109,7 @@ ud=(r_sat-r_sun)/Ds
 IF (Ds .gt. Dsun) THEN
 
 ! Project the satellite position vector onto the unit vector SUN->SAT
-   CALL productdot(r_sat,ud,AB)
+   AB = dot_product(r_sat,ud)
    
 ! A vector resulted from the cross product of the position vector EARTH->SAT and the unit vector SUN->SAT 
 
@@ -122,7 +122,7 @@ IF (Ds .gt. Dsun) THEN
 !    
 !     rp-rs >= xx : full eclipse
 
-   xx = sqrt(yy(1)**2+yy(2)**2+yy(3)**2)/AB
+   xx = norm2(yy)/AB
    rs=sunrad/Ds 
    rp=ertrad/AB 
 
@@ -142,14 +142,14 @@ ENDIF
 Rmoonsun = r_moon - r_sun
 Rsatmoon = r_sat - r_moon
 
-Dmoonsun = dsqrt(Rmoonsun(1)**2+Rmoonsun(2)**2+Rmoonsun(3)**2)
-
+!Dmoonsun = dsqrt(Rmoonsun(1)**2+Rmoonsun(2)**2+Rmoonsun(3)**2)
+Dmoonsun = norm2(Rmoonsun)
     
 IF (Ds .gt. Dmoonsun) THEN
 
-   CALL productdot(Rsatmoon,ud,CD) 
+   CD = dot_product(Rsatmoon,ud)
    CALL productcross (Rsatmoon,ud,yy)
-   xx=sqrt(yy(1)**2+yy(2)**2+yy(3)**2)/CD
+   xx=norm2(yy)/CD
 
    rs=sunrad/Ds 
    rp=moonrad/CD 
