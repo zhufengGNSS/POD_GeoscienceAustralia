@@ -416,21 +416,21 @@ IF (SATTYPE == 'A') ICON = 1
 ! Epochs loop
 DO i_write = 1 , Nepochs       
 
-Sec_00 = 900*(i_write-1)
+!Sec_00 = 900*(i_write-1)
 
-year  = IY
-month = IM
-day   = ID
+!year  = IY
+!month = IM
+!day   = ID
 !print*, 'year, month, day, Sec_00 =', year, month, day, Sec_00
-if (1<0) then
-hour_ti = INT(FD * 24.0D0)
-min_ti  = INT(FD * 24.0D0 * 60.0D0)
-sec_ti  = (FD * 24.0D0 * 60.0D0 * 60.0D0)
-else
-hour_ti = INT(Sec_00 / (60.0D0 * 60.0D0))
-min_ti  = INT(Sec_00/60.0D0 - hour_ti*60.0D0)
-sec_ti  = (Sec_00 - hour_ti*3600.0D0 - min_ti*60.D0)
-end if
+!if (1<0) then
+!hour_ti = INT(FD * 24.0D0)
+!min_ti  = INT(FD * 24.0D0 * 60.0D0)
+!sec_ti  = (FD * 24.0D0 * 60.0D0 * 60.0D0)
+!else
+!hour_ti = INT(Sec_00 / (60.0D0 * 60.0D0))
+!min_ti  = INT(Sec_00/60.0D0 - hour_ti*60.0D0)
+!sec_ti  = (Sec_00 - hour_ti*3600.0D0 - min_ti*60.D0)
+!end if
 !print*,'time line=',year, month, day, Sec_00, hour_ti, min_ti,sec_ti
 !print *,"sec_ti print", sec_ti
 !WRITE (*,FMT='(A6,F17.6)'),"sec_ti", sec_ti
@@ -443,7 +443,7 @@ end if
 !',hour_ti,' ',min_ti,' ',sec_ti,' '
 !WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year, month, day,
 !hour_ti, min_ti, sec_ti
-WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year,' ', month,' ',day,' ', hour_ti,' ', min_ti,' ', sec_ti
+!WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year,' ', month,' ',day,' ', hour_ti,' ', min_ti,' ', sec_ti
 
 ! Satellites loop
 !DO i_sat = 1 , Nsat       
@@ -452,11 +452,11 @@ DO i_sat = 1 , sz3
 IF(i_sat == IPRN(i_sat))THEN                  ! GNSS BRDC          
 
 !Sec_00 = NEWEPOCH(i_write,i_sat) -  NEWEPOCH(1,i_sat)
-!Sec_00 = 900*(i_write-1)
-IF (ORBmatrix(i_write,1, i_sat) /= 0.d0 )THEN
-print*,'CURRENT EPOCH (GPSWEEK) =', NEWEPOCH(i_write,i_sat), 'REFERENCE EPOCH =', NEWEPOCH(1,i_sat),&
-       'ISAT = ', i_sat,'IPRN(ISAT)=',IPRN(i_sat), 'EXPECTED EPOCH DIFF =', 900*(i_write-1), &
-       'REAL SEC_00=',SEC_00, 'POS =',ORBmatrix(i_write,1, i_sat)
+Sec_00 = 900*(i_write-1)
+!IF (ORBmatrix(i_write,1, i_sat) /= 0.d0 )THEN
+!print*,'CURRENT EPOCH (GPSWEEK) =', NEWEPOCH(i_write,i_sat), 'REFERENCE EPOCH =', NEWEPOCH(1,i_sat),&
+!       'ISAT = ', i_sat,'IPRN(ISAT)=',IPRN(i_sat), 'EXPECTED EPOCH DIFF =', 900*(i_write-1), &
+!       'REAL SEC_00=',SEC_00, 'POS =',ORBmatrix(i_write,1, i_sat)
 !IF (Sec_00 .LT. 0.d0) EXIT
 
 ! Satellite PRN number 
@@ -489,22 +489,22 @@ Dcl_ti = 999999.999999D0
 
 ! ----------------------------------------------------------------------
 !IF (i_sat == 1) THEN
-!IF (i_sat == ICON .OR. ORBmatrix(i_write,1, ICON) == 0.d0) THEN
+IF (i_sat == ICON ) THEN
 ! Write the Epoch line
 
-!year  = IY
-!month = IM
-!day   = ID
+year  = IY
+month = IM
+day   = ID
 !print*, 'year, month, day, Sec_00 =', year, month, day, Sec_00
-!if (1<0) then
-!hour_ti = INT(FD * 24.0D0) 
-!min_ti  = INT(FD * 24.0D0 * 60.0D0)
-!sec_ti  = (FD * 24.0D0 * 60.0D0 * 60.0D0)
-!else
-!hour_ti = INT(Sec_00 / (60.0D0 * 60.0D0)) 
-!min_ti  = INT(Sec_00/60.0D0 - hour_ti*60.0D0)  
-!sec_ti  = (Sec_00 - hour_ti*3600.0D0 - min_ti*60.D0)
-!end if
+if (1<0) then
+hour_ti = INT(FD * 24.0D0) 
+min_ti  = INT(FD * 24.0D0 * 60.0D0)
+sec_ti  = (FD * 24.0D0 * 60.0D0 * 60.0D0)
+else
+hour_ti = INT(Sec_00 / (60.0D0 * 60.0D0)) 
+min_ti  = INT(Sec_00/60.0D0 - hour_ti*60.0D0)  
+sec_ti  = (Sec_00 - hour_ti*3600.0D0 - min_ti*60.D0)
+end if
 !print*,'time line=',year, month, day, Sec_00, hour_ti, min_ti,sec_ti
 !print *,"sec_ti print", sec_ti 
 !WRITE (*,FMT='(A6,F17.6)'),"sec_ti", sec_ti
@@ -515,9 +515,9 @@ Dcl_ti = 999999.999999D0
 !READ (line_ith, * , IOSTAT=ios_data) char3, year, month, day, hr, minute, sec  
 !WRITE (UNIT=UNIT_IN,FMT=*,IOSTAT=ios_ith) '*  ', year,' ', month,' ',day,' ',hour_ti,' ',min_ti,' ',sec_ti,' '
 !WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year, month, day, hour_ti, min_ti, sec_ti
-!WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year,' ', month,' ', day,' ', hour_ti,' ', min_ti,' ', sec_ti
+WRITE (UNIT=UNIT_IN,FMT=fmt_epoch,IOSTAT=ios_ith) '*  ', year,' ', month,' ', day,' ', hour_ti,' ', min_ti,' ', sec_ti
 
-!END IF
+END IF
 ! ----------------------------------------------------------------------
 
 
@@ -542,7 +542,7 @@ IF (ios_ith /= 0) THEN
 END IF
 ! ----------------------------------------------------------------------
 END IF                    ! GNSS BRDC
-END IF
+!END IF
 
  END DO
  END DO
