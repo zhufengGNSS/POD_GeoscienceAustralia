@@ -146,7 +146,7 @@ CALL time_GPSweek (MJD_ti , GPS_week, GPS_wsec, GPSweek_mod1024)
 JJ = 0
 K = 0
 DO I=1, MAXNSAT
-
+! at the current stage the GLONASS is excluded in the broadcast-related processing.
 IF (I < 50 .OR. I < 150 .AND. I > 100 .OR. &
     I < 200 .AND. I > 150 .OR. I > 200) THEN
 
@@ -154,6 +154,7 @@ IF (I < 50 .OR. I < 150 .AND. I > 100 .OR. &
         IF (EPH(3,J,I) .GT. 0.d0) THEN 
             K= K+1
             EPHNEW(1:20,K,I) = EPH(1:20,J,I)
+!            CALL chkbrdc1 (EPH(1:20,J,I))
             IF (K .EQ. 1) THEN 
                DT = 0.d0
                DO II=1, 7
@@ -164,6 +165,8 @@ IF (I < 50 .OR. I < 150 .AND. I > 100 .OR. &
                END DO
             ELSE
                DT =  EPHNEW(2,K,I)-EPHNEW(2,K-1,I)
+!print*,'PRN SAT = ', I
+!               CALL chkbrdc (EPHNEW(1:20,K-1,I), EPHNEW(1:20,K,I))
                IF (DT .LT. 0.d0) EXIT
                ! For GPS and BDS case
                IF (I < 50 .OR.  I < 200 .AND. I > 150) THEN
@@ -331,6 +334,8 @@ IF (I < 50 .AND. EPHNEW(3,1,I) > 0.d0 ) THEN ! GPS/GNSS sampling rate: 2 hour
          IF (IBAD(K,I) /= 1 )THEN
             INEW = INEW + 1
             EPHNEW2(1:20,INEW,I) = EPHNEW(1:20,K,I)
+!CALL chkbrdc_gps (EPHNEW2(1:20,INEW,I))
+
             IF (INEW == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
             DO II=1,8 ! 15-minute resolution 
                JJ = JJ + 1
@@ -343,6 +348,8 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
             END DO
            
             ELSE IF (EPHNEW2(2,INEW,I) == GPS_wsec+7200*(INEW-1)) THEN
+
+!CALL chkbrdc (EPHNEW2(1:20,INEW-1,I), EPHNEW2(1:20,INEW,I))
                  DT = EPHNEW2(2,INEW,I) - GPS_wsec 
                  IF (DT .LT. 0.d0) EXIT
                  IF (NINT(DT) - NINT(KKK) > 7200.d0) THEN
@@ -393,7 +400,7 @@ ELSE IF (I < 150 .AND. I > 100 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! GALILEO sampli
          IF (IBAD(K,I) /= 1 )THEN
             IGAL = IGAL +1
             EPHNEW2(1:20,IGAL,I) = EPHNEW(1:20,K,I)
-        
+!CALL chkbrdc_gal (EPHNEW2(1:20,IGAL,I))       
             IF (IGAL == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
                DO II=1,2!8
                   JJ = JJ + 1
@@ -408,6 +415,7 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
                      .AND.  MOD(EPHNEW2(2,IGAL,I),1800.d0) == 0) THEN !.AND.  MOD(EPHNEW2(2,IGAL,I),7200.d0) == 0) THEN
                DT = EPHNEW2(2,IGAL,I) - GPS_wsec 
 !PRINT*,'DT =', NINT(DT), NINT(KKK), IGAL
+!CALL chkbrdc (EPHNEW2(1:20,IGAL-1,I), EPHNEW2(1:20,IGAL,I))
                IF (NINT(DT)-NINT(KKK) > 1800.d0)THEN!7200.d0) THEN
                !print*,'ADD POINTS FOR INTERPOLATION', (NINT(DT)-NINT(KKK))/SAMPLE - 2,'POINTS'
                print*,'MISSING EPOCHS AND INVALID ZONES'
