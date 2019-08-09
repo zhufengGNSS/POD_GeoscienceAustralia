@@ -102,6 +102,15 @@ MODULE mdl_config
       INTEGER (KIND = prec_int2) :: Estimator_Iterations_cfg 
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Reference System of Variational Equations' Partials & Parameter Estimation 
+! ----------------------------------------------------------------------
+! 1. Celestial Reference System :: ICRS
+! 2. Terrestrial Reference System :: ITRS
+! ----------------------------------------------------------------------
+      CHARACTER (LEN=4) :: VEQ_REFSYS_cfg				
+! ----------------------------------------------------------------------
+
 
 ! ----------------------------------------------------------------------
 ! Write to sp3 orbit format: Option for write Satellite Velocity vector 

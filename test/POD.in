@@ -10,7 +10,7 @@
 ! 3. Orbit Integration (Equation of Motion only)
 ! 4. Orbit Integration and Partials (Equation of Motion and Variational Equations)
 ! ----------------------------------------------------------------------
-POD_MODE_cfg              2
+POD_MODE_cfg              1
 
 ! ----------------------------------------------------------------------
 %% Initial Conditions input mode
@@ -79,6 +79,14 @@ ext_orbit_filename_cfg		  	  igs19424.sp3
 %% Parameter Estimation
 Estimator_Iterations_cfg     2
 
+
+----------------------------------------------------------------------
+%% Reference System of Variational Equations' Partials & Parameter Estimation 
+----------------------------------------------------------------------
+! 1. Celestial Reference System :: ICRS
+! 2. Terrestrial Reference System :: ITRS
+VEQ_REFSYS_cfg	  	  		ITRS
+! ----------------------------------------------------------------------
  
 ----------------------------------------------------------------------
 %% Write to sp3 orbit format: Option for write Satellite Velocity vector 

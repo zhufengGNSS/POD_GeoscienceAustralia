@@ -321,6 +321,17 @@ READ ( param_value, FMT = * , IOSTAT=ios_key ) leapsec_filename_cfg
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
+! Reference System of Variational Equations' Partials & Parameter Estimation 
+! ----------------------------------------------------------------------
+! 1. Celestial Reference System :: ICRS
+! 2. Terrestrial Reference System :: ITRS
+! ----------------------------------------------------------------------
+param_id = 'VEQ_REFSYS_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT ='(A4)', IOSTAT=ios_key ) VEQ_REFSYS_cfg 
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
 ! End :: Read major configuration file POD.in
 ! ----------------------------------------------------------------------
 !
@@ -536,7 +547,7 @@ GPS_day = ( GPS_wsec/86400.0D0 )
 ! Write satellite orbits and partial derivatives to one .orb output file (internal format)
 ! ----------------------------------------------------------------------
 !orbits_partials_fname = 'orbits_partials_icrf.orb'
-write (orbits_partials_fname, FMT='(A3,I4,I1,A25)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits_partials_icrf.out'
+write (orbits_partials_fname, FMT='(A3,I4,I1,A20)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits_partials.out'
 !CALL writeorbit_multi (orbits_partials_icrf, PRNmatrix, orbits_partials_fname)
 CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_icrf, PRNmatrix, orbits_partials_fname)
 ! ----------------------------------------------------------------------
