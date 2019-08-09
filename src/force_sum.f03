@@ -244,7 +244,7 @@ End If
 If (FMOD_GRAV(2) > 0) Then
 
 ! Julian Day Number of the input epoch
-JD = mjd + 2400000.5D0   !+ 2.0D0 / (1000.0D0 * 86400.0D0 )
+JD = mjd + 2400000.5D0
 
 ! Center celestial body: Earth
 NCTR = 3 
