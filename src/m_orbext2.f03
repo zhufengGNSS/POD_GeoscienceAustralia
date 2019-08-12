@@ -58,6 +58,8 @@ SUBROUTINE orbext2 (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, 
 ! Author :	Dr. Thomas Papanikolaou
 !			Geoscience Australia, CRC-SI
 ! Created:	24 April 2018
+!
+! Changes:  06-08-2019 Tzupang Tseng : Skip bad orbits with zero value in SP3 file
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -101,7 +103,8 @@ SUBROUTINE orbext2 (EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, 
 ! External orbit: orbext_ICRF, orbext_ITRF, orbext_kepler
 CALL prm_orbext (EQMfname)												
 ! ----------------------------------------------------------------------
-
+! Skip bad orbits with zero value in SP3 file
+CALL scan0orbext
 ! ----------------------------------------------------------------------
 ! Orbit comparison statistics
 ! ICRF
