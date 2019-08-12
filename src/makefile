@@ -13,7 +13,7 @@ FLFLAGS = -L/usr/lib64
 SRCS = mdl_precision.f90 mdl_num.f90 mdl_config.f03 mdl_param.f03 mdl_eop.f90 mdl_planets.f90 mdl_tides.f90 mdl_arr.f90 \
 m_integrEQM.f03 m_matrixRxR.f03 m_legendre.f03 m_legendre1.f03 m_force_tides.f03 m_tides_ocean.f03 m_legendre2.f03 \
 m_pd_geopotential.f03 m_force_gfm.f03 pd_forceZ.f03 m_get_lambda.f m_shadow.f90 m_pd_empirical.f03 m_pd_ECOM.f90 \
-m_satinfo.f90 m_pd_force.f03 m_veq_rkn768.f03 m_integrVEQ.f03 m_betainfo.f90 m_orbinteg.f03 m_matrixinv.f03 m_orb_estimator.f03 \
+m_satinfo.f90 m_pd_force.f03 m_veq_rkn768.f03 m_veqC2T.f03 m_integrVEQ.f03 m_betainfo.f90 m_orbinteg.f03 m_matrixinv.f03 m_orb_estimator.f03 \
 m_orbC2T.f03 m_orbT2C.f03 m_statist.f03 m_statdelta.f03 m_orbinfo.f90 m_statorbit.f03 m_statorbit2.f03 m_writearray.f03 m_writearray2.f03 m_orbresize.f03 \
 m_orbext.f03 m_orbext2.f03 m_gfc.f03 m_gfc3.f03 m_obsorbT2C.f03 m_write_prmfile_init.f03 m_writedata.f03 m_writeorbit.f03 m_writeorbit_multi.f03 \
 m_write_orb2sp3.f03 m_rso.f03 m_sp3.f03 m_sp3_PRN.f03 m_lagrange.f03 m_interporb.f03 m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03 m_keplerorb.f03 \
