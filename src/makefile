@@ -5,7 +5,7 @@ FC = gfortran
 
 # Compiler flags
 
-FCFLAGS = -llapack -lblas
+FCFLAGS = -O3 -llapack -lblas
 #-O3 -Wuninitialized -fno-f2c -ffast-math -fno-automatic -fno-backslash -m64 -mcmodel=large 
 # Linker flags
 FLFLAGS = -L/usr/lib64
@@ -35,7 +35,7 @@ empirical_init_file.f03 empirical_init.f03 empirical_cor.f03 beta_angle.f90 yaw_
 yaw_attitude.f90 eclips.f eclips2017.f eclips201707.f beta_pred.f90 yaw_bds.f90 yaw_gal.f90 yawdyn.f90 \
 attitude.f03 force_sum.f03 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 pd_gm.f03 pd_forceZ.f03 eclipse_integstep.f03 \
 write_prmfile.f03 writeparam.f03 writeparam1.f03 time_TT_sec.f90 prm_main.f03 prm_emp.f03 empirical_cor.f03 empirical_init.f03 \
-ecom_init.f03 prm_srp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.f03 prm_orbext.f03 prm_planets.f03 prm_pseudobs.f03 \
+ecom_init.f03 prm_srp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.f03 scan0orbext.f03 prm_orbext.f03 prm_planets.f03 scan0orb.f03 prm_pseudobs.f03 \
 f90getopt.F90 read_cmdline.f03 \
 main_pod.f03
 
@@ -58,16 +58,29 @@ crs_trs.f90 m_eop_data.f03 m_eop_cor.f03 m_eop_igu.f03 eop_rd.f90 eop_c04.f90 eo
 era_matrix.f90 \
 main_crs2trs.f03
 
+BRDC2ECEF = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
+brdc_cmdline.f03 mdl_brdconfig.f03 f90getopt.F90 \
+arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
+m_matrixinv.f03 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
+m_write_brd2sp3.f03 prn2str.f03 prn_shift_brdc.f03 chkbrdc_gps.f chkbrdc_gal.f chkbrdc.f \
+readbrdcheader.f03 readbrdcmessg.f90 reformbrdc.f brdc2ecef.f \
+time_GPSweek.f90 jd2cal.for cal2jd.for time_GPSweek2.f90 \
+main_brdcorbit.f90
+#readbrdcmessg.f90 brdcinfo.f03 reformbrdc.f  \
+jd2cal.for cal2jd.for dat.for \
+main_brdcorbit.f90
+
+
 PROGRAM = pod
 
-all: $(BIN) $(PROGRAM) crs2trs
+all: $(BIN) $(PROGRAM) crs2trs brd2ecef
 
 directories: $(BIN)
 
 $(BIN): 
 	mkdir -p $(BIN)
 
-$(PROGRAM): $(SRCS)
+$(PROGRAM): $(SRCS)  
 	$(FC) $(FCFLAGS) -o $(BIN)/$@ $^
 
 %.o: %.F
@@ -78,6 +91,8 @@ $(PROGRAM): $(SRCS)
 
 crs2trs: $(CRS2TRSSRCS) $(BIN)
 	$(FC) $(FCFLAGS) $(FLFLAGS) $(CRS2TRSSRCS) -o $(BIN)/crs2trs
+brd2ecef: $(BRDC2ECEF) $(BIN)
+	$(FC) $(FCFLAGS) $(FLFLAGS) $(BRDC2ECEF) -o $(BIN)/brd2ecef
 
 clean:
 	rm -f *.o *.mod $(BIN)/$(PROGRAM) $(BIN)/crs2trs

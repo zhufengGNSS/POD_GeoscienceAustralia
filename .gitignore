@@ -8,8 +8,10 @@
 *.out
 *.mod
 *.e
+*.rnx
 data/
 bin/
+test/
 pod
 crs2trs
 tp_test/
