@@ -37,6 +37,10 @@ SUBROUTINE scan0orb
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int8) :: i, read_i, k 
       INTEGER (KIND = prec_int8) :: ic, it, j
+      INTEGER (KIND = prec_int8) :: INEW1, INEW2
+      INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF2,pseudobs_ICRF2
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF3,pseudobs_ICRF3
 ! ----------------------------------------------------------------------
 
 sz1 = SIZE (pseudobs_ICRF, DIM =1)
@@ -46,12 +50,12 @@ sz3 = SIZE (pseudobs_ITRF, DIM =1)
 sz4 = SIZE (pseudobs_ITRF, DIM =2)
 
 !print*,'sz1, sz2 =', sz1, sz2, 'sz3, sz4 =',  sz3, sz4
-pseudobs_ICRF2 = pseudobs_ICRF
-pseudobs_ITRF2 = pseudobs_ITRF
+
+ALLOCATE (pseudobs_ICRF2(sz1,sz2), STAT = AllocateStatus)
+ALLOCATE (pseudobs_ITRF2(sz3,sz4), STAT = AllocateStatus)
 
 pseudobs_ICRF2 = 0.d0
 pseudobs_ITRF2 = 0.d0
-! ----------------------------------------------------------------------
 
 ic = 0
 DO k=1, sz1
@@ -69,10 +73,45 @@ it = it +1
 pseudobs_ITRF2(it,1:8) = pseudobs_ITRF(k,1:8)
 END IF
 END DO
+
+ALLOCATE (pseudobs_ICRF3(ic,sz2), STAT = AllocateStatus)
+ALLOCATE (pseudobs_ITRF3(it,sz3), STAT = AllocateStatus)
+
+INEW1 = 0
+DO k=1, sz1
+   DO j=1, ic
+   IF (pseudobs_ICRF2(j,3) == pseudobs_ICRF(k,3) .AND. pseudobs_ICRF2(j,4) == pseudobs_ICRF(k,4))THEN
+
+   INEW1 = INEW1 + 1
+   pseudobs_ICRF3(INEW1,1:8)= pseudobs_ICRF(k,1:8)
+
+   END IF
+   END DO
+END DO
+
+
+INEW2 = 0
+DO k=1, sz3
+   DO j=1, it
+   IF (pseudobs_ITRF2(j,3) == pseudobs_ITRF(k,3) .AND. pseudobs_ITRF2(j,4) == pseudobs_ITRF(k,4))THEN
+
+   INEW2 = INEW2 + 1
+   pseudobs_ITRF3(INEW2,1:8)= pseudobs_ITRF(k,1:8)
+
+   END IF
+   END DO
+END DO
+
+DEALLOCATE (pseudobs_ICRF, STAT = DeAllocateStatus)
+DEALLOCATE (pseudobs_ITRF, STAT = DeAllocateStatus)
+
+ALLOCATE (pseudobs_ICRF(ic,sz2), STAT = AllocateStatus)
+ALLOCATE (pseudobs_ITRF(it,sz3), STAT = AllocateStatus)
+print*,'Number of Epochs or Positions used for POD =', ic
 pseudobs_ICRF = 0.d0
 pseudobs_ITRF = 0.d0
 
-pseudobs_ICRF = pseudobs_ICRF2
-pseudobs_ITRF = pseudobs_ITRF2
+pseudobs_ICRF = pseudobs_ICRF3
+pseudobs_ITRF = pseudobs_ITRF3
 
 END
