@@ -142,6 +142,7 @@ WRITE (UNIT=UNIT_IN,FMT='(a,a)'            ,IOSTAT=ios_ith) '#INFO    EOP file: 
 WRITE (UNIT=UNIT_IN,FMT='(a,i3)'           ,IOSTAT=ios_ith) '#INFO    Number of Satellites:              ',Nsat
 WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of Parameters per satellite:',NPARAM_glb+6
 WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of Partials:                ',Nparam-8
+WRITE (UNIT=UNIT_IN,FMT='(a,a4)'           ,IOSTAT=ios_ith) '#INFO    Partials Reference System:         ',VEQ_REFSYS_cfg
 WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    Satellite ICS:                     '
 DO i_sat = 1 , Nsat
    WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,i3,a)' ,IOSTAT=ios_ith) '#IC_INFO ',PRN_array(i_sat),' [SVN] [BLK_TYP] [ANT_TH] &
