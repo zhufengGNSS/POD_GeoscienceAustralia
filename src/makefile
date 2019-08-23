@@ -62,12 +62,11 @@ BRDC2ECEF = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 
 brdc_cmdline.f03 mdl_brdconfig.f03 f90getopt.F90 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
 m_matrixinv.f03 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
-m_write_brd2sp3.f03 prn2str.f03 prn_shift_brdc.f03 chkbrdc_gps.f chkbrdc_gal.f chkbrdc.f \
+m_write_brd2sp3.f03 prn2str.f03 prn_shift_brdc.f03 chkbrdc.f \
 readbrdcheader.f03 readbrdcmessg.f90 reformbrdc.f brdc2ecef.f \
-time_GPSweek.f90 jd2cal.for cal2jd.for time_GPSweek2.f90 \
-main_brdcorbit.f90
-#readbrdcmessg.f90 brdcinfo.f03 reformbrdc.f  \
-jd2cal.for cal2jd.for dat.for \
+m_read_leapsec.f03 taiutc.for time_UTC.f90 time_GPSweek.f90 jd2cal.for cal2jd.for time_GPSweek2.f90 \
+brdc_qc_gps.f90 brdc_qc_gal.f90 m_meanstd.f90 \
+m_antoffset.f90 glnorbint.f glnacc.f \
 main_brdcorbit.f90
 
 

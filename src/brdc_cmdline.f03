@@ -19,6 +19,7 @@ type(option_s) :: opts(14)
 ! Input file name              -f
 ! Output file name             -o
 ! Satellite constellation      -c
+! leap second                  -l
 ! Information                  -h
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
@@ -30,7 +31,8 @@ type(option_s) :: opts(14)
 opts(1)  = option_s( "inputfile",     .true.,      'f' )
 opts(2)  = option_s( "outputfile",    .true.,      'o' )
 opts(3)  = option_s( "constellation", .true.,      'c' )
-opts(4)  = option_s( "help",          .true.,      'h' )
+opts(4)  = option_s( "leap second",   .true.,      'l' )
+opts(5)  = option_s( "help",          .true.,      'h' )
 
 
 ! Get the program name
@@ -48,7 +50,7 @@ optind=1
 
 ! Process options given sequentially
 do
-   select case(getopt("f:o:c:h",opts))
+   select case(getopt("f:o:c:l:h",opts))
       case( char(0) )
          exit
       case( 'f' )
@@ -60,6 +62,9 @@ do
       case( 'c' )
 !         print *, 'option GNSS constellation=', optarg
               GNSSTYPE    = trim(optarg)
+      case( 'l' )
+!         print *, 'option GNSS constellation=', optarg
+              leapsec_filename_cfg  = trim(optarg)
       case( 'h' )
           print*,' Conversion from broadcast dynamic elements to earth-center earth-fixed (ecef) coordinates '
           print*,' The program can work for multi-GNSS constellations, except for GLONASS that will be handled soon.'
@@ -76,8 +81,7 @@ do
           print*,''
           print*,'Examples:'
           print*,''
-          print*,'       ',trim(pgm_name),' -f brdc3210.16n  -o brdc16321.sp3'		  
-          print*,'       ',trim(pgm_name),' -f BRDC00IGS_R_20163210000_01D_MN.rnx -o brdc16321.sp3'
+          print*,'       ',trim(pgm_name),' -f BRDC00IGS_R_20163210000_01D_MN.rnx -o brdc16321.sp3 -c A -l leap.second'
           stop
    end select
 end do
