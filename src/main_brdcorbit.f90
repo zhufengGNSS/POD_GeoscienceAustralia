@@ -25,6 +25,8 @@ PROGRAM  main_brdcorbit
       USE m_write_brd2sp3
       USE m_read_leapsec
       USE m_antoffset
+      USE m_eop_data
+      USE m_eop_cor
       IMPLICIT NONE
 
 !--------------------------------------------------------------------
@@ -73,14 +75,36 @@ PROGRAM  main_brdcorbit
       INTEGER (KIND = prec_int4) :: SAMPLE
       INTEGER (KIND = prec_d) :: IPRN(220),ISTR(220)
       INTEGER (KIND = prec_d),DIMENSION(:,:),ALLOCATABLE :: IBAD
-      CHARACTER*8 :: STATUS
+!-----------------------------------------------------------------
+      REAL (KIND = prec_q) :: CRS2TRS(3,3), TRS2CRS(3,3)
+      REAL (KIND = prec_q) :: d_CRS2TRS(3,3), d_TRS2CRS(3,3)
+      REAL (KIND = prec_d) :: EOP_cr(7)
+      REAL (KIND = prec_q) :: r_TRS(3), r_CRS(3)
+      CHARACTER (LEN=50)   :: EOP_fname
+      INTEGER (KIND = prec_int4) :: EOP_Nint 
+      INTEGER (KIND = prec_int1) :: EOP_sol
+      REAL (KIND = prec_d) :: eop(7)
+      INTEGER (KIND = prec_int2) :: iau_model
+!----------------------------------------------------------------
+      REAL (KIND = prec_q), DIMENSION(3) :: rbody
+      REAL (KIND = prec_q), DIMENSION(3) :: rSun
+      DOUBLE PRECISION  JD, Zbody(6)
+      INTEGER NTARG_SUN, NCTR
+      CHARACTER (LEN=100) :: fname_header, fname_data, fname_out
+
+
+
+
 ! ----------------------------------------------------------------
 PI = 4*ATAN(1.D0)        
 
 ! If PRINTID = 1, print out the debugging.
-PRINTID = 1
+PRINTID = 0
 
-! Apply the anntenna offset w.r.t COM
+! Apply the anntenna offset w.r.t COM (Only for GLONASS whose broadcast position
+! is in the phase center of transmitting antenna in a PZ-90 ECEF frame)
+! ANTOPT = 1 : correct the antenna offset
+! ANTOPT = 0 : no correction 
 ANTOPT = 1
 
 ! START CPU COUNTER
@@ -149,6 +173,29 @@ CALL time_GPSweek (MJD_ti , GPS_week, GPS_wsec, GPSweek_mod1024)
 ! --------------------
 CALL read_leapsec(leapsec_filename_cfg)
 
+! Get EOP data
+! EOP option setting
+! EOP_sol = 1 : refers to EOP data format of the C04 solution
+! EOP_sol = 2 : refers to EOP data format of the daily solution
+! EOP_sol = 3 : refers to EOP data format of the ultra-rapid
+
+EOP_sol = 1
+EOP_Nint = 4
+EOP_fname = EOP_fname_cfg
+CALL eop_rd (EOP_fname, EOP_sol, MJD_ti , eop)
+
+!Precession-Nutation model by International Astronomical Union (IAU)
+!IAU = 2000 refers to the IAU 2000A model
+!IAU = 2006 refers to the IAU 2006/2000A model
+iau_model= 2006
+
+! Planetary/Lunar Ephemeris data
+! -------------------------------
+fname_out = 'DE.430'
+fname_header = 'header.430_229'
+fname_data = 'ascp1950.430'
+CALL CATfile (fname_header,fname_data,fname_out)
+CALL asc2eph (fname_out)
 
 ! Assign a new array for each satellite with the epoch recounting (K value)
 ! and Detect the bad records in TOE by using an index of IBAD
@@ -451,14 +498,8 @@ ELSE IF(I > 50 .AND. I < 100 .AND. ABS(EPHNEW(5,1,I)) > 0.d0) THEN ! GLONASS sam
    CALL time_GPSweek (mjd_GPS , GPS_week, GPS_wsec1, GPSweek_mod1024)
 !PRINT*,'t0 =',GPS_wsec1,'t =', GPS_wsec, 't - t0 =',GPS_wsec-GPS_wsec1
 
-! Read EOP data
-! -------------
-CALL eop_data (mjd_TT, EOP_fname, EOP_sol, EOP_Nint , EOP_day_glb)
-
 ! ICRF-ITRF transformation matrix (including derivatives) based on EOP data
-CALL EOP (mjd_TT, EOP_cr, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2CRS)
-
-
+CALL crs_trs (mjd_TT, eop, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2CRS)
 
       IF (IGLN == 1) THEN
       DO II = 1,2
@@ -466,15 +507,15 @@ CALL EOP (mjd_TT, EOP_cr, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2CRS)
       DELT2 = SAMPLE*(II-1) + GPS_wsec
       NEWEPOCH2(JJ,I) = DELT2
       CALL glnorbint(EPHNEW2(1:16,IGLN,I),DELT2,GPS_wsec1,ECEFPOS(JJ,1:3,I))
+      IF (ANTOPT == 1) THEN
       r_TRS(1:3) = ECEFPOS(JJ,1:3,I)
-! ITRF to ICRF
-! r_CRS = TRS2CRS * r_TRS
+      ! ITRF to ICRF
+      ! r_CRS = TRS2CRS * r_TRS
       CALL matrix_Rr (TRS2CRS, r_TRS, r_CRS)
-      IF (ANTOPT == 1) CALL antoffset (r_CRS, ECEFPOS(JJ,1:3,I))
-
+      CALL antoffset (mjd_TT, r_CRS, ECEFPOS(JJ,1:3,I))
       CALL matrix_Rr (CRS2TRS, ECEFPOS(JJ,1:3,I), r_TRS)
       ECEFPOS(JJ,1:3,I) = r_TRS
-
+      END IF
 IF (PRINTID == 1) &
 PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =', ECEFPOS(JJ,1:3,I)
 
@@ -486,7 +527,15 @@ PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =', ECEFPO
       DELT2 = SAMPLE*(II-1) + GPS_wsec + 1800*(K-1)
       NEWEPOCH2(JJ,I) = DELT2
       CALL glnorbint(EPHNEW2(1:16,IGLN,I),DELT2,GPS_wsec1,ECEFPOS(JJ,1:3,I))
-      IF (ANTOPT == 1) CALL antoffset (ECEFPOS(JJ,1:3,I), ECEFPOS(JJ,1:3,I))
+      IF (ANTOPT == 1) THEN
+      r_TRS(1:3) = ECEFPOS(JJ,1:3,I)
+      ! ITRF to ICRF
+      ! r_CRS = TRS2CRS * r_TRS
+      CALL matrix_Rr (TRS2CRS, r_TRS, r_CRS)
+      CALL antoffset (mjd_TT, r_CRS, ECEFPOS(JJ,1:3,I))
+      CALL matrix_Rr (CRS2TRS, ECEFPOS(JJ,1:3,I), r_TRS)
+      ECEFPOS(JJ,1:3,I) = r_TRS
+      END IF
 IF (PRINTID == 1) &
 PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =', ECEFPOS(JJ,1:3,I)
       
@@ -497,7 +546,15 @@ PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =', ECEFPO
       DELT2 = SAMPLE*(II-1) + GPS_wsec + 1800*(K-1)
       NEWEPOCH2(JJ,I) = DELT2
       CALL glnorbint(EPHNEW2(1:16,IGLN,I),DELT2,GPS_wsec1,ECEFPOS(JJ,1:3,I))
-      IF (ANTOPT == 1) CALL antoffset (ECEFPOS(JJ,1:3,I), ECEFPOS(JJ,1:3,I))
+      IF (ANTOPT == 1) THEN
+      r_TRS(1:3) = ECEFPOS(JJ,1:3,I)
+      ! ITRF to ICRF
+      ! r_CRS = TRS2CRS * r_TRS
+      CALL matrix_Rr (TRS2CRS, r_TRS, r_CRS)
+      CALL antoffset (mjd_TT, r_CRS, ECEFPOS(JJ,1:3,I))
+      CALL matrix_Rr (CRS2TRS, ECEFPOS(JJ,1:3,I), r_TRS)
+      ECEFPOS(JJ,1:3,I) = r_TRS
+      END IF
 IF (PRINTID == 1) &
 PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
 
@@ -515,7 +572,6 @@ CALL brdc_qc_gal(EPHNEW(9,1:150,I),  AVE(7), STD(7))
 CALL brdc_qc_gal(EPHNEW(10,1:150,I), AVE(8), STD(8))
 !print*,'AVE =', AVE
 !print*,'STD =', STD
-!pause
    DO K = 1, 150
          IF (IBAD(K,I) /= 1 )THEN
             IGAL = IGAL +1

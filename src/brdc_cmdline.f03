@@ -32,7 +32,8 @@ opts(1)  = option_s( "inputfile",     .true.,      'f' )
 opts(2)  = option_s( "outputfile",    .true.,      'o' )
 opts(3)  = option_s( "constellation", .true.,      'c' )
 opts(4)  = option_s( "leap second",   .true.,      'l' )
-opts(5)  = option_s( "help",          .true.,      'h' )
+opts(5)  = option_s( "EOP file",      .true.,      'r' )
+opts(6)  = option_s( "help",          .true.,      'h' )
 
 
 ! Get the program name
@@ -50,7 +51,7 @@ optind=1
 
 ! Process options given sequentially
 do
-   select case(getopt("f:o:c:l:h",opts))
+   select case(getopt("f:o:c:l:r:h",opts))
       case( char(0) )
          exit
       case( 'f' )
@@ -63,8 +64,11 @@ do
 !         print *, 'option GNSS constellation=', optarg
               GNSSTYPE    = trim(optarg)
       case( 'l' )
-!         print *, 'option GNSS constellation=', optarg
+!         print *, 'option leap second=', optarg
               leapsec_filename_cfg  = trim(optarg)
+      case( 'r' )
+!         print *, 'option EOP file=', optarg
+              EOP_fname_cfg = trim(optarg)
       case( 'h' )
           print*,' Conversion from broadcast dynamic elements to earth-center earth-fixed (ecef) coordinates '
           print*,' The program can work for multi-GNSS constellations, except for GLONASS that will be handled soon.'
@@ -77,11 +81,14 @@ do
           print*,'      -o --outputfile = output file name'
           print*,'      -c --constellation = GNSS TYPE, e.g., A: All GNSS; G: GPS; R: GLONASS'
           print*,'                                            E: GALILEO;  C: BDS; J: QZSS'
+          print*,'      -l --leap second file = leap.second'
+          print*,'      -r --EOP file'
           print*,'      -h --help.   = Print program help'
           print*,''
           print*,'Examples:'
           print*,''
-          print*,'       ',trim(pgm_name),' -f BRDC00IGS_R_20163210000_01D_MN.rnx -o brdc16321.sp3 -c A -l leap.second'
+          print*,'       ',trim(pgm_name),' -f BRDC00IGS_R_20163210000_01D_MN.rnx -o brdc16321.sp3 -c A -l leap.second &
+                                            -r finals2000A.daily'
           stop
    end select
 end do
