@@ -67,6 +67,24 @@ readbrdcheader.f03 readbrdcmessg.f90 reformbrdc.f brdc2ecef.f \
 m_read_leapsec.f03 taiutc.for time_UTC.f90 time_GPSweek.f90 jd2cal.for cal2jd.for time_GPSweek2.f90 \
 brdc_qc_gps.f90 brdc_qc_gal.f90 m_meanstd.f90 \
 m_antoffset.f90 glnorbint.f glnacc.f \
+\
+EOP.f90 \
+fad03.for  faf03.for   fal03.for   fama03.for  fane03.for  fapa03.for  faur03.for \
+fae03.for  faju03.for  falp03.for  fame03.for  faom03.for  fasa03.for  fave03.for \
+xy06.for s06.for c2ixys.for \
+xys00a.for pnm00a.for bpn2xy.for s00.for pn00a.for nut00a.for pn00.for pr00.for obl80.for bp00.for numat.for bi00.for \
+ir.for rz.for ry.for rx.for \
+anp.for era00.for gmst00.for gmst06.for \
+sp00.for pom00.for \
+ORTHO_EOP.F CNMTX.F UTLIBR.F PMSDNUT2.F FUNDARG.F RG_ZONT2.F \
+interp_iers.f \
+rxr.for tr.for cr.for cp.for \
+time_TT.f90 time_GPS.f90 time_TAI.f90 \
+crs_trs.f90 m_eop_data.f03 m_eop_cor.f03 m_eop_igu.f03 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 interp_lin.f90 \
+era_matrix.f90 \
+\
+CATfile.f90 asc2eph.f90 mdl_planets.f90 STATE.f90 PLEPH.f CONST.f SPLIT.f INTERP.f FSIZER3.f \
+\
 main_brdcorbit.f90
 
 
