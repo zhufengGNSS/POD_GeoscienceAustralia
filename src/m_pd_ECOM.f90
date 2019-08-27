@@ -20,7 +20,7 @@ MODULE m_pd_ECOM
 Contains
 
 
-SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
+SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, Asrp)
 
 
 ! ----------------------------------------------------------------------
@@ -74,6 +74,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
       INTEGER (KIND = 4), INTENT(IN) :: eclipsf
       REAL (KIND = prec_q),INTENT(IN) :: GM
       REAL (KIND = prec_q),INTENT(IN) :: lambda
+      INTEGER(KIND = 4)               :: satsvn
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
@@ -81,7 +82,14 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
       REAL (KIND = prec_q) :: Cr,ab,Lab
       REAL (KIND = prec_q) :: ANG,E,Edot
       REAL (KIND = prec_q) :: Ds,sclfa
-
+! ----------------------------------------------------------------------
+! Satellite physical informaiton
+! ----------------------------------------------------------------------
+      REAL (KIND = prec_q) :: X_SIDE,Z_SIDE
+      REAL (KIND = prec_q) :: MASS,AREA
+      REAL (KIND = prec_q) :: A_SOLAR
+      REAL (KIND = prec_q) :: F0,alpha
+! ---------------------------------------------------------------------
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
      ! REAL (KIND = prec_q) :: Asrp(3,9)
       REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,ez,ev,en
@@ -104,7 +112,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE,INTENT(OUT) :: Asrp
 ! ----------------------------------------------------------------------
       REAL (KIND = 8)      :: II, KN, U
-
+      
 ! ----------------------------------------------------------------------
 ! Numerical Constants
       AU = 1.4959787066d11 ! (m)
@@ -113,6 +121,87 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
              ! ex_i = 0 (default)
              !      = 1 (using dynamic ex vector from attitude routine)
 ! ---------------------------------------------------------------------
+! GPS constellation
+! -----------------
+      if(prnnum.le.100)then
+! IIF
+         if(satsvn.ge.62.and.satsvn.le.73) then
+         MASS   = 1633.0d0
+         Z_SIDE = 5.05D0
+         X_SIDE = 4.55D0
+         A_SOLAR= 22.25D0
+         F0 = 16.7d-5
+         alpha = F0/MASS
+! IIR
+         else
+         MASS   = 1080.0d0
+         Z_SIDE = 4.25D0
+         X_SIDE = 4.11D0
+         A_SOLAR= 13.92D0
+         F0 = 11.15d-5
+         alpha = F0/MASS
+         end if
+! GLONASS constellation
+! ---------------------
+      else if (prnnum .gt. 100 .and. prnnum .le. 200) then
+         Z_SIDE = 1.6620D0
+         X_SIDE = 4.200D0
+         A_SOLAR= 23.616D0
+         
+! GLONASS-K
+         if(satsvn.eq.801.or.satsvn.eq.802.or.satsvn.eq.855)then
+         MASS = 995.0d0
+         F0 = 10.0d-5
+         alpha = F0/MASS
+! GLONASS-M
+         else
+         MASS   = 1415.0d0
+         F0 = 20.9d-5
+         alpha = F0/MASS
+         end if
+
+! GALILEO constellation
+! ---------------------
+      else if (prnnum .gt. 200 .and. prnnum .le. 300) then
+         MASS   = 700.0d0
+         Z_SIDE = 3.002D0
+         X_SIDE = 1.323D0
+         A_SOLAR= 11.0D0
+         F0 = 8.35d-5
+         alpha = F0/MASS
+! BDS constellation
+! -----------------
+      else if (prnnum .gt. 300 .and. prnnum .le. 400) then
+         Z_SIDE = 3.96D0
+         X_SIDE = 4.5D0
+         A_SOLAR= 22.44D0
+
+! BDS MEO
+         if(satsvn.ge.12.and.satsvn.le.15)then
+         MASS   = 800.0d0
+         F0 = 8.35d-5
+         alpha = F0/MASS
+! BDS IGSO
+         elseif(satsvn.ge.7.and.satsvn.le.10.or.satsvn.eq.5.or.satsvn.eq.17)then
+         MASS = 1400.0d0
+         F0 = 50.1d-5
+         alpha = F0/MASS
+         end if
+
+! QZSS constellation
+! ------------------
+      else if (prnnum .gt. 400 .and. prnnum .le. 500) then
+         if(satsvn.eq.1)then
+         MASS = 2000.0d0
+         Z_SIDE = 6.00D0
+         X_SIDE = 12.2D0
+         A_SOLAR= 40.0D0
+         F0 = 50.1d-5 ! Assumed to be the same with BDS/IGSO
+         alpha = F0/MASS
+
+         end if
+      end if
+
 ! The unit vector ez SAT->EARTH
       er(1)=r(1)/sqrt(r(1)**2+r(2)**2+r(3)**2)
       er(2)=r(2)/sqrt(r(1)**2+r(2)**2+r(3)**2)
@@ -282,27 +371,27 @@ sclfa=(AU/Ds)**2
 PD_Param_ID = 0
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ed(1)
-        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)
-        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)
+        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ed(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)*alpha
 !print*,'D0=',PD_Param_ID
 Else
         PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ey(1)
-        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ey(2)
-        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ey(3)
+        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ey(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ey(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ey(3)*alpha
 !print*,'Y0=',PD_Param_ID
 Else
         PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*eb(1)
-        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*eb(2)
-        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*eb(3)
+        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*eb(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*eb(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*eb(3)*alpha
 !print*,'B0=',PD_Param_ID
 Else
         PD_Param_ID = PD_Param_ID
@@ -310,15 +399,15 @@ End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(1)
-        Asrp (2,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(2)
-        Asrp (3,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(3)
+        Asrp (1,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(3)*alpha
 !print*,'DC=',PD_Param_ID
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(1)
-        Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(2)
-        Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(3)
+        Asrp (1,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(3)*alpha
 !print*,'DS=',PD_Param_ID
 Else
         PD_Param_ID = PD_Param_ID
@@ -326,15 +415,15 @@ End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(1)
-        Asrp (2,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(2)
-        Asrp (3,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(3)
+        Asrp (1,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(3)*alpha
 !print*,'YC=',PD_Param_ID
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(1)
-        Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(2)
-        Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(3)
+        Asrp (1,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(3)*alpha
 !print*,'YS=',PD_Param_ID
 Else
         PD_Param_ID = PD_Param_ID
@@ -342,15 +431,15 @@ End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp(1,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(1)
-        Asrp(2,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(2)
-        Asrp(3,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(3)
+        Asrp(1,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(1)*alpha
+        Asrp(2,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(2)*alpha
+        Asrp(3,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(3)*alpha
 !print*,'BC=',PD_Param_ID
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp(1,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(1)
-        Asrp(2,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(2)
-        Asrp(3,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(3)
+        Asrp(1,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(1)*alpha
+        Asrp(2,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(2)*alpha
+        Asrp(3,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(3)*alpha
 !print*,'BS=',PD_Param_ID
 Else
         PD_Param_ID = PD_Param_ID
@@ -365,69 +454,69 @@ PD_Param_ID = 0
 If (ECOM_Bias_glb(1) == 1) Then
 
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ed(1)
-        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)
-        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)
+        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ed(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)*alpha
 Else
         PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
 
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ey(1)
-        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ey(2)
-        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ey(3)
+        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ey(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ey(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ey(3)*alpha
 Else
         PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
 
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*eb(1)
-        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*eb(2)
-        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*eb(3)
+        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*eb(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*eb(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*eb(3)*alpha
 Else
         PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*DCOS(2*del_u)*ed(1)
-        Asrp (2,PD_Param_ID) = -sclfa*DCOS(2*del_u)*ed(2)
-        Asrp (3,PD_Param_ID) = -sclfa*DCOS(2*del_u)*ed(3)
+        Asrp (1,PD_Param_ID) = -sclfa*DCOS(2*del_u)*ed(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*DCOS(2*del_u)*ed(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*DCOS(2*del_u)*ed(3)*alpha
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(1)
-        Asrp (2,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(2)
-        Asrp (3,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(3)
+        Asrp (1,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(3)*alpha
 Else
         PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*DCOS(4*del_u)*ed(1)
-        Asrp (2,PD_Param_ID) = -sclfa*DCOS(4*del_u)*ed(2)
-        Asrp (3,PD_Param_ID) = -sclfa*DCOS(4*del_u)*ed(3)
+        Asrp (1,PD_Param_ID) = -sclfa*DCOS(4*del_u)*ed(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*DCOS(4*del_u)*ed(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*DCOS(4*del_u)*ed(3)*alpha
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(1)
-        Asrp (2,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(2)
-        Asrp (3,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(3)
+        Asrp (1,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(1)*alpha
+        Asrp (2,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(2)*alpha
+        Asrp (3,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(3)*alpha
 Else
         PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp(1,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(1)
-        Asrp(2,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(2)
-        Asrp(3,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(3)
+        Asrp(1,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(1)*alpha
+        Asrp(2,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(2)*alpha
+        Asrp(3,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(3)*alpha
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-        Asrp(1,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(1)
-        Asrp(2,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(2)
-        Asrp(3,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(3)
+        Asrp(1,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(1)*alpha
+        Asrp(2,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(2)*alpha
+        Asrp(3,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(3)*alpha
 Else
         PD_Param_ID = PD_Param_ID
 End If
@@ -442,11 +531,14 @@ End If
 IF (lambda .lt. 1) THEN
 !IF (abs(beta*180.0d0/Pi) .lt. 13.87 .and. del_u*180.0d0/Pi .gt. 167 .and. del_u*180.0d0/Pi .lt. 193) then
 !print*,'lambda=, del_u=', lambda, del_u*180/Pi
-Asrp(1:3,1) = lambda*Asrp(1:3,1)
+Asrp(1:3,1) = lambda*Asrp(1:3,1)*alpha
 
 END IF
 
 !----------------------------------------------------------------------------------------------
+!print*,'alpha =', alpha
+!print*,'PRN= ',prnnum, 'Asrp1 =', Asrp/alpha
+!print*,'PRN= ',prnnum, 'Asrp2 =', Asrp
 
 END SUBROUTINE
 
