@@ -66,7 +66,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
       INTEGER                           :: prnnum,BLKNUM
       REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
       REAL (KIND = prec_q)               :: fx,fy,fz
-      INTEGER                            :: satsvn
+      INTEGER(KIND = 4)                  :: satsvn
 
 ! ----------------------------------------------------------------------
 ! Local variables declaration
@@ -100,6 +100,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
       REAL (KIND = 8)      :: II, KN, U
+      REAL (KIND = prec_q) :: F0,alpha
 ! ----------------------------------------------------------------------
 ! Sun-related variables
 ! ----------------------------------------------------------------------
@@ -133,13 +134,16 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          Z_SIDE = 5.05D0
          X_SIDE = 4.55D0
          A_SOLAR= 22.25D0
+         F0 = 16.7d-5
+         alpha = F0/MASS
 ! IIR
          else
          MASS   = 1080.0d0
          Z_SIDE = 4.25D0
          X_SIDE = 4.11D0
          A_SOLAR= 13.92D0
-
+         F0 = 11.15d-5
+         alpha = F0/MASS
          end if
 
 ! GLONASS constellation
@@ -152,9 +156,13 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
 ! GLONASS-K
          if(satsvn.eq.801.or.satsvn.eq.802.or.satsvn.eq.855)then
          MASS = 995.0d0
+         F0 = 10.0d-5
+         alpha = F0/MASS
 ! GLONASS-M
          else
          MASS   = 1415.0d0
+         F0 = 20.9d-5
+         alpha = F0/MASS
          end if
 
 ! GALILEO constellation
@@ -164,7 +172,8 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          Z_SIDE = 3.002D0
          X_SIDE = 1.323D0
          A_SOLAR= 11.0D0
-
+         F0 = 8.35d-5
+         alpha = F0/MASS
 ! BDS constellation
 ! -----------------
       else if (prnnum .gt. 300 .and. prnnum .le. 400) then
@@ -175,9 +184,13 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
 ! BDS MEO
          if(satsvn.ge.12.and.satsvn.le.15)then
          MASS   = 800.0d0
+         F0 = 8.35d-5
+         alpha = F0/MASS
 ! BDS IGSO
          elseif(satsvn.ge.7.and.satsvn.le.10.or.satsvn.eq.5.or.satsvn.eq.17)then
          MASS = 1400.0d0
+         F0 = 50.1d-5
+         alpha = F0/MASS
          end if
 
 ! QZSS constellation
@@ -188,6 +201,8 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          Z_SIDE = 6.00D0
          X_SIDE = 12.2D0
          A_SOLAR= 40.0D0
+         F0 = 50.1d-5 ! Assumed to be the same with BDS/IGSO
+         alpha = F0/MASS
 !         end if
       end if
 
@@ -436,7 +451,7 @@ If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)*alpha
         END DO
 !print*,'ECOM1-caused accelerations'
 !print*,'D0'
@@ -447,7 +462,7 @@ If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)*alpha
         END DO
 !print*,'Y0'
 Else
@@ -457,7 +472,7 @@ If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)*alpha
         END DO
 !print*,'B0'
 Else
@@ -468,14 +483,14 @@ If (ECOM_CPR_glb(1) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ed(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ed(i)*alpha
         END DO
 !print*,'DC'
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ed(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ed(i)*alpha
         END DO
 !print*,'DS'
 Else
@@ -486,14 +501,14 @@ If (ECOM_CPR_glb(2) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ey(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*ey(i)*alpha
         END DO
 !print*,'YC'
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ey(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ey(i)*alpha
         END DO
 !print*,'YS'
 Else
@@ -504,14 +519,14 @@ If (ECOM_CPR_glb(3) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)*alpha
         END DO
 !print*,'BC'
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)*alpha
         END DO
 !print*,'BS'
 Else
@@ -527,7 +542,7 @@ If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)*alpha
         END DO
 Else
         PD_Param_ID = PD_Param_ID
@@ -536,7 +551,7 @@ If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)*alpha
         END DO
 Else
         PD_Param_ID = PD_Param_ID
@@ -545,7 +560,7 @@ If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)*alpha
         END DO
 Else
         PD_Param_ID = PD_Param_ID
@@ -555,13 +570,13 @@ If (ECOM_CPR_glb(1) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(2*del_u)*ed(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(2*del_u)*ed(i)*alpha
         END DO
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(2*del_u)*ed(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(2*del_u)*ed(i)*alpha
         END DO
 Else
         PD_Param_ID = PD_Param_ID
@@ -571,13 +586,13 @@ If (ECOM_CPR_glb(2) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(4*del_u)*ed(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(4*del_u)*ed(i)*alpha
         END DO
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(4*del_u)*ed(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(4*del_u)*ed(i)*alpha
         END DO
 Else
         PD_Param_ID = PD_Param_ID
@@ -587,13 +602,13 @@ If (ECOM_CPR_glb(3) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)*alpha
         END DO
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)
+        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)*alpha
         END DO
 Else
         PD_Param_ID = PD_Param_ID
@@ -629,15 +644,15 @@ srpcoef(1) = lambda*srpcoef(1)
 
 
 DO i=1,3
-     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
-                       +   srpcoef(2)*sclfa*ey(i)              &
-                       +   srpcoef(3)*sclfa*eb(i)              &
-                       +   srpcoef(4)*sclfa*DCOS(del_u)*ed(i)  &
-                       +   srpcoef(5)*sclfa*DSIN(del_u)*ed(i)  &
-                       +   srpcoef(6)*sclfa*DCOS(del_u)*ey(i)  &
-                       +   srpcoef(7)*sclfa*DSIN(del_u)*ey(i)  &
-                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)  &
-                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)  
+     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)*alpha              &
+                       +   srpcoef(2)*sclfa*ey(i)*alpha              &
+                       +   srpcoef(3)*sclfa*eb(i)*alpha              &
+                       +   srpcoef(4)*sclfa*DCOS(del_u)*ed(i)*alpha  &
+                       +   srpcoef(5)*sclfa*DSIN(del_u)*ed(i)*alpha  &
+                       +   srpcoef(6)*sclfa*DCOS(del_u)*ey(i)*alpha  &
+                       +   srpcoef(7)*sclfa*DSIN(del_u)*ey(i)*alpha  &
+                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)*alpha  &
+                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)*alpha  
 
 END DO
 
@@ -648,15 +663,15 @@ END DO
 
 
 DO i=1,3
-     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
-                       +   srpcoef(2)*sclfa*ey(i)              &
-                       +   srpcoef(3)*sclfa*eb(i)              &
-                       +   srpcoef(4)*sclfa*DCOS(2*del_u)*ed(i)  &
-                       +   srpcoef(5)*sclfa*DSIN(2*del_u)*ed(i)  &
-                       +   srpcoef(6)*sclfa*DCOS(4*del_u)*ed(i)  &
-                       +   srpcoef(7)*sclfa*DSIN(4*del_u)*ed(i)  &
-                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)  &
-                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)
+     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)*alpha              &
+                       +   srpcoef(2)*sclfa*ey(i)*alpha              &
+                       +   srpcoef(3)*sclfa*eb(i)*alpha              &
+                       +   srpcoef(4)*sclfa*DCOS(2*del_u)*ed(i)*alpha  &
+                       +   srpcoef(5)*sclfa*DSIN(2*del_u)*ed(i)*alpha  &
+                       +   srpcoef(6)*sclfa*DCOS(4*del_u)*ed(i)*alpha  &
+                       +   srpcoef(7)*sclfa*DSIN(4*del_u)*ed(i)*alpha  &
+                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)*alpha  &
+                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)*alpha
 
 END DO
      
