@@ -91,6 +91,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
       INTEGER              :: ex_i
       INTEGER              :: i,j,k,m
       INTEGER              :: N_param, PD_Param_ID
+      INTEGER              :: att_ON
 ! ----------------------------------------------------------------------
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
@@ -117,8 +118,12 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
     ex_i = 0 ! change the definition of the unit vector ex 
              ! ex_i = 0 (default)
              !      = 1 (using dynamic ex vector from attitude routine)
+  att_ON = 0 ! att_ON = 1 : use the orbit-normal attitude for BDS satellite
+             !              when the beta < 4 deg
+             !        = 0 : use the yaw-steering attitude for BDS satellite 
+             !              for all beta angles 
 ! ---------------------------------------------------------------------
-
+  
 ! initialize the SRP force
 ! -------------------------
      DO i=1,3
@@ -313,6 +318,37 @@ END IF
       end if
 
 !print*,'del_u=, lambda=',del_u*180/Pi, lambda
+
+! Implement the orbit-normal attitude for BDS satellites when the beat < 4 deg
+! ----------------------------------------------------------------------------
+     if (att_ON == 1) then
+     if(prnnum .gt. 300 .and. prnnum .le. 400) then
+        if (abs(beta*180.0d0/Pi) < 4.d0) then
+!        PRINT*,'The orbit-normal attitude is applied.'
+!        PRINT*,'ed_YS =',ed, sqrt(ed(1)**2+ed(2)**2+ed(3)**2)
+!        print*,'ey_YS =',ey, sqrt(ey(1)**2+ey(2)**2+ey(3)**2)
+!        print*,'eb_YS =',eb, sqrt(eb(1)**2+eb(2)**2+eb(3)**2)
+        CALL productcross (ez,ev,yy)
+        ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+        CALL productcross (ed,ey,yy)
+        eb(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        eb(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        eb(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        
+        CALL productcross (ey,eb,yy)
+        ed(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ed(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ed(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+!        PRINT*,'ed_ON =',ed, sqrt(ed(1)**2+ed(2)**2+ed(3)**2)
+!        print*,'ey_ON =',ey, sqrt(ey(1)**2+ey(2)**2+ey(3)**2)
+!        print*,'eb_ON =',eb, sqrt(eb(1)**2+eb(2)**2+eb(3)**2)
+!
+        end if
+     end if
+     end if
 
 !========================================
 ! angles between ed and each surface(k)

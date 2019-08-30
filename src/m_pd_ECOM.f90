@@ -100,6 +100,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
       INTEGER              :: ex_i
+      INTEGER              :: att_ON
 ! ----------------------------------------------------------------------
 ! Sun-related variables
 ! ----------------------------------------------------------------------
@@ -120,6 +121,10 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
     ex_i = 0 ! change the definition of the unit vector ex
              ! ex_i = 0 (default)
              !      = 1 (using dynamic ex vector from attitude routine)
+  att_ON = 0 ! att_ON = 1 : use the orbit-normal attitude for BDS satellite
+             !              when the beta < 4 deg
+             !        = 0 : use the yaw-steering attitude for BDS satellite
+             !              for all beta angles
 ! ---------------------------------------------------------------------
 ! GPS constellation
 ! -----------------
@@ -306,6 +311,29 @@ END IF
       del_u=del_u+2*Pi
       END IF 
 
+! Implement the orbit-normal attitude for BDS satellites when the beat < 4 deg
+! ----------------------------------------------------------------------------
+     if (att_ON == 1) then
+     if(prnnum .gt. 300 .and. prnnum .le. 400) then
+        if (abs(beta*180.0d0/Pi) < 4.d0) then
+
+        CALL productcross (ez,ev,yy)
+        ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+        CALL productcross (ed,ey,yy)
+        eb(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        eb(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        eb(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)  
+   
+        CALL productcross (ey,eb,yy)
+        ed(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ed(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ed(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        end if
+     end if
+     end if
 ! ----------------------------------------------------------------------
 ! Partial derivatives w.r.t. unknown parameters
 
