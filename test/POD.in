@@ -34,11 +34,10 @@ VEQ_fname_cfg          VEQ.in	! Variational Equations
 %% Orbit arc length (in hours) 
 ! ----------------------------------------------------------------------
 ! Orbit Estimation arc
-orbit_determination_arc_cfg     06
-  
+orbit_determination_arc_cfg     24  
 
 ! Orbit Prediction arc
-orbit_prediction_arc_cfg        06
+orbit_prediction_arc_cfg        12
 
 
 ! ---------------------------------------------------------------------------
@@ -52,7 +51,6 @@ EOP_solution_cfg          1
 
 ! EOP data file name   {EOP_sol=1: eopc04_08_IAU2000.62-now	 EOP_sol=2: finals2000A.daily}
 EOP_fname_cfg             eopc04_14_IAU2000.62-now 		
-!EOP_fname_cfg              finals2000A.daily		
 
 ! ERP data file name
 ERP_fname_cfg             igu18543_12.erp
@@ -71,24 +69,43 @@ iau_model_cfg             2000
 %% Observation Model                                                       
 ! External orbit as pseudo-observations                                                
 pseudobs_orbit_filename_cfg		  igs19424.sp3
-!pseudobs_orbit_filename_cfg		  igu20561_18.sp3
-!pseudobs_orbit_filename_cfg		  igs20526.sp3 
-!pseudobs_orbit_filename_cfg		  igu20520_00.sp3
+ 
 ---------------------------------------------------------------------------
 %% External Orbit Comparison  
 ext_orbit_filename_cfg		  	  igs19424.sp3					
-!ext_orbit_filename_cfg		  	  igu20561_18.sp3					
-!ext_orbit_filename_cfg		  	  igu20520_00.sp3					
-!ext_orbit_filename_cfg		  	  igs20526.sp3 
+
+
 ---------------------------------------------------------------------------
 %% Parameter Estimation
 Estimator_Iterations_cfg     2
 
+
+----------------------------------------------------------------------
+%% Reference System of Variational Equations' Partials & Parameter Estimation 
+----------------------------------------------------------------------
+! 1. Celestial Reference System :: ICRS
+! 2. Terrestrial Reference System :: ITRS
+VEQ_REFSYS_cfg	  	  		ITRS
+! ----------------------------------------------------------------------
  
 ----------------------------------------------------------------------
 %% Write to sp3 orbit format: Option for write Satellite Velocity vector 
 ----------------------------------------------------------------------
 ! 0. sp3_velocity_cfg = 0 :: Do not write Velocity vector to sp3 orbit
 ! 1. sp3_velocity_cfg > 0 :: Write Velocity vector to sp3 orbit
-sp3_velocity_cfg	  	  0
+sp3_velocity_cfg	  	  1
+! ----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+%% Write partials of the velocity vector w.r.t. parameters into the orbits_partials output file: 
+----------------------------------------------------------------------
+! 0. partials_velocity_cfg = 0 :: Do not write Velocity vector's partials elements
+! 1. partials_velocity_cfg > 0 :: Write Velocity vector's partials elements
+partials_velocity_cfg	  	  0
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+%% Leap second
+leapsec_filename_cfg        leap.second
 ! ----------------------------------------------------------------------

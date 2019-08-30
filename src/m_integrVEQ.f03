@@ -60,7 +60,9 @@ SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orb
       USE mdl_precision
       USE mdl_num
       !USE mdl_param
+      USE mdl_config
       USE m_veq_rkn768
+      USE m_veqC2T
       IMPLICIT NONE
 
 	  
@@ -77,6 +79,7 @@ SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orb
 ! ----------------------------------------------------------------------
 ! OUT
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbc, Smatrix, Pmatrix  
+!      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Smatrix_T, Pmatrix_T  
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -94,12 +97,32 @@ SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orb
       REAL (KIND = prec_d), DIMENSION(8) :: Zo 
       REAL (KIND = prec_d), DIMENSION(6) :: yo, yn, ey 
 ! ----------------------------------------------------------------------	  
-      REAL (KIND = prec_d), DIMENSION(6,6) :: veqZo, veqZ  
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqPo, veqP 
+      REAL (KIND = prec_d), DIMENSION(6,6) :: veqZo, veqZ, veqZ_T   
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqPo, veqP, veqP_T 
+      INTEGER (KIND = prec_int2) :: Nveq_rv
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Smatrix_T, Pmatrix_T  
+      INTEGER (KIND = prec_int2) :: VEQ_refsys
+! ----------------------------------------------------------------------	  
 
 
+! ----------------------------------------------------------------------
+! Matrices (Smatrix, Pmatrix) dimension of Variational Equations solution regarding the velocity vector rows 
+Nveq_rv = 6
+IF (partials_velocity_cfg == 0) THEN
+	Nveq_rv = 3
+END IF
+! ----------------------------------------------------------------------
 
-
+! ----------------------------------------------------------------------
+! Reference system of Variational Equations solution' matrices (Smatrix, Pmatrix)
+! ----------------------------------------------------------------------
+IF (VEQ_REFSYS_cfg == 'ICRS') THEN 
+	VEQ_refsys = 1 
+ELSE IF (VEQ_REFSYS_cfg == 'ITRS') THEN
+	VEQ_refsys = 2 
+END IF
+! ----------------------------------------------------------------------
+ 
 ! ----------------------------------------------------------------------
 ! Initial Conditions
 ! ----------------------------------------------------------------------
@@ -119,18 +142,18 @@ Nepochs = INT(arc / step) + 1
 ! Dynamic allocatable arrays 
 ! ----------------------------------------------------------------------
 ALLOCATE (orbc(Nepochs,8), STAT = AllocateStatus)
-
-!ALLOCATE (Smatrix(Nepochs*6,6), STAT = AllocateStatus)
-ALLOCATE (Smatrix(Nepochs,6*6+2), STAT = AllocateStatus)
-
-!ALLOCATE (Pmatrix(Nepochs,Nparam*6), STAT = AllocateStatus)
-ALLOCATE (Pmatrix(Nepochs,Nparam*6+2), STAT = AllocateStatus)
-
+!ALLOCATE (Smatrix(Nepochs,6*6+2), STAT = AllocateStatus)
+ALLOCATE (Smatrix(Nepochs,6*Nveq_rv+2), STAT = AllocateStatus)
+!ALLOCATE (Pmatrix(Nepochs,Nparam*6+2), STAT = AllocateStatus)
+ALLOCATE (Pmatrix(Nepochs,Nparam*Nveq_rv+2), STAT = AllocateStatus)
 If (Nparam /= 0) Then
 ALLOCATE (veqPo(6,Nparam), STAT = AllocateStatus)
 Else
 ALLOCATE (veqPo(6,1), STAT = AllocateStatus)
 End IF
+
+ALLOCATE (Smatrix_T(Nepochs,6*Nveq_rv+2), STAT = AllocateStatus)
+ALLOCATE (Pmatrix_T(Nepochs,Nparam*Nveq_rv+2), STAT = AllocateStatus)
 ! ----------------------------------------------------------------------
 
 
@@ -171,9 +194,11 @@ Smatrix(1,2) = to_sec
 Smatrix(1,  3:8) = veqZo(1,1:6)
 Smatrix(1, 9:14) = veqZo(2,1:6)
 Smatrix(1,15:20) = veqZo(3,1:6)
+IF (Nveq_rv == 6) Then
 Smatrix(1,21:26) = veqZo(4,1:6)
 Smatrix(1,27:32) = veqZo(5,1:6)
 Smatrix(1,33:38) = veqZo(6,1:6)
+End IF
 
 ! Sensitivity matrix
 Pmatrix(1,1) = MJDo
@@ -186,7 +211,8 @@ Pmatrix(1,2) = to_sec
 !End Do
 i1 = 0
 iparam = 0	
-Do i1 = 1 , 6 
+!Do i1 = 1 , 6 
+Do i1 = 1 , Nveq_rv 
 Do iparam = 1 , Nparam
    Pmatrix(1, 2+(i1-1)*Nparam+iparam) = veqPo(i1,iparam) 
    !(/ veqP(1,iparam), veqP(2,iparam), veqP(3,iparam), veqP(4,iparam), veqP(5,iparam), veqP(6,iparam) /)
@@ -196,7 +222,37 @@ i1 = 0
 !print *,"Pmatrix(1,:)", Pmatrix(1,:)
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! VEQ matrices transformation from celestial to terrestrial reference system
+! ----------------------------------------------------------------------
+! Transformation of state transition matrix and sensitivity matrix at initial epoch
+CALL veqC2T (MJDo, to_sec, veqZo, veqPo, veqZ_T, veqP_T)
 
+! State Transition Matrix in itrs
+Smatrix_T(1,1) = MJDo
+Smatrix_T(1,2) = to_sec
+Smatrix_T(1,  3:8) = veqZ_T(1,1:6)
+Smatrix_T(1, 9:14) = veqZ_T(2,1:6)
+Smatrix_T(1,15:20) = veqZ_T(3,1:6)
+IF (Nveq_rv == 6) Then
+Smatrix_T(1,21:26) = veqZ_T(4,1:6)
+Smatrix_T(1,27:32) = veqZ_T(5,1:6)
+Smatrix_T(1,33:38) = veqZ_T(6,1:6)
+End IF
+
+! Sensitivity matrix in ITRS
+Pmatrix_T(1,1) = MJDo
+Pmatrix_T(1,2) = to_sec
+i1 = 0
+iparam = 0	
+!Do i1 = 1 , 6 
+Do i1 = 1 , Nveq_rv 
+Do iparam = 1 , Nparam
+   Pmatrix_T(1, 2+(i1-1)*Nparam+iparam) = veqP_T(i1,iparam) 
+End Do
+End Do
+i1 = 0
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Numerical integration methods
@@ -250,9 +306,11 @@ Do j = 1 , Nepochs-1
 	Smatrix(j+1,  3:8) = veqZ(1,1:6)
 	Smatrix(j+1, 9:14) = veqZ(2,1:6)
 	Smatrix(j+1,15:20) = veqZ(3,1:6)
+IF (Nveq_rv == 6) Then
 	Smatrix(j+1,21:26) = veqZ(4,1:6)
 	Smatrix(j+1,27:32) = veqZ(5,1:6)
 	Smatrix(j+1,33:38) = veqZ(6,1:6)
+END IF
 
 	! Sensitivity matrix
 	Pmatrix(j+1,1) = orbc(j+1,1)
@@ -264,7 +322,8 @@ Do j = 1 , Nepochs-1
 
 	i1 = 0
 	iparam = 0	
-	Do i1 = 1 , 6 
+	!Do i1 = 1 , 6 
+	Do i1 = 1 , Nveq_rv 
 	Do iparam = 1 , Nparam
 	   Pmatrix(j+1, 2+(i1-1)*Nparam+iparam) = veqP(i1,iparam) 
 	End Do
@@ -280,6 +339,34 @@ Do j = 1 , Nepochs-1
     ! Initial VEQ arrays at next epoch numerical integration 
     veqZo = veqZ
     veqPo = veqP
+	
+! ----------------------------------------------------------------------
+! VEQ matrices transformation from celestial to terrestrial reference system
+	mjd_th = INT(MJDo) + TT / (24.0D0 * 3600.0D0)
+	CALL veqC2T (mjd_th, TTo, veqZ, veqP, veqZ_T, veqP_T)
+! State Transition Matrix in itrs at the next epoch TT (to+h)
+	Smatrix_T(j+1,1) = orbc(j+1,1)
+	Smatrix_T(j+1,2) = orbc(j+1,2)
+	Smatrix_T(j+1,  3:8) = veqZ_T(1,1:6)
+	Smatrix_T(j+1, 9:14) = veqZ_T(2,1:6)
+	Smatrix_T(j+1,15:20) = veqZ_T(3,1:6)
+IF (Nveq_rv == 6) Then
+	Smatrix_T(j+1,21:26) = veqZ_T(4,1:6)
+	Smatrix_T(j+1,27:32) = veqZ_T(5,1:6)
+	Smatrix_T(j+1,33:38) = veqZ_T(6,1:6)
+END IF
+! Sensitivity matrix in ITRS
+	Pmatrix_T(j+1,1) = orbc(j+1,1)
+	Pmatrix_T(j+1,2) = orbc(j+1,2)
+	i1 = 0
+	iparam = 0	
+	Do i1 = 1 , Nveq_rv 
+	Do iparam = 1 , Nparam
+	   Pmatrix_T(j+1, 2+(i1-1)*Nparam+iparam) = veqP_T(i1,iparam) 
+	End Do
+	End Do
+! ----------------------------------------------------------------------
+
 End DO
 ! ----------------------------------------------------------------------
 
@@ -322,9 +409,11 @@ Do j = 1 , Nepochs-1
 	Smatrix(j+1,  3:8) = veqZ(1,1:6)
 	Smatrix(j+1, 9:14) = veqZ(2,1:6)
 	Smatrix(j+1,15:20) = veqZ(3,1:6)
+IF (Nveq_rv == 6) Then
 	Smatrix(j+1,21:26) = veqZ(4,1:6)
 	Smatrix(j+1,27:32) = veqZ(5,1:6)
 	Smatrix(j+1,33:38) = veqZ(6,1:6)
+END IF
 
 	! Sensitivity matrix
 	Pmatrix(j+1,1) = orbc(j+1,1)
@@ -335,7 +424,8 @@ Do j = 1 , Nepochs-1
 	!End Do
 	i1 = 0
 	iparam = 0	
-	Do i1 = 1 , 6 
+	!Do i1 = 1 , 6 
+	Do i1 = 1 , Nveq_rv 
 	Do iparam = 1 , Nparam
 	   Pmatrix(j+1, 2+(i1-1)*Nparam+iparam) = veqP(i1,iparam) 
 	End Do
@@ -345,6 +435,14 @@ End DO
 
 End If
 
+
+! ----------------------------------------------------------------------
+! VEQ Reference System
+IF (VEQ_refsys == 2) THEN
+	Smatrix = Smatrix_T
+	Pmatrix = Pmatrix_T
+END IF
+! ----------------------------------------------------------------------
 
 End Subroutine
 

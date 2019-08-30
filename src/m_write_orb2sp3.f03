@@ -40,6 +40,7 @@ SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, sp3_fname, sat_vel)
 
       USE mdl_precision
       USE mdl_num
+      USE mdl_config
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -125,9 +126,13 @@ End IF
 REFRAME = 'ITRF '
 ! Time System
 TIMESYS = 'GPS'
+
 ! Orbit Type
-ORBTYPE = 'FIT'
-ORBTYPE = 'INT'
+IF (POD_MODE_cfg == 1 .or. POD_MODE_cfg == 2) THEN
+	ORBTYPE = 'FIT'
+ELSE IF (POD_MODE_cfg == 3 .or. POD_MODE_cfg == 4) THEN
+	ORBTYPE = 'INT'
+END IF
 
 Agency  = '  GA'
 
