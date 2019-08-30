@@ -58,10 +58,11 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 !			Geoscience Australia, CRC-SI
 ! Created:	20 April 2018
 !
-! Changes:  18-12-2018  Tzupang Tseng : enabled the function of the ECOM SRP estimation and added some conditions to judge which model
+! Changes:  18-12-2018  Tzupang Tseng : Enabled the function of the ECOM SRP estimation and added some conditions to judge which model
 !                                       is used to improve the GNSS orbit modelling (Currently the ECOM model is only estimated with full
 !                                       9 coefficients or 3 bias terms. The adjustable function has not been ready yet)
 !           21-02-2019  Tzupang Tseng : The adjustable function of the ECOM model has been activated.
+!           06-08-2019  Tzupang Tseng : Added a function to skip bad orbits with zero value in SP3 file
 !
 ! Last modified:
 ! 20 May 2019,	Dr. Thomas Papanikolaou
@@ -82,6 +83,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       USE mdl_precision
       USE mdl_num
       USE mdl_param
+      USE mdl_config
       USE mdl_planets
       USE mdl_tides
       USE m_orbinteg
@@ -155,6 +157,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf, orb_itrf  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix  
+      INTEGER (KIND = prec_int2) :: VEQ_refsys
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -200,6 +203,18 @@ CALL prm_pseudobs (EQMfname)
 ! ----------------------------------------------------------------------
 ! External Orbit comparison: Precise Orbit (sp3)
 !CALL prm_orbext (EQMfname)												
+! ----------------------------------------------------------------------
+! Skip bad orbits with zero value in SP3 file
+CALL scan0orb
+! ----------------------------------------------------------------------
+! Reference system of Variational Equations solution' matrices (Smatrix, Pmatrix)
+! and orbit parameter estimation 
+! ----------------------------------------------------------------------
+IF (VEQ_REFSYS_cfg == 'ICRS') THEN 
+	VEQ_refsys = 1 
+ELSE IF (VEQ_REFSYS_cfg == 'ITRS') THEN
+	VEQ_refsys = 2 
+END IF
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -289,7 +304,17 @@ Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MI
 ! ----------------------------------------------------------------------
 ! Parameter estimation: Initial Conditions and orbit parameters
 ! ----------------------------------------------------------------------
-Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
+IF (VEQ_refsys == 1) THEN
+	! Orbit parameter estimator
+	Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
+ELSE IF (VEQ_refsys == 2) THEN
+	! Time System according to global variable TIME_Scale (Module mdl_param.f03)
+	time_sys = TIME_SCALE
+	! Orbit transformation to terrestrial frame: ICRF to ITRF
+	CALL orbC2T (orb_icrf, time_sys, orb_itrf)
+	! Orbit parameter estimator
+	Call orb_estimator(orb_itrf, veqSmatrix, veqPmatrix, pseudobs_ITRF, Xmatrix, Wmatrix, Amatrix)		
+END IF
 
 filename = "Amatrix.out"
 !Call writearray (Amatrix, filename)
