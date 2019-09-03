@@ -3,7 +3,7 @@ CC
 CC NAME       :  chkbrdc_gps
 CC
 CC PURPOSE    :  CHECK ONE EPHEMERIS MESSAGE FOR GARBAGE. SET STATUS
-CC               ACCORDING TO THE RESULT OF THE CHECK
+CC               ACCORDING TO THE RESULT OF THE CHECK (REFER TO BERNESE CHKBR1.f)
 CC
 CC PARAMETERS :
 CC         IN :  EPH    : EPHEMERIDES INFORMATION              R*8(20)
@@ -34,6 +34,14 @@ CC                              :        :
 CC        OUT :  STATUS : STATUS OF THE MESSAGE (RESULT OF    CH*8
 CC                          THE CHECKS PERFORMED)
 CC
+CC AUTHOR     :  M.ROTHACHER
+CC
+CC
+CC CREATED    :  88/08/02 09:08
+CC
+CC CHANGES    :  02-08-2019  T. Tseng: Introduce the STD values for
+CC                                     quality control
+
       IMPLICIT NONE
 C
 C DECLARATIONS INSTEAD OF IMPLICIT

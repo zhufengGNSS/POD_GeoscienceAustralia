@@ -4,7 +4,7 @@ CC NAME       : glnacc
 CC
 CC
 CC PURPOSE    :  COMPUTES GLONASS ACCELERATION FOR SATELLITE POSITIONS 
-CC               PROPAGATION IN ECEF SYSTEM
+CC               PROPAGATION IN ECEF SYSTEM (REFER TO BERNESE GLDVDT.f)
 CC
 CC PARAMETERS :
 CC         IN :  ITYP   : =1 FOR X-COMPONENT                  I*4
@@ -17,6 +17,10 @@ CC               VX     : VELOCITY IN X DIRECTION             R*8
 CC               VY     : VELOCITY IN Y DIRECTION             R*8
 CC        OUT :  ACC    : ACCELERATION                        R*8
 CC
+CC AUTHOR     :  H.HABRICH
+CC
+CC CREATED    :  13-FEB-1997
+
 C*
       IMPLICIT NONE
       REAL*8    X,Y,Z,VX,VY,GM,AE,OMEGA,C20,ACC,T1,T2,T3,T4,R,D
