@@ -45,15 +45,19 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
 !
 ! Created:	08-Jan-2018
 !
-! Changes:    11-12-2018  Tzupang Tseng : make the PD matrix dynamic
-!             31-01-2019  Tzupang Tseng : change the definition of ey by
-!                                         dividing the length of ey
-!             20-02-2019  Tzupang Tseng : create a function for switching on and
-!                                         off some particular coefficients in ECOM models
-!             22-03-2019  Tzupang Tseng : set a simple condition for the eclipsed satellites
-!                                         where only D0 partials are setup to zero 
-!             02-05-2019  Tzupang Tseng : use the coefficient from the shadow.f90 for scaling
-!                                         the SRP effect
+! Changes:  11-12-2018 Tzupang Tseng: make the PD matrix dynamic
+!           31-01-2019 Tzupang Tseng: change the definition of ey by
+!                                     dividing the length of ey
+!           20-02-2019 Tzupang Tseng: create a function for switching on and
+!                                     off some particular coefficients in ECOM models
+!           22-03-2019 Tzupang Tseng: set a simple condition for the eclipsed satellites
+!                                     where only D0 partials are setup to zero 
+!           02-05-2019 Tzupang Tseng: use the coefficient from the shadow.f90 for scaling
+!                                     the SRP effect
+!           30-08-2019 Tzupang Tseng: implement the orbit-normal attitude for the BDS SRP estimation (still need to be tested)
+!           03-09-2019 Tzupang Tseng: use a simple box-wing model as a priori SRP value where the ECOM is
+!                                     used to adjust the box-wing model(BOX-WING + ECOM)
+
 ! 
 ! Copyright:  GEOSCIENCE AUSTRALIA
 ! ----------------------------------------------------------------------
@@ -78,10 +82,12 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_q) :: AU,Pi
+      REAL (KIND = prec_q) :: AU,Pi,Ps
       REAL (KIND = prec_q) :: Cr,ab,Lab
       REAL (KIND = prec_q) :: ANG,E,Edot
       REAL (KIND = prec_q) :: Ds,sclfa
+      REAL (KIND = prec_q) :: fxo,fyo,fzo
+      REAL (KIND = prec_q), DIMENSION(4) :: cosang
 ! ----------------------------------------------------------------------
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
@@ -101,6 +107,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
       REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
       INTEGER              :: ex_i
       INTEGER              :: att_ON
+      INTEGER              :: flag_BW
 ! ----------------------------------------------------------------------
 ! Sun-related variables
 ! ----------------------------------------------------------------------
@@ -117,6 +124,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
 ! ----------------------------------------------------------------------
 ! Numerical Constants
       AU = 1.4959787066d11 ! (m)
+      Ps = 4.5567D-6 ! (Nm^-2)
       Pi = 4*atan(1.0d0)
     ex_i = 0 ! change the definition of the unit vector ex
              ! ex_i = 0 (default)
@@ -125,6 +133,9 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
              !              when the beta < 4 deg
              !        = 0 : use the yaw-steering attitude for BDS satellite
              !              for all beta angles
+ flag_BW = 2 !flag_BW = 1 : use the simple box-wing model as a priori SRP values
+             !        = 0 : use the constant f0 as a priori SRP value
+             !        = any numbers: directly estimate the SRP parameters
 ! ---------------------------------------------------------------------
 ! GPS constellation
 ! -----------------
@@ -136,7 +147,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
          X_SIDE = 4.55D0
          A_SOLAR= 22.25D0
          F0 = 16.7d-5
-         alpha = F0/MASS
 ! IIR
          else
          MASS   = 1080.0d0
@@ -144,7 +154,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
          X_SIDE = 4.11D0
          A_SOLAR= 13.92D0
          F0 = 11.15d-5
-         alpha = F0/MASS
          end if
 ! GLONASS constellation
 ! ---------------------
@@ -162,7 +171,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
          else
          MASS   = 1415.0d0
          F0 = 20.9d-5
-         alpha = F0/MASS
          end if
 
 ! GALILEO constellation
@@ -173,7 +181,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
          X_SIDE = 1.323D0
          A_SOLAR= 11.0D0
          F0 = 8.35d-5
-         alpha = F0/MASS
 ! BDS constellation
 ! -----------------
       else if (prnnum .gt. 300 .and. prnnum .le. 400) then
@@ -185,12 +192,12 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
          if(satsvn.ge.12.and.satsvn.le.15)then
          MASS   = 800.0d0
          F0 = 8.35d-5
-         alpha = F0/MASS
+!         alpha = F0/MASS
 ! BDS IGSO
          elseif(satsvn.ge.7.and.satsvn.le.10.or.satsvn.eq.5.or.satsvn.eq.17)then
          MASS = 1400.0d0
          F0 = 50.1d-5
-         alpha = F0/MASS
+!         alpha = F0/MASS
          end if
 
 ! QZSS constellation
@@ -202,7 +209,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
          X_SIDE = 12.2D0
          A_SOLAR= 40.0D0
          F0 = 50.1d-5 ! Assumed to be the same with BDS/IGSO
-         alpha = F0/MASS
 
          end if
       end if
@@ -227,6 +233,10 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
       ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
       ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 
+! The unit vector of x side, which is always illuminated by the sun.
+
+      CALL productcross (ey,ez,ex)
+
 ! Using the BODY-X univector from Kouba routine to redefine the ey for the satellite eclipsed
 IF(ex_i .gt. 0) THEN
       ex(1)=eBX_ecl(1)/sqrt(eBX_ecl(1)**2+eBX_ecl(2)**2+eBX_ecl(3)**2)
@@ -248,17 +258,11 @@ END IF
 
      CALL productcross (er,ev,en)
 
-
-
 ! computation of the satellite argument of latitude and orbit inclination
       CALL kepler_z2k (r,v,GM,kepler)
       u_sat = kepler(9)*Pi/180.d0
       i_sat = kepler(3)*Pi/180.d0
       omega_sat = kepler(4)*Pi/180.d0
-!      CALL XYZELE(GM, r, v, II, U, KN)
-!      u_sat = U
-!      i_sat = II
-!      omega_sat = KN
 
 ! compute the sun position in the satellite orbit plane by rotating big Omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
@@ -335,6 +339,36 @@ END IF
      end if
      end if
 ! ----------------------------------------------------------------------
+
+!========================================
+! angles between ed and each surface(k)
+! k=1: +X
+!   2: +Y
+!   3: +Z
+!   4: solar panels
+!=======================================
+     cosang(1)=ed(1)*ex(1)+ed(2)*ex(2)+ed(3)*ex(3)
+     cosang(2)=ed(1)*ey(1)+ed(2)*ey(2)+ed(3)*ey(3)
+     cosang(3)=ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3)
+     cosang(4)=ed(1)*ed(1)+ed(2)*ed(2)+ed(3)*ed(3)
+
+! A scaling factor is applied to ECOM model
+!******************************************************************
+      sclfa=(AU/Ds)**2
+
+! SIMPLE BOX-WING model as the a priori SRP value
+      if (flag_BW == 1) then
+         fxo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1.5*A_SOLAR*cosang(4)*ed(1))
+         fyo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1.5*A_SOLAR*cosang(4)*ed(2))
+         fzo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1.5*A_SOLAR*cosang(4)*ed(3))
+         alpha = sqrt(fxo**2+fyo**2+fzo**2)
+      else if (flag_BW == 0) then
+         alpha = F0/MASS
+      else
+         alpha = 1.d0
+      end if
+
+
 ! Partial derivatives w.r.t. unknown parameters
 
 !ALLOCATE (Asrp(3,N_param), STAT = AllocateStatus)
@@ -386,10 +420,6 @@ END IF
 
 ALLOCATE (Asrp(3,PD_Param_ID), STAT = AllocateStatus)
 
-
-! A scaling factor is applied to ECOM model
-!******************************************************************
-sclfa=(AU/Ds)**2
 
 ! ECOM1 model
 ! ***************************************
