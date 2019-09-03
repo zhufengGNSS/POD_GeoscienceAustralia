@@ -46,6 +46,9 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
 !               22-03-2019 Tzupang Tseng: set a simple condition for the eclipsed satellites
 !                                         where only the D0 accelerations are setup to zero 
 !               02-05-2019 Tzupang Tseng: use the coefficient from the shadow.f90 for scaling the SRP effect
+!               30-08-2019 Tzupang Tseng: implement the orbit-normal attitude for the BDS SRP estimation (still need to be tested)
+!               03-09-2019 Tzupang Tseng: use a simple box-wing model as a  priori SRP value where the ECOM is 
+!                                         used to adjust the box-wing model (BOX-WING + ECOM)
 !
 ! Copyright:  GEOSCIENCE AUSTRALIA, AUSTRALIA
 ! ----------------------------------------------------------------------
@@ -92,6 +95,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
       INTEGER              :: i,j,k,m
       INTEGER              :: N_param, PD_Param_ID
       INTEGER              :: att_ON
+      INTEGER              :: flag_BW
 ! ----------------------------------------------------------------------
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
@@ -122,6 +126,9 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
              !              when the beta < 4 deg
              !        = 0 : use the yaw-steering attitude for BDS satellite 
              !              for all beta angles 
+ flag_BW = 2 !flag_BW = 1 : use the simple box-wing model as a priori SRP values
+             !        = 0 : use the constant f0 as a priori SRP value
+             !        = any numbers : directly estimate the SRP parameters
 ! ---------------------------------------------------------------------
   
 ! initialize the SRP force
@@ -140,7 +147,6 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          X_SIDE = 4.55D0
          A_SOLAR= 22.25D0
          F0 = 16.7d-5
-         alpha = F0/MASS
 ! IIR
          else
          MASS   = 1080.0d0
@@ -148,7 +154,6 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          X_SIDE = 4.11D0
          A_SOLAR= 13.92D0
          F0 = 11.15d-5
-         alpha = F0/MASS
          end if
 
 ! GLONASS constellation
@@ -162,12 +167,10 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          if(satsvn.eq.801.or.satsvn.eq.802.or.satsvn.eq.855)then
          MASS = 995.0d0
          F0 = 10.0d-5
-         alpha = F0/MASS
 ! GLONASS-M
          else
          MASS   = 1415.0d0
          F0 = 20.9d-5
-         alpha = F0/MASS
          end if
 
 ! GALILEO constellation
@@ -178,7 +181,6 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          X_SIDE = 1.323D0
          A_SOLAR= 11.0D0
          F0 = 8.35d-5
-         alpha = F0/MASS
 ! BDS constellation
 ! -----------------
       else if (prnnum .gt. 300 .and. prnnum .le. 400) then
@@ -190,25 +192,22 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          if(satsvn.ge.12.and.satsvn.le.15)then
          MASS   = 800.0d0
          F0 = 8.35d-5
-         alpha = F0/MASS
 ! BDS IGSO
          elseif(satsvn.ge.7.and.satsvn.le.10.or.satsvn.eq.5.or.satsvn.eq.17)then
          MASS = 1400.0d0
          F0 = 50.1d-5
-         alpha = F0/MASS
          end if
 
 ! QZSS constellation
 ! ------------------
       else if (prnnum .gt. 400 .and. prnnum .le. 500) then
-!         if(satsvn.eq.1)then
+         if(satsvn.eq.1)then
          MASS = 2000.0d0
          Z_SIDE = 6.00D0
          X_SIDE = 12.2D0
          A_SOLAR= 40.0D0
          F0 = 50.1d-5 ! Assumed to be the same with BDS/IGSO
-         alpha = F0/MASS
-!         end if
+         end if
       end if
 
 
@@ -264,10 +263,7 @@ END IF
       u_sat = kepler(9)*Pi/180.d0
       i_sat = kepler(3)*Pi/180.d0
       omega_sat = kepler(4)*Pi/180.d0
-!      CALL XYZELE(GM, r, v, II, U, KN)
-!      u_sat = U
-!      i_sat = II
-!      omega_sat = KN      
+
 ! compute the sun position in the satellite orbit plane by rotating omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
       do i=1,3
@@ -362,7 +358,22 @@ END IF
      cosang(3)=ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3)
      cosang(4)=ed(1)*ed(1)+ed(2)*ed(2)+ed(3)*ed(3)
 
-!print*, 'COSANG1=', cosang(1)
+! A scaling factor is applied to ECOM model
+!******************************************************************
+      sclfa=(AU/Ds)**2
+
+! SIMPLE BOX-WING 
+      if (flag_BW == 1) then
+         fxo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1.5*A_SOLAR*cosang(4)*ed(1))
+         fyo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1.5*A_SOLAR*cosang(4)*ed(2))
+         fzo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1.5*A_SOLAR*cosang(4)*ed(3))
+         alpha = sqrt(fxo**2+fyo**2+fzo**2)
+   !      print*,'alpha_BW', alpha
+      else if (flag_BW == 0) then
+         alpha = F0/MASS
+      else
+         alpha = 1.d0
+      end if
 
 ! computation of the factor zta related to the Sun illumination
       IF (eclpf.eq.1) THEN ! in the eclipse
@@ -473,9 +484,6 @@ END IF
 
 
      ELSE IF (srpid == 3) THEN
-! A scaling factor 
-!*************************************************************************
-     sclfa=(AU/Ds)**2
 
 ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
 
