@@ -72,6 +72,8 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  USE mdl_eop
 	  USE m_sp3_PRN
 	  USE m_write_orb2sp3
+      USE mdl_config
+      USE m_read_satsnx 
       IMPLICIT NONE
 
 
@@ -114,7 +116,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  !CHARACTER (LEN=3), ALLOCATABLE :: PRNmatrix(:)
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
 	  CHARACTER (LEN=3) :: PRN_isat
-	  INTEGER :: ios
+	  INTEGER :: ios,ios_key
       CHARACTER (LEN=100) :: orbits_fname				
       CHARACTER (LEN=100) :: fname_write				
       CHARACTER (LEN=100) :: filename				
@@ -155,8 +157,9 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: EQMfname_PRN, VEQfname_PRN				
 
-	  
-	  
+      INTEGER :: DOY
+      INTEGER (KIND = prec_int4) :: J
+      DOUBLE PRECISION MJD0, MJD, MJDref  
 
 ! ----------------------------------------------------------------------
 ! Delete Planetary ephemeris written file DE.430
@@ -227,7 +230,20 @@ Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
+! Read Satellite infromation from SINEX file
+! ----------------------------------------------------------------------
+!param_id = 'satsinex_filename_cfg'
+!Call readparam (PODfname, param_id, param_value)
+!READ ( param_value, FMT = * , IOSTAT=ios_key ) satsinex_filename_cfg
+!PRINT*,'satsinex_filename',satsinex_filename_cfg
+! Compute day of year
+CALL iau_CAL2JD ( Iyear, Imonth, Iday, MJD0, MJD, J )
+CALL iau_CAL2JD ( Iyear, 1, 1, MJD0, MJDref, J )
+DOY = IDNINT(MJD-MJDref) + 1
 
+PRINT*,'Day Of Year =', DOY, Iyear
+
+!CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00)
 
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
@@ -245,6 +261,9 @@ Do isat = 1 , Nsat
 ! ----------------------------------------------------------------------
 PRN_isat = PRNmatrix(isat)
 print *,"Satellite: ", PRNmatrix(isat) ! isat
+
+CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat)
+print*,'GNSS Block Type: ', antbody
 
 ! ----------------------------------------------------------------------
 ! Copy Initial Configuration files 
