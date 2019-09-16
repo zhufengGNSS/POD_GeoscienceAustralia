@@ -52,7 +52,6 @@ SUBROUTINE statorbit2 (ds1, ds2, orbdiff)
       USE m_statist
       USE mdl_planets
       USE m_orbinfo
-      USE m_satinfo
       IMPLICIT NONE
 
 	  
@@ -210,10 +209,11 @@ Do i = 1 , Nepochs
       delta_t = ABS(ds2(j,1) - ds1(i,1))
       IF (delta_t < dt_limit) then
          k = k + 1
-CALL satinfo (ds1(i,1), PRN_no, satsvn, satblk)
-
+satsvn = satid
+rsat = ds1(i,3:5)
+vsat = ds1(i,6:8)
 	     ! State vector numerical differences at common epochs
-CALL orbinfo (ds1(i,1), PRN_no, satsvn, ds1(i,3:5), ds1(i,6:8), beta0, del_u0, yaw0, lambda0, & 
+CALL orbinfo (ds1(i,1), PRN_no, satsvn, rsat, vsat, beta0, del_u0, yaw0, lambda0, & 
               angX0, angY0, angZ0, fr0, ft0, fn0)
 beta1(k)  = beta0
 del_u1(k) = del_u0
@@ -226,7 +226,8 @@ fr1(k)  = fr0
 ft1(k)  = ft0
 fn1(k)  = fn0
 !print*,del_u0*180/Pi, fr0, ft0, fn0
-   
+rsat = ds2(j,3:5)
+vsat = ds2(j,6:8)
 CALL orbinfo (ds2(j,1), PRN_no, satsvn, ds2(j,3:5), ds2(j,6:8), beta0, del_u0, yaw0, lambda0, & 
              angX0, angY0, angZ0, fr0, ft0, fn0)
 beta2(k)  = beta0

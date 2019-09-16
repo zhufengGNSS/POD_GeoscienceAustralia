@@ -29,7 +29,13 @@ MODULE mdl_param
 
 ! ---------------------------------------------------------------------------
 ! Satellite information file
-!      CHARACTER (*), PARAMETER :: satinfoplace ='/data/bitbucket/Tzupang/pod/SATINFO/'
+      CHARACTER*1  :: yawbias     ! Yaw bias
+      CHARACTER*20 :: antbody     ! antenna/body-type (rcvant_tab/ANTEX std)
+      INTEGER*4    :: satid       ! SVN or PRN number
+      INTEGER*4    :: frqchn      ! frquency channel (GLONASS only)
+      INTEGER*4    :: power       ! transmitted power in watts
+      REAL*8       :: sbmass      ! S/C mass in kg
+      REAL*8       :: yawrate     ! maximum yaw rate of the input prn or svn
 ! --------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------

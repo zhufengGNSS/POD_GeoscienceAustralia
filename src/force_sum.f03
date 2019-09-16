@@ -44,7 +44,6 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       USE m_force_tides
       USE m_tides_ocean
       USE m_pd_empirical
-      USE m_satinfo
       USE m_writedata
       USE m_shadow
       IMPLICIT NONE
@@ -559,7 +558,7 @@ SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf
 ! in the main program file (main_pod.f03) through setting the global variables: 
 
 ! GPS case: Satellite Block ID:        1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
-!satblk = SATblock_glb
+satblk = SATblock_glb
 
 ! Beidou case: 'IGSO', 'MEO'
 BDSorbtype = BDSorbtype_glb
@@ -567,13 +566,6 @@ BDSorbtype = BDSorbtype_glb
 fmt_line = '(A1,I2.2)'
 READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
 
-CALL prn_shift (GNSSid, PRN_no, PRN_no)
-!print*,GNSSid, PRN_no
-
-CALL satinfo (mjd, PRN_no, satsvn, satblk)
-!print*,satsvn
-IF (satblk .eq. 6 .OR. satblk .eq. 7) satblk = 5
-IF (satblk .eq. 8 ) satblk = 6
 ! Yaw-attitude model
 PRN_GNSS = PRN
 CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
@@ -603,9 +595,6 @@ READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
 CALL prn_shift (GNSSid, PRN_no, PRN_no)
 !print*,GNSSid, PRN_no
 
-CALL satinfo (mjd, PRN_no, satsvn, satblk)
-!print*,satsvn
-
 END IF
  
 ! ----------------------------------------------------------------------
@@ -618,7 +607,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 srpid =  SRP_MOD_glb
 
 
-CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, satsvn, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
+CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
@@ -631,7 +620,7 @@ End IF
 ! ----------------------------------------------------------------------
 if (FMOD_NONGRAV(2) > 0) Then
 
-CALL force_erp (mjd, PRN_no, satsvn, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
+CALL force_erp (mjd, PRN_no, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
 Ferp_icrf = (/ fx, fy, fz /)
 !print*,'force_erp=', sqrt(fx**2+fy**2+fz**2)
 Else IF (FMOD_NONGRAV(2) == 0) Then
@@ -644,7 +633,7 @@ End IF
 ! ----------------------------------------------------------------------
 if (FMOD_NONGRAV(3) > 0) Then
 
-CALL force_ant (mjd, PRN_no, satsvn, rsat_icrf, fx, fy, fz)
+CALL force_ant (rsat_icrf, fx, fy, fz)
 Fant_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(3) == 0) Then

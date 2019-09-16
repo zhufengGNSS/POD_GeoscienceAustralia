@@ -20,7 +20,7 @@ MODULE m_pd_ECOM
 Contains
 
 
-SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, Asrp)
+SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
 
 
 ! ----------------------------------------------------------------------
@@ -137,6 +137,8 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, satsvn, eclipsf, r, v, r_sun, A
              !        = 0 : use the constant f0 as a priori SRP value
              !        = any numbers: directly estimate the SRP parameters
 ! ---------------------------------------------------------------------
+      satsvn = satid
+
 ! GPS constellation
 ! -----------------
       if(prnnum.le.100)then
@@ -364,6 +366,7 @@ END IF
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
       else if (flag_BW == 0) then
          alpha = F0/MASS
+         alpha = F0/sbmass
       else
          alpha = 1.d0
       end if

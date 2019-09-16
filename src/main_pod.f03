@@ -320,6 +320,14 @@ CALL readparam (PODfname, param_id, param_value)
 READ ( param_value, FMT = * , IOSTAT=ios_key ) leapsec_filename_cfg 
 ! ----------------------------------------------------------------------
 
+! Read Satellite infromation from SINEX file
+! ----------------------------------------------------------------------
+param_id = 'satsinex_filename_cfg'
+Call readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) satsinex_filename_cfg
+PRINT*,'satsinex_filename =', satsinex_filename_cfg
+!----------------------------------------------------------------------
+
 ! ----------------------------------------------------------------------
 ! Reference System of Variational Equations' Partials & Parameter Estimation 
 ! ----------------------------------------------------------------------
