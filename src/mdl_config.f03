@@ -133,4 +133,9 @@ MODULE mdl_config
       CHARACTER (LEN=100) :: leapsec_filename_cfg				
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Satellite metadata SINEX filename (satsinex_filename)
+      CHARACTER (LEN=100) :: satsinex_filename_cfg
+! ----------------------------------------------------------------------
+
 END

@@ -1,5 +1,5 @@
 
-SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
+SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, eclpf, srpid, r, v, r_sun, fx, fy, fz)
 
 
 ! ----------------------------------------------------------------------
@@ -56,7 +56,6 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
       USE mdl_precision
       USE mdl_num
       USE mdl_param
-      USE m_satinfo
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -130,7 +129,8 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
              !        = 0 : use the constant f0 as a priori SRP value
              !        = any numbers : directly estimate the SRP parameters
 ! ---------------------------------------------------------------------
-  
+     
+     satsvn = satid
 ! initialize the SRP force
 ! -------------------------
      DO i=1,3
@@ -371,6 +371,7 @@ END IF
    !      print*,'alpha_BW', alpha
       else if (flag_BW == 0) then
          alpha = F0/MASS
+         alpha = F0/sbmass
       else
          alpha = 1.d0
       end if

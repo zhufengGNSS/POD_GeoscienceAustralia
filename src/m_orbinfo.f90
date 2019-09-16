@@ -244,8 +244,6 @@ SUBROUTINE orbinfo (mjd, prnnum, satsvn, rsat, vsat, beta, del_u, yaw, lambda, a
 
 ! computation of the satellite argument of latitude and orbit
 ! inclination
-!      CALL XYZELE(GM, rsat, vsat, II, U, KN)
-!print*,'BERNESE=', II*180/Pi, U*180/Pi, KN*180/Pi
       CALL kepler_z2k (rsat, vsat, GM, kepler)
       u_sat = kepler(9)*Pi/180.d0
       i_sat = kepler(3)*Pi/180.d0
