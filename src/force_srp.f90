@@ -34,9 +34,9 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, eclpf, srpid, r, v, r_sun, fx
 ! Created:	01-10-2017
 ! 
 ! Changes:      10-10-2018 Tzupang Tseng: modify the Cannonball model to be 
-!                                            similar to the box-wing model in
-!                                            preparation for BDS with the ON
-!                                            attitude mode.
+!                                         similar to the box-wing model in
+!                                         preparation for BDS with the ON
+!                                         attitude mode.
 !               11-12-2018 Tzupang Tseng: make the force matrix dynamic
 !               23-01-2019 Tzupang Tseng: add the ECOM2 model
 !               31-01-2019 Tzupang Tseng: change the definition of ey by
@@ -65,7 +65,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, eclpf, srpid, r, v, r_sun, fx
       REAL (KIND = prec_q), INTENT (IN) :: lambda
       REAL (KIND = prec_d) , Dimension(3), INTENT(IN) :: eBX_ecl
       INTEGER                           :: srpid,ECOM
-      INTEGER                           :: prnnum,BLKNUM
+      INTEGER                           :: prnnum
       REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
       REAL (KIND = prec_q)               :: fx,fy,fz
       INTEGER(KIND = 4)                  :: satsvn
@@ -111,8 +111,11 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, eclpf, srpid, r, v, r_sun, fx
        REAL (KIND = prec_q) :: u_sun
        REAL (KIND = prec_q) :: beta,del_u
        REAL (KIND = prec_q), DIMENSION(3) :: r_sun1,r_sun2
-
 ! ----------------------------------------------------------------------
+       INTEGER*4 BLKNUM,SVN,REFF
+       REAL*8  ACCEL(3),SUN(3)
+       REAL*8  YSAT(6)
+! ---------------------------------------------------------------------- 
 ! Numerical Constants
       Ps = 4.5567D-6 ! (Nm^-2)
       Cr = 1.5 ! SRP coefficient ranges from 1.3 to 1.5
@@ -125,7 +128,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, eclpf, srpid, r, v, r_sun, fx
              !              when the beta < 4 deg
              !        = 0 : use the yaw-steering attitude for BDS satellite 
              !              for all beta angles 
- flag_BW = 2 !flag_BW = 1 : use the simple box-wing model as a priori SRP values
+ flag_BW = 1 !flag_BW = 1 : use the simple box-wing model as a priori SRP values
              !        = 0 : use the constant f0 as a priori SRP value
              !        = any numbers : directly estimate the SRP parameters
 ! ---------------------------------------------------------------------
@@ -368,7 +371,34 @@ END IF
          fyo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1.5*A_SOLAR*cosang(4)*ed(2))
          fzo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1.5*A_SOLAR*cosang(4)*ed(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
-   !      print*,'alpha_BW', alpha
+         print*,'alpha_SIMPLE BW', alpha
+      REFF = 0     
+      YSAT(1:3) = r
+      YSAT(4:6) = v
+      SUN = r_sun
+      SVN = satsvn
+      IF(antbody == 'GPS-I')       BLKNUM = 1
+      IF(antbody == 'GPS-II')      BLKNUM = 2
+      IF(antbody == 'GPS-IIA')     BLKNUM = 3
+      IF(antbody == 'GPS-IIR')     BLKNUM = 4
+      IF(antbody == 'GPS-IIR-A')   BLKNUM = 5
+      IF(antbody == 'GPS-IIR-B')   BLKNUM = 6
+      IF(antbody == 'GPS-IIR-M')   BLKNUM = 7
+      IF(antbody == 'GPS-IIF')     BLKNUM = 8
+      IF(antbody == 'GPS-IIIA')    BLKNUM = 9
+      IF(antbody == 'GLO')                                    BLKNUM = 101
+      IF(antbody == 'GLO-M'   .or. antbody == 'GLO-M+')       BLKNUM = 102
+      IF(antbody == 'GLO-K1A' .or. antbody == 'GLO-K1B')      BLKNUM = 103
+      IF(antbody == 'GLA-1')       BLKNUM = 201 ! Galileo (IOV)
+      IF(antbody == 'GLA-2')       BLKNUM = 202 ! Galileo (FOC)
+
+!      PRINT*,'r,v',r,v
+!      PRINT*,'YSAT',YSAT
+      CALL SRPFBOXW(1,0,1,REFF,YSAT,SUN,0.d0,1,BLKNUM,SVN,55656D0,ACCEL)
+ 
+      alpha = (AU/Ds)*sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
+      print*,'alpha_COMPLX BW', alpha
+      
       else if (flag_BW == 0) then
          alpha = F0/MASS
          alpha = F0/sbmass
@@ -384,7 +414,7 @@ END IF
       END IF
 
       IF (srpid == 1) THEN
-! A simply cannonball model
+! A simple cannonball model
 ! *********************************
 !  a=-zta*Cr*(A/m)P(1AU/r)^2*Dr(i)
 ! ********************************
