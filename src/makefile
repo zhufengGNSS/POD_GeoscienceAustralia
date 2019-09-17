@@ -32,7 +32,7 @@ force_gm.f90 GM_de.f90 CATfile.f90 asc2eph.f90 STATE.f90 PLEPH.f CONST.f SPLIT.f
 force_gm3rd.f90 indirectJ2.f90 delaunay.f90 gmst_iers.f03 tides_solid1.f90 tides_solid2.f90 tide_perm.f90 \
 tides_fes2004.f90 IERS_CMP_2015.F tide_pole_se.f90 tide_pole_oc.f90 rel_schwarzschild.f90 rel_LenseThirring.f90 rel_deSitter.f90 \
 force_srp.f90 prn_shift.f03 surfprop.f90 cross_product.f90 R3.for R1.for force_erp.f90 force_ant.f90 \
-ERPFBOXW.f SURFBOXW.f PROPBOXW.f \
+SRPFBOXW.f ERPFBOXW.f SURFBOXW.f PROPBOXW.f \
 empirical_init_file.f03 empirical_init.f03 empirical_cor.f03 beta_angle.f90 yaw_nom.f90 yaw_angle.f90 \
 yaw_attitude.f90 eclips.f eclips2017.f eclips201707.f beta_pred.f90 yaw_bds.f90 yaw_gal.f90 yawdyn.f90 \
 attitude.f03 force_sum.f03 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 pd_gm.f03 pd_forceZ.f03 eclipse_integstep.f03 \
