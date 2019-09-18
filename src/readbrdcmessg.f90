@@ -1,5 +1,5 @@
 SUBROUTINE  readbrdcmessg(UNIT_IN,VERSION,MAXNSAT,MAXNPAR,MAXEPO, &
-                          IYEAR4,MONTH,IDAY,ISAT,EPH,CLK)
+                          IYEAR4,MONTH,IDAY,ISAT,EPH)
 
 
 ! ----------------------------------------------------------------------
@@ -42,9 +42,9 @@ SUBROUTINE  readbrdcmessg(UNIT_IN,VERSION,MAXNSAT,MAXNPAR,MAXEPO, &
       INTEGER (KIND = prec_int4),INTENT(IN) :: MAXNSAT, MAXNPAR,MAXEPO
       INTEGER (KIND = prec_int4),INTENT(OUT) :: IYEAR4,MONTH,IDAY
       INTEGER (KIND = prec_int4),INTENT(OUT) :: ISAT
-      REAL (KIND = prec_q),INTENT(OUT) ::EPH(MAXNPAR,MAXEPO,MAXNSAT),CLK(MAXNPAR,MAXEPO,MAXNSAT)
+      REAL (KIND = prec_q),INTENT(OUT) ::EPH(MAXNPAR,MAXEPO,MAXNSAT)!,CLK(MAXNPAR,MAXEPO,MAXNSAT)
       REAL (KIND = prec_q) :: EPHDAT(MAXNPAR)
-      REAL (KIND = prec_q) :: EPHV3(MAXNPAR),CLKV3(MAXNPAR)
+      REAL (KIND = prec_q) :: EPHV3(MAXNPAR)!,CLKV3(MAXNPAR)
 
       INTEGER (KIND = prec_int4) :: ISVN
 ! ----------------------------------------------------------------------
@@ -71,9 +71,9 @@ SUBROUTINE  readbrdcmessg(UNIT_IN,VERSION,MAXNSAT,MAXNPAR,MAXEPO, &
 
 EPHDAT = 0.d0
 EPH    = 0.d0
-CLK    = 0.d0
+!CLK    = 0.d0
 EPHV3  = 0.d0
-CLKV3  = 0.d0
+!CLKV3  = 0.d0
 
 ! Read broadcast message 
 !-------------------------------
@@ -181,11 +181,11 @@ IF (ISAT < 50 .OR.  ISAT > 100 .AND. ISAT < 150 .OR. &
 
      END DO
 
-     CALL reformbrdc (EPHDAT,EPHV3,CLKV3)
+     CALL reformbrdc (MAXNPAR,EPHDAT,EPHV3)!,CLKV3)
      DO I=1,20
      EPH(I,IEPO,ISAT)=EPHV3(I)
      !print*,'EPH(1:2,:,:), GPSWEEK, TOE', EPH(1,IEPO,ISAT), EPH(2,IEPO,ISAT)
-     CLK(I,IEPO,ISAT)=CLKV3(I)
+     !CLK(I,IEPO,ISAT)=CLKV3(I)
      END DO
 
 ELSE IF (ISAT > 50 .AND. ISAT < 100 )THEN

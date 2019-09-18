@@ -66,7 +66,7 @@ m_write_brd2sp3.f03 prn2str.f03 prn_shift_brdc.f03 chkbrdc.f \
 readbrdcheader.f03 readbrdcmessg.f90 reformbrdc.f brdc2ecef.f \
 m_read_leapsec.f03 taiutc.for time_UTC.f90 time_GPSweek.f90 jd2cal.for cal2jd.for time_GPSweek2.f90 \
 brdc_qc_gps.f90 brdc_qc_gal.f90 m_meanstd.f90 \
-m_antoffset.f90 glnorbint.f glnacc.f \
+m_antoffset.f90 glnorbint.f90 glnacc.f \
 \
 EOP.f90 \
 fad03.for  faf03.for   fal03.for   fama03.for  fane03.for  fapa03.for  faur03.for \
