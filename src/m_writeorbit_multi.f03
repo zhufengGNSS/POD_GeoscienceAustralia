@@ -129,12 +129,12 @@ fmt_wrt = '(A3,A1,F25.12,F25.9,3F25.4,3F25.9, A)'
 WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    POD tabular ephemeris file: '
 WRITE (UNIT=UNIT_IN,FMT='(a,a)'            ,IOSTAT=ios_ith) '#INFO    Generated from: ',trim(pseudobs_orbit_filename_cfg)
 WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith)    '#INFO    Epoch initial conditions:   ', &
-                                                            INT(orbitsmatrix_crf(1,1,1)),orbitsmatrix_crf(1,2,1)
+                                                            INT(orbits_ics_icrf(1,1)),orbits_ics_icrf(2,1) !INT(orbitsmatrix_crf(1,1,1)),orbitsmatrix_crf(1,2,1)
 WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith)    '#INFO    Epoch Start:                ', & 
                                                             INT(orbitsmatrix_crf(1,1,1)),orbitsmatrix_crf(1,2,1) 
 WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith)    '#INFO    Epoch End:                  ', &
                                                             INT(orbitsmatrix_crf(Nepochs,1,1)),orbitsmatrix_crf(Nepochs,2,1) 
-WRITE (UNIT=UNIT_IN,FMT='(a,i5)'           ,IOSTAT=ios_ith) '#INFO    Tabular interval (sec):     ',900
+WRITE (UNIT=UNIT_IN,FMT='(a,I9)'           ,IOSTAT=ios_ith) '#INFO    Tabular interval (sec):     ', abs(INT(integstep))
 WRITE (UNIT=UNIT_IN,FMT='(a,i5)'           ,IOSTAT=ios_ith) '#INFO    Number of Epochs:           ',Nepochs
 WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    Model information:           [TIME_SYS] [GRAV_MODEL]&
                                            &[PN_MODEL] [EPH_MODEL] [ALBEDO_MODEL]'
