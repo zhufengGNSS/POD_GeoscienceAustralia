@@ -135,7 +135,7 @@ to_sec = tsec_start !to_sec = (MJDo - INT(MJDo)) * (24.D0 * 3600.D0)
 tmax = to_sec + arc
 
 ! Number of epochs
-Nepochs = INT(arc / step) + 1
+Nepochs = INT(arc / ABS(step)) + 1
 
 
 ! ----------------------------------------------------------------------
@@ -288,6 +288,9 @@ Do j = 1 , Nepochs-1
 	TTo = TT
 	If (TT >= 86400.D0) Then
 		TTo = TT - INT(TT / 86400.D0) * 86400.D0
+	End IF 
+	If (TT < 0.D0) Then
+		TTo = TT + (INT(ABS(TT)/86400.D0)+1) * 86400.D0
 	End IF 
 
 	! MJD and Seconds
