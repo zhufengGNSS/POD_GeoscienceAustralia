@@ -137,7 +137,6 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       REAL (KIND = prec_d) :: Yawangle
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 ! Global variables used
 ! ----------------------------------------------------------------------
@@ -606,7 +605,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 ! SRP model
 srpid =  SRP_MOD_glb
 
-print*,'mjd =', mjd
+
 CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 

@@ -1,6 +1,5 @@
 C*
-      SUBROUTINE SRPFBOXW(ERM,ANT,GRD,REFF,YSAT,SUN,KAPPA,MONTH,
-     1                    BLKNUM,SVN,MJD,ACCEL)
+      SUBROUTINE SRPFBOXW(REFF,YSAT,SUN,BLKNUM,SVN,ACCEL)
 CC
 CC NAME       :  SRPFBOXW
 CC
@@ -8,16 +7,7 @@ CC PURPOSE    :  COMPUTATION OF EARTH RADIATION PRESSURE ACTING ON A
 CC               BOW-WING SATELLITE
 CC
 CC PARAMETERS :
-CC         IN :  ERM       : EARTH RADIATION MODEL
-CC                           0 = NONE
-CC                           1 = EARTH RADIATION PRESSURE (ANALYTICAL)
-CC                           2 = EARTH RADIATION PRESSURE (CERES DATA)
-CC               CERES DAT : CERES DATA (EXTERNAL ASCII FILES) -> SET PATH IN DATPATH
-CC               ANT       : 0 = NO ANTENNA THRUST
-CC                         : 1 = WITH ANTENNA THRUST
-CC               GRD       : 1 = 2.5 degree grid
-CC                         : 2 = 5.0 degree grid
-CC                         : 3 = 10  degree grid
+CC         IN :  
 CC               REFF      : ACCELERATION IN REFERENCE FRAME:
 CC                           0 = INERTIAL
 CC                           1 = BODY FIXED (Z,Y,X)
@@ -26,9 +16,6 @@ CC                           3 = ORBITAL (RADIAL, ALONG- AND CROSS-TRACK)
 CC               YSAT      : SATELLITE POSITION [m] AND VELOCITY [m/s] (INERTIAL), 
 CC                           (POSITION,VELOCITY) = (RX,RY,RZ,VX,VY,VZ)
 CC               SUN       : SUN POSITION VECTOR [m] (INERTIAL)
-CC               KAPPA     : ROTATION MATRIX FROM INERTIAL TO EARTH-FIXED
-CC                           REFERENCE FRAME (FOR ERM=2)
-CC               MONTH     : MONTH NUMBER (1 ... 12), FOR ERM=2
 CC               BLKNUM    : BLOCK NUMBER
 CC                             1 = GPS-I
 CC                             2 = GPS-II
@@ -46,7 +33,6 @@ CC                           201 = Galileo (IOV) (Added from acc_albedo_propboxw
 CC                           202 = Galileo (FOC) (Added from acc_albedo_propboxw.f)
 CC                           NB: when adding a new block number, check last block in this function!
 CC               SVN       : SPACE VEHICLE NUMBER          
-CC               MJD       : MODIFIED JULIAN DAY
 CC
 CC        OUT : ACCEL      : ACCELERATION VECTOR [m/s^2]
 CC
@@ -67,17 +53,15 @@ C     that can be stored (was 15 for GPS+GLONASS).
                           ! 0-10 GPS, 11-20 Glonass, 21-30 Galileo
       parameter ( max_blk = 30 ) 
 C
-      INTEGER*4 BLKNUM,ERM,ANT,GRD,REFF,SBLK,INDB,MONTH,SVN
-      INTEGER*4 IFIRST,II,JJ,K,LFNLOC,IOSTAT,LENPATH
-      INTEGER*4 LATK,LONK,LATKMX,LONKMX,GRDCER
+      INTEGER*4 BLKNUM,REFF,SBLK,INDB,SVN
+      INTEGER*4 JFIRST,II,JJ,K
+      INTEGER*4 LATK,LONK,LATKMX,LONKMX
       integer*4 i,j
 C
       REAL*8 PI,C,AU,S0,TOA,ALB,MASS
       REAL*8 YSAT(6),SUN(3),FORCE(3),ACCEL(3)
 C
 C     EARTH AND SATELLITE PROPERTIES
-      REAL*8 CERES_R(72,144),CERES_E(72,144)
-      REAL*8 CERGRE(72,144),CERGEM(72,144)
       REAL*8 D_AREA_ALL(72,144),V_NS_ALL(72,144,3)
       REAL*8 AREA(4,2,max_blk),REFL(4,2,max_blk),DIFU(4,2,max_blk),
      .       ABSP(4,2,max_blk)
@@ -96,7 +80,7 @@ C     ATTITUDE
 C
       REAL*8 ABSNCFVI,ABSNCFIR,ALBFAC,PHASEVI,PHASEIR
       REAL*8 NCFVEC(3)
-      REAL*8 D_ANG,GRDANG,GRDNUM,LATIND,LONIND
+      REAL*8 D_ANG,LATIND,LONIND
       REAL*8 D_AREA,LAT_IN,LON_IN,DIST2,ABSDIST
       REAL*8 COSLAT,PSI
       REAL*8 V_NS(3),V_INS(3),V_DIST(3),V_SAT(3)
@@ -104,13 +88,8 @@ C
       REAL*8 REFL_CF,EMIT_CF,E_REFL,E_EMIT
       REAL*8 FORCE_LL(3),FREF(3)
       REAL*8 ANTFORCE,ANTPOW,MJD
-      REAL*8 KAPPA(3,3)
 C
-      CHARACTER*2 F_MONTH(12)
-      CHARACTER*100 DATPATH,FILREFL,FILEMIT
-      CHARACTER*5000 LINE
-      CHARACTER*25 ITEM
-
+      
 C MOD TAH 190722: introduce "known_blks" arrway with know block
 C     types for GPS, Glonass and Galileo.  Needs to be extended
 C     when other constellations added.
@@ -121,23 +100,11 @@ C     when other constellations added.
      .                 101, 102, 103,   0,   0,  0,  0,  0,  0,  0,
      .                 201, 202,   0,   0,   0,  0,  0,  0,  0,  0 /
 C
-      DATA IFIRST/1/
-      DATA (F_MONTH(K),K=1,12)/
-     . '01', '02', '03', '04', '05', '06', 
-     . '07', '08', '09', '10', '11', '12'/
+      DATA JFIRST/1/
 
 C DATA FILES PATH AND NAME (CHANGE TO LOCAL PATH)
-      DATPATH = './CERES/'
             
-C COMPLETE FILE NAMES
-      II = LEN(DATPATH)
-      DO WHILE (DATPATH(II:II).EQ.' ')
-         II = II-1
-      ENDDO
-      LENPATH = II
 
-      FILREFL = DATPATH(1:LENPATH) // 'REFLMO' // F_MONTH(MONTH)
-      FILEMIT = DATPATH(1:LENPATH) // 'EMITMO' // F_MONTH(MONTH)
 
 C Constants needed
       PI = 4D0*DATAN(1D0)
@@ -158,12 +125,10 @@ C Initialization of force vector
       ACCEL(2) = 0D0
       ACCEL(3) = 0D0
 
-      LFNLOC = 999
-
 C ----------------------------------------
 C LOAD SATELLITE PROPERTIES AND CERES DATA
 C ----------------------------------------
-      IF ((IFIRST==1).AND.(ERM.GT.0)) THEN
+      IF ((JFIRST==1)) THEN
 
 C     PROPERTIES FOR ALL SATELLITES BLOCKS
 C MOD TAH 190722: Extended loop to handle galileo (201,202) 
@@ -176,11 +141,6 @@ C           IF((SBLK.LE.10).OR.(SBLK.GT.100))THEN
             CALL PROPBOXW(SBLK,AREAS,REFLS,DIFUS,ABSPS,AREA2S,REFL2S,
      1                    DIFU2S,ABSP2S,REFLIRS,DIFUIRS,ABSPIRS)
 
-C           IF(SBLK.LE.10)THEN
-C              INDB = SBLK
-C           ELSEIF(SBLK.GT.100)THEN
-C              INDB = SBLK - 90
-C           ENDIF
 
             DO II = 1,4
                DO JJ = 1,2
@@ -202,105 +162,7 @@ C           ENDIF
             ENDIF
          ENDDO
 
-
-         IF(ERM.EQ.2)THEN
-
-C     REFLECTIVITY 
-            CERES_R = 0
-            OPEN(UNIT=LFNLOC,FILE=FILREFL,STATUS='UNKNOWN',
-     1           FORM='FORMATTED',IOSTAT=IOSTAT)
-            DO II=1,72
-               READ(LFNLOC,"(A)")LINE
-               DO JJ=1,144
-                  ITEM = LINE((JJ-1)*25+1:JJ*25)
-                  IF (INDEX(ITEM,'NaN') /= 0) THEN
-                     CERES_R(II,JJ) = 0D0
-                  ELSE
-                     READ(ITEM,*) CERES_R(II,JJ)
-                  ENDIF
-               ENDDO
-            ENDDO
-            CLOSE(LFNLOC)
-C     EMISSIVITY 
-            CERES_E = 0
-            OPEN(UNIT=LFNLOC,FILE=FILEMIT,STATUS='UNKNOWN',
-     1           FORM='FORMATTED',IOSTAT=IOSTAT)
-            DO II=1,72
-               READ(LFNLOC,"(A)")LINE
-               DO JJ=1,144
-                  ITEM = LINE((JJ-1)*25+1:JJ*25)
-                  IF (INDEX(ITEM,'NaN') /= 0) THEN
-                     CERES_E(II,JJ) = 0D0
-                  ELSE
-                     READ(ITEM,*) CERES_E(II,JJ)
-                  ENDIF
-               ENDDO
-            ENDDO
-            CLOSE(LFNLOC)
-
-C     PRE-INTEGRATION, INDEPENDENT OF SATELLITE POSITION
-            GRDANG = 2.5D0
-            LATIND = 36.5D0
-            LONIND = 72.5D0
-            IF(GRD.EQ.1)THEN
-               GRDNUM = 1D0
-               LATKMX = 72
-               LONKMX = 144
-            ELSEIF(GRD.EQ.2)THEN
-               GRDNUM = 2D0
-               GRDCER = 2
-               LATKMX = 36
-               LONKMX = 72
-            ELSEIF(GRD.EQ.3)THEN
-               GRDNUM = 4D0
-               GRDCER = 4
-               LATKMX = 18
-               LONKMX = 36
-            ENDIF
- 
-            GRDANG = GRDANG*GRDNUM
-            LATIND = (LATIND-0.5D0)/GRDNUM + 0.5D0
-            LONIND = (LONIND-0.5D0)/GRDNUM + 0.5D0
-              
-            D_ANG = (PI*GRDANG/180D0)**2
-
-            DO LATK = 1,LATKMX
-               DO LONK = 1,LONKMX
-
-                  LAT_IN = (LATK-LATIND)*GRDANG*(PI/180D0)
-                  LON_IN = (LONK-LONIND)*GRDANG*(PI/180D0)
-
-C                 Sphere normal vector and differential of area
-                  COSLAT = DCOS(LAT_IN)
-                  D_AREA_ALL(LATK,LONK) = (TOA**2)*COSLAT*D_ANG
-                  V_NS_ALL(LATK,LONK,1) = COSLAT*DCOS(LON_IN)
-                  V_NS_ALL(LATK,LONK,2) = COSLAT*DSIN(LON_IN)
-                  V_NS_ALL(LATK,LONK,3) = DSIN(LAT_IN)
-
-C                 New matrix of Reflectivity and Emissivity
-                  CERGRE(LATK,LONK) = 0D0
-                  CERGEM(LATK,LONK) = 0D0
-                  IF(GRD.EQ.1)THEN
-                     CERGRE(LATK,LONK) = CERES_R(LATK,LONK)
-                     CERGEM(LATK,LONK) = CERES_E(LATK,LONK)
-                  ELSEIF((GRD.EQ.2).OR.(GRD.EQ.3))THEN
-                     DO II = 0,(GRDCER-1)
-                        DO JJ = 0,(GRDCER-1)
-                           CERGRE(LATK,LONK) = CERGRE(LATK,LONK) 
-     1                     + CERES_R(GRDCER*LATK-II,GRDCER*LONK-JJ)
-                           CERGEM(LATK,LONK) = CERGEM(LATK,LONK)
-     1                     + CERES_E(GRDCER*LATK-II,GRDCER*LONK-JJ)
-                        ENDDO
-                     ENDDO
-                     CERGRE(LATK,LONK) = CERGRE(LATK,LONK)/(GRDNUM**2)
-                     CERGEM(LATK,LONK) = CERGEM(LATK,LONK)/(GRDNUM**2)
-                  ENDIF
-
-               ENDDO
-            ENDDO
-C
-          ENDIF
-         IFIRST = 0
+!         JFIRST = 0
       ENDIF
 
 
@@ -325,7 +187,7 @@ C --------------------------
       ALGVEC(2) = CRSVEC(3)*RADVEC(1)-CRSVEC(1)*RADVEC(3)
       ALGVEC(3) = CRSVEC(1)*RADVEC(2)-CRSVEC(2)*RADVEC(1) 
 
-      IF(ERM.GT.0)THEN
+
 
 C        DISTANCE FROM SATELLITE TO SUN
          RSUN = DSQRT((YSAT(1)-SUN(1))**2+(YSAT(2)-SUN(2))**2+
@@ -362,13 +224,13 @@ C        X VECTOR
             ATTSURF(K,3) = X_SAT(K)
             ATTSURF(K,4) = D_SUN(K)
          ENDDO
-      ENDIF
+
 
 C ---------------------------- 
 C OPTICAL PROPERTIES PER BLOCK
 C ----------------------------
 
-      IF(ERM.GT.0)THEN
+
          IF(BLKNUM.LE.10)THEN
             INDB = BLKNUM
          ELSEIF(BLKNUM.GT.100 .and. BLKNUM.lt.200 )THEN
@@ -394,29 +256,11 @@ C MOD TAH 190722: Added Galileo
                ABSPIRS(II,JJ) = ABSPIR(II,JJ,INDB)
             ENDDO
          ENDDO
-      ENDIF
+
 
 C ----------------------
 C EARTH RADIATION MODELS (This part is modified for SRP modeling)
 C ----------------------
-
-      IF(ERM.GT.0)THEN
-         ABSSUN = DSQRT(SUN(1)**2 + SUN(2)**2 + SUN(3)**2)
-         DO K=1,3
-            ESUN(K) = SUN(K)/ABSSUN
-         ENDDO
-
-         PSIDOT = ESUN(1)*RADVEC(1)+ESUN(2)*RADVEC(2)+ESUN(3)*RADVEC(3)
-         IF(DABS(PSIDOT).GT.(1D0-1D-6))THEN
-            PSI = 0D0
-         ELSE
-            PSI = DACOS(PSIDOT)
-         ENDIF
-         S0 = S0*(AU/ABSSUN)**2
-      ENDIF
-
-C     ANALYTICAL MODEL
-      IF(ERM.EQ.1)THEN
 
 c         NCFVEC(1) = RADVEC(1)
 c         NCFVEC(2) = RADVEC(2)
@@ -428,12 +272,12 @@ c         ABSNCFVI = ALBFAC*PHASEVI
 c         ABSNCFIR = ALBFAC*PHASEIR
 
 !     CHANGE THE RADIATION DIRECTION TO SUN-SAT
-         NCFVEC(1) = D_SUN(1)
-         NCFVEC(2) = D_SUN(2)
-         NCFVEC(3) = D_SUN(3)
+         NCFVEC(1) = (-1.d0)*D_SUN(1)
+         NCFVEC(2) = (-1.d0)*D_SUN(2)
+         NCFVEC(3) = (-1.d0)*D_SUN(3)
          ALBFAC = (S0/C)
          ABSNCFVI = ALBFAC*1.d0
-         ABSNCFIR = ALBFAC*1.d0
+         ABSNCFIR = ALBFAC*(2/3)
 
 
          CALL SURFBOXW(AREAS,REFLS,DIFUS,ABSPS,
@@ -442,11 +286,12 @@ c         ABSNCFIR = ALBFAC*PHASEIR
      3                    ABSNCFVI,ABSNCFIR,NCFVEC,ATTSURF,FORCE)
               
 cd         print *,'In ERPFBOXW blk ',indb
-cd         write(*,*) 'areas ', ((AREAS(i,j),i=1,4),j=1,2)
+cd         write(*,*) 'areas ',((AREAS(i,j),i=1,4),j=1,2)
 cd         write(*,*) 'refls ', ((REFLS(i,j),i=1,4),j=1,2)
 cd         write(*,*) 'difus ', ((DIFUS(i,j),i=1,4),j=1,2)
 cd         write(*,*) 'absps ', ((ABSPS(i,j),i=1,4),j=1,2)                     
-cd        write(*,*) 'areas2s ',((AREA2S(i,j),i=1,4),j=1,2)
+cd         write(*,*) 'areas2s ',((AREA2S(i,j),i=1,4),j=1,2)
+cd         write(*,*) 'albfac, C, S0', ALBFAC, C, S0
 cd         write(*,*) 'refl2s ', ((REFL2S(i,j),i=1,4),j=1,2)
 cd         write(*,*) 'difu2s ',  ((DIFU2S(i,j),i=1,4),j=1,2)
 cd         write(*,*) 'absp2s',   ((ABSP2S(i,j),i=1,4),j=1,2)
@@ -459,120 +304,8 @@ cd         write(*,*) 'ncfvec ',  ( NCFVEC(i),i=1,3)
 cd         write(*,*) 'attsurf ', (( ATTSURF(i,j),i=1,4),j=1,4)
 cd         write(*,*) 'force ', (FORCE(i),i=1,3)
 
-C     NUMERICAL MODEL (CERES DATA)
-      ELSEIF(ERM.EQ.2)THEN
 
-         ABSSUN = DSQRT(SUN(1)**2 + SUN(2)**2 + SUN(3)**2)
-         DO K=1,3
-            ESUN(K) = SUN(K)/ABSSUN
-         ENDDO
-
-         DO LATK = 1,LATKMX
-            DO LONK = 1,LONKMX
-
-               D_AREA = D_AREA_ALL(LATK,LONK)
-               V_NS(1) = V_NS_ALL(LATK,LONK,1)
-               V_NS(2) = V_NS_ALL(LATK,LONK,2)
-               V_NS(3) = V_NS_ALL(LATK,LONK,3)
-
-               DO II=1,3
-                  V_INS(II)=0D0
-                  DO JJ=1,3
-                     V_INS(II) = V_INS(II) + KAPPA(JJ,II)*V_NS(JJ)
-                  ENDDO
-               ENDDO
-
-C              Distance and direction from point in the Earth to satellite
-               V_DIST(1) = YSAT(1)-TOA*V_INS(1) 
-               V_DIST(2) = YSAT(2)-TOA*V_INS(2)
-               V_DIST(3) = YSAT(3)-TOA*V_INS(3)
-               DIST2 = V_DIST(1)**2 +V_DIST(2)**2 +V_DIST(3)**2
-               ABSDIST = DSQRT(DIST2)
-               V_SAT(1) = V_DIST(1)/ABSDIST
-               V_SAT(2) = V_DIST(2)/ABSDIST
-               V_SAT(3) = V_DIST(3)/ABSDIST
-
-C              Cosine of angles of incident and reflected radiation
-               COS_IN = ESUN(1)*V_INS(1) + ESUN(2)*V_INS(2) 
-     1                + ESUN(3)*V_INS(3)
-               COS_RE =V_SAT(1)*V_INS(1) +V_SAT(2)*V_INS(2)
-     1                +V_SAT(3)*V_INS(3)
-
-               IF(COS_RE.GE.0)THEN
-
-C              Reflectivity and emissivity coefficients
-                  REFL_CF = CERGRE(LATK,LONK)
-                  EMIT_CF = CERGEM(LATK,LONK)
-
-C                 Reflected Irradiance
-                  IF(COS_IN.GE.0)THEN
-                     E_REFL=(REFL_CF/(PI*DIST2))*COS_RE*COS_IN*S0*D_AREA
-                  ELSE
-                     E_REFL=0D0
-                  ENDIF
-
-C                 Emitted Irradiance
-                  E_EMIT = (EMIT_CF/(4*PI*DIST2))*COS_RE*S0*D_AREA
-
-C                 Non-conservative force
-                  ABSNCFVI = E_REFL/C
-                  ABSNCFIR = E_EMIT/C
-                  NCFVEC(1) = V_SAT(1)
-                  NCFVEC(2) = V_SAT(2)
-                  NCFVEC(3) = V_SAT(3)
-
-                  CALL SURFBOXW(AREAS,REFLS,DIFUS,ABSPS,
-     1                    AREA2S,REFL2S,DIFU2S,ABSP2S,
-     2                    REFLIRS,DIFUIRS,ABSPIRS,
-     3                    ABSNCFVI,ABSNCFIR,NCFVEC,ATTSURF,FORCE_LL)
-
-                  FORCE(1) = FORCE(1) + FORCE_LL(1)
-                  FORCE(2) = FORCE(2) + FORCE_LL(2)
-                  FORCE(3) = FORCE(3) + FORCE_LL(3)
-               ENDIF
-
-            ENDDO
-         ENDDO
-
-      ENDIF
-
-
-C     ANTENNA POWER OF GPS SATELLITES (IN WATTS)
-C     IGS MODEL (JIM RAY, 2011)
-
-C     GPS BLOCK IIA (ASSUMED THE SAME FOR BLOCK I AND II) 
-      IF(BLKNUM.LE.3)THEN
-         ANTPOW = 76D0
-
-C     GPS BLOCK IIR
-      ELSEIF((BLKNUM.GE.4).AND.(BLKNUM.LE.6))THEN
-         ANTPOW = 85D0
-
-C     GPS BLOCK IIR-M
-      ELSEIF(BLKNUM.EQ.7)THEN
-         ANTPOW = 198D0
-
-C     GPS BLOCK IIF
-      ELSEIF(BLKNUM.EQ.8)THEN
-         ANTPOW = 249D0
-         IF((SVN.EQ.62).AND.(MJD.GE.55656D0))THEN
-C           NO M-CODE FOR SVN62/PRN25 STARTING 05APR2011; NANU 2011026
-            ANTPOW = 154D0
-         ENDIF
-      ENDIF
-
-C     NO ANTENNA POWER INFORMATION FOR GLONASS SATELLITES
-
-
-C     NAVIGATION ANTENNA THRUST (SIMPLE MODEL)
-      IF((ANT.EQ.1).AND.(BLKNUM.LT.100))THEN
-         ANTFORCE = ANTPOW/C
-         FORCE(1) = FORCE(1) + ANTFORCE*RADVEC(1)
-         FORCE(2) = FORCE(2) + ANTFORCE*RADVEC(2)
-         FORCE(3) = FORCE(3) + ANTFORCE*RADVEC(3)
-      ENDIF
-
-      IF((REFF.GT.0).AND.((ERM.GT.0).OR.(ANT.EQ.1)))THEN
+      IF(REFF.GT.0)THEN
          DO K=1,3
             FREF(K) = 0D0
          ENDDO
