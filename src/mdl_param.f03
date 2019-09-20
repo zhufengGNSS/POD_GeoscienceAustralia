@@ -52,6 +52,8 @@ MODULE mdl_param
 ! Initial State Vector in ICRF
       REAL (KIND = prec_d) :: SVEC_Zo(6)
       REAL (KIND = prec_d) :: SVEC_Zo_ESTIM(6)
+! Initial Conditions' satellite matrix 
+      REAL (KIND = prec_d), DIMENSION(:), ALLOCATABLE :: IC_sat_glb	  
 ! ---------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------
