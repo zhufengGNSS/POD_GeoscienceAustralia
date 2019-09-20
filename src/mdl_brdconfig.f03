@@ -19,6 +19,8 @@ MODULE mdl_brdconfig
 ! ----------------------------------------------------------------------
 	  CHARACTER (LEN=100) :: INFILENAME, OUTFILENAME
           CHARACTER (LEN=2)   :: GNSSTYPE
+          CHARACTER (LEN=100) :: leapsec_filename_cfg
+          CHARACTER (LEN=50)  :: EOP_fname_cfg
 ! ----------------------------------------------------------------------
 
 

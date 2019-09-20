@@ -593,6 +593,7 @@ Asrp(1:3,1) = lambda*Asrp(1:3,1)*alpha
 
 END IF
 
+
 !----------------------------------------------------------------------------------------------
 !print*,'alpha =', alpha
 !print*,'PRN= ',prnnum, 'Asrp1 =', Asrp/alpha
