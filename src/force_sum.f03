@@ -606,7 +606,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 srpid =  SRP_MOD_glb
 
 
-CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, eclipsf, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
+CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
@@ -619,7 +619,7 @@ End IF
 ! ----------------------------------------------------------------------
 if (FMOD_NONGRAV(2) > 0) Then
 
-CALL force_erp (mjd, PRN_no, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
+CALL force_erp (mjd, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
 Ferp_icrf = (/ fx, fy, fz /)
 !print*,'force_erp=', sqrt(fx**2+fy**2+fz**2)
 Else IF (FMOD_NONGRAV(2) == 0) Then

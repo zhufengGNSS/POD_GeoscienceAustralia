@@ -584,7 +584,7 @@ Fsrp_icrf = (/ fx, fy, fz /)
 
 IF (ECOM_param_glb /= 0) THEN ! Condition added 5/6/2019 in order to avoid program segment fault
 
-CALL pd_ECOM (lambda, eBX_ecl, GMearth, PRN_no, eclipsf, rsat_icrf, vsat_icrf, rSun, PD_ECOM_param )
+CALL pd_ECOM (lambda, eBX_ecl, GMearth, PRN_no, rsat_icrf, vsat_icrf, rSun, PD_ECOM_param )
 
 END IF
 
