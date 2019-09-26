@@ -18,7 +18,7 @@ MODULE m_orbinfo
 
       Contains
 
-SUBROUTINE orbinfo (mjd, prnnum, satsvn, rsat, vsat, beta, del_u, yaw, lambda, angX, angY, angZ, &
+SUBROUTINE orbinfo (mjd, prnnum, rsat, vsat, beta, del_u, yaw, lambda, angX, angY, angZ, &
                     fr, ft, fn )
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: orbinfo.f90
@@ -31,7 +31,6 @@ SUBROUTINE orbinfo (mjd, prnnum, satsvn, rsat, vsat, beta, del_u, yaw, lambda, a
 ! Input parameters:
 ! - mjd:               Time in MJD
 ! - prnnum:            Satellite PRN number
-! - satsvn:            Satellite SVN number
 ! - rsat:              Satellite position vector in ICRF
 ! - vsat:              Satellite velocity vector in ICRF
 !
@@ -63,7 +62,6 @@ SUBROUTINE orbinfo (mjd, prnnum, satsvn, rsat, vsat, beta, del_u, yaw, lambda, a
 
 !-------------------------------------------------------------------
       INTEGER (KIND = prec_int4) :: prnnum
-      INTEGER (KIND = 4)         :: satsvn
       REAL (KIND = prec_d), INTENT(IN) :: mjd
       REAL (KIND = prec_d), DIMENSION(3), INTENT(IN) :: rsat, vsat
       REAL (KIND = prec_q), INTENT(OUT) :: angX, angY, angZ
@@ -95,12 +93,6 @@ SUBROUTINE orbinfo (mjd, prnnum, satsvn, rsat, vsat, beta, del_u, yaw, lambda, a
       INTEGER (KIND = prec_int2) :: AllocateStatus
       INTEGER              :: PD_Param_ID
       REAL (KIND = 8)      :: II, KN, U
-! ----------------------------------------------------------------------
-! Satellite physical informaiton
-! ----------------------------------------------------------------------
-      REAL (KIND = prec_q) :: X_SIDE,Z_SIDE
-      REAL (KIND = prec_q) :: MASS,AREA
-      REAL (KIND = prec_q) :: A_SOLAR
 
 ! Numerical Constants
 
@@ -115,72 +107,6 @@ SUBROUTINE orbinfo (mjd, prnnum, satsvn, rsat, vsat, beta, del_u, yaw, lambda, a
      END DO
 
 ! ---------------------------------------------------------------------
-! GPS constellation
-! -----------------
-      if(prnnum.le.100)then
-! IIF
-         if(satsvn.ge.62.and.satsvn.le.73) then
-         MASS   = 1633.0d0
-         Z_SIDE = 5.05D0
-         X_SIDE = 4.55D0
-         A_SOLAR= 22.25D0
-! IIR
-         else
-         MASS   = 1080.0d0
-         Z_SIDE = 4.25D0
-         X_SIDE = 4.11D0
-         A_SOLAR= 13.92D0
-
-         end if
-
-! GLONASS constellation
-! ---------------------
-      else if (prnnum .gt. 100 .and. prnnum .le. 200) then
-         Z_SIDE = 1.6620D0
-         X_SIDE = 4.200D0
-         A_SOLAR= 23.616D0
-
-! GLONASS-K
-         if(satsvn.eq.801.or.satsvn.eq.802.or.satsvn.eq.855)then
-         MASS = 995.0d0
-! GLONASS-M
-         else
-         MASS   = 1415.0d0
-         end if
-
-! GALILEO constellation
-! ---------------------
-      else if (prnnum .gt. 200 .and. prnnum .le. 300) then
-         MASS   = 700.0d0
-         Z_SIDE = 3.002D0
-         X_SIDE = 1.323D0
-         A_SOLAR= 11.0D0
-
-! BDS constellation
-! -----------------
-      else if (prnnum .gt. 300 .and. prnnum .le. 400) then
-         Z_SIDE = 3.96D0
-         X_SIDE = 4.5D0
-         A_SOLAR= 22.44D0
-
-! BDS MEO
-         if(satsvn.ge.12.and.satsvn.le.15)then
-         MASS   = 800.0d0
-! BDS IGSO
-         elseif(satsvn.ge.7.and.satsvn.le.10.or.satsvn.eq.5.or.satsvn.eq.17)then
-         MASS = 1400.0d0
-         end if
-
-! QZSS constellation
-! ------------------
-      else if (prnnum .gt. 400 .and. prnnum .le. 500) then
-!         if(satsvn.eq.1)then
-         MASS = 2000.0d0
-         Z_SIDE = 6.00D0
-         X_SIDE = 12.2D0
-         A_SOLAR= 40.0D0
-!         end if
-      end if
 
 ! Julian Day Number of the input epoch
       JD = mjd + 2400000.5D0
@@ -487,69 +413,46 @@ End If
      fy=-fsrp(2)
      fz=-fsrp(3)
 
-
 IF (lambda .lt. 1)THEN
-
-DO i=1,3
- fsrp(i)=0.0d0
-END DO
-
-srpcoef(1) = lambda*srpcoef(1)
-        IF (ECOM_param_glb == 1 ) then
- fxo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(1)+0.3*Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
- fyo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(2)+0.3*Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
- fzo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(3)+0.3*Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
-
-DO i=1,3
-     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
-                       +   srpcoef(2)*sclfa*ey(i)              &
-                       +   srpcoef(3)*sclfa*eb(i)              &
-                       +   srpcoef(4)*sclfa*DCOS(del_u)*ed(i)  &
-                       +   srpcoef(5)*sclfa*DSIN(del_u)*ed(i)  &
-                       +   srpcoef(6)*sclfa*DCOS(del_u)*ey(i)  &
-                       +   srpcoef(7)*sclfa*DSIN(del_u)*ey(i)  &
-                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)  &
-                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)
-
-END DO
-
-       ELSE
- fxo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(1)+0.5*Z_SIDE*cosang(3)*ez(1)+0.1*A_SOLAR*cosang(4)*ed(1))
- fyo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(2)+0.5*Z_SIDE*cosang(3)*ez(2)+0.1*A_SOLAR*cosang(4)*ed(2))
- fzo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(3)+0.5*Z_SIDE*cosang(3)*ez(3)+0.1*A_SOLAR*cosang(4)*ed(3))
-
-DO i=1,3
-     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
-                       +   srpcoef(2)*sclfa*ey(i)              &
-                       +   srpcoef(3)*sclfa*eb(i)              &
-                       +   srpcoef(4)*sclfa*DCOS(2*del_u)*ed(i)  &
-                       +   srpcoef(5)*sclfa*DSIN(2*del_u)*ed(i)  &
-                       +   srpcoef(6)*sclfa*DCOS(4*del_u)*ed(i)  &
-                       +   srpcoef(7)*sclfa*DSIN(4*del_u)*ed(i)  &
-                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)  &
-                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)
-
-END DO
-
-       END IF
-
+    DO i=1,3
+    fsrp(i)=0.0d0
+    END DO
+    srpcoef(1) = lambda*srpcoef(1)
+    IF (ECOM_param_glb == 1 ) then
+       DO i=1,3
+       fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
+                         +   srpcoef(2)*sclfa*ey(i)              &
+                         +   srpcoef(3)*sclfa*eb(i)              &
+                         +   srpcoef(4)*sclfa*DCOS(del_u)*ed(i)  &
+                         +   srpcoef(5)*sclfa*DSIN(del_u)*ed(i)  &
+                         +   srpcoef(6)*sclfa*DCOS(del_u)*ey(i)  &
+                         +   srpcoef(7)*sclfa*DSIN(del_u)*ey(i)  &
+                         +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)  &
+                         +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)
+       END DO
+   ELSE
+       DO i=1,3
+       fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)              &
+                         +   srpcoef(2)*sclfa*ey(i)              &
+                         +   srpcoef(3)*sclfa*eb(i)              &
+                         +   srpcoef(4)*sclfa*DCOS(2*del_u)*ed(i)  &
+                         +   srpcoef(5)*sclfa*DSIN(2*del_u)*ed(i)  &
+                         +   srpcoef(6)*sclfa*DCOS(4*del_u)*ed(i)  &
+                         +   srpcoef(7)*sclfa*DSIN(4*del_u)*ed(i)  &
+                         +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)  &
+                         +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)
+       END DO
+   END IF
      fx=-fsrp(1) 
      fy=-fsrp(2) 
      fz=-fsrp(3) 
-
-    !fx=-(fsrp(1) + fxo)
-    !fy=-(fsrp(2) + fyo)
-    !fz=-(fsrp(3) + fzo)
-
-
 END IF
+     fr = fx*(-ez(1))+fy*(-ez(2))+fz*(-ez(3))
+     ft = fx*et(1)+fy*et(2)+fz*et(3)
+     fn = fx*en(1)+fy*en(2)+fz*en(3)
 
-   fr = fx*(-ez(1))+fy*(-ez(2))+fz*(-ez(3))
-   ft = fx*et(1)+fy*et(2)+fz*et(3)
-   fn = fx*en(1)+fy*en(2)+fz*en(3)
-
-       END SUBROUTINE
-        END MODULE
+END SUBROUTINE
+END MODULE
 
 
 

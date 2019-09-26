@@ -20,7 +20,7 @@ MODULE m_pd_ECOM
 Contains
 
 
-SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
+SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, r, v, r_sun, Asrp)
 
 
 ! ----------------------------------------------------------------------
@@ -74,10 +74,8 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
       REAL (KIND = prec_d) , Dimension(3), INTENT(IN) :: eBX_ecl
       REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r,v
       REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r_sun
-      INTEGER (KIND = 4), INTENT(IN) :: eclipsf
       REAL (KIND = prec_q),INTENT(IN) :: GM
       REAL (KIND = prec_q),INTENT(IN) :: lambda
-      INTEGER(KIND = 4)               :: satsvn
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
@@ -134,27 +132,24 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
              !              when the beta < 4 deg
              !        = 0 : use the yaw-steering attitude for BDS satellite
              !              for all beta angles
- flag_BW = 2 !flag_BW = 1 : use the simple box-wing model as a priori SRP values
+ flag_BW = 0 !flag_BW = 1 : use the simple box-wing model as a priori SRP values
              !        = 2 : use the box-wing model from repro3 routines as a
              !              priori SRP values
              !        = 0 : use the constant f0 as a priori SRP value
              !        = any numbers: directly estimate the SRP parameters
 ! ---------------------------------------------------------------------
-      satsvn = satid
 
 ! GPS constellation
 ! -----------------
       if(prnnum.le.100)then
 ! IIF
-         if(satsvn.ge.62.and.satsvn.le.73) then
-         MASS   = 1633.0d0
+         if(SVNID.ge.62.and.SVNID.le.73) then
          Z_SIDE = 5.05D0
          X_SIDE = 4.55D0
          A_SOLAR= 22.25D0
          F0 = 16.7d-5
 ! IIR
          else
-         MASS   = 1080.0d0
          Z_SIDE = 4.25D0
          X_SIDE = 4.11D0
          A_SOLAR= 13.92D0
@@ -166,22 +161,16 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
          Z_SIDE = 1.6620D0
          X_SIDE = 4.200D0
          A_SOLAR= 23.616D0
-         
 ! GLONASS-K
-         if(satsvn.eq.801.or.satsvn.eq.802.or.satsvn.eq.855)then
-         MASS = 995.0d0
+         if(SVNID.eq.801.or.SVNID.eq.802.or.SVNID.eq.855)then
          F0 = 10.0d-5
-         alpha = F0/MASS
 ! GLONASS-M
          else
-         MASS   = 1415.0d0
          F0 = 20.9d-5
          end if
-
 ! GALILEO constellation
 ! ---------------------
       else if (prnnum .gt. 200 .and. prnnum .le. 300) then
-         MASS   = 700.0d0
          Z_SIDE = 3.002D0
          X_SIDE = 1.323D0
          A_SOLAR= 11.0D0
@@ -192,29 +181,21 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, eclipsf, r, v, r_sun, Asrp)
          Z_SIDE = 3.96D0
          X_SIDE = 4.5D0
          A_SOLAR= 22.44D0
-
 ! BDS MEO
-         if(satsvn.ge.12.and.satsvn.le.15)then
-         MASS   = 800.0d0
+         if(SVNID.ge.12.and.SVNID.le.15)then
          F0 = 8.35d-5
-!         alpha = F0/MASS
 ! BDS IGSO
-         elseif(satsvn.ge.7.and.satsvn.le.10.or.satsvn.eq.5.or.satsvn.eq.17)then
-         MASS = 1400.0d0
+         elseif(SVNID.ge.7.and.SVNID.le.10.or.SVNID.eq.5.or.SVNID.eq.17)then
          F0 = 50.1d-5
-!         alpha = F0/MASS
          end if
-
 ! QZSS constellation
 ! ------------------
       else if (prnnum .gt. 400 .and. prnnum .le. 500) then
-         if(satsvn.eq.1)then
-         MASS = 2000.0d0
+         if(SVNID.eq.1)then
          Z_SIDE = 6.00D0
          X_SIDE = 12.2D0
          A_SOLAR= 40.0D0
          F0 = 50.1d-5 ! Assumed to be the same with BDS/IGSO
-
          end if
       end if
 
@@ -360,40 +341,21 @@ END IF
 ! A scaling factor is applied to ECOM model
 !******************************************************************
       sclfa=(AU/Ds)**2
-
 ! SIMPLE BOX-WING model as the a priori SRP value
       if (flag_BW == 1) then
-         fxo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
-         fyo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
-         fzo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
+         fxo=sclfa*Ps/sbmass*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
+         fyo=sclfa*Ps/sbmass*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
+         fzo=sclfa*Ps/sbmass*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
 
       else if (flag_BW == 2) then
          REFF = 0
          YSAT(1:3) = r
          YSAT(4:6) = v
-         SUN = r_sun
-         SVN = satsvn
-         IF(antbody == 'GPS-I')       BLKNUM = 1
-         IF(antbody == 'GPS-II')      BLKNUM = 2
-         IF(antbody == 'GPS-IIA')     BLKNUM = 3
-         IF(antbody == 'GPS-IIR')     BLKNUM = 4
-         IF(antbody == 'GPS-IIR-A')   BLKNUM = 5
-         IF(antbody == 'GPS-IIR-B')   BLKNUM = 6
-         IF(antbody == 'GPS-IIR-M')   BLKNUM = 7
-         IF(antbody == 'GPS-IIF')     BLKNUM = 8
-         IF(antbody == 'GPS-IIIA')    BLKNUM = 9
-         IF(antbody == 'GLO')                                    BLKNUM = 101
-         IF(antbody == 'GLO-M'   .or. antbody == 'GLO-M+')       BLKNUM = 102
-         IF(antbody == 'GLO-K1A' .or. antbody == 'GLO-K1B')      BLKNUM = 103
-         IF(antbody == 'GLA-1')       BLKNUM = 201 ! Galileo (IOV)
-         IF(antbody == 'GLA-2')       BLKNUM = 202 ! Galileo (FOC)
-
-         CALL SRPFBOXW(REFF,YSAT,SUN,BLKNUM,SVN,ACCEL)
+         CALL SRPFBOXW(REFF,YSAT,R_SUN,BLKID,SVNID,ACCEL)
          alpha = sclfa*sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
 
       else if (flag_BW == 0) then
-         alpha = F0/MASS
          alpha = F0/sbmass
       else
          alpha = 1.d0
@@ -618,16 +580,9 @@ End If
 ! use the shadow coefficient for scaling the SRP effect
 !-------------------------------------------------------
 IF (lambda .lt. 1) THEN
-!IF (abs(beta*180.0d0/Pi) .lt. 13.87 .and. del_u*180.0d0/Pi .gt. 167 .and. del_u*180.0d0/Pi .lt. 193) then
-!print*,'lambda=, del_u=', lambda, del_u*180/Pi
 Asrp(1:3,1) = lambda*Asrp(1:3,1)*alpha
-
 END IF
-
-!----------------------------------------------------------------------------------------------
-!print*,'alpha =', alpha
-!print*,'PRN= ',prnnum, 'Asrp1 =', Asrp/alpha
-!print*,'PRN= ',prnnum, 'Asrp2 =', Asrp
+!-------------------------------------------------------
 
 END SUBROUTINE
 

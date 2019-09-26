@@ -105,9 +105,7 @@ SUBROUTINE statorbit2 (ds1, ds2, orbdiff)
       CHARACTER (LEN=30) :: fmt_line
       INTEGER (KIND = prec_int2) :: ios
       INTEGER (KIND = prec_int4) :: PRN_no
-      INTEGER (KIND = 4)         :: satsvn
-      INTEGER (KIND = 4)         :: satblk
-      REAL    (KIND = 4)         :: prnnum, blk
+      REAL    (KIND = 4)         :: prnnum
 
 Pi = 4*atan(1.0d0)
 
@@ -209,11 +207,10 @@ Do i = 1 , Nepochs
       delta_t = ABS(ds2(j,1) - ds1(i,1))
       IF (delta_t < dt_limit) then
          k = k + 1
-satsvn = satid
 rsat = ds1(i,3:5)
 vsat = ds1(i,6:8)
 	     ! State vector numerical differences at common epochs
-CALL orbinfo (ds1(i,1), PRN_no, satsvn, rsat, vsat, beta0, del_u0, yaw0, lambda0, & 
+CALL orbinfo (ds1(i,1), PRN_no, rsat, vsat, beta0, del_u0, yaw0, lambda0, & 
               angX0, angY0, angZ0, fr0, ft0, fn0)
 beta1(k)  = beta0
 del_u1(k) = del_u0
@@ -225,15 +222,18 @@ angZ1(k)  = angZ0
 fr1(k)  = fr0
 ft1(k)  = ft0
 fn1(k)  = fn0
-!print*,del_u0*180/Pi, fr0, ft0, fn0
+!print*,diel_u0*180/Pi, fr0, ft0, fn0
 rsat = ds2(j,3:5)
 vsat = ds2(j,6:8)
-CALL orbinfo (ds2(j,1), PRN_no, satsvn, ds2(j,3:5), ds2(j,6:8), beta0, del_u0, yaw0, lambda0, & 
+CALL orbinfo (ds2(j,1), PRN_no, rsat, vsat, beta0, del_u0, yaw0, lambda0, & 
              angX0, angY0, angZ0, fr0, ft0, fn0)
 beta2(k)  = beta0
 del_u2(k) = del_u0
 yaw2(k)   = yaw0
 lambda2(k)= lambda0
+angX2(k)  = angX0
+angY2(k)  = angY0
+angZ2(k)  = angZ0
 fr2(k)  = fr0
 ft2(k)  = ft0
 fn2(k)  = fn0
@@ -248,7 +248,7 @@ fn2(k)  = fn0
 		 CALL matrix_Rr(Rrtn, dr, dr_RTN)
 	 orbdiff(k,1)   = ds2(j,1)
          orbdiff(k,2)   = PRN_no 
-         orbdiff(k,3)   = satblk
+         orbdiff(k,3)   = BLKID
          orbdiff(k,4)   = lambda2(k)
          orbdiff(k,5)   = beta2(k)  *180/Pi
          orbdiff(k,6)   = del_u2(k) *180/Pi

@@ -1,5 +1,5 @@
       Subroutine read_svsinex( lun,idir,iyr,iday,ihr,imin,gnss,isat
-     .                       , satid,frqchn,antbody,svid,sbmass
+     .                       , satid,frqchn,antbody,blkid,svid,sbmass
      .                       , yawbias,yawrate,power)
 
 c PURPOSE: Read an IGS Satellite metadata SINEX file, returning the values
@@ -26,13 +26,15 @@ c             power   : transmitted power in watts                 I*4
 
 c CREATED 14 November 2017 by R. King
 
+        
       implicit none
 
-                  
-      character*1  gnss,gnss_tmp,yawbias         
+      INTEGER*4    SVNID, BLKID            
+      character*1  gnss,gnss_tmp,yawbias 
       character*3  prn,          ! PRN string read from sinex file
      .             prn_in        ! PRN string for satellite we are looking for
                          ! or the correct one when svn found (depends on idir)                        
+
       character*4  svn,          ! SVN string read from sinex file
      .             svn_in        ! SVN string for satellite we are looking for
                          ! or the correct one when prn found.
@@ -382,6 +384,21 @@ c Get the transmitter power ( SATELLITE/TX_POWER block)
          write(*,*) svn, prn, antbody, iyr, iday, frqchn, sbmass, 
      .                power, yawbias, yawrate 
       endif
+      SVNID = satid
+      IF(antbody=='GPS-I')      BLKID = 1
+      IF(antbody=='GPS-II')     BLKID = 2
+      IF(antbody=='GPS-IIA')    BLKID = 3
+      IF(antbody=='GPS-IIR')    BLKID = 4
+      IF(antbody=='GPS-IIR-A')  BLKID = 5
+      IF(antbody=='GPS-IIR-B')  BLKID = 6
+      IF(antbody=='GPS-IIR-M')  BLKID = 7
+      IF(antbody=='GPS-IIF')    BLKID = 8
+      IF(antbody=='GPS-IIIA')   BLKID = 9
+      IF(antbody=='GLO')        BLKID = 101
+      IF(antbody=='GLO-M'  .or.antbody == 'GLO-M+')  BLKID = 102
+      IF(antbody=='GLO-K1A'.or.antbody == 'GLO-K1B') BLKID = 103
+      IF(antbody=='GLA-1')     BLKID = 201 ! Galileo (IOV)
+      IF(antbody=='GLA-2')     BLKID = 202 ! Galileo (FOC)
 
       return
       end

@@ -60,6 +60,7 @@ SUBROUTINE read_satsnx (satsinex_filename, Iyr, iday, Sec_00, PRN_isat)
       INTEGER (KIND = prec_int2) :: AllocateStatus
       integer*4 idir     ! Direction of PRN->SVN or visa-vers
       integer*4 UNIT_IN,isat,iyr,iday,ihr,imin
+
       REAL (KIND = prec_d) :: Sec_00
       CHARACTER*128  :: cha
 ! ----------------------------------------------------------------------
@@ -80,7 +81,7 @@ SUBROUTINE read_satsnx (satsinex_filename, Iyr, iday, Sec_00, PRN_isat)
       END IF
       
       CALL read_svsinex(UNIT_IN,idir,iyr,iday,ihr,imin,gnss,isat, &
-                  satid,frqchn,antbody,svid,sbmass,yawbias,yawrate,power)
+                  svnid,frqchn,antbody,blkid,svid,sbmass,yawbias,yawrate,power)
  
 ! ----------------------------------------------------------------------
       CLOSE (UNIT=UNIT_IN)
