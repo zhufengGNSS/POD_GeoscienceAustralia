@@ -39,7 +39,7 @@ attitude.f03 force_sum.f03 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 pd_g
 write_prmfile.f03 writeparam.f03 writeparam1.f03 time_TT_sec.f90 prm_main.f03 prm_emp.f03 empirical_cor.f03 empirical_init.f03 \
 ecom_init.f03 prm_srp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.f03 scan0orbext.f03 prm_orbext.f03 prm_planets.f03 scan0orb.f03 prm_pseudobs.f03 \
 f90getopt.F90 read_cmdline.f03 \
-m_read_satsnx.f03 read_svsinex.f \
+m_read_satsnx.f03 m_read_svsinex.f03 \
 main_pod.f03
 
 CRS2TRSSRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \

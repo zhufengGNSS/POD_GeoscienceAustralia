@@ -42,15 +42,15 @@ SUBROUTINE read_satsnx (satsinex_filename, Iyr, iday, Sec_00, PRN_isat)
       USE mdl_num
       USE mdl_param
       USE mdl_config
+      USE m_read_svsinex
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
 ! Dummy argument declarations
 ! ----------------------------------------------------------------------
-      CHARACTER (LEN=*) :: satsinex_filename
+      CHARACTER (LEN=100) :: satsinex_filename
       CHARACTER (LEN=3) :: PRN_isat
-      character*1  gnss
-      character*10 svid
+      CHARACTER (LEN=1) :: gnss
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
@@ -58,11 +58,11 @@ SUBROUTINE read_satsnx (satsinex_filename, Iyr, iday, Sec_00, PRN_isat)
       INTEGER (KIND = prec_int2) :: ios
       INTEGER (KIND = prec_int2) :: ios_line, ios_key, ios_data
       INTEGER (KIND = prec_int2) :: AllocateStatus
-      integer*4 idir     ! Direction of PRN->SVN or visa-vers
-      integer*4 UNIT_IN,isat,iyr,iday,ihr,imin
+      INTEGER (KIND = prec_int2) :: idir     ! Direction of PRN->SVN or visa-vers
+      INTEGER (KIND = prec_int4) :: UNIT_IN,isat,iyr,iday,ihr,imin
 
       REAL (KIND = prec_d) :: Sec_00
-      CHARACTER*128  :: cha
+      CHARACTER (LEN=128)  :: cha
 ! ----------------------------------------------------------------------
       UNIT_IN = 90  												
       idir = -1
@@ -81,7 +81,7 @@ SUBROUTINE read_satsnx (satsinex_filename, Iyr, iday, Sec_00, PRN_isat)
       END IF
       
       CALL read_svsinex(UNIT_IN,idir,iyr,iday,ihr,imin,gnss,isat, &
-                  svnid,frqchn,antbody,blkid,svid,sbmass,yawbias,yawrate,power)
+                  SVNID,BLKTYP,BLKID,MASS,power)
  
 ! ----------------------------------------------------------------------
       CLOSE (UNIT=UNIT_IN)

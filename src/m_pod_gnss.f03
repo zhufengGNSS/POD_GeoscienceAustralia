@@ -230,12 +230,6 @@ Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
-! Read Satellite infromation from SINEX file
-! ----------------------------------------------------------------------
-!param_id = 'satsinex_filename_cfg'
-!Call readparam (PODfname, param_id, param_value)
-!READ ( param_value, FMT = * , IOSTAT=ios_key ) satsinex_filename_cfg
-!PRINT*,'satsinex_filename',satsinex_filename_cfg
 ! Compute day of year
 CALL iau_CAL2JD ( Iyear, Imonth, Iday, MJD0, MJD, J )
 CALL iau_CAL2JD ( Iyear, 1, 1, MJD0, MJDref, J )
@@ -243,7 +237,6 @@ DOY = IDNINT(MJD-MJDref) + 1
 
 PRINT*,'Day Of Year =', DOY, Iyear
 
-!CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00)
 
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
@@ -261,9 +254,10 @@ Do isat = 1 , Nsat
 ! ----------------------------------------------------------------------
 PRN_isat = PRNmatrix(isat)
 print *,"Satellite: ", PRNmatrix(isat) ! isat
-
+! Read Satellite infromation from SINEX file
+! ----------------------------------------------------------------------
 CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat)
-print*,'GNSS Block Type: ', antbody
+print*,'GNSS Block Type: ', BLKTYP
 
 ! ----------------------------------------------------------------------
 ! Copy Initial Configuration files 
