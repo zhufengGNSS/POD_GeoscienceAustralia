@@ -94,7 +94,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum,  srpid, r, v, r_sun, fx, fy, 
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: X_SIDE,Z_SIDE
-      REAL (KIND = prec_q) :: MASS,AREA
+      REAL (KIND = prec_q) :: AREA
       REAL (KIND = prec_q) :: A_SOLAR
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
@@ -351,9 +351,9 @@ END IF
 
 ! SIMPLE BOX-WING 
       if (flag_BW == 1 .or. srpid == 1) then
-         fxo=sclfa*Ps/sbmass*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
-         fyo=sclfa*Ps/sbmass*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
-         fzo=sclfa*Ps/sbmass*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
+         fxo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
+         fyo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
+         fzo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
 
 ! BOX-WING model from the repro3 routine
@@ -367,7 +367,7 @@ END IF
       
       else if (flag_BW == 0) then
          alpha = F0/MASS
-         alpha = F0/sbmass
+         alpha = F0/MASS
       else
          alpha = 1.d0
       end if

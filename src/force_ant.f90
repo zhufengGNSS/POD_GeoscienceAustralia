@@ -62,7 +62,7 @@ c  = 299792458.d0
 
 ! The acceleration caused by the satellite antenna thrust
 ! --------------------------------------------------------
-      f_ant = power/(sbmass*c)
+      f_ant = POWER/(MASS*c)
 
 ! --------------------------------------------------------
 
