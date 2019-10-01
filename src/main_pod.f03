@@ -277,7 +277,7 @@ param_id = 'EOP_fname_cfg'
 CALL readparam (PODfname, param_id, param_value)
 READ ( param_value, FMT = * , IOSTAT=ios_key ) EOP_fname_cfg 
 
-! ERP filename (Earth Rotation Parameters by IGS) :: Solution 3 (requires also finals2000A.daily data from EOP_sol=2 for Precession-Nutation corrections)
+! ERP filename (Earth Rotation Parameters by IGS) :: Solution 3
 param_id = 'ERP_fname_cfg'
 CALL readparam (PODfname, param_id, param_value)
 READ ( param_value, FMT = * , IOSTAT=ios_key ) ERP_fname_cfg 
@@ -404,10 +404,11 @@ End IF
 Print *," "
 ! IC mode
 If      (IC_MODE_cfg == 1) then
-Print *,"Orbit Initial Conditions mode: 1 :: A-priori orbit input file"
+Print *,"Initial Conditions mode: 1 :: A-priori orbit input file: ", TRIM(pseudobs_orbit_filename_cfg)
 Else IF (IC_MODE_cfg == 2) then 
-Print *,"Orbit Initial Conditions mode: 2 :: Initial Conditions input file"
+Print *,"Initial Conditions mode: 2 :: Initial Conditions input file: ", TRIM(IC_filename_cfg)
 END IF
+Print *," "
 
 ! ----------------------------------------------------------------------
 ! Read Leap Second File
@@ -570,9 +571,10 @@ GPS_day = ( GPS_wsec/86400.0D0 )
 ! Write satellite orbits and partial derivatives to one .orb output file (internal format)
 ! ----------------------------------------------------------------------
 !orbits_partials_fname = 'orbits_partials_icrf.orb'
-write (orbits_partials_fname, FMT='(A3,I4,I1,A20)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits_partials.orb'
+write (orbits_partials_fname, FMT='(A3,I4,I1,A20)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits_partials.out'
 !CALL writeorbit_multi (orbits_partials_icrf, PRNmatrix, orbits_partials_fname)
-CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_icrf, PRNmatrix, orbits_partials_fname)
+CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_icrf, PRNmatrix, & 
+						orbits_partials_fname, EQMfname, VEQfname)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------

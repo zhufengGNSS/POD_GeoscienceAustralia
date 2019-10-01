@@ -10,7 +10,7 @@
 ! 3. Orbit Integration (Equation of Motion only)
 ! 4. Orbit Integration and Partials (Equation of Motion and Variational Equations)
 ! ----------------------------------------------------------------------
-POD_MODE_cfg              1
+POD_MODE_cfg              4
 
 ! ----------------------------------------------------------------------
 %% Initial Conditions input mode
@@ -36,7 +36,7 @@ VEQ_fname_cfg          VEQ.in	! Variational Equations
 %% Orbit arc length (in hours) 
 ! ----------------------------------------------------------------------
 ! Orbit Estimation arc
-orbit_determination_arc_cfg     24  
+orbit_determination_arc_cfg     26  
 
 ! Orbit Prediction arc
 orbit_prediction_arc_cfg        12
@@ -61,7 +61,7 @@ EOP_fname_cfg             eopc04_14_IAU2000.62-now
 ERP_fname_cfg             igu18543_12.erp
 
 ! EOP 
-EOP_Nint_cfg              4   	
+EOP_Nint_cfg              6   	
  
 ! ---------------------------------------------------------------------------
 ! IAU Precession-Nutation model:
