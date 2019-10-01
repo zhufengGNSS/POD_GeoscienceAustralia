@@ -15,7 +15,7 @@
  Seconds			   0.0000000000000000
  
  ! Initial State Vector (m):
- state_vector			  -22404418.645000208       -4567800.0216180142       -13978953.818232412        2003.4708051626053       -2111.5295809096770       -2503.3685578760919
+ state_vector			  -22404418.652544137       -4567800.0217060149       -13978953.798371309        2003.4708026483122       -2111.5295826511574       -2503.3685587111599
  
  
  ---------------------------------------------------------------------------
@@ -28,7 +28,7 @@
  EOP_data_sol			    1
  EOP_filename			 eopc04_14_IAU2000.62-now
  ERP_filename			 igu18543_12.erp
- EOP_interpolation_points			           4
+ EOP_interpolation_points			           6
  
  ! IAU Precession-Nutation model:
  ! 1. IAU2000A:		iau_pn_model = 2000
@@ -139,7 +139,7 @@
  
  ---------------------------------------------------------------------------
  %% Parameter Estimation
- Estimator_procedure			1
+ Estimator_procedure			0
  Estimator_Iterations			      2
  
  ---------------------------------------------------------------------------

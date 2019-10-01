@@ -4,7 +4,7 @@
  Satellite_PRN			G09
  Reference_frame           ITRF
  Time_scale                GPS
- Orbit_arc_length			   86400.000000000000
+ Orbit_arc_length			   93600.000000000000
  
  ---------------------------------------------------------------------------
  %% Initial Conditions: Epoch and State Vector
@@ -15,7 +15,7 @@
  Seconds			   0.0000000000000000
  
  ! Initial State Vector (m):
- state_vector			  -3842856.1646769508        16376733.436679354       -20579109.203472562       -3174.4503789140822       -1982.9975179798382       -987.67188437413802
+ state_vector			  -3842856.1760230749        16376733.453447059       -20579109.191630978       -3174.4503784631411       -1982.9975175614418       -987.67188421936510
  
  
  ---------------------------------------------------------------------------
@@ -28,7 +28,7 @@
  EOP_data_sol			    1
  EOP_filename			 eopc04_14_IAU2000.62-now
  ERP_filename			 igu18543_12.erp
- EOP_interpolation_points			           4
+ EOP_interpolation_points			           6
  
  ! IAU Precession-Nutation model:
  ! 1. IAU2000A:		iau_pn_model = 2000
@@ -139,7 +139,7 @@
  
  ---------------------------------------------------------------------------
  %% Parameter Estimation
- Estimator_procedure			1
+ Estimator_procedure			0
  Estimator_Iterations			      2
  
  ---------------------------------------------------------------------------

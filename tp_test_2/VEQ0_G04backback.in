@@ -4,7 +4,7 @@
  Satellite_PRN			G04
  Reference_frame			 ICRF
  Time_scale                GPS
- Orbit_arc_length			   86400.000000000000
+ Orbit_arc_length			   93600.000000000000
  
  ---------------------------------------------------------------------------
  %% Initial Conditions: Epoch and State Vector
@@ -139,7 +139,7 @@
  
  ---------------------------------------------------------------------------
  %% Parameter Estimation
- Estimator_procedure			1
+ Estimator_procedure			0
  Estimator_Iterations			      2
  
  ---------------------------------------------------------------------------
