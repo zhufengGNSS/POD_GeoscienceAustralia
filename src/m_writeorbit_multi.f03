@@ -20,7 +20,7 @@ MODULE m_writeorbit_multi
 Contains
 
 
-SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf, PRN_array, filename)
+SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf, PRN_array, filename,EQMfname,VEQfname)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: writeorbit_multi 
@@ -35,7 +35,9 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf,
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - wrtArray:       Input allocatable array
-! - filename:       file name to be used for writing array data
+! - filename:       Orbits & Partials file name to be used for writing out the orbits/partials matrices 
+! - EQMfname: 		Input configuration file name for the orbit integration of the Equation of Motion  
+! - VEQfname: 		Input configuration file name for the orbit integration of the Variational Equations
 !
 ! Output arguments:
 !
@@ -61,6 +63,7 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf,
       REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:), ALLOCATABLE :: orbits_ics_icrf
       CHARACTER (LEN=3), ALLOCATABLE :: PRN_array(:)
       CHARACTER (LEN=100), INTENT(IN) :: filename
+      CHARACTER (LEN=100), INTENT(IN)  :: EQMfname, VEQfname				
 ! OUT
 ! ----------------------------------------------------------------------
 
@@ -68,7 +71,7 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf,
 ! Local variables declaration
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int8) :: i, i_write
-      INTEGER (KIND = prec_int2) :: UNIT_IN, ios, ios_ith
+      INTEGER (KIND = prec_int2) :: UNIT_IN, ios, ios_ith, ios_key
       INTEGER (KIND = prec_int8) :: sz1, sz2, sz3
       INTEGER (KIND = prec_int2) :: wrt_opt
       INTEGER (KIND = prec_int2) :: FMT_opt
@@ -81,10 +84,17 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf,
       INTEGER (KIND = prec_int8) :: Nepochs, Nparam, Nsat, Norbits_ics_icrf 
       INTEGER (KIND = prec_int8) :: i_epoch, i_sat
 ! ----------------------------------------------------------------------
+      CHARACTER (LEN=100) :: param_id				
+      CHARACTER (LEN=500) :: param_value				
+      CHARACTER (LEN=100) :: gravity_model_filename, iau_pn_model, DE_fname_data, ocean_tides_model_file
+      CHARACTER (LEN=100) :: orbit_num_integrator, EOP_sol, EOP_data, SE_Tides, Pole_Tide 
+      CHARACTER (LEN=5) :: EPH_name
+      INTEGER (KIND = prec_int4) :: ln
+      INTEGER (KIND = prec_int2) :: Ftides
+! ----------------------------------------------------------------------
 
-! ----------------------------------------------------------------------
+
 UNIT_IN = 7  												
-! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Orbit arrays dimensions
@@ -123,22 +133,106 @@ fmt_wrt = '(A3,A1,F25.12,F25.9,3F25.4,3F25.9, A)'
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
-! Thomas - Please complete adding the following header information to the output tabular file
 ! Write file header information
 ! ----------------------------------------------------------------------
-WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    POD tabular ephemeris file: '
-WRITE (UNIT=UNIT_IN,FMT='(a,a)'            ,IOSTAT=ios_ith) '#INFO    Generated from: ',trim(pseudobs_orbit_filename_cfg)
-WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith)    '#INFO    Epoch initial conditions:   ', &
-                                                            INT(orbits_ics_icrf(1,1)),orbits_ics_icrf(2,1) !INT(orbitsmatrix_crf(1,1,1)),orbitsmatrix_crf(1,2,1)
-WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith)    '#INFO    Epoch Start:                ', & 
-                                                            INT(orbitsmatrix_crf(1,1,1)),orbitsmatrix_crf(1,2,1) 
-WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith)    '#INFO    Epoch End:                  ', &
-                                                            INT(orbitsmatrix_crf(Nepochs,1,1)),orbitsmatrix_crf(Nepochs,2,1) 
-WRITE (UNIT=UNIT_IN,FMT='(a,I9)'           ,IOSTAT=ios_ith) '#INFO    Tabular interval (sec):     ', abs(INT(integstep))
-WRITE (UNIT=UNIT_IN,FMT='(a,i5)'           ,IOSTAT=ios_ith) '#INFO    Number of Epochs:           ',Nepochs
-WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    Model information:           [TIME_SYS] [GRAV_MODEL]&
-                                           &[PN_MODEL] [EPH_MODEL] [ALBEDO_MODEL]'
-WRITE (UNIT=UNIT_IN,FMT='(a,a)'            ,IOSTAT=ios_ith) '#INFO    EOP file:                          ',trim(EOP_fname_cfg)
+WRITE (UNIT=UNIT_IN,FMT='(A)'           ,IOSTAT=ios_ith) '#INFO    POD Tool :: Orbits & Partial Derivatives file'
+! POD Tool mode
+IF (POD_MODE_cfg == 1) WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    POD Tool mode:                     ', & 
+					   & '1. Orbit Determination (using pseudo-observations)'
+IF (POD_MODE_cfg == 2) WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    POD Tool mode:                     ', & 
+					   & '2. Orbit Determination and Prediction'
+IF (POD_MODE_cfg == 3) WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    POD Tool mode:                     ', & 
+					   & '3. Orbit Numerical Integration'
+IF (POD_MODE_cfg == 4) WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    POD Tool mode:                     ', & 
+					   & '4. Orbit & Partials numerical integration '
+! Initial Conditions
+IF (IC_MODE_cfg == 1) WRITE (UNIT=UNIT_IN,FMT='(A,A,A)',IOSTAT=ios_ith) '#INFO    Initial Conditions input mode:     ', & 
+					   & '1. a-priori .sp3 orbit: ',TRIM(pseudobs_orbit_filename_cfg)
+IF (IC_MODE_cfg == 2) WRITE (UNIT=UNIT_IN,FMT='(A,A,A)',IOSTAT=ios_ith) '#INFO    Initial Conditions input mode:     ', & 
+					   & '2. Initial Conditions input file: ',TRIM(IC_filename_cfg) 
+
+WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith) '#INFO    Epoch initial conditions:          ', &
+                                                         INT(orbits_ics_icrf(1,1)),orbits_ics_icrf(2,1) !INT(orbitsmatrix_crf(1,1,1)),orbitsmatrix_crf(1,2,1)
+WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith) '#INFO    Epoch Start:                       ', & 
+                                                         INT(orbitsmatrix_crf(1,1,1)),orbitsmatrix_crf(1,2,1) 
+WRITE (UNIT=UNIT_IN,FMT='(a,I9,F25.10)' ,IOSTAT=ios_ith) '#INFO    Epoch End:                         ', &
+                                                         INT(orbitsmatrix_crf(Nepochs,1,1)),orbitsmatrix_crf(Nepochs,2,1) 
+WRITE (UNIT=UNIT_IN,FMT='(a,I9)'        ,IOSTAT=ios_ith) '#INFO    Tabular interval (sec):            ', abs(INT(integstep))
+WRITE (UNIT=UNIT_IN,FMT='(a,i5)'        ,IOSTAT=ios_ith) '#INFO    Number of Epochs:                  ',Nepochs
+
+! Orbit arc length (in hours) 
+WRITE (UNIT=UNIT_IN,FMT='(A,A,I4,A,I4,A,I4)',IOSTAT=ios_ith) '#INFO    Orbit arc length (hours):          ', & 
+								  '| Orbit Determination arc: ', INT(orbit_determination_arc_cfg), &
+								  ' | Orbit Prediction arc: ', INT(orbit_prediction_arc_cfg), &
+								  ' | Backwards orbit integration arc: ', INT(orbit_backwards_arc_cfg)
+
+! Numerical Integration methods
+IF (integmeth == 1) orbit_num_integrator = 'RKN7(6)8 Runge-Kutta-Nystrom 7th order method'
+IF (integmeth == 2) orbit_num_integrator = 'Runge-Kutta 4th order'
+IF (integmeth == 3) orbit_num_integrator = 'RK8(7)13 Runge-Kutta 8th order'
+WRITE (UNIT=UNIT_IN,FMT='(2A)',IOSTAT=ios_ith)   '#INFO    Numerical Integration Method:     ', orbit_num_integrator 
+WRITE (UNIT=UNIT_IN,FMT='(A,I7)',IOSTAT=ios_ith) '#INFO    Numerical Integration step (sec): ', abs(INT(integstep)) 
+
+! Satellite Dynamics model
+!WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    Model information:           [TIME_SYS] [GRAV_MODEL]&
+!                                           &[PN_MODEL] [EPH_MODEL] [ALBEDO_MODEL]'
+WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    Time System:                       ', TIME_SCALE 
+param_id = 'gravity_model_filename'
+CALL readparam (EQM_fname_cfg, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) gravity_model_filename 
+param_id = 'DE_fname_data'
+CALL readparam (EQM_fname_cfg, param_id, param_value)
+!READ ( TRIM(ADJUSTR(param_value)), FMT = * , IOSTAT=ios_key ) DE_fname_data
+DE_fname_data =  TRIM(param_value) 
+ln = LEN_TRIM (DE_fname_data)
+WRITE (EPH_name, FMT = '(A2,A3)' , IOSTAT=ios_key ), 'DE', DE_fname_data(ln-2:ln)
+
+! General orbit parameterization											
+Call prm_main (EQMfname)
+
+IF (FMOD_GRAV(3) == 1 .and. FMOD_TIDES(1) == 1) THEN
+SE_Tides = 'IERS 2010'
+ELSE
+SE_Tides = '-'
+END IF
+IF (FMOD_GRAV(3) == 1 .and. FMOD_TIDES(3) == 1) THEN
+param_id = 'ocean_tides_model_file'
+CALL readparam (EQM_fname_cfg, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) ocean_tides_model_file 
+ELSE
+ocean_tides_model_file = '-'
+END IF
+IF (FMOD_GRAV(3) == 1 .and. FMOD_TIDES(4) == 1) THEN
+Pole_Tide = 'IERS 2010'
+ELSE
+Pole_Tide = '-'
+END IF
+WRITE (UNIT=UNIT_IN,FMT='(A)',IOSTAT=ios_ith)   '#INFO    Satellite Dynamics Model::         ' 
+WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    Gravity field model:               ', TRIM(gravity_model_filename)
+WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    Planetary Ephemeris:               ', TRIM(EPH_name)
+WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    Solid Earth Tides  :               ', TRIM(SE_Tides)
+WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    Ocean Tides        :               ', TRIM(ocean_tides_model_file)
+WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    Pole Tide          :               ', TRIM(Pole_Tide)
+
+! Earth Orientation modelling
+IF (EOP_solution_cfg == 1) THEN 
+	EOP_sol = 'IERS C04'
+	EOP_data = EOP_fname_cfg
+ELSE IF (EOP_solution_cfg == 2) THEN
+	EOP_sol = 'IERS RS/PC Daily'
+	EOP_data = EOP_fname_cfg
+ELSE IF (EOP_solution_cfg == 3) THEN
+	EOP_sol = 'IGS ultra-rapid ERP'
+	EOP_data = ERP_fname_cfg
+END IF
+param_id = 'iau_pn_model'
+CALL readparam (EQM_fname_cfg, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) iau_pn_model 
+WRITE (UNIT=UNIT_IN,FMT='(10A)'            ,IOSTAT=ios_ith) '#INFO    Earth Orientation modelling:       ', &
+											& '[EOP solution: ',trim(EOP_sol),'] ', &
+											& '[EOP data file: ',trim(EOP_data),'] ', &
+											& '[Precession-Nutation model: IAU',TRIM(iau_pn_model),']'
+
 WRITE (UNIT=UNIT_IN,FMT='(a,i3)'           ,IOSTAT=ios_ith) '#INFO    Number of Satellites:              ',Nsat
 WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of Parameters per satellite:',NPARAM_glb+6
 WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of Partials:                ',Nparam-8
