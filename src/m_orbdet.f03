@@ -696,23 +696,9 @@ VEQmode = 1
 Call orbinteg (VEQfname_back, VEQmode, orb0, veqSmatrix_back, veqPmatrix_back)
 
 ! Merge orbits and partials matrices
-filename = "orb_back_0.out"
-Call writearray (orb_back, filename)
-
 ! Orbit matrix
 CALL matrixreverse (orb_back)
-
-filename = "orb_back_1.out"
-Call writearray (orb_back, filename)
-
-filename = "orb_icrf0.out"
-Call writearray (orb_icrf, filename)
-
 CALL matrixmerge   (orb_back, orb_icrf)
-
-filename = "orb_icrf1.out"
-Call writearray (orb_icrf, filename)
-
 ! veqSmatrix matrix
 CALL matrixreverse (veqSmatrix_back)
 CALL matrixmerge   (veqSmatrix_back, veqSmatrix)
@@ -720,10 +706,6 @@ CALL matrixmerge   (veqSmatrix_back, veqSmatrix)
 CALL matrixreverse (veqPmatrix_back)
 CALL matrixmerge   (veqPmatrix_back, veqPmatrix)
 
-!ELSE
-!orb_icrf_2   = orb_icrf
-!veqSmatrix_2 = veqSmatrix
-!veqPmatrix_2 = veqPmatrix
 END IF  
 ! ----------------------------------------------------------------------
 
