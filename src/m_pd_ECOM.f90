@@ -65,6 +65,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, r, v, r_sun, Asrp)
       USE mdl_precision
       USE mdl_num
       USE mdl_param
+      USE mdl_config
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -104,7 +105,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, r, v, r_sun, Asrp)
       REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
       INTEGER              :: ex_i
       INTEGER              :: att_ON
-      INTEGER              :: flag_BW
 ! ----------------------------------------------------------------------
 ! Sun-related variables
 ! ----------------------------------------------------------------------
@@ -132,11 +132,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, r, v, r_sun, Asrp)
              !              when the beta < 4 deg
              !        = 0 : use the yaw-steering attitude for BDS satellite
              !              for all beta angles
- flag_BW = 0 !flag_BW = 1 : use the simple box-wing model as a priori SRP values
-             !        = 2 : use the box-wing model from repro3 routines as a
-             !              priori SRP values
-             !        = 0 : use the constant f0 as a priori SRP value
-             !        = any numbers: directly estimate the SRP parameters
 ! ---------------------------------------------------------------------
 
 ! GPS constellation
@@ -342,20 +337,20 @@ END IF
 !******************************************************************
       sclfa=(AU/Ds)**2
 ! SIMPLE BOX-WING model as the a priori SRP value
-      if (flag_BW == 1) then
-         fxo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
-         fyo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
-         fzo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
+      if (Flag_BW_cfg == 1) then
+         fxo=Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
+         fyo=Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
+         fzo=Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
 
-      else if (flag_BW == 2) then
+      else if (Flag_BW_cfg == 2) then
          REFF = 0
          YSAT(1:3) = r
          YSAT(4:6) = v
          CALL SRPFBOXW(REFF,YSAT,R_SUN,BLKID,SVNID,ACCEL)
-         alpha = sclfa*sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
+         alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
 
-      else if (flag_BW == 0) then
+      else if (Flag_BW_cfg == 0) then
          alpha = F0/MASS
       else
          alpha = 1.d0

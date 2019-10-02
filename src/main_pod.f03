@@ -328,6 +328,12 @@ READ ( param_value, FMT = * , IOSTAT=ios_key ) satsinex_filename_cfg
 PRINT*,'satsinex_filename =', satsinex_filename_cfg
 !----------------------------------------------------------------------
 
+! Flag of different models for A priori SRP value 
+! ---------------------------------------------------------------------
+param_id = 'Flag_BW_cfg'
+Call readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) Flag_BW_cfg
+PRINT*,'Flag_BW_cfg =', Flag_BW_cfg
 ! ----------------------------------------------------------------------
 ! Reference System of Variational Equations' Partials & Parameter Estimation 
 ! ----------------------------------------------------------------------

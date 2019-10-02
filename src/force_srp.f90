@@ -53,6 +53,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum,  srpid, r, v, r_sun, fx, fy, 
       USE mdl_precision
       USE mdl_num
       USE mdl_param
+      USE mdl_config
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -84,12 +85,10 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum,  srpid, r, v, r_sun, fx, fy, 
       REAL (KIND = prec_q), DIMENSION(4) :: cosang
       REAL (KIND = prec_q), DIMENSION(4) :: AREA1,REFL1,DIFU1,ABSP1
       INTEGER (KIND = prec_int2) :: AllocateStatus,DeAllocateStatus
-      INTEGER              :: zta
       INTEGER              :: ex_i
       INTEGER              :: i,j,k,m
       INTEGER              :: N_param, PD_Param_ID
       INTEGER              :: att_ON
-      INTEGER              :: flag_BW
 ! ----------------------------------------------------------------------
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
@@ -123,11 +122,6 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum,  srpid, r, v, r_sun, fx, fy, 
              !              when the beta < 4 deg
              !        = 0 : use the yaw-steering attitude for BDS satellite 
              !              for all beta angles 
- flag_BW = 0 !flag_BW = 1 : use the simple box-wing model as a priori SRP value
-             !        = 2 : use the box-wing model from repro3 routines as a
-             !              priori SRP value
-             !        = 0 : use the constant f0 as a priori SRP value
-             !        = any numbers : directly estimate the SRP parameters
 ! ---------------------------------------------------------------------
      
 ! initialize the SRP force
@@ -350,23 +344,22 @@ END IF
       sclfa=(AU/Ds)**2
 
 ! SIMPLE BOX-WING 
-      if (flag_BW == 1 .or. srpid == 1) then
-         fxo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
-         fyo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
-         fzo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
+      if (Flag_BW_cfg == 1 .or. srpid == 1) then
+         fxo=Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
+         fyo=Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
+         fzo=Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
 
 ! BOX-WING model from the repro3 routine
 ! --------------------------------------
-      else if (flag_BW == 2 .or. srpid == 2) then
+      else if (Flag_BW_cfg == 2 .or. srpid == 2) then
          REFF = 0     
          YSAT(1:3) = r
          YSAT(4:6) = v
          CALL SRPFBOXW(REFF,YSAT,R_SUN,BLKID,SVNID,ACCEL)
-         alpha = sclfa*sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
+         alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
       
-      else if (flag_BW == 0) then
-         alpha = F0/MASS
+      else if (Flag_BW_cfg == 0) then
          alpha = F0/MASS
       else
          alpha = 1.d0
