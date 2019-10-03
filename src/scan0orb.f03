@@ -107,7 +107,7 @@ DEALLOCATE (pseudobs_ITRF, STAT = DeAllocateStatus)
 
 ALLOCATE (pseudobs_ICRF(ic,sz2), STAT = AllocateStatus)
 ALLOCATE (pseudobs_ITRF(it,sz3), STAT = AllocateStatus)
-print*,'Number of Epochs or Positions used for POD =', ic
+!print*,'Number of Epochs or Positions used for POD =', ic
 pseudobs_ICRF = 0.d0
 pseudobs_ITRF = 0.d0
 

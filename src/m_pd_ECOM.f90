@@ -157,7 +157,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, r, v, r_sun, Asrp)
          Z_SIDE = 1.6620D0
          X_SIDE = 4.200D0
          A_SOLAR= 23.616D0
-<<<<<<< HEAD
 ! GLONASS-K
          if(SVNID.eq.801.or.SVNID.eq.802.or.SVNID.eq.855)then
          F0 = 10.0d-5
