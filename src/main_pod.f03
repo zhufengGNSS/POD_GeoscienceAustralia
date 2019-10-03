@@ -186,13 +186,20 @@ READ ( param_value, FMT = * , IOSTAT=ios_key ) POD_MODE_cfg
 ! ----------------------------------------------------------------------
 param_id = 'IC_input'
 CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) IC_MODE 
+READ ( param_value, FMT = * , IOSTAT=ios_key ) IC_MODE_cfg 
 
 ! Initial Conditions reference frame
 param_id = 'IC_refsys'
 CALL readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) IC_REF 
+READ ( param_value, FMT = * , IOSTAT=ios_key ) IC_REF_cfg
+
+! Initial Conditions file name
+param_id = 'IC_filename_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) IC_filename_cfg
 ! ----------------------------------------------------------------------
+!print *,"IC_MODE_cfg, IC_REF_cfg", IC_MODE_cfg, IC_REF_cfg
+!print *,"IC_filename_cfg", IC_filename_cfg
 
 ! ----------------------------------------------------------------------
 ! Configuration files of Orbit modelling (2 Basic initial files):
@@ -246,6 +253,14 @@ CALL readparam (PODfname, param_id, param_value)
 READ ( param_value, FMT = * , IOSTAT=ios_key ) orbit_prediction_arc_cfg 
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Orbit Propagation backwards arc length
+! ----------------------------------------------------------------------
+param_id = 'orbit_backwards_arc_cfg'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) orbit_backwards_arc_cfg 
+! ----------------------------------------------------------------------
+
 ! ---------------------------------------------------------------------------
 ! Earth Orientation Parameters (EOP)
 ! ---------------------------------------------------------------------------
@@ -262,7 +277,7 @@ param_id = 'EOP_fname_cfg'
 CALL readparam (PODfname, param_id, param_value)
 READ ( param_value, FMT = * , IOSTAT=ios_key ) EOP_fname_cfg 
 
-! ERP filename (Earth Rotation Parameters by IGS) :: Solution 3 (requires also finals2000A.daily data from EOP_sol=2 for Precession-Nutation corrections)
+! ERP filename (Earth Rotation Parameters by IGS) :: Solution 3
 param_id = 'ERP_fname_cfg'
 CALL readparam (PODfname, param_id, param_value)
 READ ( param_value, FMT = * , IOSTAT=ios_key ) ERP_fname_cfg 
@@ -390,6 +405,7 @@ print *, "ORBPRED_ARC_glb", ORBPRED_ARC_glb
 Print *," "
 end if
 
+! POD mode
 If      (POD_MODE_glb == 1) then
 Print *,"POD Tool mode: 1 :: Orbit Determination"
 Else IF (POD_MODE_glb == 2) then 
@@ -397,8 +413,15 @@ Print *,"POD Tool mode: 2 :: Orbit Determination and Prediction"
 Else IF (POD_MODE_glb == 3) then 
 Print *,"POD Tool mode: 3 :: Orbit Integration"
 Else IF (POD_MODE_glb == 4) then 
-Print *,"POD Tool mode: 2 :: Orbit Integration and Partials"
+Print *,"POD Tool mode: 4 :: Orbit Integration and Partials"
 End IF
+Print *," "
+! IC mode
+If      (IC_MODE_cfg == 1) then
+Print *,"Initial Conditions mode: 1 :: A-priori orbit input file: ", TRIM(pseudobs_orbit_filename_cfg)
+Else IF (IC_MODE_cfg == 2) then 
+Print *,"Initial Conditions mode: 2 :: Initial Conditions input file: ", TRIM(IC_filename_cfg)
+END IF
 Print *," "
 
 ! ----------------------------------------------------------------------
@@ -550,7 +573,8 @@ CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_parti
 ! Output filenames prefix
 ! ----------------------------------------------------------------------
 !mjd = orbits_partials_icrf(1,1,1)
-mjd = orbits_partials_itrf(2,1,1)
+!mjd = orbits_partials_itrf(2,1,1)
+mjd = orbits_ics_icrf(1,1) 
 CALL time_GPSweek  (mjd, GPS_week, GPS_wsec, GPSweek_mod1024)
 !CALL time_GPSweek2 (mjd, GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
 GPS_day = ( GPS_wsec/86400.0D0 )  
@@ -563,7 +587,8 @@ GPS_day = ( GPS_wsec/86400.0D0 )
 !orbits_partials_fname = 'orbits_partials_icrf.orb'
 write (orbits_partials_fname, FMT='(A3,I4,I1,A20)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits_partials.out'
 !CALL writeorbit_multi (orbits_partials_icrf, PRNmatrix, orbits_partials_fname)
-CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_icrf, PRNmatrix, orbits_partials_fname)
+CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_icrf, PRNmatrix, & 
+						orbits_partials_fname, EQMfname, VEQfname)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -571,7 +596,7 @@ CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_ic
 ! ----------------------------------------------------------------------
 ! Orbit sp3 filename
 write (ORB2sp3_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.sp3'
-
+sat_vel = sp3_velocity_cfg
 ! ICRF
 !CALL write_orb2sp3 (orbits_partials_icrf, PRNmatrix, ORB2sp3_fname, sat_vel)
 ! ITRF

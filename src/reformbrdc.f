@@ -3,7 +3,7 @@ CC
 CC NAME       :  reformbrdc
 CC
 CC PURPOSE    :  rearrange the broadcast information into orbit-related
-CC               and clock related groups
+CC               and clock related groups (REFER TO BERNESE RXV3BR.f)
 CC
 CC PARAMETERS :
 CC         IN :  EPHDAT(1:28)          : ARRAY CONTAINING THE        R*8
@@ -76,6 +76,12 @@ CC                 CLOCK(14)           : A0
 CC                 CLOCK(I),I=15,...,20: NOT USED
 CC
 CC
+CC AUTHOR     :  W. GURTNER
+CC
+CC VERSION    :  3.4  (JAN 93)
+CC
+CC CREATED    :  89/04/05
+
 C*
       IMPLICIT NONE
 C

@@ -106,7 +106,7 @@ SUBROUTINE write_brd2sp3 (ISTR,IPRN,IGNSS,IG,IR,IE,IC,IJ,SATTYPE,SAMPLE,IY,IM,ID
       REAL (KIND = prec_q) :: sec_ti 	  
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int8) :: Nepochs, Nelem, Nsat
-      INTEGER (KIND = prec_int8) :: i_sat, II
+      INTEGER (KIND = prec_int8) :: i_sat, i_sat1, II
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=1) :: orbvector
       CHARACTER (LEN=5) :: REFRAME
@@ -286,25 +286,25 @@ Do j17 = 1 , 17
 
 ! Process the selected GNSS constellation type
        IF (SATTYPE == 'G') THEN
-       i_sat = i_sat
+       i_sat1 = i_sat
        ELSE IF (SATTYPE == 'R') THEN
-       i_sat = i_sat + 50
+       i_sat1 = i_sat + 50
        ELSE IF (SATTYPE == 'E') THEN 
-       i_sat = i_sat + 100
+       i_sat1 = i_sat + 100
        ELSE IF (SATTYPE == 'C') THEN
-       i_sat = i_sat + 150
+       i_sat1 = i_sat + 150
        ELSE IF (SATTYPE == 'J') THEN
-       i_sat = i_sat + 200
+       i_sat1 = i_sat + 200
        ELSE IF (SATTYPE == 'A') THEN
-       IF(i_sat <= IG) i_sat = i_sat ! GPS
-!      IF(i_sat <= IG+IR .AND. i_sat > IG) i_sat = i_sat + 50 ! GLONASS
-       IF(i_sat <= IG+IE .AND. i_sat > IG) i_sat = i_sat-(IG) + 100 ! GALILEO
-       IF(i_sat <= IG+IE+IC .AND. i_sat > IG+IE) i_sat = i_sat-(IG+IE) + 150 ! BDS
-       IF(i_sat <= IG+IE+IC+IJ .AND. i_sat > IG+IE+IC) i_sat = i_sat-(IG+IE+IC) + 200 ! QZSS
+       IF(i_sat <= IG) i_sat1 = i_sat ! GPS
+       IF(i_sat <= IG+IR .AND. i_sat > IG) i_sat1 = i_sat-(IG) + 50 ! GLONASS
+       IF(i_sat <= IG+IR+IE .AND. i_sat > IG+IR) i_sat1 = i_sat-(IG+IR) + 100 ! GALILEO
+       IF(i_sat <= IG+IR+IE+IC .AND. i_sat > IG++IR+IE) i_sat1 = i_sat-(IG+IR+IE) + 150 ! BDS
+       IF(i_sat <= IG+IR+IE+IC+IJ .AND. i_sat > IG+IR+IE+IC) i_sat1 = i_sat-(IG+IR+IE+IC) + 200 ! QZSS
        END IF
 	
-       CALL prn2str (ISTR(i_sat), PRN_write)
-!       print*,'i_sat=, PRN_write=',IPRN(i_sat),ISTR(i_sat),i_sat, PRN_write
+       CALL prn2str (ISTR(i_sat1), PRN_write)
+!       print*,'i_sat=, PRN_write=',IPRN(i_sat1),ISTR(i_sat1),i_sat1, PRN_write
 		!WRITE(wrt_line,FMT=*,IOSTAT=ios_ith) ADJUSTL(TRIM(wrt_line)),PRN_write
 	ELSE IF (i_sat > Nsat) THEN
 		PRN_write = '  0'
