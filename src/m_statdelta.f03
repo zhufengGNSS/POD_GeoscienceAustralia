@@ -74,6 +74,8 @@ SUBROUTINE statdelta (ds1, ds2, dsr, RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr)
       INTEGER (KIND = prec_int8) :: i, j, j1, k, looptest 
       INTEGER (KIND = prec_int8) :: sz1, sz2, sz3, sz4
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
+      INTEGER (KIND = prec_int8) :: Nparam 
+      REAL (KIND = prec_d), ALLOCATABLE, DIMENSION(:,:) :: ds_temp, ds1_2, ds2_2
 ! ----------------------------------------------------------------------	  
 
 
@@ -92,9 +94,35 @@ Nepochs2 = sz3
 ! ----------------------------------------------------------------------
 ! Test collumns dimension
 If (sz2 .NE. sz4) Then
-print *,"Subroutine statdelta.f03 within Module mdl_statdelta.f03: Input matrices dimension(DIM=2) do not agree"
-print *,"DIM=2", sz2, sz4   
+!print *,"Subroutine statdelta.f03 within Module mdl_statdelta.f03: Input matrices dimension(DIM=2) do not agree"
+!print *,"DIM=2", sz2, sz4   
 !         STOP "*** - ***"
+If (sz2 < sz4) Then
+	Nparam = sz2
+	ALLOCATE (ds2_2(Nepochs2,Nparam), STAT = AllocateStatus)
+	ds2_2 = ds2(:,1:Nparam)
+	!DEALLOCATE (ds2, STAT = DeAllocateStatus)
+	!ALLOCATE (ds2(Nepochs2,Nparam), STAT = AllocateStatus)
+	!ds2 = ds_temp
+	ALLOCATE (ds1_2(Nepochs,Nparam), STAT = AllocateStatus)
+	ds1_2 = ds1
+Else if (sz2 > sz4) Then
+	Nparam = sz4
+	ALLOCATE (ds1_2(Nepochs,Nparam), STAT = AllocateStatus)
+	ds1_2 = ds1(:,1:Nparam)
+	!DEALLOCATE (ds1, STAT = DeAllocateStatus)
+	!ALLOCATE (ds1(Nepochs,Nparam), STAT = AllocateStatus)
+	!ds1 = ds_temp
+	ALLOCATE (ds2_2(Nepochs2,Nparam), STAT = AllocateStatus)
+	ds2_2 = ds2
+End IF
+
+ELSE
+	Nparam = sz2
+	ALLOCATE (ds1_2(Nepochs,Nparam), STAT = AllocateStatus)
+	ds1_2 = ds1
+	ALLOCATE (ds2_2(Nepochs2,Nparam), STAT = AllocateStatus)
+	ds2_2 = ds2
 End If
 ! ----------------------------------------------------------------------
 
@@ -107,7 +135,7 @@ j = 0
 Do i = 1 , Nepochs
    ! Test the time argument: 
    Do j = 1 , Nepochs2 
-      delta_t = ABS(ds2(j,1) - ds1(i,1))
+      delta_t = ABS(ds2_2(j,1) - ds1_2(i,1))
       IF (delta_t < dt_limit) then
          ! Counter of the common epochs
          Nepochs_delta = Nepochs_delta + 1 
@@ -122,7 +150,7 @@ End Do
 
 ! Dynamic allocatable array
 ! Allocate the array of the numerical orbit comparison
-ALLOCATE (dsr(Nepochs_delta,sz2), STAT = AllocateStatus)
+ALLOCATE (dsr(Nepochs_delta,Nparam), STAT = AllocateStatus)
 
 
 ! ----------------------------------------------------------------------
@@ -133,12 +161,12 @@ k = 0
 Do i = 1 , Nepochs
    ! Test the time argument: 
    Do j = 1 , Nepochs2   
-      delta_t = ABS(ds2(j,1) - ds1(i,1))
+      delta_t = ABS(ds2_2(j,1) - ds1_2(i,1))
       IF (delta_t < dt_limit) then
 	  ! Compute the numerical differences of the state vector
          k = k + 1
-		 dsr(k,1:2) = ds1(i,1:2)
-         dsr(k,3:sz2) = ds2(j,3:sz2) - ds1(i,3:sz2)
+		 dsr(k,1:2) = ds1_2(i,1:2)
+         dsr(k,3:sz2) = ds2_2(j,3:sz2) - ds1_2(i,3:sz2)
 	  End IF
    End Do
 End Do

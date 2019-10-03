@@ -19,6 +19,7 @@ SUBROUTINE ecom_init (Niteration,ECOM_0_coef)
       USE mdl_precision
       USE mdl_num
       USE mdl_param
+      USE mdl_config
       IMPLICIT NONE
 	  
 	  
@@ -44,7 +45,9 @@ srp_i = ECOM_param_glb
 i = Niteration
 write (fname_id, *) i
 ECOM_0_coef = 0.d0
-
+IF (IC_MODE_cfg == 2) THEN
+	ECOM_0_coef = IC_sat_glb (9:8+NPARAM_glb)
+END IF
 !print*,'ECOM_0_coef=',ECOM_0_coef
 
 IF (srp_i == 1) THEN

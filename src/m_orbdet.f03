@@ -93,6 +93,8 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       USE m_statorbit
       USE m_writearray
       USE m_orbresize
+      USE m_matrixreverse
+      USE m_matrixmerge
       IMPLICIT NONE
 	  
 	  
@@ -150,7 +152,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d) :: mjd, r_sat(3), v_sat(3)
       LOGICAL :: integstep_flag
-      REAL (KIND = prec_d) :: integstep_initial, integstep_reduced
+      REAL (KIND = prec_d) :: integstep_initial, integstep_reduced, integstep_orb, integstep_orbback
       INTEGER (KIND = prec_int8) :: integstep_rate 
       INTEGER (KIND = prec_int8) :: Nepochs_0, Nepochs_stepsmall, n2_orb, n2_veqs, n2_veqp 
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_stepsmall, veqSmatrix_stepsmall, veqPmatrix_stepsmall
@@ -158,6 +160,11 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf, orb_itrf  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix  
       INTEGER (KIND = prec_int2) :: VEQ_refsys
+! ----------------------------------------------------------------------
+      INTEGER (KIND = prec_int2) :: orbintegr_back_flag
+      CHARACTER (LEN=100) :: EQMfname_back, VEQfname_back
+      REAL (KIND = prec_d) :: orbarc_back
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_back, veqSmatrix_back, veqPmatrix_back
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -228,20 +235,12 @@ CALL eclipse_integstep (EQMfname, VEQfname, mjd, r_sat, v_sat, integstep_flag, i
 ! ----------------------------------------------------------------------
 !print *,"integstep_flag,integstep_initial, integstep_reduced", integstep_flag,integstep_initial, integstep_reduced 
 
-! ----------------------------------------------------------------------
-! Dynamic Orbit Determination 
-! ----------------------------------------------------------------------
-! POD modes :: 1, 2
-! 1. Orbit Determination (pseudo-observations; orbit fitting)
-! 2. Orbit Determination and Prediction
-! ----------------------------------------------------------------------
-If (ESTmode > 0) then
-! Orbit Estimation
 
 ! ----------------------------------------------------------------------
 ! Initial conditions
 ! ----------------------------------------------------------------------
 ! Empirical parameters apriori values set to zero
+IF (EMP_param_glb >0) THEN
 i = 999
 Bias_0 = (/ 0.0D0, 0.0D0, 0.0D0/)
 CPR_CS_0(1,:) = (/ 0.0D0, 0.0D0/)
@@ -249,6 +248,7 @@ CPR_CS_0(2,:) = (/ 0.0D0, 0.0D0/)
 CPR_CS_0(3,:) = (/ 0.0D0, 0.0D0/)
 !Call empirical_init (i, Bias_0, CPR_CS_0)
 Call empirical_init_file (i, Bias_0, CPR_CS_0)
+END IF
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 ! Initial conditions for solar radiation pressure
@@ -270,6 +270,16 @@ ELSE
 PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
 END IF
 ! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Dynamic Orbit Determination 
+! ----------------------------------------------------------------------
+! POD modes :: 1, 2
+! 1. Orbit Determination (pseudo-observations; orbit fitting)
+! 2. Orbit Determination and Prediction
+! ----------------------------------------------------------------------
+If (ESTmode > 0) then
+! Orbit Estimation
 
 ! Iterations number of parameter estimation algorithm
 Do i = 0 , Niter
@@ -637,6 +647,66 @@ IF (integstep_flag) THEN
 ELSE
 	integstep_rate = 0
 END IF
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Orbit propagation backwards in order to propagate orbits and partials at epochs prior the ICs (initial conditions)
+! ----------------------------------------------------------------------
+IF (orbit_backwards_arc_cfg > 0.0D0) THEN
+	orbintegr_back_flag = 1
+ELSE
+	orbintegr_back_flag = 0
+END IF 
+
+IF (orbintegr_back_flag > 0) THEN
+
+! Copy Configuration files 
+fname_id = 'back'
+CALL write_prmfile2 (EQMfname, fname_id, EQMfname_back)
+CALL write_prmfile2 (VEQfname, fname_id, VEQfname_back)
+
+! Set negative sign to numerical integration step
+IF (integstep_flag) THEN
+	integstep_orb = integstep_reduced 
+ELSE
+	!integstep_orb = integstep_initial
+	integstep_orb = integstep
+END IF
+integstep_orbback = -1.0D0 * integstep_orb
+!integstep_orbback = -1.0D0 * integstep
+
+param_id = 'integrator_step'
+write (param_value, *)  integstep_orbback
+Call write_prmfile (EQMfname_back, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname_back, fname_id, param_id, param_value)
+
+! Set orbit arc length for backwards orbit propagation
+! Orbit arc length (in seconds)
+orbarc_back = orbit_backwards_arc_cfg * 3600.D0
+param_id = 'Orbit_arc_length'
+write (param_value, *) orbarc_back
+Call write_prmfile (EQMfname_back, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname_back, fname_id, param_id, param_value)
+
+! Orbit integration backwards: Equation of Motion solution
+VEQmode = 0
+Call orbinteg (EQMfname_back, VEQmode, orb_back, veq0, veq1)
+! Orbit integration backwards: Variational Equations solution
+VEQmode = 1
+Call orbinteg (VEQfname_back, VEQmode, orb0, veqSmatrix_back, veqPmatrix_back)
+
+! Merge orbits and partials matrices
+! Orbit matrix
+CALL matrixreverse (orb_back)
+CALL matrixmerge   (orb_back, orb_icrf)
+! veqSmatrix matrix
+CALL matrixreverse (veqSmatrix_back)
+CALL matrixmerge   (veqSmatrix_back, veqSmatrix)
+! veqPmatrix matrix
+CALL matrixreverse (veqPmatrix_back)
+CALL matrixmerge   (veqPmatrix_back, veqPmatrix)
+
+END IF  
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
