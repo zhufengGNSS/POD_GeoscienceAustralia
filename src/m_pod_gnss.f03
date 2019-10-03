@@ -61,6 +61,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
       USE mdl_precision
       USE mdl_num
       USE mdl_param
+      USE mdl_config
       USE m_orbitmain
       USE m_writeorbit_multi
       USE m_orbdet
@@ -72,6 +73,10 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  USE mdl_eop
 	  USE m_sp3_PRN
 	  USE m_write_orb2sp3
+          USE m_orbitIC
+      USE mdl_config
+      USE m_read_satsnx 
+	  
       IMPLICIT NONE
 
 
@@ -114,15 +119,18 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  !CHARACTER (LEN=3), ALLOCATABLE :: PRNmatrix(:)
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
 	  CHARACTER (LEN=3) :: PRN_isat
-	  INTEGER :: ios
+	  INTEGER :: ios,ios_key
       CHARACTER (LEN=100) :: orbits_fname				
       CHARACTER (LEN=100) :: fname_write				
       CHARACTER (LEN=100) :: filename				
-! ----------------------------------------------------------------------
       CHARACTER (LEN=300) :: fname_sp3, ORBpseudobs_fname, ORBEXT_fname				
+! ----------------------------------------------------------------------
+      REAL (KIND = prec_d) :: mjd, mjd0, jd0
+      REAL (KIND = prec_d) :: Sec_00 	    
 	  INTEGER :: year, month, day
 	  INTEGER :: Iyear, Imonth, Iday
-      REAL (KIND = prec_d) :: Sec_00 	    
+      INTEGER J_flag
+      DOUBLE PRECISION FD
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=50) :: fname_id				
       CHARACTER (LEN=100) :: param_id				
@@ -136,7 +144,6 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
       !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbit_resT  
       !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbit_resN  
 ! ----------------------------------------------------------------------
-      !REAL (KIND = prec_d) :: mjd
       !INTEGER (KIND = prec_int8) :: GPS_week, GPSweek_mod1024
       !REAL (KIND = prec_d) :: GPS_wsec, GPS_day
 ! ----------------------------------------------------------------------
@@ -155,8 +162,14 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: EQMfname_PRN, VEQfname_PRN				
 
-	  
-	  
+      INTEGER :: DOY
+      INTEGER (KIND = prec_int4) :: J
+      DOUBLE PRECISION MJDD0, MJDD, MJDref  
+! ----------------------------------------------------------------------
+	  REAL (KIND = prec_d) :: mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
+	  REAL (KIND = prec_d) :: dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS
+      REAL (KIND = prec_d) :: t_sec     
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Delete Planetary ephemeris written file DE.430
@@ -185,6 +198,7 @@ CALL prm_ocean (EQMfname)
 ! ----------------------------------------------------------------------
 ! Satellites Orbits :: PRN numbers 
 ! ----------------------------------------------------------------------
+IF (IC_MODE_cfg == 1) THEN
 param_id = 'pseudobs_filename'
 CALL readparam (EQMfname, param_id, param_value)
 ORBpseudobs_fname = param_value
@@ -194,6 +208,24 @@ ORBpseudobs_fname = param_value
 ! Read the sp3 header file :: Nsat
 CALL sp3_PRN (ORBpseudobs_fname, PRNmatrix, Iyear, Imonth, Iday, Sec_00)
 Nsat = size(PRNmatrix, DIM = 1)
+
+ELSE IF (IC_MODE_cfg == 2) THEN
+
+! Initial Conditions file 
+CALL orbitIC (IC_filename_cfg, IC_matrix_glb, PRNmatrix)
+
+Nsat = size(PRNmatrix, DIM = 1)
+
+!print *,"IC_matrix_glb(1,1)", IC_matrix_glb(1,1)
+
+mjd0   = IC_matrix_glb(1,1)
+Sec_00 = IC_matrix_glb(1,2)
+
+jd0 = 2400000.5D0
+mjd = mjd0 + Sec_00 / 86400.0D0
+CALL iau_JD2CAL ( jd0, mjd, Iyear, Imonth, Iday, FD, J_flag )
+
+END IF
 ! ----------------------------------------------------------------------
 print *,"Satellites number: ", Nsat, "IC Eopch: ", Iyear, Imonth, Iday, Sec_00
 print *," "
@@ -227,6 +259,12 @@ Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
+! Compute day of year
+CALL iau_CAL2JD ( Iyear, Imonth, Iday, MJDD0, MJDD, J )
+CALL iau_CAL2JD ( Iyear, 1, 1, MJDD0, MJDref, J )
+DOY = IDNINT(MJDD-MJDref) + 1
+
+PRINT*,'Day Of Year =', DOY, Iyear
 
 
 ! ----------------------------------------------------------------------
@@ -245,6 +283,10 @@ Do isat = 1 , Nsat
 ! ----------------------------------------------------------------------
 PRN_isat = PRNmatrix(isat)
 print *,"Satellite: ", PRNmatrix(isat) ! isat
+! Read Satellite infromation from SINEX file
+! ----------------------------------------------------------------------
+CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat)
+print*,'GNSS Block Type: ', BLKTYP
 
 ! ----------------------------------------------------------------------
 ! Copy Initial Configuration files 
@@ -263,17 +305,37 @@ Call write_prmfile (VEQfname_PRN, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 ! Rewrite :: Initial State vector
 ! ----------------------------------------------------------------------
+IF (IC_MODE_cfg == 1) THEN
 ! Interpolated Orbit: Read sp3 orbit data and apply Lagrange interpolation
 Call prm_main     (EQMfname_PRN)
 CALL prm_pseudobs (EQMfname_PRN)
 Zo = pseudobs_ITRF(1,3:8)
+
+ELSE IF (IC_MODE_cfg == 2) THEN
+! Initial Conditions file option
+Zo = IC_matrix_glb (isat,3:8)
+! Initial Conditions matrix per satellite
+sz1 = size(IC_matrix_glb, DIM = 1)
+sz2 = size(IC_matrix_glb, DIM = 2)
+ALLOCATE (IC_sat_glb(sz2), STAT = AllocateStatus)
+IC_sat_glb = IC_matrix_glb (isat,1:sz2)
+END IF
 !print *,"Zo", Zo
 
+! Write Initial Conditions (state vector only) in the configuration files
 write (fname_id, *) '_imd' !isat
 param_id = 'state_vector'
 write (param_value, *) Zo
 Call write_prmfile (EQMfname_PRN, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname_PRN, fname_id, param_id, param_value)
+! Write Initial Conditions Reference System in the configuration files
+IF (IC_MODE_cfg == 2) THEN
+	write (fname_id, *) '_imd' !isat
+	param_id = 'Reference_frame'
+	write (param_value, *) IC_REF_cfg
+	Call write_prmfile (EQMfname_PRN, fname_id, param_id, param_value)
+	Call write_prmfile (VEQfname_PRN, fname_id, param_id, param_value)
+END IF
 ! ----------------------------------------------------------------------
 
 ! End of update/rewrite configuration files
@@ -356,10 +418,72 @@ orbdiff2 (isat,:,:) = orbdiff(:,:)
 ! ----------------------------------------------------------------------
 ! Create Orbit IC's matrix :: Write estimates for Satellite(isat) SVEC_Zo_ESTIM and ECOM_accel_aposteriori
 ! ----------------------------------------------------------------------
-orbits_ics_icrf(1:2,isat) = orb_icrf(1,1:2)
-orbits_ics_icrf(3:8,isat) = SVEC_Zo_ESTIM
-orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_aposteriori !*1.0D9
+!orbits_ics_icrf(1:2,isat) = orb_icrf(1,1:2)
+
+! ----------------------------------------------------------------------
+! IC :: Initial Epoch MJD and Sec since 00h 
+! ----------------------------------------------------------------------
+! Time Scale transformation for the initial epoch time argument
+! Time scale change is applied in case that TIME_SCALE .NOT. Terrestrial Time
+! TIME_SCALE: global variable in module mdl_param.f03
+! ----------------------------------------------------------------------
+If (TIME_SCALE == 'TT') Then
+! MJD_to and SEC_to :: global variables in mdl_param.f03
+orbits_ics_icrf(1,isat) = MJD_to
+orbits_ics_icrf(2,isat) = SEC_to
+
+!Else If (TIME_SCALE /= 'TT') Then
+Else 
+! MJD_to and SEC_to :: global variables in mdl_param.f03
+
+! MJD in TT Time
+mjd = MJD_to
+! Seconds since 00h
+t_sec = SEC_to
+!print *, "t_sec ", t_sec
+
+! Time scale: TT to GPS time
+CALL time_TT (mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC)
+Call time_TT_sec (mjd , dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS)
+!print *,"dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS", dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS
+
+! Test the TIME_SCALE global variable in mdl_param.f03	
+If (TIME_SCALE == 'GPS') then
+	mjd = mjd_GPS
+	t_sec = t_sec - (dt_TT_TAI + dt_TAI_GPS)
+Else if (TIME_SCALE == 'UTC') then
+	mjd = mjd_UTC		
+	t_sec = t_sec - (dt_TT_TAI + dt_TAI_UTC)
+Else if (TIME_SCALE == 'TAI') then
+	mjd = mjd_TAI
+	t_sec = t_sec - (dt_TT_TAI)	
+End If	
+!print *, "TIME_SCALE ", TIME_SCALE
+!print *, "(dt_TT_TAI + dt_TAI_GPS) ", (dt_TT_TAI + dt_TAI_GPS)
+!print *, "t_sec ", t_sec
+
+orbits_ics_icrf(1,isat) = mjd
+orbits_ics_icrf(2,isat) = t_sec
+
+End If
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! IC :: Initial State Vector
+! ----------------------------------------------------------------------
+!orbits_ics_icrf(3:8,isat) = SVEC_Zo_ESTIM
+orbits_ics_icrf(3:8,isat) = SVEC_Zo
+!print *,"SVEC_Zo_ESTIM ", SVEC_Zo_ESTIM
+!print *,"SVEC_Zo       ", SVEC_Zo
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! IC :: Orbital parameters being estimated e.g. force emprical parameters
+! ----------------------------------------------------------------------
+!orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_aposteriori !*1.0D9
+orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_glb  ! Correction : Write the ECOM parameters in all POD cases including orbit propagation without estimation (POD MODE cases: 3 & 4)
 !write(*,fmt='(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))') PRN_isat,orbits_ics_icrf(:,isat)
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Orbit & Partial Derivatives matrix :: Write Orbit/Partials results from Satellite(isat) 
@@ -395,20 +519,15 @@ End Do
 ! Orbit residuals matrices per orbital component
 ! ----------------------------------------------------------------------
 Do iepoch = 1 , Ncommon
-
 orbit_resR(:,isat+2) = dorb_RTN(:,3)
 orbit_resT(:,isat+2) = dorb_RTN(:,4)
 orbit_resN(:,isat+2) = dorb_RTN(:,5)
-
 End Do
 ! ----------------------------------------------------------------------
-
 End Do
-
 
 
 End SUBROUTINE
-
 
 End MODULE
 

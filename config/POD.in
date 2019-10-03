@@ -10,7 +10,7 @@
 ! 3. Orbit Integration (Equation of Motion only)
 ! 4. Orbit Integration and Partials (Equation of Motion and Variational Equations)
 ! ----------------------------------------------------------------------
-POD_MODE_cfg              2
+POD_MODE_cfg              1
 
 ! ----------------------------------------------------------------------
 %% Initial Conditions input mode
@@ -20,8 +20,10 @@ POD_MODE_cfg              2
 ! ----------------------------------------------------------------------
 IC_input                   1
 ! Initial Conditions Reference Frame: ITRF, ICRF
-IC_refsys                  ITRF		
+IC_refsys                  ICRF		
 
+! Initial Conditions file name
+IC_filename_cfg				orb_pea.out
 
 ! ----------------------------------------------------------------------
 %% Configuration files of Orbit modelling (2 basic initial files):
@@ -34,10 +36,13 @@ VEQ_fname_cfg          VEQ.in	! Variational Equations
 %% Orbit arc length (in hours) 
 ! ----------------------------------------------------------------------
 ! Orbit Estimation arc
-orbit_determination_arc_cfg     24  
+orbit_determination_arc_cfg     26  
 
 ! Orbit Prediction arc
 orbit_prediction_arc_cfg        12
+
+! Orbit Propagation backwards arc
+orbit_backwards_arc_cfg          2
 
 
 ! ---------------------------------------------------------------------------
@@ -68,22 +73,77 @@ iau_model_cfg             2000
 ---------------------------------------------------------------------------
 %% Observation Model                                                       
 ! External orbit as pseudo-observations                                                
-pseudobs_orbit_filename_cfg		  igs19424.sp3
+pseudobs_orbit_filename_cfg		  igs19423.sp3
  
 ---------------------------------------------------------------------------
 %% External Orbit Comparison  
-ext_orbit_filename_cfg		  	  igs19424.sp3					
+ext_orbit_filename_cfg		  	  igs19423.sp3					
 
 
 ---------------------------------------------------------------------------
 %% Parameter Estimation
 Estimator_Iterations_cfg     2
 
+
+----------------------------------------------------------------------
+%% Reference System of Variational Equations' Partials & Parameter Estimation 
+----------------------------------------------------------------------
+! 1. Celestial Reference System :: ICRS
+! 2. Terrestrial Reference System :: ITRS
+VEQ_REFSYS_cfg	  	  		ITRS
+! ----------------------------------------------------------------------
  
 ----------------------------------------------------------------------
 %% Write to sp3 orbit format: Option for write Satellite Velocity vector 
 ----------------------------------------------------------------------
 ! 0. sp3_velocity_cfg = 0 :: Do not write Velocity vector to sp3 orbit
 ! 1. sp3_velocity_cfg > 0 :: Write Velocity vector to sp3 orbit
-sp3_velocity_cfg	  	  1
+sp3_velocity_cfg	  	  0
 ! ----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+%% Write partials of the velocity vector w.r.t. parameters into the orbits_partials output file: 
+----------------------------------------------------------------------
+! 0. partials_velocity_cfg = 0 :: Do not write Velocity vector's partials elements
+! 1. partials_velocity_cfg > 0 :: Write Velocity vector's partials elements
+partials_velocity_cfg	  	  0
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+%% Leap second
+leapsec_filename_cfg        leap.second
+! ----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+%% Write partials of the velocity vector w.r.t. parameters into the orbits_partials output file: 
+----------------------------------------------------------------------
+! 0. partials_velocity_cfg = 0 :: Do not write Velocity vector's partials elements
+! 1. partials_velocity_cfg > 0 :: Write Velocity vector's partials elements
+partials_velocity_cfg	  	  0
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+%% Leap second
+leapsec_filename_cfg        leap.second
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+%% Satellite metadata SINEX
+satsinex_filename_cfg        igs_metadata_2063.snx
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+%% A priori SRP value 
+! 1 : use the simple box-wing model as a priori SRP value
+! 2 : use the box-wing model from repro3 routines as a
+!     priori SRP value
+! 0 : use the constant f0 as a priori SRP value
+! other numbers : directly estimate the SRP parameters
+
+Flag_BW_cfg        1
+
+! ----------------------------------------------------------------------
+

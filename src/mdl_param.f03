@@ -29,7 +29,11 @@ MODULE mdl_param
 
 ! ---------------------------------------------------------------------------
 ! Satellite information file
-!      CHARACTER (*), PARAMETER :: satinfoplace ='/data/bitbucket/Tzupang/pod/SATINFO/'
+      CHARACTER(LEN=20) :: BLKTYP     ! block type
+      INTEGER(KIND = prec_int2)    :: SVNID      ! SVN 
+      INTEGER(KIND = prec_int2)    :: BLKID      ! block type number
+      INTEGER(KIND = prec_int4)    :: POWER      ! transmitted power in watts
+      REAL(KIND = prec_d)          :: MASS       ! S/C mass in kg
 ! --------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------
@@ -52,6 +56,8 @@ MODULE mdl_param
 ! Initial State Vector in ICRF
       REAL (KIND = prec_d) :: SVEC_Zo(6)
       REAL (KIND = prec_d) :: SVEC_Zo_ESTIM(6)
+! Initial Conditions' satellite matrix 
+      REAL (KIND = prec_d), DIMENSION(:), ALLOCATABLE :: IC_sat_glb	  
 ! ---------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------

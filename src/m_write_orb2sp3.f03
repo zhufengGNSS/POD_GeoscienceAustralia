@@ -100,7 +100,7 @@ SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, sp3_fname, sat_vel)
       CHARACTER (LEN=300) :: wrt_line
       CHARACTER (LEN=6) :: wrt_line_0
       INTEGER (KIND = prec_int8) :: GPS_week, GPSweek_mod1024
-      REAL (KIND = prec_d) :: GPS_wsec
+      REAL (KIND = prec_d) :: GPS_wsec, GPS_day
       REAL (KIND = prec_d) :: Interval
       INTEGER (KIND = prec_int8) :: Nsat_17frac, Nsat_lines, j17
       CHARACTER (LEN=1) :: char1
@@ -216,7 +216,10 @@ sec_ti  = (Sec_00 - hour_ti*3600.0D0 - min_ti*60.D0)
 end if
 
 ! GPS Week number and seconds
-CALL time_GPSweek (MJD_ti , GPS_week, GPS_wsec, GPSweek_mod1024)
+!CALL time_GPSweek (MJD_ti , GPS_week, GPS_wsec, GPSweek_mod1024)
+!CALL time_GPSweek2(MJD_ti , GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
+CALL time_GPSweek3(MJD_ti, Sec_00, GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
+
 ! ----------------------------------------------------------------------
 ! Epochs Interval
 Interval = ORBmatrix(2,2,1) - ORBmatrix(1,2,1)

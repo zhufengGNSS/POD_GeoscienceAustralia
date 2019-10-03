@@ -28,7 +28,23 @@ MODULE mdl_config
 ! 4. Orbit Integration and Partials (Equation of Motion and Variational Equations)
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int2) :: POD_MODE_cfg	  	  
+! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Initial Conditions input mode
+! ----------------------------------------------------------------------
+! 1. Input a-priori orbit in sp3 format (applied as pseudo-observations)
+! 2. Input file with Initial Conditions (State Vector and Parameters at initial epoch per satellite) 
+! ----------------------------------------------------------------------
+      INTEGER (KIND = prec_int2) :: IC_MODE_cfg	  	  
+	  
+! Initial Conditions reference frame
+      CHARACTER (LEN=100) :: IC_REF_cfg				
+! Initial Conditions file name
+      CHARACTER (LEN=300) :: IC_filename_cfg
+! Initial Conditions matrix (global variable)
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: IC_matrix_glb
+! ----------------------------------------------------------------------
 	  
 ! ----------------------------------------------------------------------
 ! Orbit arc length (in hours) 
@@ -38,6 +54,9 @@ MODULE mdl_config
 
 ! Orbit Prediction arc
       REAL (KIND = prec_d) :: orbit_prediction_arc_cfg
+
+! Orbit Propagation backwards arc
+      REAL (KIND = prec_d) :: orbit_backwards_arc_cfg
 ! ---------------------------------------------------------------------------
 
 
@@ -133,4 +152,13 @@ MODULE mdl_config
       CHARACTER (LEN=100) :: leapsec_filename_cfg				
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Satellite metadata SINEX filename (satsinex_filename)
+      CHARACTER (LEN=100) :: satsinex_filename_cfg
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! A priori SRP value
+      INTEGER (KIND = prec_int2) :: Flag_BW_cfg
+! ----------------------------------------------------------------------
 END
