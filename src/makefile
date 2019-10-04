@@ -5,7 +5,8 @@ FC = gfortran
 
 # Compiler flags
 
-FCFLAGS = -O3 -llapack -lblas -frecursive  
+FCFLAGS = -O3 -llapack -lblas -frecursive 
+FCFLAGS_BRDC = -O3 -llapack -lblas
 #-fcheck=all -std=legacy
 #-O3 -Wuninitialized -fno-f2c -ffast-math -fno-automatic -fno-backslash -m64 -mcmodel=large 
 # Linker flags
@@ -37,7 +38,7 @@ empirical_init_file.f03 empirical_init.f03 empirical_cor.f03 beta_angle.f90 yaw_
 yaw_attitude.f90 eclips.f eclips2017.f eclips201707.f beta_pred.f90 yaw_bds.f90 yaw_gal.f90 yawdyn.f90 \
 attitude.f03 force_sum.f03 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 pd_gm.f03 pd_forceZ.f03 eclipse_integstep.f03 \
 write_prmfile.f03 writeparam.f03 writeparam1.f03 time_TT_sec.f90 prm_main.f03 prm_emp.f03 empirical_cor.f03 empirical_init.f03 \
-ecom_init.f03 prm_srp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.f03 scan0orbext.f03 prm_orbext.f03 prm_planets.f03 scan0orb.f03 prm_pseudobs.f03 \
+ecom_init.f03 prm_srp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.f03 prm_orbext.f03 prm_planets.f03 scan0orb.f03 prm_pseudobs.f03 \
 f90getopt.F90 read_cmdline.f03 \
 m_read_satsnx.f03 m_read_svsinex.f03 \
 main_pod.f03
@@ -112,7 +113,7 @@ $(PROGRAM): $(SRCS)
 crs2trs: $(CRS2TRSSRCS) $(BIN)
 	$(FC) $(FCFLAGS) $(FLFLAGS) $(CRS2TRSSRCS) -o $(BIN)/crs2trs
 brd2ecef: $(BRDC2ECEF) $(BIN)
-	$(FC) $(FCFLAGS) $(FLFLAGS) $(BRDC2ECEF) -o $(BIN)/brd2ecef
+	$(FC) $(FCFLAGS_BRDC) $(FLFLAGS) $(BRDC2ECEF) -o $(BIN)/brd2ecef
 
 clean:
 	rm -f *.o *.mod $(BIN)/$(PROGRAM) $(BIN)/crs2trs

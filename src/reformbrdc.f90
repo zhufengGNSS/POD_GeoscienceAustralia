@@ -48,4 +48,19 @@ eph2(18) = eph1(21)                ! idot
 eph2(19) = 0.d0
 eph2(20) = 0.d0
 
+
+clk(1)  = eph1(23)                 ! GPS week
+clk(2)  = eph1(22)                 ! L2 code indicator  
+clk(3)  = eph1(25)                 ! user ranging error (m)
+clk(4)  = eph1(26)                 ! satellite health message
+clk(6)  = eph1(24)                 ! P2 data flag
+clk(9)  = eph1(27)                 ! 
+clk(10) = eph1(28)
+clk(11) = eph1(1)                  ! toc
+IF(clk(11)-eph2(2).GT.+302400.D0) clk(1)=clk(1)-1
+IF(clk(11)-eph2(2).LT.-302400.D0) clk(1)=clk(1)+1
+clk(12) = eph1(4)                  ! A2
+clk(13) = eph1(3)                  ! A1
+clk(14) = eph1(2)                  ! A0
+
 END
