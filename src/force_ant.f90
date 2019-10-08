@@ -9,9 +9,6 @@ SUBROUTINE force_ant (r,fx,fy,fz)
 ! Acceleration due to the antenna thrust effect  
 ! ----------------------------------------------------------------------
 ! Input arguments:
-! - mjd          : time variable
-! - prnnum       : satellite PRN number 
-! - satsvn       : satellite SVN number  
 ! - r            : satellite position vector (m)
 ! 
 ! Output arguments:
