@@ -20,7 +20,7 @@ MODULE m_pd_ECOM
 Contains
 
 
-SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, r, v, r_sun, Asrp)
+SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, GNSSid, r, v, r_sun, Asrp)
 
 
 ! ----------------------------------------------------------------------
@@ -31,7 +31,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, r, v, r_sun, Asrp)
 ! w.r.t. ECOM SRP parameters.  
 ! ----------------------------------------------------------------------
 ! Input arguments:
-! - prnnum       : satellite PRN number 
+! - GNSSid       : id of satellite constellation  
 ! - r            : satellite position vector (m)
 ! - v            : satellite velocity vector
 ! - r_sun        : Sun position vector
@@ -71,13 +71,13 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, r, v, r_sun, Asrp)
 ! ----------------------------------------------------------------------
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int4),INTENT(IN)         :: prnnum
+      CHARACTER (LEN=1) :: GNSSid
       REAL (KIND = prec_d) , Dimension(3), INTENT(IN) :: eBX_ecl
       REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r,v
       REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r_sun
       REAL (KIND = prec_q),INTENT(IN) :: GM
       REAL (KIND = prec_q),INTENT(IN) :: lambda
-      INTEGER(KIND = 4)               :: satsvn
+      
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
@@ -135,65 +135,92 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, prnnum, r, v, r_sun, Asrp)
              !              for all beta angles
 ! ---------------------------------------------------------------------
 
+IF (GNSSid == 'G') THEN
 ! GPS constellation
 ! -----------------
-      if(prnnum.le.100)then
+! I
+         if (BLKTYP=='GPS-I')then
+         Z_SIDE = 3.020D0
+         X_SIDE = 1.728D0
+         A_SOLAR= 6.053D0
+         F0 = 4.54d-5
+
+! II and IIA
+         else if (BLKTYP=='GPS-II' .or. BLKTYP=='GPS-IIA') then
+         Z_SIDE = 2.881D0
+         X_SIDE = 2.893D0
+         A_SOLAR= 11.871D0
+         F0 = 8.695d-5
 ! IIF
-         if(SVNID.ge.62.and.SVNID.le.73) then
+         else if(BLKTYP=='GPS-IIF') then
          Z_SIDE = 5.05D0
          X_SIDE = 4.55D0
          A_SOLAR= 22.25D0
          F0 = 16.7d-5
 ! IIR
-         else
+         else if (BLKTYP=='GPS-IIR' .or. BLKTYP=='GPS-IIR-A' .or. &
+                  BLKTYP=='GPS-IIR-B'.or.BLKTYP=='GPS-IIR-M') then
          Z_SIDE = 4.25D0
          X_SIDE = 4.11D0
          A_SOLAR= 13.92D0
          F0 = 11.15d-5
+! III
+         else if (BLKTYP=='GPS-IIIA') then
+         Z_SIDE = 4.38D0
+         X_SIDE = 6.05D0
+         A_SOLAR= 22.25D0
+         F0 = 11.0d-5
          end if
+ELSE IF (GNSSid == 'R') THEN
 ! GLONASS constellation
 ! ---------------------
-      else if (prnnum .gt. 100 .and. prnnum .le. 200) then
+         if(BLKTYP=='GLO' .or. BLKTYP=='GLO-M' .or. BLKTYP == 'GLO-M+' .or.&
+            BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B')then
          Z_SIDE = 1.6620D0
          X_SIDE = 4.200D0
          A_SOLAR= 23.616D0
 ! GLONASS-K
-         if(SVNID.eq.801.or.SVNID.eq.802.or.SVNID.eq.855)then
-         F0 = 10.0d-5
+         if(BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B') F0 = 10.0d-5
 ! GLONASS-M
-         else
-         F0 = 20.9d-5
+         if (BLKTYP=='GLO' .or. BLKTYP=='GLO-M' .or. BLKTYP == 'GLO-M+') F0 = 20.9d-5
+
          end if
+
+ELSE IF (GNSSid == 'E') THEN
 ! GALILEO constellation
 ! ---------------------
-      else if (prnnum .gt. 200 .and. prnnum .le. 300) then
+         if (BLKTYP=='GLA-1' .or. BLKTYP=='GLA-2') then
          Z_SIDE = 3.002D0
          X_SIDE = 1.323D0
          A_SOLAR= 11.0D0
          F0 = 8.35d-5
+         end if
+
+ELSE IF (GNSSid == 'C') THEN
 ! BDS constellation
 ! -----------------
-      else if (prnnum .gt. 300 .and. prnnum .le. 400) then
+         if (BLKTYP=='BDS-2M'.or. BLKTYP=='BDS-2G'.or.BLKTYP=='BDS-2I') then
          Z_SIDE = 3.96D0
          X_SIDE = 4.5D0
          A_SOLAR= 22.44D0
 ! BDS MEO
-         if(SVNID.ge.12.and.SVNID.le.15)then
-         F0 = 8.35d-5
+         if(BLKTYP=='BDS-2M') F0 = 8.35d-5
 ! BDS IGSO
-         elseif(SVNID.ge.7.and.SVNID.le.10.or.SVNID.eq.5.or.SVNID.eq.17)then
-         F0 = 50.1d-5
+         if(BLKTYP=='BDS-2I'.or. BLKTYP=='BDS-2G') F0 = 50.1d-5
          end if
+
+ELSE IF (GNSSid == 'J') THEN
 ! QZSS constellation
 ! ------------------
-      else if (prnnum .gt. 400 .and. prnnum .le. 500) then
-         if(SVNID.eq.1)then
+         if (BLKTYP=='QZS-1'.or.BLKTYP=='QZS-2I'.or.BLKTYP=='QZS-2G') then
          Z_SIDE = 6.00D0
          X_SIDE = 12.2D0
          A_SOLAR= 40.0D0
          F0 = 50.1d-5 ! Assumed to be the same with BDS/IGSO
          end if
-      end if
+END IF
+
+
 
 ! The unit vector ez SAT->EARTH
       er(1)=r(1)/sqrt(r(1)**2+r(2)**2+r(3)**2)
@@ -300,7 +327,7 @@ END IF
 ! Implement the orbit-normal attitude for BDS satellites when the beat < 4 deg
 ! ----------------------------------------------------------------------------
      if (att_ON == 1) then
-     if(prnnum .gt. 300 .and. prnnum .le. 400) then
+     if(GNSSid == 'C') then
         if (abs(beta*180.0d0/Pi) < 4.d0) then
 
         CALL productcross (ez,ev,yy)
