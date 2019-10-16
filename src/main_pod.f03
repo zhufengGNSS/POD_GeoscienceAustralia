@@ -107,9 +107,15 @@
 ! ----------------------------------------------------------------------
       CHARACTER (len=300) :: str
       INTEGER (KIND = prec_int2) :: j
+      CHARACTER (len=9) :: POD_version
       	      
 ! CPU Times
 CALL cpu_time (CPU_t0)
+
+! ----------------------------------------------------------------------
+! POD Version:
+POD_version = 'v.1.0.1'
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! POD major configuration file
@@ -335,6 +341,20 @@ CALL readparam (PODfname, param_id, param_value)
 READ ( param_value, FMT = * , IOSTAT=ios_key ) leapsec_filename_cfg 
 ! ----------------------------------------------------------------------
 
+! Read Satellite infromation from SINEX file
+! ----------------------------------------------------------------------
+param_id = 'satsinex_filename_cfg'
+Call readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) satsinex_filename_cfg
+PRINT*,'satsinex_filename =', satsinex_filename_cfg
+!----------------------------------------------------------------------
+
+! Flag of different models for A priori SRP value 
+! ---------------------------------------------------------------------
+param_id = 'Flag_BW_cfg'
+Call readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) Flag_BW_cfg
+PRINT*,'Flag_BW_cfg =', Flag_BW_cfg
 ! ----------------------------------------------------------------------
 ! Reference System of Variational Equations' Partials & Parameter Estimation 
 ! ----------------------------------------------------------------------
@@ -574,7 +594,7 @@ GPS_day = ( GPS_wsec/86400.0D0 )
 write (orbits_partials_fname, FMT='(A3,I4,I1,A20)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits_partials.out'
 !CALL writeorbit_multi (orbits_partials_icrf, PRNmatrix, orbits_partials_fname)
 CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_icrf, PRNmatrix, & 
-						orbits_partials_fname, EQMfname, VEQfname)
+						orbits_partials_fname, EQMfname, VEQfname, POD_version)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
