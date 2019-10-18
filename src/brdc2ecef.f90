@@ -1,4 +1,4 @@
-SUBROUTINE brdc2ecef(GPST,EPH,ECEFPOS)
+SUBROUTINE brdc2ecef(GPST,EPH,CLK,ECEFPOS,SATCLK)
 
 ! NAME       :  brdc2ecef.f90
 !
@@ -37,7 +37,7 @@ IMPLICIT NONE
 
 INTEGER :: I
 REAL (KIND = prec_d) :: GPST
-REAL (KIND = prec_d) :: EPH(20),ECEFPOS(3)
+REAL (KIND = prec_d) :: CLK(3),EPH(20),ECEFPOS(3),SATCLK
 REAL (KIND = prec_d) :: axis, toe, DT
 REAL (KIND = prec_d) :: u0, u
 REAL (KIND = prec_d) :: Et, e
@@ -57,6 +57,7 @@ GM     = 398.6004415D12   ! M**3/SEC**
 ! --------------------------
 toe = EPH(2)
 DT=GPST-toe
+
 IF(DT.GT. 302400.D0)DT=DT-604800.D0
 IF(DT.LT.-302400.D0)DT=DT+604800.D0
 !print*,'DT =',DT
@@ -110,6 +111,8 @@ ECEFPOS(1)=r*cos(w)*cos(ascnode) - r*sin(w)*cos(it)*sin(ascnode)
 ECEFPOS(2)=r*cos(w)*sin(ascnode) + r*sin(w)*cos(it)*cos(ascnode)
 ECEFPOS(3)=r*sin(w)*sin(it)
 !print*,'ECEFPOS =', ECEFPOS
+! Convert to the unit required in SP3 file
+SATCLK = 1.D6*(CLK(1) + CLK(2)*DT + CLK(3)*DT**2) 
 
 END 
 

@@ -299,7 +299,7 @@ Do j17 = 1 , 17
        IF(i_sat <= IG) i_sat1 = i_sat ! GPS
        IF(i_sat <= IG+IR .AND. i_sat > IG) i_sat1 = i_sat-(IG) + 50 ! GLONASS
        IF(i_sat <= IG+IR+IE .AND. i_sat > IG+IR) i_sat1 = i_sat-(IG+IR) + 100 ! GALILEO
-       IF(i_sat <= IG+IR+IE+IC .AND. i_sat > IG++IR+IE) i_sat1 = i_sat-(IG+IR+IE) + 150 ! BDS
+       IF(i_sat <= IG+IR+IE+IC .AND. i_sat > IG+IR+IE) i_sat1 = i_sat-(IG+IR+IE) + 150 ! BDS
        IF(i_sat <= IG+IR+IE+IC+IJ .AND. i_sat > IG+IR+IE+IC) i_sat1 = i_sat-(IG+IR+IE+IC) + 200 ! QZSS
        END IF
 	
