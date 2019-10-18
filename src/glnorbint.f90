@@ -1,4 +1,4 @@
-SUBROUTINE  glnorbint(EPH,TEPO,EPOEPH,POS)
+SUBROUTINE  glnorbint(EPH,TEPO,REFEPO,POS,GLNCLK)
 
 ! NAME       :  glnorbint
 !
@@ -9,7 +9,7 @@ SUBROUTINE  glnorbint(EPH,TEPO,EPOEPH,POS)
 ! PARAMETERS :
 !         IN :  EPH    : Broadcast message for GLONASS 
 !               TEPO   : Desire epoch for new positions from interpolation  
-!               EPOEPH : reference epoch for interpolation 
+!               REFEPO : reference epoch for interpolation 
 !        OUT :  POS      : new positions at the desired epoch 
 !                        POS(1)=X
 !                        POS(2)=Y
@@ -30,10 +30,10 @@ USE mdl_param
      
 IMPLICIT NONE
 
-REAL (KIND = prec_q) :: EPH(*)
+REAL (KIND = prec_q) :: EPH(*),GLNCLK
 REAL (KIND = prec_q) :: POS(3)
 REAL (KIND = prec_q) :: X(3), Y(3), Z(3)
-REAL (KIND = prec_q) :: EPOEPH, TEPO, intv, ACC
+REAL (KIND = prec_q) :: REFEPO, TEPO, intv, ACC
 REAL (KIND = prec_q) :: hstep(500), h
 INTEGER (KIND=4)     :: i, NSTEP
 
@@ -74,13 +74,13 @@ Z(3) = EPH(15)*1000 ! acceleration
 
 ! Numerical integration
 ! ---------------------
-NSTEP = ABS(INT(TEPO-EPOEPH)/intv)+1
+NSTEP = ABS(INT(TEPO-REFEPO)/intv)+1
 
 do i = 1, NSTEP-1
 hstep(i) = intv
-if(TEPO-EPOEPH < 0.d0) hstep(i) = hstep(i)*(-1.d0)
+if(TEPO-REFEPO < 0.d0) hstep(i) = hstep(i)*(-1.d0)
 end do
-hstep(NSTEP)=MOD((TEPO-EPOEPH),intv)
+hstep(NSTEP)=MOD((TEPO-REFEPO),intv)
 do i = 1, NSTEP
 h = hstep(i)
 
@@ -171,5 +171,8 @@ POS(1) = X(1)
 POS(2) = Y(1)
 POS(3) = Z(1)
 
+! GLONASS CLOCK (CONVERT TO UNIT REQUIRED IN SP3 FORMAT)
+!-------------------------------------------------------
+GLNCLK = 1.D6*(EPH(2)+EPH(3)*(TEPO-REFEPO))
 
 END
