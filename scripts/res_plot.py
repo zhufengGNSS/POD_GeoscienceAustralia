@@ -22,19 +22,22 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
 import gc
 import math
-os.chdir('/data/test/')
 
 # Command line argument
 parser = argparse.ArgumentParser()
    
 parser.add_argument('-i', type=str, required=True, help='Input file name')
+parser.add_argument('-d', type=str, required=False, default='.', help='Output directory path')
 
 args = parser.parse_args()
 
 inputfile = args.i
+outputdir = args.d
+
+outputdir = os.path.abspath(outputdir)
+#os.chdir(outputdir)
 
 # End of command line argument
-
 infile = open(inputfile,'r')
 mat_1 = np.loadtxt(infile)
 prn = mat_1[:,1]
@@ -43,8 +46,14 @@ doy   = time.strftime("%j")
 hr    = time.strftime("%H")
 minu  = time.strftime("%M")
 
-# Output file name format as year+DOY+hour(system time)
-file_plt_1='Orbres'+year+doy+'_'+hr+'.png'
+# Output file name format (same root as input file)
+inputbase = os.path.basename(inputfile)
+outputfile = inputbase.replace("_orbdiff_rtn.out", "")
+file_plt_1 = outputdir + '/orbres_' + outputfile + '.png'
+message = 'Output file: ' + file_plt_1
+# Print output filename and path
+print(message)
+
 #-------plot 1-1------------------------------------------------------------
    #prn = mat_1[:,1]
 f1 = plt.figure(figsize=(13,8))
