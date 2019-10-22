@@ -1,0 +1,8 @@
+ascp1950.430 filter=lfs diff=lfs merge=lfs -text
+eopc04_14_IAU2000.62-now filter=lfs diff=lfs merge=lfs -text
+fes2004_Cnm-Snm.dat filter=lfs diff=lfs merge=lfs -text
+goco05s.gfc filter=lfs diff=lfs merge=lfs -text
+header.430_229 filter=lfs diff=lfs merge=lfs -text
+igs_metadata_2063.snx filter=lfs diff=lfs merge=lfs -text
+leap.second filter=lfs diff=lfs merge=lfs -text
+satinfo.dat filter=lfs diff=lfs merge=lfs -text
