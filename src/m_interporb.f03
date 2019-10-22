@@ -96,19 +96,18 @@ SUBROUTINE interp_orb (fname_sp3, PRN, interv, NPint, orbint)
       REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: X_interp 
       REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: Y_interp 
 ! ----------------------------------------------------------------------
-
-
+      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: clock_matrix
 
  
 	  ! Read IGS sp3 orbit data file (position only): orbsp3 
-      Call sp3 (fname_sp3, PRN, orbsp3)
+      Call sp3 (fname_sp3, PRN, orbsp3, clock_matrix)
 	  sz1 = size(orbsp3, DIM = 1)
 
 ! ----------------------------------------------------------------------
 ! Interpolation epoch limits (24h orbit arc or less):
 ! 1. Interpolation is applied only within the data points (15 min less than 24h arc):  Set Nlimit to 1
 ! 2. Interpolation is applied also after the last data point's epoch (23h 45min 00sec) in order to cover a 24h arc:  Set Nlimit to 0
-Nlimit = 0
+Nlimit = 1
 ! ----------------------------------------------------------------------
 	  
 	  ! Data rate of sp3 (in sec)
