@@ -37,6 +37,7 @@
       USE m_writearray2
       USE m_writeorbit
 	  USE m_write_orb2sp3
+	  USE m_clock_read
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -108,7 +109,12 @@
       CHARACTER (len=300) :: str
       INTEGER (KIND = prec_int2) :: j
       CHARACTER (len=9) :: POD_version
-      	      
+      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: CLKmatrix 
+      CHARACTER (LEN=300) :: CLKfname
+      INTEGER (KIND = prec_int2) :: CLKformat
+! ----------------------------------------------------------------------
+
+
 ! CPU Times
 CALL cpu_time (CPU_t0)
 
@@ -564,16 +570,26 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 ! End :: Rewrite configuration files
 ! ----------------------------------------------------------------------
-! ----------------------------------------------------------------------
 
-! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 ! POD of the GNSS satellite constellations
 ! ----------------------------------------------------------------------
 CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, &
                orbits_ics_icrf,orbit_resR, orbit_resT, orbit_resN, orbdiff2)
 ! ----------------------------------------------------------------------
+
 ! ----------------------------------------------------------------------
+! Clocks read from input file for passing to the write out 
+! ----------------------------------------------------------------------
+IF (IC_MODE_cfg == 1) THEN 
+CLKformat = 1
+CLKfname  = pseudobs_orbit_filename_cfg
+ELSE
+CLKformat = 0
+CLKfname = ''
+END IF 
+CALL clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
+! ---------------------------------------------------------------------- 
 
 ! ----------------------------------------------------------------------
 ! Output filenames prefix
@@ -585,7 +601,6 @@ CALL time_GPSweek  (mjd, GPS_week, GPS_wsec, GPSweek_mod1024)
 !CALL time_GPSweek2 (mjd, GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
 GPS_day = ( GPS_wsec/86400.0D0 )  
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Write satellite orbits and partial derivatives to one .orb output file (internal format)
@@ -604,9 +619,9 @@ CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_ic
 write (ORB2sp3_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.sp3'
 sat_vel = sp3_velocity_cfg
 ! ICRF
-!CALL write_orb2sp3 (orbits_partials_icrf, PRNmatrix, ORB2sp3_fname, sat_vel)
+!CALL write_orb2sp3 (orbits_partials_icrf, PRNmatrix, ORB2sp3_fname, sat_vel, CLKmatrix)
 ! ITRF
-CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sat_vel)
+CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sat_vel, CLKmatrix)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
