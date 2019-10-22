@@ -1,0 +1,4 @@
+gag19424_igs19424_orbdiff_rtn.out.good filter=lfs diff=lfs merge=lfs -text
+gag19424.sp3.good filter=lfs diff=lfs merge=lfs -text
+pod.out.good filter=lfs diff=lfs merge=lfs -text
+igs19424.sp3 filter=lfs diff=lfs merge=lfs -text
