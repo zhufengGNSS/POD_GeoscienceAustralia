@@ -330,6 +330,10 @@ filename = "Amatrix.out"
 !Call writearray (Amatrix, filename)
 filename = "Wmatrix.out"
 !Call writearray (Wmatrix, filename)
+filename = "pseudobs_ITRF.out"
+Call writearray (pseudobs_ITRF, filename)
+filename = "pseudobs_ICRF.out"
+Call writearray (pseudobs_ICRF, filename)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
