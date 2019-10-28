@@ -23,7 +23,7 @@ MODULE m_interporb
 Contains
 
 
-SUBROUTINE interp_orb (fname_sp3, PRN, interv, NPint, orbint)
+SUBROUTINE interp_orb (fname_sp3, PRN, interv_in, NPint, orbint)
 
 
 ! ----------------------------------------------------------------------
@@ -35,7 +35,7 @@ SUBROUTINE interp_orb (fname_sp3, PRN, interv, NPint, orbint)
 ! Input arguments:
 ! - fname_sp3:  	Orbit file in sp3 format which contains only position vector 
 ! - PRN:			Satellite PRN number
-! - interv: 		Interval of the interpolation epochs (in seconds)
+! - interv_in: 		Interval of the interpolation epochs (in seconds)
 ! - NPint:			Number of data points to be used for interpolation (defines the order of the polynomial)
 ! - fname_orbint:	Output file name for writing interpolated orbit array  
 !
@@ -73,7 +73,7 @@ SUBROUTINE interp_orb (fname_sp3, PRN, interv, NPint, orbint)
 ! IN
       CHARACTER (LEN=300), INTENT(IN) :: fname_sp3
       !CHARACTER (LEN=300), INTENT(IN) :: fname_orbint
-      INTEGER (KIND = prec_int8), INTENT(IN) :: interv, NPint
+      INTEGER (KIND = prec_int8), INTENT(IN) :: interv_in, NPint
 	  !INTEGER (KIND = 4) :: PRN
       CHARACTER (LEN=3), INTENT(IN) :: PRN
 ! OUT
@@ -83,7 +83,7 @@ SUBROUTINE interp_orb (fname_sp3, PRN, interv, NPint, orbint)
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int8) :: Nepochs, epoch_i, sz1, sz2 
+      INTEGER (KIND = prec_int8) :: Nepochs, epoch_i, sz1, sz2, interv 
       INTEGER (KIND = prec_int8) :: data_rate, Nepoch_int, Norb_int, NPint_1, NPint_2, Nlimit 
 	  INTEGER (KIND = prec_int8) :: i, j, i1, i2, ti
 	  REAL (KIND = prec_d) :: SecDay_i, MJD_i 
@@ -118,11 +118,17 @@ Nlimit = 1
 		end if
 	  End Do
 	  
+! ----------------------------------------------------------------------
+IF (interv_in < 0 .OR. interv_in > data_rate) THEN
+	interv = data_rate
+ELSE
+	interv = interv_in
+END IF
+! ----------------------------------------------------------------------
 	  
       ! Number of points to be interpolated during the span between two epochs of the sp3 file (15min, 5min)
 	  Nepoch_int = data_rate / interv - 1
-	  
-	  
+	  	  
       ! Number of epochs of interpolated orbit (excluding extrapolation at the last point i.e. the start of the next day's sp3: 00h 00min 00sec)
       !Norb_int = (data_rate / interv) * (sz1-1) + 1 
       Norb_int = (data_rate / interv) * (sz1 - Nlimit) + Nlimit
@@ -131,16 +137,12 @@ Nlimit = 1
 	  !Nlimit=0	  
       !Norb_int = 1 + (data_rate / interv) * (sz1 - Nlimit) - 1
 	  
-	  
 ! Allocatable arrays for Lagrange Interpolation (declared in mdl_arr.f90)
       ALLOCATE (X_interp(NPint), STAT = AllocateStatus)
       ALLOCATE (Y_interp(NPint), STAT = AllocateStatus)
-
-
 ! Allocatable arrays  for the interpolated orbit array
       ALLOCATE (orbint(Norb_int, 8) , STAT = AllocateStatus)
-	  
-	  
+	  	  
 ! ----------------------------------------------------------------------
 ! Number of data points (used for the interpolation) before and after of each epoch of sp3 file	  
       NPint_1 = INT(NPint/2) 
@@ -150,8 +152,7 @@ Nlimit = 1
       DO i = 1 , sz1
 		epoch_i  = epoch_i + 1
 		MJD_i    = orbsp3(i,1)
-		SecDay_i = orbsp3(i,2)
-		
+		SecDay_i = orbsp3(i,2)		
 ! ----------------------------------------------------------------------
 ! Form arrays with data points to be used in the interpolation		
 		if ( i < NPint_1 ) then
@@ -168,7 +169,6 @@ Nlimit = 1
 			!print *,"i,epoch_i,i1,i2", i, epoch_i, i1, i2
 		end if
 
-		
         ! Time array of the data points used for the interpolation: X_interp
 !		ti = 1
 !		X_interp(1) = orbsp3(i1, 2)
@@ -183,7 +183,6 @@ Nlimit = 1
 		End Do
 	    j = 0		
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Data Point: Velocity computation based on interpolation
@@ -300,15 +299,9 @@ If (i <= sz1 - Nlimit) then
 		End DO
 End IF
 ! ----------------------------------------------------------------------
-
-      End Do		
-	  
+      End Do		  
 	  Deallocate (X_interp)	  
 	  Deallocate (Y_interp)	  
-
-	  
 End subroutine
-
-
 
 END Module
