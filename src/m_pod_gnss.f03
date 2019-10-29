@@ -73,7 +73,10 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  USE mdl_eop
 	  USE m_sp3_PRN
 	  USE m_write_orb2sp3
-	  USE m_orbitIC
+          USE m_orbitIC
+      USE mdl_config
+      USE m_read_satsnx 
+	  
       IMPLICIT NONE
 
 
@@ -116,7 +119,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  !CHARACTER (LEN=3), ALLOCATABLE :: PRNmatrix(:)
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
 	  CHARACTER (LEN=3) :: PRN_isat
-	  INTEGER :: ios
+	  INTEGER :: ios,ios_key
       CHARACTER (LEN=100) :: orbits_fname				
       CHARACTER (LEN=100) :: fname_write				
       CHARACTER (LEN=100) :: filename				
@@ -158,6 +161,10 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
       REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbdiff2
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: EQMfname_PRN, VEQfname_PRN				
+
+      INTEGER :: DOY
+      INTEGER (KIND = prec_int4) :: J
+      DOUBLE PRECISION MJDD0, MJDD, MJDref  
 ! ----------------------------------------------------------------------
 	  REAL (KIND = prec_d) :: mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
 	  REAL (KIND = prec_d) :: dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS
@@ -252,6 +259,12 @@ Call write_prmfile (EQMfname, fname_id, param_id, param_value)
 Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
+! Compute day of year
+CALL iau_CAL2JD ( Iyear, Imonth, Iday, MJDD0, MJDD, J )
+CALL iau_CAL2JD ( Iyear, 1, 1, MJDD0, MJDref, J )
+DOY = IDNINT(MJDD-MJDref) + 1
+
+PRINT*,'Day Of Year =', DOY, Iyear
 
 
 ! ----------------------------------------------------------------------
@@ -270,6 +283,10 @@ Do isat = 1 , Nsat
 ! ----------------------------------------------------------------------
 PRN_isat = PRNmatrix(isat)
 print *,"Satellite: ", PRNmatrix(isat) ! isat
+! Read Satellite infromation from SINEX file
+! ----------------------------------------------------------------------
+CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat)
+print*,'GNSS Block Type: ', BLKTYP
 
 ! ----------------------------------------------------------------------
 ! Copy Initial Configuration files 

@@ -1,5 +1,5 @@
 
-SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r_sun, fx, fy, fz)
+SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum,  srpid, r, v, r_sun, fx, fy, fz)
 
 
 ! ----------------------------------------------------------------------
@@ -14,9 +14,6 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
 ! Input arguments:
 ! - GM           : the earth gravitational constant  
 ! - prnnum       : satellite PRN number
-! - satsvn       : satellite SVN
-! - eclpf        : =1: in the orbit eclipse; 
-!                  =2: in the sun illumination;
 ! - srpid        : =1: a simply cannonball model; 
 !                  =2: box-wing model;
 !                  =3: ECOM model
@@ -34,9 +31,9 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
 ! Created:	01-10-2017
 ! 
 ! Changes:      10-10-2018 Tzupang Tseng: modify the Cannonball model to be 
-!                                            similar to the box-wing model in
-!                                            preparation for BDS with the ON
-!                                            attitude mode.
+!                                         similar to the box-wing model in
+!                                         preparation for BDS with the ON
+!                                         attitude mode.
 !               11-12-2018 Tzupang Tseng: make the force matrix dynamic
 !               23-01-2019 Tzupang Tseng: add the ECOM2 model
 !               31-01-2019 Tzupang Tseng: change the definition of ey by
@@ -56,20 +53,18 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
       USE mdl_precision
       USE mdl_num
       USE mdl_param
-      USE m_satinfo
+      USE mdl_config
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
-      INTEGER (KIND=4), INTENT(IN)      :: eclpf
       REAL (KIND = prec_q), INTENT (IN) :: lambda
       REAL (KIND = prec_d) , Dimension(3), INTENT(IN) :: eBX_ecl
       INTEGER                           :: srpid,ECOM
-      INTEGER                           :: prnnum,BLKNUM
+      INTEGER                           :: prnnum
       REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
       REAL (KIND = prec_q)               :: fx,fy,fz
-      INTEGER(KIND = 4)                  :: satsvn
 
 ! ----------------------------------------------------------------------
 ! Local variables declaration
@@ -90,17 +85,15 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
       REAL (KIND = prec_q), DIMENSION(4) :: cosang
       REAL (KIND = prec_q), DIMENSION(4) :: AREA1,REFL1,DIFU1,ABSP1
       INTEGER (KIND = prec_int2) :: AllocateStatus,DeAllocateStatus
-      INTEGER              :: zta
       INTEGER              :: ex_i
       INTEGER              :: i,j,k,m
       INTEGER              :: N_param, PD_Param_ID
       INTEGER              :: att_ON
-      INTEGER              :: flag_BW
 ! ----------------------------------------------------------------------
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: X_SIDE,Z_SIDE
-      REAL (KIND = prec_q) :: MASS,AREA
+      REAL (KIND = prec_q) :: AREA
       REAL (KIND = prec_q) :: A_SOLAR
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
@@ -112,8 +105,11 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
        REAL (KIND = prec_q) :: u_sun
        REAL (KIND = prec_q) :: beta,del_u
        REAL (KIND = prec_q), DIMENSION(3) :: r_sun1,r_sun2
-
 ! ----------------------------------------------------------------------
+       INTEGER*4 BLKNUM,SVN,REFF,ERM,ANT,GRD,MONTH
+       REAL*8  ACCEL(3),SUN(3)
+       REAL*8  YSAT(6)
+! ---------------------------------------------------------------------- 
 ! Numerical Constants
       Ps = 4.5567D-6 ! (Nm^-2)
       Cr = 1.5 ! SRP coefficient ranges from 1.3 to 1.5
@@ -126,11 +122,8 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
              !              when the beta < 4 deg
              !        = 0 : use the yaw-steering attitude for BDS satellite 
              !              for all beta angles 
- flag_BW = 0 !flag_BW = 1 : use the simple box-wing model as a priori SRP values
-             !        = 0 : use the constant f0 as a priori SRP value
-             !        = any numbers : directly estimate the SRP parameters
 ! ---------------------------------------------------------------------
-  
+     
 ! initialize the SRP force
 ! -------------------------
      DO i=1,3
@@ -141,15 +134,13 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
 ! -----------------
       if(prnnum.le.100)then
 ! IIF
-         if(satsvn.ge.62.and.satsvn.le.73) then
-         MASS   = 1633.0d0
+         if(SVNID.ge.62.and.SVNID.le.73) then
          Z_SIDE = 5.05D0
          X_SIDE = 4.55D0
          A_SOLAR= 22.25D0
          F0 = 16.7d-5
 ! IIR
          else
-         MASS   = 1080.0d0
          Z_SIDE = 4.25D0
          X_SIDE = 4.11D0
          A_SOLAR= 13.92D0
@@ -162,21 +153,17 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          Z_SIDE = 1.6620D0
          X_SIDE = 4.200D0
          A_SOLAR= 23.616D0
-
 ! GLONASS-K
-         if(satsvn.eq.801.or.satsvn.eq.802.or.satsvn.eq.855)then
-         MASS = 995.0d0
+         if(SVNID.eq.801.or.SVNID.eq.802.or.SVNID.eq.855)then
          F0 = 10.0d-5
 ! GLONASS-M
          else
-         MASS   = 1415.0d0
          F0 = 20.9d-5
          end if
 
 ! GALILEO constellation
 ! ---------------------
       else if (prnnum .gt. 200 .and. prnnum .le. 300) then
-         MASS   = 700.0d0
          Z_SIDE = 3.002D0
          X_SIDE = 1.323D0
          A_SOLAR= 11.0D0
@@ -187,22 +174,17 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum, satsvn, eclpf, srpid, r, v, r
          Z_SIDE = 3.96D0
          X_SIDE = 4.5D0
          A_SOLAR= 22.44D0
-
 ! BDS MEO
-         if(satsvn.ge.12.and.satsvn.le.15)then
-         MASS   = 800.0d0
+         if(SVNID.ge.12.and.SVNID.le.15)then
          F0 = 8.35d-5
 ! BDS IGSO
-         elseif(satsvn.ge.7.and.satsvn.le.10.or.satsvn.eq.5.or.satsvn.eq.17)then
-         MASS = 1400.0d0
+         elseif(SVNID.ge.7.and.SVNID.le.10.or.SVNID.eq.5.or.SVNID.eq.17)then
          F0 = 50.1d-5
          end if
-
 ! QZSS constellation
 ! ------------------
       else if (prnnum .gt. 400 .and. prnnum .le. 500) then
-         if(satsvn.eq.1)then
-         MASS = 2000.0d0
+         if(SVNID.eq.1)then
          Z_SIDE = 6.00D0
          X_SIDE = 12.2D0
          A_SOLAR= 40.0D0
@@ -247,7 +229,6 @@ END IF
 ! The unit vector eb = ed x ey
 
       CALL productcross (ed,ey,eb)
-
 
 ! the orbit normal vector
 !------------------------
@@ -363,127 +344,28 @@ END IF
       sclfa=(AU/Ds)**2
 
 ! SIMPLE BOX-WING 
-      if (flag_BW == 1) then
-         fxo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1.5*A_SOLAR*cosang(4)*ed(1))
-         fyo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1.5*A_SOLAR*cosang(4)*ed(2))
-         fzo=sclfa*Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1.5*A_SOLAR*cosang(4)*ed(3))
+      if (Flag_BW_cfg == 1 .or. srpid == 1) then
+         fxo=Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
+         fyo=Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
+         fzo=Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
-   !      print*,'alpha_BW', alpha
-      else if (flag_BW == 0) then
+
+! BOX-WING model from the repro3 routine
+! --------------------------------------
+      else if (Flag_BW_cfg == 2 .or. srpid == 2) then
+         REFF = 0     
+         YSAT(1:3) = r
+         YSAT(4:6) = v
+         CALL SRPFBOXW(REFF,YSAT,R_SUN,BLKID,SVNID,ACCEL)
+         alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
+      
+      else if (Flag_BW_cfg == 0) then
          alpha = F0/MASS
       else
          alpha = 1.d0
       end if
 
-! computation of the factor zta related to the Sun illumination
-      IF (eclpf.eq.1) THEN ! in the eclipse
-         zta=0
-      ELSE
-         zta=1
-      END IF
-
-      IF (srpid == 1) THEN
-! A simply cannonball model
-! *********************************
-!  a=-zta*Cr*(A/m)P(1AU/r)^2*Dr(i)
-! ********************************
-
-! The main surface area face toward to the Sun using the SAT->SUN and SAT->EARTH
-! vectors
-     ANG=acos(ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3))*180.0d0/Pi
-
-     if (abs(ANG) .lt. 30.0d0) then
-     AREA=Z_SIDE+A_SOLAR
-     else
-     AREA=X_SIDE+A_SOLAR
-     end if
-! Cartesian counterparts (fx,fy,fz) of acceleration fr
-      fx = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(1)
-      fy = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(2)
-      fz = -zta*Cr*AREA/MASS*Ps*(AU/Ds)**2*ed(3) 
-
-! end of the cannonball model
-!--------------------------------------------------------------------------
-
-
-! Box-wing model
-! **************
-     ELSE IF (srpid == 2) THEN
-
-!      CALL surfprop(BLKNUM,AREA1,REFL1,DIFU1,ABSP1)
-
-! Forces caused by different interactions between optical properties and the
-! satellite surface
-
-!write(*,*)Ps/MASS
-     do k=1,4
-     if (k .eq. 1) then
-! Judge the positive surface or negative surface facing to the Sun
-        IF(cosang(k).GE.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*ex(i))+2*cosang(k)**2*REFL1(k)*ex(i)
-      end do
-        ELSEIF(cosang(k).LT.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*(-ex(i)))+2*cosang(k)**2*REFL1(k)*(-ex(i))
-      end do
-        END IF
-
-     elseif (k .eq. 2) then
-        IF(cosang(k).GE.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*ey(i))+2*cosang(k)**2*REFL1(k)*ey(i)
-      end do
-        ELSEIF(cosang(k).LT.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*(-ey(i)))+2*cosang(k)**2*REFL1(k)*(-ey(i))
-      end do
-        END IF
-
-     elseif (k .eq. 3) then
-        IF(cosang(k).GE.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*ez(i))+2*cosang(k)**2*REFL1(k)*ez(i)
-      end do
-        ELSEIF(cosang(k).LT.0D0)THEN
-      do i=1,3
-     surforce(k,i)=abs(cosang(k))*(ABSP1(k)+DIFU1(k))*(ed(i)+2/3*(-ez(i)))+2*cosang(k)**2*REFL1(k)*(-ez(i))
-      end do
-        END IF
-
-     elseif (k .eq. 4) then
-      do i=1,3
-! Here the normal of the soalr panels is assumed to be parallel to ed
-      surforce(k,i)=AREA1(k)*ed(i)+REFL1(k)*ed(i)+(2/3)*DIFU1(k)*ed(i)
-      end do
-
-
-     end if
-     end do
-
-! Compute the total forces
-!
-     do i=1,3
-     fsrp(i)=0.0d0
-     end do
-
-     do i=1,3
-        do k=1,4
-     fsrp(i)=fsrp(i)+(Ps/MASS)*surforce(k,i)
-        end do
-     end do
-
-! forces in inertial frame
-!-------------------------
-     fx=-fsrp(1)
-     fy=-fsrp(2)
-     fz=-fsrp(3)
-
-! end of the box-wing model
-! =======================================================================
-
-
-     ELSE IF (srpid == 3) THEN
+     IF (srpid == 3) THEN 
 
 ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
 
@@ -668,69 +550,41 @@ End If
 
 ! use the shadow coefficient for scaling the SRP effect
 !-------------------------------------------------------
-
-!IF (abs(beta*180.0d0/Pi) .lt. 13.87 .and. del_u*180.0d0/Pi .gt. 167 .and. del_u*180.0d0/Pi .lt. 193) then
 IF (lambda .lt. 1)THEN
 !print*,'beta=, lambda=, del_u=', beta*180/Pi, lambda, del_u*180/Pi
-
-
-DO i=1,3
- fsrp(i)=0.0d0
-END DO
-
-srpcoef(1) = lambda*srpcoef(1)
-
-
-        IF (ECOM_param_glb == 1 ) then
- fxo=lambda*sclfa*Ps/MASS*(0.7*X_SIDE*cosang(1)*ex(1)+0.3*Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
- fyo=lambda*sclfa*Ps/MASS*(0.7*X_SIDE*cosang(1)*ex(2)+0.3*Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
- fzo=lambda*sclfa*Ps/MASS*(0.7*X_SIDE*cosang(1)*ex(3)+0.3*Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
-
-
-DO i=1,3
-     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)*alpha              &
-                       +   srpcoef(2)*sclfa*ey(i)*alpha              &
-                       +   srpcoef(3)*sclfa*eb(i)*alpha              &
-                       +   srpcoef(4)*sclfa*DCOS(del_u)*ed(i)*alpha  &
-                       +   srpcoef(5)*sclfa*DSIN(del_u)*ed(i)*alpha  &
-                       +   srpcoef(6)*sclfa*DCOS(del_u)*ey(i)*alpha  &
-                       +   srpcoef(7)*sclfa*DSIN(del_u)*ey(i)*alpha  &
-                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)*alpha  &
-                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)*alpha  
-
-END DO
-
-       ELSE 
- fxo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(1)+0.5*Z_SIDE*cosang(3)*ez(1)+0.1*A_SOLAR*cosang(4)*ed(1))
- fyo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(2)+0.5*Z_SIDE*cosang(3)*ez(2)+0.1*A_SOLAR*cosang(4)*ed(2))
- fzo=lambda*sclfa*Ps/MASS*(0.01*X_SIDE*cosang(1)*ex(3)+0.5*Z_SIDE*cosang(3)*ez(3)+0.1*A_SOLAR*cosang(4)*ed(3))
-
-
-DO i=1,3
-     fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)*alpha              &
-                       +   srpcoef(2)*sclfa*ey(i)*alpha              &
-                       +   srpcoef(3)*sclfa*eb(i)*alpha              &
-                       +   srpcoef(4)*sclfa*DCOS(2*del_u)*ed(i)*alpha  &
-                       +   srpcoef(5)*sclfa*DSIN(2*del_u)*ed(i)*alpha  &
-                       +   srpcoef(6)*sclfa*DCOS(4*del_u)*ed(i)*alpha  &
-                       +   srpcoef(7)*sclfa*DSIN(4*del_u)*ed(i)*alpha  &
-                       +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)*alpha  &
-                       +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)*alpha
-
-END DO
-     
-       END IF
-
-     fx=-fsrp(1)
-     fy=-fsrp(2)
-     fz=-fsrp(3)
-!     fx=-(fsrp(1) + fxo)
-!     fy=-(fsrp(2) + fyo)
-!     fz=-(fsrp(3) + fzo)
-
-
+   DO i=1,3
+   fsrp(i)=0.0d0
+   END DO
+   srpcoef(1) = lambda*srpcoef(1)
+   IF (ECOM_param_glb == 1 ) then
+      DO i=1,3
+      fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)*alpha              &
+                        +   srpcoef(2)*sclfa*ey(i)*alpha              &
+                        +   srpcoef(3)*sclfa*eb(i)*alpha              &
+                        +   srpcoef(4)*sclfa*DCOS(del_u)*ed(i)*alpha  &
+                        +   srpcoef(5)*sclfa*DSIN(del_u)*ed(i)*alpha  &
+                        +   srpcoef(6)*sclfa*DCOS(del_u)*ey(i)*alpha  &
+                        +   srpcoef(7)*sclfa*DSIN(del_u)*ey(i)*alpha  &
+                        +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)*alpha  &
+                        +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)*alpha  
+      END DO
+   ELSE 
+      DO i=1,3
+      fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)*alpha              &
+                        +   srpcoef(2)*sclfa*ey(i)*alpha              &
+                        +   srpcoef(3)*sclfa*eb(i)*alpha              &
+                        +   srpcoef(4)*sclfa*DCOS(2*del_u)*ed(i)*alpha  &
+                        +   srpcoef(5)*sclfa*DSIN(2*del_u)*ed(i)*alpha  &
+                        +   srpcoef(6)*sclfa*DCOS(4*del_u)*ed(i)*alpha  &
+                        +   srpcoef(7)*sclfa*DSIN(4*del_u)*ed(i)*alpha  &
+                        +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)*alpha  &
+                        +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)*alpha
+      END DO
+   END IF
+      fx=-fsrp(1)
+      fy=-fsrp(2)
+      fz=-fsrp(3)
 END IF
-
 !----------------------------------------------------------------------------------------------
 
 

@@ -131,9 +131,15 @@ READ(line_ith,'(A1,I2,I5,5I3,3D19.12)') cSvn,iSvn2,IYEAR,MONTH,IDAY,IHOUR,&
 IEPO = IEPO + 1
 IYEAR4 = IYEAR
 
+IF(IEPO > MAXEPO) THEN
+PRINT*,'THE NUMBER OF EPOCHS RECORDED IN A FILE EXCEEDS THE THRESHOLD.'
+PRINT*,'THE NUMBER OF EPOCHS RECORDED:',IEPO
+PRINT*,'THE THRESHOLD:', MAXEPO
+PRINT*,'PLEASE ADJUST MAXEPO IN MAIN PROGRAM.'
+END IF
         ! Convert the calender time to MJD time system
           CALL iau_CAL2JD ( IYEAR4, MONTH, IDAY, MJD0, MJD, J )
-          !print*,'MJD =, J =',MJD, J
+!          print*,'MJD =, J =',MJD, J
          
            TOC = MJD + (IHOUR/24.D0+MINUTE/1440.D0+iSEC/86400.D0)
         ! The following critierion only works for GALILEO broadcast records.
@@ -183,8 +189,11 @@ IF (ISAT < 50 .OR.  ISAT > 100 .AND. ISAT < 150 .OR. &
      END DO
 
 ELSE IF (ISAT > 50 .AND. ISAT < 100 )THEN
-     CALL time_GPSweek2 (TOC , GPS_week, EPHDAT(1), GPSweek_mod1024, GPS_day)
-     !print*,'GPS_week=, GPS_day=',GPS_week,GPS_day
+!     CALL time_GPSweek2 (TOC , GPS_week, EPHDAT(1), GPSweek_mod1024, GPS_day)
+     EPHDAT(1) = TOC ! GLONASS time system is UTC time
+                     ! Here the first element is setup to the MJD in convenience
+                     ! to convert to GPS time later 
+!     print*,'ISAT=',ISAT,'GPS_week=',GPS_week,'GPS_day=',GPS_day
 !     print*,'EPHDAT(1-4) =',EPHDAT(1),EPHDAT(2),EPHDAT(3),EPHDAT(4)
 
      DO  I=5,NG,4
@@ -192,13 +201,15 @@ ELSE IF (ISAT > 50 .AND. ISAT < 100 )THEN
 !     print*,line_ith
      IF (VERSION == 2) READ(line_ith,'(3X,4D19.12)') (EPHDAT(K),K=I,I+3)
      IF (VERSION == 3) READ(line_ith,'(4X,4D19.12)') (EPHDAT(K),K=I,I+3)
-!     print*,'EPHDAT =', EPHDAT(I), EPHDAT(I+1),EPHDAT(I+2),EPHDAT(I+3)
+!     print*,'EPHDAT(5-16)=', EPHDAT(I), EPHDAT(I+1),EPHDAT(I+2),EPHDAT(I+3)
      END DO
 
 
      DO I=1,16
      EPH(I,IEPO,ISAT)=EPHDAT(I)
-!     print*,'EPH(1:2,:,:), UTC, SECONDS', EPH(1,IEPO,ISAT), EPH(4,IEPO,ISAT)
+!PRINT*,'CHECK EPHDAT'
+!PRINT*,'EPH(I,IEPO,ISAT) =',EPH(I,IEPO,ISAT), 'I =', I
+!     print*,'ISAT =',ISAT,'UTC, SECONDS', EPH(I,IEPO,ISAT), EPHDAT(I)
      !   CLK(I,IEPO,ISAT)
      END DO
 
