@@ -29,7 +29,11 @@ MODULE mdl_param
 
 ! ---------------------------------------------------------------------------
 ! Satellite information file
-!      CHARACTER (*), PARAMETER :: satinfoplace ='/data/bitbucket/Tzupang/pod/SATINFO/'
+      CHARACTER(LEN=20) :: BLKTYP     ! block type
+      INTEGER(KIND = prec_int2)    :: SVNID      ! SVN 
+      INTEGER(KIND = prec_int2)    :: BLKID      ! block type number
+      INTEGER(KIND = prec_int4)    :: POWER      ! transmitted power in watts
+      REAL(KIND = prec_d)          :: MASS       ! S/C mass in kg
 ! --------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------
@@ -65,9 +69,9 @@ MODULE mdl_param
 ! External Orbit arrays (prm_orbext.f03, prm_pseudobs.f03)
 ! Allocatable Arrays	  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbext_kepler, orbext_ICRF, orbext_ITRF
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbext_kepler2,orbext_ICRF2, orbext_ITRF2
+!      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbext_kepler2,orbext_ICRF2, orbext_ITRF2
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF, pseudobs_ICRF
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF2, pseudobs_ICRF2
+!      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF2, pseudobs_ICRF2
       INTEGER (KIND = prec_int2) :: ORBEXT_glb
 ! ---------------------------------------------------------------------------
 
