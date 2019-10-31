@@ -595,7 +595,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 srpid =  SRP_MOD_glb
 
 
-CALL force_srp (lambda, eBX_ecl, GMearth, GNSSid, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
+CALL force_srp (lambda, eBX_ecl, eclipsf, GMearth, GNSSid, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then

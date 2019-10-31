@@ -78,7 +78,7 @@ SUBROUTINE orbinfo (mjd, prnnum, rsat, vsat, beta, del_u, yaw, lambda, angX, ang
       REAL (KIND = prec_q) :: u_sun, yaw2
       INTEGER  NTARG_SUN, NTARG_MOON, NCTR
       REAL (KIND = prec_q), DIMENSION(3) :: ed, ey, eb, ex, en, ev, ez, et
-      REAL (KIND = prec_q), DIMENSION(3) :: yy
+      REAL (KIND = prec_q), DIMENSION(3) :: yy, ed_on
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
       REAL (KIND = prec_q), DIMENSION(4) :: cosang
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
@@ -214,6 +214,12 @@ SUBROUTINE orbinfo (mjd, prnnum, rsat, vsat, beta, del_u, yaw, lambda, angX, ang
       beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2)) ! in rad
 !write (*,*) beta*180.0d0/Pi
 
+! yaw angle
+      yaw= acos(ex(1)*et(1)+ex(2)*et(2)+ex(3)*et(3))
+
+      IF (beta*180/Pi .gt. 0.d0) yaw= -yaw ! In accordance with the IGS convention (yaw-steering only)
+
+
       u_sun = atan2(r_sun2(2),r_sun2(1)) ! in rad
       del_u = u_sat - u_sun
       if (del_u*180/Pi .gt.360.0d0) then
@@ -222,10 +228,58 @@ SUBROUTINE orbinfo (mjd, prnnum, rsat, vsat, beta, del_u, yaw, lambda, angX, ang
       del_u=del_u+2*Pi
       end if
 
-! yaw angle
-      yaw= acos(ex(1)*et(1)+ex(2)*et(2)+ex(3)*et(3))
+! BDS yaw angles for the orbit normal attitude
+!     if(prnnum > 300) then
+!        if (abs(beta*180.0d0/Pi) < 4.d0) ex = et
 
-IF (beta*180/Pi .gt. 0.d0) yaw= -yaw ! In accordance with the IGS convention
+!     end if
+      if(BLKID == 301)then
+      CALL productcross (ez,ev,yy)
+      ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+      CALL productcross (ed,ey,yy)
+      eb(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      eb(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      eb(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+      CALL productcross (ey,eb,yy)
+      ed_on(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ed_on(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ed_on(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+      yaw= acos(ed(1)*ed_on(1)+ed(2)*ed_on(2)+ed(3)*ed_on(3))
+      IF (beta*180/Pi .gt. 0.d0) yaw= -yaw
+
+      elseif(BLKID == 302 .or. BLKID == 303)then
+      if (abs(beta*180.0d0/Pi) < 4.5d0) then
+      CALL productcross (ez,ev,yy)
+      ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+      CALL productcross (ed,ey,yy)
+      eb(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      eb(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      eb(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+      CALL productcross (ey,eb,yy)
+      ed_on(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ed_on(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+      ed_on(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+      yaw= acos(ed(1)*ed_on(1)+ed(2)*ed_on(2)+ed(3)*ed_on(3))
+      IF (beta*180/Pi .gt. 0.d0) yaw= -yaw
+
+      end if
+      end if
+
+
+! yaw angle
+!      yaw= acos(ex(1)*et(1)+ex(2)*et(2)+ex(3)*et(3))
+
+!IF (beta*180/Pi .gt. 0.d0) yaw= -yaw ! In accordance with the IGS convention
 
 
 !========================================

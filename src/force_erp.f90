@@ -57,7 +57,7 @@ YSAT(4:6) = vsat
 KAPPA = 0.d0
 MONTH = 1
 
-!print*,'Block type, SVNID, BLKID,  power, MASS = ', antbody, SVNID, BLKID,power, MASS
+!print*,'Block type, SVNID, BLKID,  power, MASS = ', BLKTYP, SVNID, BLKID,power, MASS
 CALL ERPFBOXW(ERM,ANT,GRD,REFF,YSAT,R_SUN,KAPPA,MONTH,BLKID,SVNID,MJD,ACCEL)
 
 fx_erp = ACCEL(1) 
