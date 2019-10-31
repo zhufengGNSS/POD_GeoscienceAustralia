@@ -545,6 +545,43 @@ C      SOLAR PANELS
           S_SIDE(1,3) = 0.23D0
           S_SIDE(1,4) = 1D0
 
+CC ========================================================
+CC BDS satellites (Temporally using)
+CC Information: http://mgex.igs.org/IGS_MGEX_Status_BDS.php
+CC ========================================================
+        ELSEIF (BLKNUM.EQ.301.OR.BLKNUM.EQ.302.OR.BLKNUM.EQ.303)THEN 
+          blk_found = .true. 
+  
+C      +/- X SIDE
+          X_SIDE(1,1) = 4.50D0
+          X_SIDE(1,2) = 0.20D0 ! assumed to be identical to GPS III
+          X_SIDE(1,3) = 0.56D0 ! assumed to be identical to GPS III
+          X_SIDE(1,4) = 1D0
+
+C      +/- Y SIDE
+          Y_SIDE(1,1) = 5.50D0
+          Y_SIDE(1,2) = 0.20D0 ! assumed to be identical to GPS III
+          Y_SIDE(1,3) = 0.56D0 ! assumed to be identical to GPS III
+          Y_SIDE(1,4) = 1D0
+
+C      -Z SIDE
+          Z_SIDE(1,1) = 3.96D0
+          Z_SIDE(1,2) = 0.0D0 
+          Z_SIDE(1,3) = 0.0D0 
+          Z_SIDE(1,4) = 1D0
+
+C      +Z SIDE
+          Z_SIDE(3,1) = 3.96D0
+          Z_SIDE(3,2) = 0.0D0
+          Z_SIDE(3,3) = 0.0D0
+          Z_SIDE(3,4) = 1D0
+
+C      SOLAR PANELS
+          S_SIDE(1,1) = 22.440D0
+          S_SIDE(1,2) = 0.85D0
+          S_SIDE(1,3) = 0.23D0
+          S_SIDE(1,4) = 1D0
+
       ENDIF
 
 
