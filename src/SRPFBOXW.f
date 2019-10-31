@@ -371,6 +371,12 @@ C     MASS OF SATELLITES
          else
             mass = 710.d0   ! Average 19/07/22 == 708.597kg
          endif
+* BDS
+      ELSEIF(BLKNUM.eq.301) then
+         MASS = 1550D0
+      ELSEIF(BLKNUM.eq.302 .or.BLKNUM.eq.303) then
+         MASS = 1900D0
+
       else
          print *,'No MASS for BLKNUM ',BLKNUM
          stop 'NO MASS: ERPFBOXW'
