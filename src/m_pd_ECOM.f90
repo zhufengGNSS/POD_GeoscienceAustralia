@@ -20,7 +20,7 @@ MODULE m_pd_ECOM
 Contains
 
 
-SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, GNSSid, r, v, r_sun, Asrp)
+SUBROUTINE pd_ECOM (lambda, eBX_ecl, eclipsf, GM, GNSSid, r, v, r_sun, Asrp)
 
 
 ! ----------------------------------------------------------------------
@@ -77,6 +77,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, GNSSid, r, v, r_sun, Asrp)
       REAL (KIND = prec_q), DIMENSION(3),INTENT(IN) :: r_sun
       REAL (KIND = prec_q),INTENT(IN) :: GM
       REAL (KIND = prec_q),INTENT(IN) :: lambda
+      INTEGER (KIND = 4):: eclipsf
       
 ! ----------------------------------------------------------------------
 ! Local variables declaration
@@ -98,7 +99,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, GM, GNSSid, r, v, r_sun, Asrp)
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
      ! REAL (KIND = prec_q) :: Asrp(3,9)
       REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,ez,ev,en
-      REAL (KIND = prec_q), DIMENSION(3) :: yy
+      REAL (KIND = prec_q), DIMENSION(3) :: yy,et
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
       INTEGER              :: i,j,k,ECOM
 ! ----------------------------------------------------------------------
@@ -189,7 +190,7 @@ ELSE IF (GNSSid == 'R') THEN
 ELSE IF (GNSSid == 'E') THEN
 ! GALILEO constellation
 ! ---------------------
-         if (BLKTYP=='GLA-1' .or. BLKTYP=='GLA-2') then
+         if (BLKTYP=='GAL-1' .or. BLKTYP=='GAL-2') then
          Z_SIDE = 3.002D0
          X_SIDE = 1.323D0
          A_SOLAR= 11.0D0
@@ -327,9 +328,20 @@ END IF
 ! Implement the orbit-normal attitude for BDS satellites when the beat < 4 deg
 ! ----------------------------------------------------------------------------
      if (att_ON == 1) then
-     if(GNSSid == 'C') then
-        if (abs(beta*180.0d0/Pi) < 4.d0) then
+     if(BLKID == 301 ) then
+         CALL productcross (ez,ev,yy)
+        ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ey(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 
+        CALL productcross (ed,ey,yy)
+        eb(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        eb(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        eb(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+     elseif(BLKID == 302 .or.BLKID == 303) then
+!        if (abs(beta*180.0d0/Pi) < 4.d0) then
+        if (eclipsf == 3) then
         CALL productcross (ez,ev,yy)
         ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
@@ -339,11 +351,13 @@ END IF
         eb(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         eb(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         eb(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)  
-   
-        CALL productcross (ey,eb,yy)
-        ed(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
-        ed(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
-        ed(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
+! Switch on the (ed,on) does not improve the orbit accuracy!!
+! Only for testing purpose!
+!        CALL productcross (ey,eb,yy)
+!        ed(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+!        ed(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+!        ed(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         end if
      end if
      end if
