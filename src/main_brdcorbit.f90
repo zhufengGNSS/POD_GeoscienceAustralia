@@ -97,7 +97,7 @@ PROGRAM  main_brdcorbit
       CHARACTER (LEN=100) :: fname_header, fname_data, fname_out
 !----------------------------------------------------------------
       CHARACTER (LEN=3), ALLOCATABLE :: PRNmatrix(:)
-      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE ::ORBmatrix
+      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE ::ORBmatrix, CLKmatrix
       INTEGER (KIND = prec_int2) :: sat_vel
       INTEGER (KIND = prec_int4) :: Nepochs, Nsat
       INTEGER (KIND = prec_int4) :: i_sat, k_sat, i_write
@@ -135,6 +135,7 @@ ALLOCATE(ECEFPOS(86400/SAMPLE,3,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(SATCLK(86400/SAMPLE,1,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(NEWEPOCH(86400/SAMPLE,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(NEWEPOCH2(86400/SAMPLE,MAXNSAT), STAT = AllocateStatus)
+SATCLK = 999999.999999d0
 EPHNEW2 = 0.d0
 EPHNEW  = 0.d0
 ECEFPOS = 0.d0
@@ -754,8 +755,10 @@ END DO
 !----------------------------------------------------------------------
 Nepochs = SIZE(ECEFPOS,DIM=1)
 Nsat    = SIZE(ECEFPOS,DIM=3)
+ALLOCATE(CLKmatrix(Nepochs,3,TOTG), STAT = AllocateStatus)
 ALLOCATE(ORBmatrix(Nepochs,8,TOTG), STAT = AllocateStatus)
 ALLOCATE(PRNmatrix(TOTG), STAT = AllocateStatus)
+CLKmatrix = 999999.999999d0 
 ORBmatrix = 0.d0
 k_sat = 0
 DO  i_sat = 1 , Nsat
@@ -769,14 +772,18 @@ PRNmatrix(k_sat) = PRN_ti
     IF(i_write == 1) THEN
     ORBmatrix(i_write,1, k_sat) = MJD_ti
     ORBmatrix(i_write,2, k_sat) = Sec_00
+    CLKmatrix(i_write,1, k_sat) = MJD_ti
+    CLKmatrix(i_write,2, k_sat) = Sec_00
     ELSE
     ORBmatrix(i_write,1, k_sat) = MJD_ti + Sec_00/86400.d0
     ORBmatrix(i_write,2, k_sat) = Sec_00
+    CLKmatrix(i_write,1, k_sat) = MJD_ti + Sec_00/86400.d0
+    CLKmatrix(i_write,2, k_sat) = Sec_00
     END IF
-    ORBmatrix(i_write,3:5, k_sat) = ECEFPOS (i_write,1:3,i_sat)
+    ORBmatrix(i_write,3:5, k_sat) = ECEFPOS(i_write,1:3,i_sat)
     ORBmatrix(i_write,6:8, k_sat) = 0.d0
+    CLKmatrix(i_write,3,   k_sat) = SATCLK(i_write,1,i_sat)
     END DO
-
 END IF
 END DO
 sat_vel = 0
@@ -784,7 +791,7 @@ sat_vel = 0
 ! WRITE THE ECEF POSITIONS IN A SP3 FORMAT
 ! ----------------------------------------
 !CALL write_brd2sp3 (ISTR,IPRN,TOTG,IG,IR,IE,IC,IJ,SATTYPE, SAMPLE,IYEAR4,MONTH,IDAY,NEWEPOCH2, ECEFPOS, OUTPUT, 0)
-CALL write_orb2sp3(ORBmatrix, PRNmatrix, OUTPUT, sat_vel)
+CALL write_orb2sp3(ORBmatrix, PRNmatrix, OUTPUT, sat_vel, CLKmatrix)
 
 
 CALL cpu_time (CPU_t1)

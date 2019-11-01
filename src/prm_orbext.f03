@@ -102,7 +102,7 @@ SUBROUTINE prm_orbext (PRMfname)
       CHARACTER (LEN=3) :: time
 	  REAL (KIND = prec_d) :: mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
 ! ----------------------------------------------------------------------
-
+      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: clock_matrix
 
   
 ! ----------------------------------------------------------------------
@@ -240,13 +240,13 @@ READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
 ! Read sp3 orbit data that include position and velocity vectors 
 If (FRAME_EXT == 'ICRF') Then
 ! ICRF
-Call sp3 (fname_orb, PRN, orbext_ICRF)
+Call sp3 (fname_orb, PRN, orbext_ICRF, clock_matrix)
 ! Orbit transformation ICRF to ITRF
 time_sys = 'GPS'
 Call orbC2T (orbext_ICRF, time_sys, orbext_ITRF)
 Else If (FRAME_EXT == 'ITRF') Then
 ! ITRF
-Call sp3 (fname_orb, PRN, orbext_ITRF)
+Call sp3 (fname_orb, PRN, orbext_ITRF, clock_matrix)
 ! Orbit transformation ITRF to ICRF
 time_sys = 'GPS'
 Call orbT2C (orbext_ITRF, time_sys, orbext_ICRF)
