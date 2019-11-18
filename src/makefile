@@ -12,7 +12,7 @@ FCFLAGS = -O3 -frecursive $(OPENBLAS)
 # Linker flags
 FLFLAGS = -L/usr/lib64
 
-SRCS = mdl_precision.f90 mdl_num.f90 mdl_config.f03 mdl_param.f03 mdl_eop.f90 mdl_planets.f90 mdl_tides.f90 mdl_arr.f90 m_matrixreverse.f03 m_matrixmerge.f03 \
+SRCS_POD = mdl_precision.f90 mdl_num.f90 mdl_config.f03 mdl_param.f03 mdl_eop.f90 mdl_planets.f90 mdl_tides.f90 mdl_arr.f90 m_matrixreverse.f03 m_matrixmerge.f03 \
 m_integrEQM.f03 m_matrixRxR.f03 m_legendre.f03 m_legendre1.f03 m_force_tides.f03 m_tides_ocean.f03 m_legendre2.f03 \
 m_pd_geopotential.f03 m_force_gfm.f03 pd_forceZ.f03 m_get_lambda.f m_shadow.f90 m_pd_empirical.f03 m_pd_ECOM.f90 \
 m_read_svsinex.f03 m_read_satsnx.f03 \
@@ -43,7 +43,9 @@ ecom_init.f03 prm_srp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean
 f90getopt.F90 read_cmdline.f03 \
 main_pod.f03
 
-CRS2TRSSRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
+OBJS_POD := $(addsuffix .o,$(basename $(SRCS_POD)))
+
+SRCS_CRS2TRS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
 m_matrixinv.f03 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
 jd2cal.for cal2jd.for taiutc.for \
@@ -62,8 +64,10 @@ crs_trs.f90 m_eop_data.f03 m_eop_cor.f03 m_eop_igu.f03 eop_rd.f90 eop_c04.f90 eo
 era_matrix.f90 \
 main_crs2trs.f03
 
-BRDC2ECEF = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
-mdl_brdconfig.f03 brdc_cmdline.f03 f90getopt.F90 m_meanstd.f90 \
+OBJS_CRS2TRS := $(addsuffix .o,$(basename $(SRCS_CRS2TRS)))
+
+SRCS_BRDC2ECEF = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
+brdc_cmdline.f03 mdl_brdconfig.f03 f90getopt.F90 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
 m_matrixinv.f03 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
 m_write_brd2sp3.f03 prn2str.f03 prn_shift_brdc.f03 chkbrdc.f \
@@ -71,7 +75,6 @@ readbrdcheader.f03 readbrdcmessg.f90 reformbrdc.f brdc2ecef.f \
 m_read_leapsec.f03 taiutc.for time_UTC.f90 time_GPSweek.f90 jd2cal.for cal2jd.for time_GPSweek2.f90 \
 brdc_qc_gps.f90 brdc_qc_gal.f90 \
 m_antoffset.f90 glnorbint.f glnacc.f \
-\
 EOP.f90 \
 fad03.for  faf03.for   fal03.for   fama03.for  fane03.for  fapa03.for  faur03.for \
 fae03.for  faju03.for  falp03.for  fame03.for  faom03.for  fasa03.for  fave03.for \
@@ -86,35 +89,64 @@ rxr.for tr.for cr.for cp.for \
 time_TT.f90 time_GPS.f90 time_TAI.f90 \
 crs_trs.f90 m_eop_data.f03 m_eop_cor.f03 m_eop_igu.f03 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 interp_lin.f90 \
 era_matrix.f90 \
-\
 CATfile.f90 asc2eph.f90 mdl_planets.f90 STATE.f90 PLEPH.f CONST.f SPLIT.f INTERP.f FSIZER3.f \
-\
 main_brdcorbit.f90
 
+OBJS_BRDC2ECEF := $(addsuffix .o,$(basename $(SRCS_BRDC2ECEF)))
 
-PROGRAM = pod
+pod: $(OBJS_POD)
+	$(FC) $(FCFLAGS) -o $(BIN)/$@ $^
 
-all: $(BIN) $(PROGRAM) crs2trs brd2ecef
+crs2trs: $(OBJS_CRS2TRS)
+	$(FC) $(FCFLAGS) -o $(BIN)/$@ $^
+
+brd2ecef: $(OBJS_BRDC2ECEF)
+	$(FC) $(FCFLAGS) -o $(BIN)/$@ $^
+
+all: $(BIN) pod crs2trs brd2ecef
 
 directories: $(BIN)
 
 $(BIN): 
 	mkdir -p $(BIN)
 
-$(PROGRAM): $(SRCS)  
-	$(FC) $(FCFLAGS) -o $(BIN)/$@ $^
-
 %.o: %.F
-	$(FC) $(FLFLAGS) -o $@ $<
+	$(FC) $(FLFLAGS) -c $<
 
-%.mod: %.h
-	$(FC) $(FLFLAGS) -o $@ $<
+%.o: %.f
+	$(FC) $(FLFLAGS) -c $<
 
-crs2trs: $(CRS2TRSSRCS) $(BIN)
-	$(FC) $(FCFLAGS) $(FLFLAGS) $(CRS2TRSSRCS) -o $(BIN)/crs2trs
-brd2ecef: $(BRDC2ECEF) $(BIN)
-	$(FC) $(FCFLAGS) $(FLFLAGS) $(BRDC2ECEF) -o $(BIN)/brd2ecef
+%.o: %.for
+	$(FC) $(FLFLAGS) -c $<
+
+%.o: %.f90
+	$(FC) $(FLFLAGS) -c $<
+
+%.o: %.F90
+	$(FC) $(FLFLAGS) -c $<
+
+%.o: %.f03
+	$(FC) $(FLFLAGS) -c $<
 
 clean:
-	rm -f *.o *.mod $(BIN)/$(PROGRAM) $(BIN)/crs2trs
+	rm -f *.o *.mod $(BIN)/pod $(BIN)/crs2trs $(BIN)/brd2ecef
+
+# Dodgy minimal dependencies added by Simon (O) - should replace with full dependency list
+
+# minimal pod dependencies
+
+taiutc.o : taiutc.for mdl_param.o
+mdl_param.o : mdl_precision.o
+m_pd_ECOM.o : mdl_config.o
+EOP.o : m_eop_cor.o m_eop_igu.o
+tides_solid1.o : m_legendre.o
+tides_fes2004.o : m_writearray.o
+m_pod_gnss.o : m_read_satsnx.o
+m_read_satsnx.o : m_read_svsinex.o
+read_cmdline.o : f90getopt.o
+
+# minimal other dependencies
+
+brdc_cmdline.o : mdl_brdconfig.o
+brdc_qc_gps.o : m_meanstd.o
 
