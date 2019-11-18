@@ -20,7 +20,7 @@ MODULE m_writeorbit_multi
 Contains
 
 
-SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf, PRN_array, filename,EQMfname,VEQfname)
+SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf,orbits_ics_icrf,PRN_array,filename,EQMfname,VEQfname,POD_version)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: writeorbit_multi 
@@ -52,6 +52,7 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf,
       USE mdl_num
       USE mdl_config
       USE mdl_param
+      USE m_read_satsnx
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -63,7 +64,8 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf,
       REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:), ALLOCATABLE :: orbits_ics_icrf
       CHARACTER (LEN=3), ALLOCATABLE :: PRN_array(:)
       CHARACTER (LEN=100), INTENT(IN) :: filename
-      CHARACTER (LEN=100), INTENT(IN)  :: EQMfname, VEQfname				
+      CHARACTER (LEN=100), INTENT(IN) :: EQMfname, VEQfname
+      CHARACTER (len=9), INTENT(IN) :: POD_version	  
 ! OUT
 ! ----------------------------------------------------------------------
 
@@ -91,6 +93,20 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf, orbits_ics_icrf,
       CHARACTER (LEN=5) :: EPH_name
       INTEGER (KIND = prec_int4) :: ln
       INTEGER (KIND = prec_int2) :: Ftides
+! ----------------------------------------------------------------------
+      CHARACTER (LEN=3) :: PRN_isat
+      !INTEGER (KIND = prec_int4) :: IY, IM, ID
+      INTEGER Iyear, Imonth, Iday, J_flag
+      DOUBLE PRECISION FD  
+      REAL (KIND = prec_d) :: Sec_00, mjd, mjd_1, jd0
+      INTEGER (KIND = prec_int4) :: DOY
+      CHARACTER (LEN=10) :: srp_model
+! ----------------------------------------------------------------------
+    CHARACTER(LEN=8)  :: date_mach
+    CHARACTER(LEN=10) :: time_mach
+    CHARACTER(LEN=5)  :: zone_mach
+    INTEGER :: time_values(8)
+    REAL (KIND = prec_q) :: kepler_ic(9),r_ic(3),v_ic(3)
 ! ----------------------------------------------------------------------
 
 
@@ -135,7 +151,13 @@ fmt_wrt = '(A3,A1,F25.12,F25.9,3F25.4,3F25.9, A)'
 ! ----------------------------------------------------------------------
 ! Write file header information
 ! ----------------------------------------------------------------------
-WRITE (UNIT=UNIT_IN,FMT='(A)'           ,IOSTAT=ios_ith) '#INFO    POD Tool :: Orbits & Partial Derivatives file'
+WRITE (UNIT=UNIT_IN,FMT='(A,17x,A)',IOSTAT=ios_ith) '#INFO    POD Tool version :',TRIM(POD_version)
+WRITE (UNIT=UNIT_IN,FMT='(A,17x,A)',IOSTAT=ios_ith) '#INFO    POD Tool output  :','Orbits & Partial Derivatives file'
+CALL date_and_time(date_mach,time_mach,zone_mach,time_values)
+WRITE (UNIT=UNIT_IN,FMT='(A,2x,I4,1x,I2,1x,I2,1x, I2,1x,I2,1x,I2,1x)',IOSTAT=ios_ith) &
+       &'#INFO    File creation date (y/m/d/h/m/s):', &
+       & time_values(1),time_values(2),time_values(3), time_values(5),time_values(6),time_values(7)      
+	
 ! POD Tool mode
 IF (POD_MODE_cfg == 1) WRITE (UNIT=UNIT_IN,FMT='(A,A)',IOSTAT=ios_ith) '#INFO    POD Tool mode:                     ', & 
 					   & '1. Orbit Determination (using pseudo-observations)'
@@ -161,8 +183,8 @@ WRITE (UNIT=UNIT_IN,FMT='(a,I9)'        ,IOSTAT=ios_ith) '#INFO    Tabular inter
 WRITE (UNIT=UNIT_IN,FMT='(a,i5)'        ,IOSTAT=ios_ith) '#INFO    Number of Epochs:                  ',Nepochs
 
 ! Orbit arc length (in hours) 
-WRITE (UNIT=UNIT_IN,FMT='(A,A,I4,A,I4,A,I4)',IOSTAT=ios_ith) '#INFO    Orbit arc length (hours):          ', & 
-								  '| Orbit Determination arc: ', INT(orbit_determination_arc_cfg), &
+WRITE (UNIT=UNIT_IN,FMT='(A,A,I3,A,I3,A,I3)',IOSTAT=ios_ith) '#INFO    Orbit arc length (hours):         ',& 
+								  'Orbit Determination arc: ', INT(orbit_determination_arc_cfg), &
 								  ' | Orbit Prediction arc: ', INT(orbit_prediction_arc_cfg), &
 								  ' | Backwards orbit integration arc: ', INT(orbit_backwards_arc_cfg)
 
@@ -239,17 +261,46 @@ WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of 
 WRITE (UNIT=UNIT_IN,FMT='(a,a4)'           ,IOSTAT=ios_ith) '#INFO    Partials Reference System:         ',VEQ_REFSYS_cfg
 WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO    Satellite ICS:                     '
 DO i_sat = 1 , Nsat
-   WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,i3,a)' ,IOSTAT=ios_ith) '#IC_INFO ',PRN_array(i_sat),' [SVN] [BLK_TYP] [ANT_TH] &
-                                           &[ECOM1] ', NPARAM_glb+6, '[IC PARAM LIST - X Y Z XD YD ZD DRAD .....]'
-                                           !&[ECOM1] ',(Nparam-8)/6, '[IC PARAM LIST - X Y Z XD YD ZD DRAD .....]'
-   !WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,1x,f14.4,f14.6,1x,15(d17.10,1x))',IOSTAT=ios_ith) '#IC_XYZ  ',PRN_array(i_sat),&
-   !                                        &' [SVN] [BLK_TYP] ICRF ',orbits_ics_icrf(:,i_sat)   
-   !WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,1x,f14.4,f14.6,1x,15(f17.12,1x))',IOSTAT=ios_ith) '#IC_XYZ  ',PRN_array(i_sat),&
-   !                                        &' [SVN] [BLK_TYP] ICRF ',orbits_ics_icrf(:,i_sat)   										   
-   WRITE (UNIT=UNIT_IN,FMT='(a,a3,a,1x)',ADVANCE="no",IOSTAT=ios_ith) '#IC_XYZ  ',PRN_array(i_sat),' [SVN] [BLK_TYP] ICRF '
-   WRITE (UNIT=UNIT_IN,FMT='(I9,F25.10)',ADVANCE="no",IOSTAT=ios_ith) INT(orbits_ics_icrf(1,i_sat)), orbits_ics_icrf(2,i_sat)
+   ! Read SINEX file for SVN number, Mass, ..  
+   !mjd0   = INT(orbits_ics_icrf(1,i_sat))
+   Sec_00 = orbits_ics_icrf(2,i_sat)
+   mjd = orbits_ics_icrf(1,i_sat)
+   jd0 = 2400000.5D0
+   CALL iau_JD2CAL ( jd0, mjd, Iyear, Imonth, Iday, FD, J_flag )
+   CALL iau_CAL2JD ( Iyear, 1, 1, jd0, mjd_1, J_flag )   
+   DOY = INT(mjd) - (mjd_1-1) 
+   PRN_isat = PRN_array(i_sat)
+   CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat) 
+   ! SRP model
+   IF (SRP_MOD_glb == 1) THEN
+      srp_model = 'Cannonball' 
+   ELSE IF (SRP_MOD_glb == 2) THEN
+      srp_model = 'Box-wing'   
+   ELSE IF (SRP_MOD_glb == 3) THEN
+	IF (ECOM_param_glb == 1) THEN
+      srp_model = 'ECOM1'   
+	ELSE IF (ECOM_param_glb == 2) THEN
+      srp_model = 'ECOM2'   
+	END IF
+   END IF
+! IC INFO   
+   WRITE (UNIT=UNIT_IN,FMT='(a,a,1x,a3,1x,a,1x,i3,1x,a,1x,a,1x,a,1x,F10.5,1x,a,1x,a,1x,a,1x,i3,1x,a)' ,IOSTAT=ios_ith) & 
+          &'#IC_INFO ','PRN:',PRN_array(i_sat),'SVN:',SVNID,'BLK_TYP:',TRIM(BLKTYP),' MASS:',MASS, &
+          &'SRP:', TRIM(srp_model), 'Nparam:', NPARAM_glb+6, '[IC PARAM LIST - X Y Z XD YD ZD DRAD .....]'
+! IC 
+   WRITE (UNIT=UNIT_IN,FMT='(a,a3,1x,I3,1x,a,1x,a,2x)',ADVANCE="no",IOSTAT=ios_ith) &
+          &'#IC_XYZ  ',PRN_array(i_sat),SVNID,TRIM(BLKTYP),'ICRF'
+   WRITE (UNIT=UNIT_IN,FMT='(I5,F19.10)',ADVANCE="no",IOSTAT=ios_ith) INT(orbits_ics_icrf(1,i_sat)), orbits_ics_icrf(2,i_sat)
    WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) orbits_ics_icrf(3:Norbits_ics_icrf,i_sat)
 ! orbitsmatrix_crf(1,3:8,i_sat), ' DR YR BR DC DS YC YS BC BS''(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))'
+! IC Kepler
+   r_ic = orbits_ics_icrf(3:5,i_sat)
+   v_ic = orbits_ics_icrf(6:8,i_sat)
+   CALL kepler_z2k(r_ic, v_ic, GM_global, kepler_ic)
+   WRITE (UNIT=UNIT_IN,FMT='(a,a3,1x, a,2x)',ADVANCE="no",IOSTAT=ios_ith) &
+          &'#IC_Kepler ',PRN_array(i_sat),'Kepler elements &
+		  &[Semi-major axis(m) Eccentricity Inclination(deg) Omega_Asc.node(deg) omega_perigee(deg) True-anomaly(deg)]'	  
+   WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) kepler_ic(1:6)    
 END DO 
 IF (partials_velocity_cfg > 0) THEN
 WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
@@ -281,9 +332,9 @@ DO i_epoch = 1 , Nepochs
 !WRITE (UNIT=UNIT_IN,FMT=fmt_wrt,IOSTAT=ios_ith) PRN_array(i_sat),' ', orbitsmatrix_crf(i_epoch,:,i_sat)
 !WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) PRN_array(i_sat),' ', orbitsmatrix_crf(i_epoch,1:8,i_sat), &
 !                                            orbitsmatrix_trf(i_epoch,3:8,i_sat),orbitsmatrix_crf(i_epoch,9:NParam,i_sat)
-WRITE (UNIT=UNIT_IN,FMT='(A3,A1)',ADVANCE="no",IOSTAT=ios_ith) PRN_array(i_sat),' '
-WRITE (UNIT=UNIT_IN,FMT='(I9)',ADVANCE="no",IOSTAT=ios_ith)  INT(orbitsmatrix_crf(i_epoch,1,i_sat))
-WRITE (UNIT=UNIT_IN,FMT='(F25.10)',ADVANCE="no",IOSTAT=ios_ith) orbitsmatrix_crf(i_epoch,2,i_sat)
+WRITE (UNIT=UNIT_IN,FMT='(A3,2x)',ADVANCE="no",IOSTAT=ios_ith) PRN_array(i_sat)
+WRITE (UNIT=UNIT_IN,FMT='(I5)',ADVANCE="no",IOSTAT=ios_ith)  INT(orbitsmatrix_crf(i_epoch,1,i_sat))
+WRITE (UNIT=UNIT_IN,FMT='(F19.10)',ADVANCE="no",IOSTAT=ios_ith) orbitsmatrix_crf(i_epoch,2,i_sat)
 WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) orbitsmatrix_crf(i_epoch,3:8,i_sat), orbitsmatrix_trf(i_epoch,3:8,i_sat), & 
 											orbitsmatrix_crf(i_epoch,9:NParam,i_sat)
 											
