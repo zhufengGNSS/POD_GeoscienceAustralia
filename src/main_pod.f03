@@ -590,6 +590,7 @@ CLKfname = ''
 END IF 
 CALL clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
 ! ---------------------------------------------------------------------- 
+!print *,"CLKformat, CLKfname ",CLKformat,CLKfname
 
 ! ----------------------------------------------------------------------
 ! Output filenames prefix
