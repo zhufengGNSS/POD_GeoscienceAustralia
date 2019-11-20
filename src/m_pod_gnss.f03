@@ -373,7 +373,7 @@ N2_veqPmatrix = sz2
 N2sum = 2 + (N2_orb-2) + (N2_veqSmatrix-2) + (N2_veqPmatrix-2)
 !N2ics = 2 + (N2_veqSmatrix-2)/6 + (N2_veqPmatrix-2)/6
 N2ics = 2 + 6 + NPARAM_glb
-print*,'N2ics: ',N2ics
+!print*,'N2ics: ',N2ics
 
 ! ----------------------------------------------------------------------
 ! Orbits matrix in ICRF

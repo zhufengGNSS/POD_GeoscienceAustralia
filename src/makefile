@@ -35,9 +35,9 @@ force_srp.f90 prn_shift.f03 surfprop.f90 cross_product.f90 R3.for R1.for force_e
 SRPFBOXW.f ERPFBOXW.f SURFBOXW.f PROPBOXW.f \
 empirical_init_file.f03 empirical_init.f03 empirical_cor.f03 beta_angle.f90 yaw_nom.f90 yaw_angle.f90 \
 yaw_attitude.f90 eclips.f eclips2017.f eclips201707.f beta_pred.f90 yaw_bds.f90 yaw_gal.f90 yawdyn.f90 \
-attitude.f03 force_sum.f03 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 pd_gm.f03 pd_forceZ.f03 eclipse_integstep.f03 \
-write_prmfile.f03 writeparam.f03 writeparam1.f03 time_TT_sec.f90 prm_main.f03 prm_emp.f03 empirical_cor.f03 empirical_init.f03 \
-ecom_init.f03 prm_srp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.f03 prm_orbext.f03 prm_planets.f03 scan0orb.f03 prm_pseudobs.f03 \
+attitude.f03 force_sum.f03 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 pd_gm.f03 eclipse_integstep.f03 \
+prm_main.f03 prm_emp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.f03 prm_orbext.f03 prm_planets.f03 scan0orb.f03 prm_pseudobs.f03 \
+ecom_init.f03 prm_srp.f03 \
 f90getopt.F90 read_cmdline.f03 \
 m_read_satsnx.f03 m_read_svsinex.f03 \
 main_pod.f03

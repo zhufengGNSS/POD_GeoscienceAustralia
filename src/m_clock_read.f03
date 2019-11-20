@@ -77,6 +77,7 @@ SUBROUTINE clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
 Nsat = SIZE (PRNmatrix,DIM=1)
 
 IF (CLKformat == 0) THEN
+	ALLOCATE (CLKmatrix(1,1,1), STAT = AllocateStatus)
 	CLKmatrix = 0.0D0  
 ! ----------------------------------------------------------------------
 ELSE IF (CLKformat == 1) THEN	  
