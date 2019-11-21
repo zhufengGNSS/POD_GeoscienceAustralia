@@ -77,13 +77,6 @@ SUBROUTINE orbitIC (fname, IC_matrix, PRNmatrix)
 ! ----------------------------------------------------------------------
 
 
-!	Nsat   = 32
-!	Nparam = 15
-!	ALLOCATE (PRNmatrix(Nsat), STAT = AllocateStatus)		   
-!	ALLOCATE (IC_matrix(Nsat, Nparam+2), STAT = AllocateStatus)		   
-!print *,"Temp :: Allocation"
-
-
 UNIT_IN = 9  												
 ! ----------------------------------------------------------------------
 ! Open file
@@ -103,6 +96,7 @@ UNIT_IN = 9
       DO
 	     READ (UNIT=UNIT_IN,FMT='(A)',IOSTAT=ios_line) line_ith
 	     i = i + 1
+!PRINT *, "ios_line: ", ios_line
 		 
 ! ----------------------------------------------------------------------
 ! End of file
@@ -180,6 +174,7 @@ UNIT_IN = 9
       DO
 	     READ (UNIT=UNIT_IN,FMT='(A)',IOSTAT=ios_line) line_ith
 	     i = i + 1
+!PRINT *, "ios_line: ", ios_line
 		 
 ! ----------------------------------------------------------------------
 ! End of file
@@ -215,7 +210,6 @@ END IF
 
 END IF
 ! ----------------------------------------------------------------------
-
 !print *,"line_ith ", line_ith
 
 
@@ -258,8 +252,11 @@ END DO
 
 END IF
 ! ----------------------------------------------------------------------
+word1_ln = ''
+line_ith = ''
 
 END IF
+
 ! ----------------------------------------------------------------------
 END DO
 CLOSE (UNIT=UNIT_IN)
