@@ -63,6 +63,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 !                                       9 coefficients or 3 bias terms. The adjustable function has not been ready yet)
 !           21-02-2019  Tzupang Tseng : The adjustable function of the ECOM model has been activated.
 !           06-08-2019  Tzupang Tseng : Added a function to skip bad orbits with zero value in SP3 file
+!           03-12-2019  Tzupang Tseng : Added a function of estimating parameters in simple box wing model
 !
 ! Last modified:
 ! 20 May 2019,	Dr. Thomas Papanikolaou
@@ -256,6 +257,7 @@ END IF
 IF (ECOM_param_glb /= 0) THEN
 IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
 IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
+IF (ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
 ALLOCATE (ECOM_0_coef(NPARAM_glb), STAT = AllocateStatus)
 ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
 ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
@@ -445,10 +447,19 @@ ELSE
         PD_Param_ID = PD_Param_ID
 End If
 
+
 IF (NPARAM_glb /= PD_Param_ID) THEN
 PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
 PRINT*,           'NPARAM_glb  =', NPARAM_glb
 PRINT*,           'PD_Param_ID =', PD_Param_ID
+END IF
+END IF
+
+IF (ECOM_param_glb == 3) THEN
+PD_Param_ID = NPARAM_glb
+DO PD_Param_ID = 1,9
+   ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+END DO
 END IF
 
 ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
@@ -475,11 +486,19 @@ param_id = 'ECOM2'
 write (param_value, *) ECOM_0_coef
 Call write_prmfile (fname, fname_id, param_id, param_value)
 END IF
+
+IF (ECOM_param_glb == 3) THEN
+fname = 'SBOXW_srp.in'
+param_id = 'SBOXW'
+write (param_value, *) ECOM_0_coef
+Call write_prmfile (fname, fname_id, param_id, param_value)
 END IF
-! End of ECOM-based SRP model
+
+END IF
+! End of SRP model
 ! **********************************************************************
   
-   END IF
+
 
 ! ----------------------------------------------------------------------
 

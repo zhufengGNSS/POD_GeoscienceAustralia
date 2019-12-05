@@ -46,6 +46,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, eclipsf, GM, GNSSid, srpid, r, v, r_sun, 
 !               30-08-2019 Tzupang Tseng: implement the orbit-normal attitude for the BDS SRP estimation (still need to be tested)
 !               03-09-2019 Tzupang Tseng: use a simple box-wing model as a  priori SRP value where the ECOM is 
 !                                         used to adjust the box-wing model (BOX-WING + ECOM)
+!               03-12-2019 Tzupang Tseng: add a function of estimating the  parameters in the simple box wing model
 !
 ! Copyright:  GEOSCIENCE AUSTRALIA, AUSTRALIA
 ! ----------------------------------------------------------------------
@@ -78,8 +79,10 @@ SUBROUTINE force_srp (lambda, eBX_ecl, eclipsf, GM, GNSSid, srpid, r, v, r_sun, 
 
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
       REAL (KIND = prec_q) :: surforce(4,3)
+      REAL (KIND = prec_q), DIMENSION(3) :: nz, nx, nd
       REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,en,ev,ez,ECOM_ey
       REAL (KIND = prec_q), DIMENSION(3) :: yy,et
+      REAL (KIND = prec_q), DIMENSION(3) :: FXX(3),FZZ(3),FSP(3)
       REAL (KIND = prec_q), DIMENSION(3) :: fsrp
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
       REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: srpcoef 
@@ -103,6 +106,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, eclipsf, GM, GNSSid, srpid, r, v, r_sun, 
 ! ----------------------------------------------------------------------
 ! Sun-related variables
 ! ----------------------------------------------------------------------
+       REAL (KIND = prec_q) :: S0, C
        REAL (KIND = prec_q) :: u_sun
        REAL (KIND = prec_q) :: beta,del_u
        REAL (KIND = prec_q), DIMENSION(3) :: r_sun1,r_sun2
@@ -112,14 +116,17 @@ SUBROUTINE force_srp (lambda, eBX_ecl, eclipsf, GM, GNSSid, srpid, r, v, r_sun, 
        REAL*8  YSAT(6)
 ! ---------------------------------------------------------------------- 
 ! Numerical Constants
-      Ps = 4.5567D-6 ! (Nm^-2)
+      S0 = 1367.d0
+      C  = 299792458.d0
+      Ps = S0/C !4.5567D-6 ! (Nm^-2)
       Cr = 1.5 ! SRP coefficient ranges from 1.3 to 1.5
       AU = 1.496d11 ! (m)
       Pi = 4*atan(1.0d0)
+! ---------------------------------------------------------------------
     ex_i = 0 ! change the definition of the unit vector ex 
              ! ex_i = 0 (default)
              !      = 1 (using dynamic ex vector from attitude routine)
-  att_ON = 0 ! att_ON = 1 : use the orbit-normal attitude for BDS satellite
+  att_ON = 1 ! att_ON = 1 : use the orbit-normal attitude for BDS satellite
              !              when the beta < 4 deg
              !        = 0 : use the yaw-steering attitude for BDS satellite 
              !              for all beta angles 
@@ -336,6 +343,11 @@ END IF
         eb(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         eb(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 
+        CALL productcross (ey,eb,yy)
+        ed(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ed(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ed(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+
      elseif(BLKID == 302 .or.BLKID == 303) then
         if (eclipsf == 3) then 
 !        if (abs(beta*180.0d0/Pi) < 4.d0) then
@@ -355,10 +367,10 @@ END IF
 
 ! Switch on the (ed,on) does not improve the orbit accuracy!!
 ! Only for testing purpose!      
-!        CALL productcross (ey,eb,yy)
-!        ed(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
-!        ed(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
-!        ed(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        CALL productcross (ey,eb,yy)
+        ed(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ed(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
+        ed(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 !        PRINT*,'ed_ON =',ed, sqrt(ed(1)**2+ed(2)**2+ed(3)**2)
 !        print*,'ey_ON =',ey, sqrt(ey(1)**2+ey(2)**2+ey(3)**2)
 !        print*,'eb_ON =',eb, sqrt(eb(1)**2+eb(2)**2+eb(3)**2)
@@ -367,6 +379,7 @@ END IF
      end if
      end if
 
+
 !========================================
 ! angles between ed and each surface(k)
 ! k=1: +X
@@ -374,10 +387,32 @@ END IF
 !   3: +Z
 !   4: solar panels
 !=======================================
+
      cosang(1)=ed(1)*ex(1)+ed(2)*ex(2)+ed(3)*ex(3)
      cosang(2)=ed(1)*ey(1)+ed(2)*ey(2)+ed(3)*ey(3)
      cosang(3)=ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3)
      cosang(4)=ed(1)*ed(1)+ed(2)*ed(2)+ed(3)*ed(3)
+
+nx = ex
+nz = ez
+nd = ed
+
+if(cosang(3)<0.d0) nz = ez*(-1.d0)
+
+!PRINT*,'COSANG =', cosang(1), cosang(3), cosang(4)
+!PRINT*,'MASS, AREA =', MASS, X_SIDE, Z_SIDE, A_SOLAR
+!PRINT*,'nx,nz,nd',nx,nz,nd
+
+do j = 1,3
+FXX(j) = Ps/MASS * X_SIDE * cosang(1) * nx(j)
+FZZ(j) = Ps/MASS * Z_SIDE * cosang(3) * nz(j)
+FSP(j) = Ps/MASS * A_SOLAR* nd(j)
+end do
+
+!PRINT*,'FXX =', FXX
+!PRINT*,'FZZ =', FZZ
+!PRINT*,'FSP =', FSP
+
 
 ! A scaling factor is applied to ECOM model
 !******************************************************************
@@ -385,20 +420,21 @@ END IF
 
 ! SIMPLE BOX-WING 
       if (Flag_BW_cfg == 1 .or. srpid == 1) then
-         fxo=Ps/MASS*(X_SIDE*cosang(1)*ex(1)+Z_SIDE*cosang(3)*ez(1)+1*A_SOLAR*cosang(4)*ed(1))
-         fyo=Ps/MASS*(X_SIDE*cosang(1)*ex(2)+Z_SIDE*cosang(3)*ez(2)+1*A_SOLAR*cosang(4)*ed(2))
-         fzo=Ps/MASS*(X_SIDE*cosang(1)*ex(3)+Z_SIDE*cosang(3)*ez(3)+1*A_SOLAR*cosang(4)*ed(3))
+         fxo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(1)+0.02*Z_SIDE*cosang(3)*nz(1)+1.7*A_SOLAR*cosang(4)*nd(1))
+         fyo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(2)+0.02*Z_SIDE*cosang(3)*nz(2)+1.7*A_SOLAR*cosang(4)*nd(2))
+         fzo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(3)+0.02*Z_SIDE*cosang(3)*nz(3)+1.7*A_SOLAR*cosang(4)*nd(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
-
+!print*,'alpha=',(alpha-F0/MASS)/alpha*100, F0/MASS
 ! BOX-WING model from the repro3 routine
 ! --------------------------------------
       else if (Flag_BW_cfg == 2 .or. srpid == 2) then
-         REFF = 0     
+         REFF = 0    ! 0: inertial frame,  1: satellite body-fixed frame, 
+                     ! 2: sun-fixed frame, 3: orbital frame 
          YSAT(1:3) = r
          YSAT(4:6) = v
          CALL SRPFBOXW(REFF,YSAT,R_SUN,BLKID,SVNID,ACCEL)
          alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
-      
+
       else if (Flag_BW_cfg == 0) then
          alpha = F0/MASS
       else
@@ -406,8 +442,62 @@ END IF
       end if
 
      IF (srpid == 3) THEN 
+IF (ECOM_param_glb <= 2) THEN
+! Bias partial derivatives matrix allocation
+PD_Param_ID = 0
+If (ECOM_Bias_glb(1) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
+End IF
+If (ECOM_Bias_glb(2) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
+End IF
+If (ECOM_Bias_glb(3) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+ELSE
+        PD_Param_ID = PD_Param_ID
+End IF
 
-ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
+! CPR partial derivatives matrix allocation
+
+If (ECOM_CPR_glb(1) == 1) THEN
+        PD_Param_ID = PD_Param_ID + 2
+ELSE
+        PD_Param_ID = PD_Param_ID
+End IF
+If (ECOM_CPR_glb(2) == 1) THEN
+        PD_Param_ID = PD_Param_ID + 2
+ELSE
+        PD_Param_ID = PD_Param_ID
+End IF
+If (ECOM_CPR_glb(3) == 1) THEN
+        PD_Param_ID = PD_Param_ID + 2
+ELSE
+        PD_Param_ID = PD_Param_ID
+End If
+
+
+
+IF (NPARAM_glb /= PD_Param_ID) THEN
+PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+PRINT*,           'NPARAM_glb  =', NPARAM_glb
+PRINT*,           'PD_Param_ID =', PD_Param_ID
+END IF
+
+ELSE IF (ECOM_param_glb == 3) THEN
+PD_Param_ID = NPARAM_glb
+
+END IF
+
+
+ALLOCATE (srpcoef(PD_Param_ID), STAT = AllocateStatus)
+
+!ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
+
+srpcoef = 0.d0
 
 ! ECOM1 model
 ! ***********************************************************************
@@ -416,6 +506,7 @@ ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)*alpha
         END DO
@@ -507,6 +598,7 @@ End If
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+        IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)*alpha
         END DO
@@ -579,6 +671,62 @@ If (ECOM_CPR_glb(3) == 1) THEN
 Else
         PD_Param_ID = PD_Param_ID
 End If
+
+! SIMPLE BOX WING
+! *******************************************************************
+      ELSE IF (ECOM_param_glb == 3 ) THEN
+      PD_Param_ID = 9
+      DO PD_Param_ID = 1, 9
+         IF (PD_Param_ID == 1) THEN
+         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+         IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
+         DO i=1,3
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FXX(i)*ed(i)
+         END DO
+         ELSE IF (PD_Param_ID == 2) THEN
+         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+         IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
+         DO i=1,3
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FZZ(i)*ed(i)
+         END DO
+         ELSE IF (PD_Param_ID == 3) THEN
+         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+         IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
+         DO i=1,3
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FSP(i)
+         END DO
+         ELSE IF (PD_Param_ID == 4) THEN
+         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+         DO i=1,3
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)
+         END DO
+         ELSE IF (PD_Param_ID == 5) THEN
+         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+         DO i=1,3
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FXX(i)*eb(i)
+         END DO
+         ELSE IF (PD_Param_ID == 6) THEN
+         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+         DO i=1,3
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FZZ(i)*eb(i)
+         END DO
+         ELSE IF (PD_Param_ID == 7) THEN
+         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+         DO i=1,3
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
+         END DO
+         ELSE IF (PD_Param_ID == 8) THEN
+         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+         DO i=1,3
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)
+         END DO
+         ELSE IF (PD_Param_ID == 9) THEN
+         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
+         DO i=1,3
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)
+         END DO
+         END IF
+      END DO
       END IF 
 
 
@@ -587,50 +735,6 @@ End If
      fz=-fsrp(3)
 
 
-
-! use the shadow coefficient for scaling the SRP effect
-!-------------------------------------------------------
-IF (lambda .lt. 1)THEN
-!print*,'beta=, lambda=, del_u=', beta*180/Pi, lambda, del_u*180/Pi
-   DO i=1,3
-   fsrp(i)=0.0d0
-   END DO
-   srpcoef(1) = lambda*srpcoef(1)
-   IF (ECOM_param_glb == 1 ) then
-      DO i=1,3
-      fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)*alpha              &
-                        +   srpcoef(2)*sclfa*ey(i)*alpha              &
-                        +   srpcoef(3)*sclfa*eb(i)*alpha              &
-                        +   srpcoef(4)*sclfa*DCOS(del_u)*ed(i)*alpha  &
-                        +   srpcoef(5)*sclfa*DSIN(del_u)*ed(i)*alpha  &
-                        +   srpcoef(6)*sclfa*DCOS(del_u)*ey(i)*alpha  &
-                        +   srpcoef(7)*sclfa*DSIN(del_u)*ey(i)*alpha  &
-                        +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)*alpha  &
-                        +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)*alpha  
-      END DO
-   ELSE 
-      DO i=1,3
-      fsrp(i) = fsrp(i) +   srpcoef(1)*sclfa*ed(i)*alpha              &
-                        +   srpcoef(2)*sclfa*ey(i)*alpha              &
-                        +   srpcoef(3)*sclfa*eb(i)*alpha              &
-                        +   srpcoef(4)*sclfa*DCOS(2*del_u)*ed(i)*alpha  &
-                        +   srpcoef(5)*sclfa*DSIN(2*del_u)*ed(i)*alpha  &
-                        +   srpcoef(6)*sclfa*DCOS(4*del_u)*ed(i)*alpha  &
-                        +   srpcoef(7)*sclfa*DSIN(4*del_u)*ed(i)*alpha  &
-                        +   srpcoef(8)*sclfa*DCOS(del_u)*eb(i)*alpha  &
-                        +   srpcoef(9)*sclfa*DSIN(del_u)*eb(i)*alpha
-      END DO
-   END IF
-      fx=-fsrp(1)
-      fy=-fsrp(2)
-      fz=-fsrp(3)
-END IF
-!----------------------------------------------------------------------------------------------
-
-
      END IF 
-
-! end of ECOM-based model
-! ---------------------------------------------------------
 
 END

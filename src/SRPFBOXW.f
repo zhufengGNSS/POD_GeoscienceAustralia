@@ -379,7 +379,7 @@ C     MASS OF SATELLITES
 
       else
          print *,'No MASS for BLKNUM ',BLKNUM
-         stop 'NO MASS: ERPFBOXW'
+         stop 'NO MASS: SRPFBOXW'
       ENDIF
 
 C     CONVERSION TO ACCELERATION
