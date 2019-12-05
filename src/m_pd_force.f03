@@ -639,7 +639,7 @@ PD_param = PD_EMP_param
 End IF
 
 
-IF (ECOM_param_glb == 1 .or.  ECOM_param_glb == 2) Then
+IF (ECOM_param_glb <= 3) Then
 PD_param = PD_ECOM_param
 END IF
 !print*,'ECOM_param_glb=',ECOM_param_glb

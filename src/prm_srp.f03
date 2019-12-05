@@ -17,6 +17,8 @@ SUBROUTINE prm_srp (PRMfname)
 !                                              for ACS POD
 !               21-02-2019 Tzupang Tseng : added a function for switching on and
 !                                          off some coefficients in ECOM models   
+!               03-12-2019 Tzupang Tseng : added a function of estimating
+!                                          parameters in simple box wing model
 !
 ! ----------------------------------------------------------------------
 	  
@@ -223,6 +225,9 @@ ELSE IF (ECOM_param_glb == 2) THEN
 
 filename = 'ECOM2_srp.in'
 
+ELSE IF (ECOM_param_glb == 3) THEN
+
+filename = 'SBOXW_srp.in'
 END IF
 ! ----------------------------------------------------------------------
 ! Open .in file
@@ -286,8 +291,11 @@ ELSE
         PD_Param_ID = PD_Param_ID
 End If
 
+IF (ECOM_param_glb == 3) PD_Param_ID = 9
+
 ALLOCATE (ECOM_accel_glb(PD_Param_ID), STAT = AllocateStatus)
 ALLOCATE (SRP_PARA(PD_Param_ID), STAT = AllocateStatus)
+SRP_PARA = 0.d0
 
 NPARAM_glb = PD_Param_ID
 
@@ -435,7 +443,12 @@ Else
         PD_Param_ID = PD_Param_ID
 End If
 
-
+ELSE IF (word1_ln == "SBOXW") THEN
+READ (line_ith, FMT = * , IOSTAT=ios_key) word_i, SRP_PARA(:)
+!print*,"SRP_PARA=",SRP_PARA(:)
+        DO PD_Param_ID =1, 9 
+        ECOM_accel_glb(PD_Param_ID)= SRP_PARA(PD_Param_ID)
+        END DO
 END IF
 
 END DO
