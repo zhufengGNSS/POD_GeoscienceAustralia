@@ -25,6 +25,8 @@ MODULE mdl_param
 ! ---------------------------------------------------------------------------
 ! Time System of orbit ouput files defined by the input configuration file
       CHARACTER (LEN=3) :: TIME_SCALE
+      INTEGER :: DOY, YR ! Day of year
+
 ! ---------------------------------------------------------------------------
 
 ! ---------------------------------------------------------------------------

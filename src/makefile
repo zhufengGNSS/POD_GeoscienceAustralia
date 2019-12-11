@@ -19,7 +19,7 @@ m_orbC2T.f03 m_orbT2C.f03 m_statist.f03 m_statdelta.f03 m_orbinfo.f90 m_statorbi
 m_orbext.f03 m_orbext2.f03 m_gfc.f03 m_gfc3.f03 m_obsorbT2C.f03 m_write_prmfile_init.f03 m_writedata.f03 m_writeorbit.f03 m_writeorbit_multi.f03 \
 m_clock_read.f03 m_write_orb2sp3.f03 m_rso.f03 m_sp3.f03 m_sp3_PRN.f03 m_lagrange.f03 m_interporb.f03 m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03 m_keplerorb.f03 \
 m_orbdet.f03 m_orbitmain.f03 m_orbitIC.f03 m_pod_gnss.f03 m_read_leapsec.f03\
-write_prmfile_init0.f03 writeparam.f03 writeparam1.f03 write_prmfile.f03 write_prmfile2.f03 readparam.f03  \
+doy2str.f03 write_prmfile_init0.f03 writeparam.f03 writeparam1.f03 write_prmfile.f03 write_prmfile2.f03 readparam.f03  \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 matrix_inv3.f90 matrix_Rr.f90 matrix_RxR.f90 \
 jd2cal.for cal2jd.for taiutc.for fad03.for faf03.for fal03.for fama03.for fane03.for  fapa03.for faur03.for \
 fae03.for  faju03.for falp03.for fame03.for faom03.for fasa03.for fave03.for xy06.for s06.for c2ixys.for \

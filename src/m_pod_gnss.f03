@@ -162,7 +162,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: EQMfname_PRN, VEQfname_PRN				
 
-      INTEGER :: DOY
+!      INTEGER :: DOY
       INTEGER (KIND = prec_int4) :: J
       DOUBLE PRECISION MJDD0, MJDD, MJDref  
 ! ----------------------------------------------------------------------
@@ -263,8 +263,8 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 CALL iau_CAL2JD ( Iyear, Imonth, Iday, MJDD0, MJDD, J )
 CALL iau_CAL2JD ( Iyear, 1, 1, MJDD0, MJDref, J )
 DOY = IDNINT(MJDD-MJDref) + 1
-
-PRINT*,'Day Of Year =', DOY, Iyear
+YR = Iyear
+!PRINT*,'Day Of Year =', Iyear,DOY
 
 
 ! ----------------------------------------------------------------------
