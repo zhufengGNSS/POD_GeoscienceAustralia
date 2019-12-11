@@ -1,7 +1,6 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
 *.eph
 *.EPH
-*.sp3
 *.mod
 *.out
 *.dat
@@ -11,8 +10,16 @@
 *.rnx
 data/
 bin/
-test/
 pod
 crs2trs
 tp_test/
 fort.*
+gag*.sp3
+test/ECOM1_srp.in
+test/EQM0.in
+test/EQM01.in
+test/VEQ0.in
+test/VEQ01.in
+test/emp_bias.in
+test/emp_cpr.in
+test/ascp1950.430
