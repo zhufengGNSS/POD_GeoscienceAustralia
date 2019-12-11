@@ -117,6 +117,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 ! ----------------------------------------------------------------------  
       REAL (KIND = prec_d) :: CPU_t0, CPU_t1
       CHARACTER (LEN=100) :: filename
+      CHARACTER (LEN=10) :: DOYSTR
       INTEGER (KIND = prec_int2) :: VEQmode 
       INTEGER (KIND = prec_int2) :: ESTmode 
       INTEGER (KIND = prec_int2) :: Niter,srp_i 
@@ -472,7 +473,9 @@ ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
 ! SRP parameters
 IF (ECOM_param_glb /= 0) THEN
 ECOM_0_coef = ECOM_accel_aposteriori
-fname_id = PRN
+!fname_id = PRN
+CALL doy2str(DOYSTR)
+fname_id = DOYSTR
 IF (ECOM_param_glb == 1) THEN
 fname = 'ECOM1_srp.in'
 param_id = 'ECOM1'
