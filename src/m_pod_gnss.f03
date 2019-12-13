@@ -162,7 +162,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: EQMfname_PRN, VEQfname_PRN				
 
-      INTEGER :: DOY
+
       INTEGER (KIND = prec_int4) :: J
       DOUBLE PRECISION MJDD0, MJDD, MJDref  
 ! ----------------------------------------------------------------------
