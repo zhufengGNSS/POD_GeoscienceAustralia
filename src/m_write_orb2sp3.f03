@@ -19,7 +19,7 @@ MODULE m_write_orb2sp3
 Contains
 
 
-SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, sp3_fname, sat_vel)
+SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, sp3_fname, sat_vel, CLKmatrix)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: writesp3_hd 
@@ -47,7 +47,7 @@ SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, sp3_fname, sat_vel)
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:,:), ALLOCATABLE :: ORBmatrix 
+      REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:,:), ALLOCATABLE :: ORBmatrix, CLKmatrix 
 	  CHARACTER (LEN=3), ALLOCATABLE, INTENT(IN) :: PRNmatrix(:)
       CHARACTER (LEN=100), INTENT(IN) :: sp3_fname
       INTEGER (KIND = prec_int2), INTENT(IN) :: sat_vel	  
@@ -85,7 +85,9 @@ SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, sp3_fname, sat_vel)
       REAL (KIND = prec_q) :: sec_ti 	  
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int8) :: Nepochs, Nelem, Nsat
+      INTEGER (KIND = prec_int8) :: Nclk_epoch, Nclk_elem, Nclk_sat, iCLK_epoch
       INTEGER (KIND = prec_int8) :: i_sat
+      INTEGER (KIND = prec_int2) :: clk_write
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=1) :: orbvector
       CHARACTER (LEN=5) :: REFRAME
@@ -166,6 +168,21 @@ Nepochs = sz1
 Nelem   = sz2
 Nsat    = sz3
 ! ----------------------------------------------------------------------
+! Clock array dimensions
+sz1 = SIZE (CLKmatrix,DIM=1)
+sz2 = SIZE (CLKmatrix,DIM=2)
+sz3 = SIZE (CLKmatrix,DIM=3)
+Nclk_epoch = sz1
+Nclk_elem  = sz2
+Nclk_sat   = sz3
+IF (Nclk_epoch > 1) THEN
+	clk_write = 1
+ELSE 
+	clk_write = 0
+END IF
+! ----------------------------------------------------------------------
+!print *,"CLKmatrix dims", Nclk_epoch, Nclk_elem, Nclk_sat
+!print *,"clk_write",clk_write
 
 ! ----------------------------------------------------------------------
 ! Writing satellite velocity vector (optional)
@@ -394,8 +411,7 @@ r_ti(3) = ORBmatrix(i_write,5, i_sat) !/ 1.D03
 ! Unit conversion: m to Km                 
 r_ti = r_ti * 1.0D-3
 
-cl_ti = 999999.999999D0
-
+! Velocity vector
 if (vel>0) then
 ! Velocity vector in dm/sec
 v_ti(1) = ORBmatrix(i_write,6, i_sat) 
@@ -405,9 +421,30 @@ v_ti(3) = ORBmatrix(i_write,8, i_sat)
 v_ti = v_ti * 1.0D1
 end if
 
-
+! Clock
+cl_ti  = 999999.999999D0
 Dcl_ti = 999999.999999D0
+IF (clk_write == 1) THEN 
+DO iCLK_epoch = 1 , Nclk_epoch
+  IF ( (ABS(CLKmatrix(iCLK_epoch,1, i_sat)) - ABS(MJD_ti) < 1.0D-3) .AND. &
+     & (CLKmatrix(iCLK_epoch,2, i_sat) - Sec_00 < 1.0D-12) )THEN
+	! Clock record
+	cl_ti = CLKmatrix(iCLK_epoch,3, i_sat)
+	! Clock correlation (sdev)
+	IF (Nclk_elem>3) Dcl_ti = CLKmatrix(iCLK_epoch,4, i_sat)  
+	!EXIT  
+  END IF
+END DO
+END IF
 
+!! Clock correlation (sdev)
+!if (vel>0) then
+!IF (clk_write == 0) THEN 
+!Dcl_ti = 999999.999999D0
+!ELSE 
+!Dcl_ti = CLKmatrix(i_write,4, i_sat) 
+!END IF
+!end if 
 
 ! ----------------------------------------------------------------------
 IF (i_sat == 1) THEN

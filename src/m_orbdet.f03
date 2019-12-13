@@ -333,17 +333,22 @@ filename = "Amatrix.out"
 !Call writearray (Amatrix, filename)
 filename = "Wmatrix.out"
 !Call writearray (Wmatrix, filename)
+filename = "pseudobs_ITRF.out"
+Call writearray (pseudobs_ITRF, filename)
+filename = "pseudobs_ICRF.out"
+Call writearray (pseudobs_ICRF, filename)
 ! ----------------------------------------------------------------------
-
+  
 ! ----------------------------------------------------------------------
 ! Temp: to be replaced by writing prm_in files (EQM + VEQ)								! ----------------------------------------------------------------------
-! ----------------------------------------------------------------------
+! ----------------------------------------------------------------------   
 !print *, "Xmatrix Z", Xmatrix(1:6,1)
 !print *, "Xmatrix P", Xmatrix(7:NPARAM_glb+6,1)
 !print *,"SVEC_Zo", SVEC_Zo
 Xo_estim(1:6) = Xmatrix(1:6,1)
 SVEC_Zo_ESTIM = SVEC_Zo + Xo_estim
 !print *, "SVEC_Zo_ESTIM Zo+Xmatrix", SVEC_Zo_ESTIM
+
 
 ! ----------------------------------------------------------------------
 ! Empirical model
@@ -570,7 +575,7 @@ orbarc_sum = orbarc + ORBPRED_ARC_glb
 
 param_id = 'Orbit_arc_length'
 write (param_value, *) orbarc_sum
-Call write_prmfile (EQMfname_pred, fname_id, param_id, param_value)
+Call write_prmfile (EQMfname_pred, fname_id, param_id, param_value) 
 !Call write_prmfile (VEQfname_pred, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
@@ -590,7 +595,7 @@ sz1 = size(dorb_icrf, DIM = 1)
 sz2 = size(dorb_icrf, DIM = 2)
 ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
 Vres = dorb_icrf(1:sz1,1:5)
-Vrms  = RMSdsr(1:3)
+Vrms  = RMSdsr(1:3) 
 !print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
 
 ! Orbit residuals in orbital frame; statistics ! ICRF

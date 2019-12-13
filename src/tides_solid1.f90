@@ -112,6 +112,12 @@ knm_plus(2+1,2+1) = -0.00057D0
       DEALLOCATE (Pnm_norm, STAT = DeAllocateStatus)	  
 ! ----------------------------------------------------------------------
 
+dCnm      = 0.0D0
+dCnm      = 0.0D0
+dCnm_moon = 0.0D0
+dSnm_moon = 0.0D0
+dCnm_sun  = 0.0D0
+dSnm_sun  = 0.0D0
 
 ! ----------------------------------------------------------------------
 ! Computation of dCnm and dSnm terms for degree and order 3

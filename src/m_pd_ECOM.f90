@@ -404,7 +404,6 @@ end do
 ! A scaling factor is applied to ECOM model
 !******************************************************************
       sclfa=(AU/Ds)**2
-
 ! SIMPLE BOX-WING model as the a priori SRP value
       if (Flag_BW_cfg == 1) then
          fxo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(1)+0.02*Z_SIDE*cosang(3)*nz(1)+1.7*A_SOLAR*cosang(4)*nd(1))

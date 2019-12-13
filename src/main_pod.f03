@@ -37,6 +37,7 @@
       USE m_writearray2
       USE m_writeorbit
 	  USE m_write_orb2sp3
+	  USE m_clock_read
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -108,7 +109,15 @@
       CHARACTER (len=300) :: str
       INTEGER (KIND = prec_int2) :: j
       CHARACTER (len=9) :: POD_version
-      	      
+      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: CLKmatrix 
+      CHARACTER (LEN=300) :: CLKfname
+      INTEGER (KIND = prec_int2) :: CLKformat
+! ----------------------------------------------------------------------
+double precision , dimension(3,3) :: xmat
+double precision , dimension(4) :: quater, quater_0
+
+
+
 ! CPU Times
 CALL cpu_time (CPU_t0)
 
@@ -564,16 +573,27 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 ! End :: Rewrite configuration files
 ! ----------------------------------------------------------------------
-! ----------------------------------------------------------------------
 
-! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 ! POD of the GNSS satellite constellations
 ! ----------------------------------------------------------------------
 CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, &
                orbits_ics_icrf,orbit_resR, orbit_resT, orbit_resN, orbdiff2)
 ! ----------------------------------------------------------------------
+
 ! ----------------------------------------------------------------------
+! Clocks read from input file for passing to the write out 
+! ----------------------------------------------------------------------
+IF (IC_MODE_cfg == 1) THEN 
+CLKformat = 1
+CLKfname  = pseudobs_orbit_filename_cfg
+ELSE
+CLKformat = 0
+CLKfname = ''
+END IF 
+CALL clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
+! ---------------------------------------------------------------------- 
+!print *,"CLKformat, CLKfname ",CLKformat,CLKfname
 
 ! ----------------------------------------------------------------------
 ! Output filenames prefix
@@ -585,7 +605,6 @@ CALL time_GPSweek  (mjd, GPS_week, GPS_wsec, GPSweek_mod1024)
 !CALL time_GPSweek2 (mjd, GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
 GPS_day = ( GPS_wsec/86400.0D0 )  
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Write satellite orbits and partial derivatives to one .orb output file (internal format)
@@ -604,9 +623,26 @@ CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_ic
 write (ORB2sp3_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.sp3'
 sat_vel = sp3_velocity_cfg
 ! ICRF
-!CALL write_orb2sp3 (orbits_partials_icrf, PRNmatrix, ORB2sp3_fname, sat_vel)
+!CALL write_orb2sp3 (orbits_partials_icrf, PRNmatrix, ORB2sp3_fname, sat_vel, CLKmatrix)
 ! ITRF
-CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sat_vel)
+CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sat_vel, CLKmatrix)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Write satellite attitude to orbex format
+! ----------------------------------------------------------------------
+! Orbex filename
+!write (ORBEX_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.att'
+!CALL write_orbex (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, ORBEX_fname)
+
+!xmat(1,1:3) = (/  0.0000000000000000D0, -0.5000000000000001D0, -0.8660254037844386D0 /)
+!xmat(2,1:3) = (/  0.9238795325112867D0, -0.3314135740355917D0,  0.1913417161825449D0 /)
+!xmat(3,1:3) = (/ -0.3826834323650897D0, -0.8001031451912655D0,  0.4619397662556435D0 /)
+!quater_0(1:4) = (/ 0.5316310262343734D0, -0.4662278970042302D0,  -0.2272920256568435D0, 0.6695807158758448D0 /)
+!CALL mat2quater(xmat,quater)
+!print *,"xmat   ", xmat
+!print *,"quaternions ", quater
+!print *,"delta-quaternions ", quater - quater_0
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
