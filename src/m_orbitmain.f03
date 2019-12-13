@@ -132,7 +132,7 @@ SUBROUTINE orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPma
 CALL orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
 ! ----------------------------------------------------------------------
 print *,"Orbit residuals: ICRF" 
-WRITE (*,FMT='(A17, A4, 3F14.4)'),"RMS-XYZ ICRF FIT", PRN, Vrms
+WRITE (*,FMT='(A17, A4, 3F14.4)')"RMS-XYZ ICRF FIT", PRN, Vrms
 !PRINT *,"Orbit Determination: Completed"
 !CALL cpu_time (CPU_t1)
 !PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
@@ -148,12 +148,12 @@ CALL orbext2(EQMfname, orb_icrf, orb_itrf, stat_XYZ_extC, stat_RTN_extC, stat_Ke
 ! ----------------------------------------------------------------------
 PRINT *,"External Orbit comparison"
 print *,"Orbit comparison: ICRF"
-WRITE (*,FMT='(A17, A4, 3F14.4)'),"RMS-RTN ICRF CMP", PRN, stat_RTN_extC(1, 1:3)
-WRITE (*,FMT='(A17, A4, 3F14.4)'),"RMS-XYZ ICRF CMP", PRN, stat_XYZ_extC(1, 1:3)
+WRITE (*,FMT='(A17, A4, 3F14.4)')"RMS-RTN ICRF CMP", PRN, stat_RTN_extC(1, 1:3)
+WRITE (*,FMT='(A17, A4, 3F14.4)')"RMS-XYZ ICRF CMP", PRN, stat_XYZ_extC(1, 1:3)
 !WRITE (*,FMT='(A9, 3F17.9)'),"RMS Vxyz", stat_XYZ_extC(1, 4:6)
 
 print *,"Orbit comparison: ITRF"
-WRITE (*,FMT='(A17, A4, 3F14.4)'),"RMS-XYZ ITRF CMP", PRN, stat_XYZ_extT(1, 1:3)
+WRITE (*,FMT='(A17, A4, 3F14.4)')"RMS-XYZ ITRF CMP", PRN, stat_XYZ_extT(1, 1:3)
 !WRITE (*,FMT='(A9, 3F17.9)'),"RMS Vxyz", stat_XYZ_extT(1,4:6)
 End If
 

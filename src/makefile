@@ -4,7 +4,7 @@ BIN = ../bin
 FC = gfortran
 
 # Compiler flags
-OPENBLAS = -L/opt/OpenBLAS/lib -lopenblas
+OPENBLAS = -L/data/OpenBLAS -lopenblas
 FCFLAGS = -O3 -frecursive $(OPENBLAS) 
 
 #-fcheck=all -std=legacy
@@ -19,7 +19,7 @@ m_read_svsinex.f03 m_read_satsnx.f03 \
 m_satinfo.f90 m_pd_force.f03 m_veq_rkn768.f03 m_veqC2T.f03 m_integrVEQ.f03 m_betainfo.f90 m_orbinteg.f03 m_matrixinv.f03 m_orb_estimator.f03 \
 m_orbC2T.f03 m_orbT2C.f03 m_statist.f03 m_statdelta.f03 m_orbinfo.f90 m_statorbit.f03 m_statorbit2.f03 m_writearray.f03 m_writearray2.f03 m_orbresize.f03 \
 m_orbext.f03 m_orbext2.f03 m_gfc.f03 m_gfc3.f03 m_obsorbT2C.f03 m_write_prmfile_init.f03 m_writedata.f03 m_writeorbit.f03 m_writeorbit_multi.f03 \
-m_clock_read.f03 m_write_orb2sp3.f03 m_rso.f03 m_sp3.f03 m_sp3_PRN.f03 m_lagrange.f03 m_interporb.f03 m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03 m_keplerorb.f03 \
+m_write_orb2sp3.f03 m_rso.f03 m_sp3.f03 m_clock_read.f03 m_sp3_PRN.f03 m_lagrange.f03 m_interporb.f03 m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03 m_keplerorb.f03 \
 m_orbdet.f03 m_orbitmain.f03 m_orbitIC.f03 m_pod_gnss.f03 m_read_leapsec.f03\
 doy2str.f03 write_prmfile_init0.f03 writeparam.f03 writeparam1.f03 write_prmfile.f03 write_prmfile2.f03 readparam.f03  \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 matrix_inv3.f90 matrix_Rr.f90 matrix_RxR.f90 \
