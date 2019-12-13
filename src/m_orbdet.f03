@@ -596,7 +596,7 @@ Vrms  = RMSdsr(1:3)
 ! Orbit residuals in orbital frame; statistics ! ICRF
 CALL statorbit (pseudobs_ICRF, orb_icrf_estim, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
 print *,"Orbit residuals: ICRF in orbital frame" 
-WRITE (*,FMT='(A17, A4, 3F14.4)'),"RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
+WRITE (*,FMT='(A17, A4, 3F14.4)')"RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
 
 ELSE 
 
@@ -619,7 +619,7 @@ Vrms  = RMSdsr(1:3)
 ! Orbit residuals in orbital frame; statistics ! ICRF
 CALL statorbit (pseudobs_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
 print *,"Orbit residuals: ICRF in orbital frame" 
-WRITE (*,FMT='(A17, A4, 3F14.4)'),"RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
+WRITE (*,FMT='(A17, A4, 3F14.4)')"RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
 ! ----------------------------------------------------------------------
 
 END IF
