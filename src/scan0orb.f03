@@ -52,7 +52,15 @@ sz4 = SIZE (pseudobs_ITRF, DIM =2)
 !print*,'sz1, sz2 =', sz1, sz2, 'sz3, sz4 =',  sz3, sz4
 
 ALLOCATE (pseudobs_ICRF2(sz1,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate pseudo_ICRF2"
+        goto 100
+end if
 ALLOCATE (pseudobs_ITRF2(sz3,sz4), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate pseudo_ITRF2"
+        goto 100
+end if
 
 pseudobs_ICRF2 = 0.d0
 pseudobs_ITRF2 = 0.d0
@@ -75,7 +83,15 @@ END IF
 END DO
 
 ALLOCATE (pseudobs_ICRF3(ic,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate pseudo_ICRF3"
+        goto 100
+end if
 ALLOCATE (pseudobs_ITRF3(it,sz3), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate pseudo_ITRF3"
+        goto 100
+end if
 
 INEW1 = 0
 DO k=1, sz1
@@ -106,7 +122,15 @@ DEALLOCATE (pseudobs_ICRF, STAT = DeAllocateStatus)
 DEALLOCATE (pseudobs_ITRF, STAT = DeAllocateStatus)
 
 ALLOCATE (pseudobs_ICRF(ic,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to reallocate pseudoobs_ICRF"
+        goto 100
+end if
 ALLOCATE (pseudobs_ITRF(it,sz3), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to reallocate pseudoobs_ITRF"
+        goto 100
+end if
 !print*,'Number of Epochs or Positions used for POD =', ic
 pseudobs_ICRF = 0.d0
 pseudobs_ITRF = 0.d0
@@ -114,4 +138,4 @@ pseudobs_ITRF = 0.d0
 pseudobs_ICRF = pseudobs_ICRF3
 pseudobs_ITRF = pseudobs_ITRF3
 
-END
+ 100 END

@@ -159,6 +159,11 @@ C Initialization of force vector
       ACCEL(3) = 0D0
 
       LFNLOC = 999
+C ----------------------------------------
+C FIXME: Default variable initialisation LONKMX, LATKMX, GRDNUM
+      LONKMX = 0
+      LATKMX = 0
+      GRDNUM = 1.d0
 
 C ----------------------------------------
 C LOAD SATELLITE PROPERTIES AND CERES DATA
@@ -532,6 +537,10 @@ C                 Non-conservative force
 C     ANTENNA POWER OF GPS SATELLITES (IN WATTS)
 C     IGS MODEL (JIM RAY, 2011)
 
+C     NO ANTENNA POWER INFORMATION FOR GLONASS SATELLITES
+C     FIXME: initialisation of ANTPOW
+      ANTPOW = 0.d0
+
 C     GPS BLOCK IIA (ASSUMED THE SAME FOR BLOCK I AND II) 
       IF(BLKNUM.LE.3)THEN
          ANTPOW = 76D0
@@ -553,7 +562,6 @@ C           NO M-CODE FOR SVN62/PRN25 STARTING 05APR2011; NANU 2011026
          ENDIF
       ENDIF
 
-C     NO ANTENNA POWER INFORMATION FOR GLONASS SATELLITES
 
 
 C     NAVIGATION ANTENNA THRUST (SIMPLE MODEL)

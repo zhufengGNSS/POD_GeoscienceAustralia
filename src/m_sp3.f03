@@ -20,7 +20,7 @@ MODULE m_sp3
 Contains
 
 
-SUBROUTINE sp3 (fname, PRNid, orbsp3)
+SUBROUTINE sp3 (fname, PRNid, orbsp3, clock_matrix)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: sp3
@@ -44,6 +44,12 @@ SUBROUTINE sp3 (fname, PRNid, orbsp3)
 !					Sec_of_day (Seconds since 00h of the day)
 !					Position vector (X,Y,X) in m
 !					Velocity vector (Vx,Vy,Vz) in m/sec 
+! - clock_matrix:	Clocks array with the following values per epoch
+!					Position vector (only); Velocity is not available
+!					[MJD Sec_of_day X Y Z]
+!
+!					Position and Velocity vector (if available)
+!					[MJD Sec_of_day X Y Z Vx Vy Vz]
 ! ----------------------------------------------------------------------
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
 ! Created:	July 2016
@@ -65,6 +71,9 @@ SUBROUTINE sp3 (fname, PRNid, orbsp3)
 ! - Dr. Thomas Papanikolaou, 13 November 2017:
 !	Upgraded from Fortran 90 to Fortran 2003 for considering the
 !	Fortran 2003 adavantages in dynamic memory allocation
+! 
+! - Dr. Thomas Papanikolaou, 17 October 2019:
+!	Satellite Clocks matrix has been formed and added as output argument 
 ! ----------------------------------------------------------------------
 
       USE mdl_precision
@@ -82,6 +91,7 @@ SUBROUTINE sp3 (fname, PRNid, orbsp3)
 ! OUT
 ! 	  orb1: Allocatable array via mdl_arr.f90 
       REAL (KIND = prec_q), INTENT(OUT), DIMENSION(:,:), ALLOCATABLE :: orbsp3
+      REAL (KIND = prec_q), INTENT(OUT), DIMENSION(:,:), ALLOCATABLE :: clock_matrix
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -135,6 +145,9 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
 	  
       UNIT_IN = 9  												
 
+      !FIXME: default initial value
+      Nvec = 3
+
 ! ----------------------------------------------------------------------
 ! Open file
       OPEN (UNIT = UNIT_IN, FILE = TRIM (fname), IOSTAT = ios)
@@ -185,13 +198,26 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
                Nvec = 3
 			else if (Zvec == 'V') then
 			   Nvec = 6
+                   else
+                           ! FIXME: add error condition here?
+                           print *, "ERROR! Zvec = ", Zvec, ", Nvec not set"
+                           Nvec = 3
 			end if
 
 ! Allocatable arrays
                Ncol = 2 + Nvec
-               !ALLOCATE ( orb1(Nepochs , Ncol), STAT = AllocateStatus)
-               ALLOCATE ( orbsp3(Nepochs , Ncol), STAT = AllocateStatus)
-		   
+               !ALLOCATE (orb1(Nepochs,Ncol), STAT = AllocateStatus)
+               ALLOCATE (orbsp3(Nepochs,Ncol), STAT = AllocateStatus)
+               if (AllocateStatus .ne. 0) then
+                       print *, "failed to allocate orbsp3"
+                       goto 100
+               end if
+			   Ncol = 2 + Nvec/3
+               ALLOCATE (clock_matrix(Nepochs,Ncol), STAT = AllocateStatus)		  
+               if (AllocateStatus .ne. 0) then
+                       print *, "failed to allocate clock_matrix"
+                       goto 100
+               end if
 		 End if
 ! ----------------------------------------------------------------------
 
@@ -217,6 +243,8 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
 ! Write MJD, Sec_day
 			orbsp3 (orb_i , 1) = mjd_i
 			orbsp3 (orb_i , 2) = sec_day
+			clock_matrix (orb_i , 1) = mjd_i
+			clock_matrix (orb_i , 2) = sec_day
 		 End if	
 ! ----------------------------------------------------------------------
 
@@ -244,6 +272,8 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
 				orbsp3 (orb_i , 3) = r(1)
 				orbsp3 (orb_i , 4) = r(2)
 				orbsp3 (orb_i , 5) = r(3)
+				! Write clock_r 
+				clock_matrix (orb_i,3) = clock_r
 			End If		 			
          End If
 ! ----------------------------------------------------------------------
@@ -265,12 +295,14 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
 				orbsp3 (orb_i , 6) = v(1)
 				orbsp3 (orb_i , 7) = v(2)
 				orbsp3 (orb_i , 8) = v(3)
+				! Write clock_v 
+				clock_matrix (orb_i,4) = clock_v
 			End If
 		 End If
 ! ----------------------------------------------------------------------
 
       END DO
-      CLOSE (UNIT=UNIT_IN)
+ 100  CLOSE (UNIT=UNIT_IN)
 
 	  
 END SUBROUTINE

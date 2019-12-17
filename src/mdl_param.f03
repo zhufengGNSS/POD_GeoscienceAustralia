@@ -20,6 +20,8 @@ MODULE mdl_param
 ! POD Mode : Orbit Determination, Propagation, Prediction, .. (1,2,3,4)
       INTEGER (KIND = prec_int2) :: POD_MODE_glb	  	  
       REAL (KIND = prec_d) :: ORBPRED_ARC_glb
+      LOGICAL :: first_call
+
 ! ---------------------------------------------------------------------------
 	  
 ! ---------------------------------------------------------------------------
@@ -138,7 +140,8 @@ INTEGER (KIND = prec_int2) :: ECOM_CPR_glb(3)
 !REAL (KIND = prec_q) :: ECOM_accel_glb(9)
 !REAL (KIND = prec_q) :: ECOM_accel_aposteriori(9)
 REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_glb
-REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_aposteriori
+!only used in m_orbdet: make it local there
+!REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_aposteriori
 
 ! ----------------------------------------------------------------------
 

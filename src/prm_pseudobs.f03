@@ -87,7 +87,7 @@ SUBROUTINE prm_pseudobs (PRMfname)
       CHARACTER (LEN=3) :: time
 	  REAL (KIND = prec_d) :: mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
 ! ----------------------------------------------------------------------
-
+      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: clock_matrix
 
   
 ! ----------------------------------------------------------------------
@@ -179,7 +179,7 @@ data_opt = 2
 if (data_opt == 1) Then
 
 ! Read IGS sp3 orbit data file 
-Call sp3 (fname_orb, PRN, pseudobs_ITRF)
+Call sp3 (fname_orb, PRN, pseudobs_ITRF, clock_matrix)
 
 ! Orbit transformation ITRF to ICRF
 time_sys = 'GPS'

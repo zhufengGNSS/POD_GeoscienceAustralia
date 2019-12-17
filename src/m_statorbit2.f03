@@ -159,14 +159,50 @@ End Do
 ! Dynamic allocatable array
 ! Allocate the array of the numerical orbit comparison
 ALLOCATE (beta1(Nepochs_delta),beta2(Nepochs_delta), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate beta1 or beta2"
+        goto 100
+end if
 ALLOCATE (del_u1(Nepochs_delta),del_u2(Nepochs_delta), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate del_u1 or del_u2"
+        goto 100
+end if
 ALLOCATE (lambda1(Nepochs_delta),lambda2(Nepochs_delta), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate lambda1 or lambda2"
+        goto 100
+end if
 ALLOCATE (orbdiff(Nepochs_delta,sz2+8), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate orbdiff"
+        goto 100
+end if
 ALLOCATE (yaw1(Nepochs_delta),yaw2(Nepochs_delta), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate yaw1 or yaw2"
+        goto 100
+end if
 ALLOCATE (angX1(Nepochs_delta), angY1(Nepochs_delta), angZ1(Nepochs_delta), STAT= AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate angX1 or angY1 or angZ1"
+        goto 100
+end if
 ALLOCATE (angX2(Nepochs_delta), angY2(Nepochs_delta), angZ2(Nepochs_delta), STAT= AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate angX2 or angY2 or angZ2"
+        goto 100
+end if
 ALLOCATE (fr1(Nepochs_delta), ft1(Nepochs_delta), fn1(Nepochs_delta), STAT= AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate fr1 or ft1 or fn1"
+        goto 100
+end if
 ALLOCATE (fr2(Nepochs_delta), ft2(Nepochs_delta), fn2(Nepochs_delta), STAT= AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate fr2 or ft2 or fn2"
+        goto 100
+end if
 beta1 =0.d0
 beta2 =0.d0
 del_u1=0.d0
@@ -268,7 +304,7 @@ End Do
 
 
 
-END SUBROUTINE
+ 100 END SUBROUTINE
 
 
 End Module

@@ -71,16 +71,10 @@ SUBROUTINE orbitIC (fname, IC_matrix, PRNmatrix)
       INTEGER (KIND = prec_int8) :: Nparam, Nsat, Nparam_isat 
       INTEGER (KIND = prec_int8) :: isat, iparam
 	  CHARACTER (LEN=3) :: PRN_i
+	  CHARACTER (LEN=1) :: char1
       INTEGER (KIND = prec_int8) :: mjd_i
       REAL (KIND = prec_q) :: sec00_i, xo, yo, zo, Vxo, Vyo, Vzo	  
 ! ----------------------------------------------------------------------
-
-
-!	Nsat   = 32
-!	Nparam = 15
-!	ALLOCATE (PRNmatrix(Nsat), STAT = AllocateStatus)		   
-!	ALLOCATE (IC_matrix(Nsat, Nparam+2), STAT = AllocateStatus)		   
-!print *,"Temp :: Allocation"
 
 
 UNIT_IN = 9  												
@@ -102,6 +96,7 @@ UNIT_IN = 9
       DO
 	     READ (UNIT=UNIT_IN,FMT='(A)',IOSTAT=ios_line) line_ith
 	     i = i + 1
+!PRINT *, "ios_line: ", ios_line
 		 
 ! ----------------------------------------------------------------------
 ! End of file
@@ -125,7 +120,12 @@ isat = isat + 1
 
 !#IC_INFO G01 [SVN] [BLK_TYP] [ANT_TH] [ECOM1]  15[IC PARAM LIST - X Y Z XD YD ZD DRAD .....]
 READ (line_ith, * , IOSTAT=ios_data) word_i, PRN_i, word_i, word_i, word_i, word_i, Nparam_isat
+!#IC_INFO PRN: G01 SVN:  63 BLK_TYP: GPS-IIF  MASS: 1633.00000 SRP: Cannonball Nparam:   6 [IC PARAM LIST - X Y Z XD YD ZD DRAD .....]
+!READ (line_ith, * , IOSTAT=ios_data) word_i, word_i,PRN_i, & 
+!								&	 word_i,word_i, word_i,word_i, word_i,word_i, word_i,word_i, word_i,Nparam_isat
 If (Nparam_isat > Nparam) Nparam = Nparam_isat
+!PRINT *, "Nparam_isat: ", Nparam_isat
+!PRINT *, "Nparam: ", word1_ln
 
 END IF
 ! ----------------------------------------------------------------------
@@ -133,7 +133,7 @@ END DO
 CLOSE (UNIT=UNIT_IN)
 ! ----------------------------------------------------------------------
 Nsat = isat
-
+!PRINT *, "Nsat, isat: ", Nsat, isat
 
 ! ----------------------------------------------------------------------
 ! Dynamic memory alloation :: Allocatable arrays PRNmatrix, IC_matrix
@@ -174,6 +174,7 @@ UNIT_IN = 9
       DO
 	     READ (UNIT=UNIT_IN,FMT='(A)',IOSTAT=ios_line) line_ith
 	     i = i + 1
+!PRINT *, "ios_line: ", ios_line
 		 
 ! ----------------------------------------------------------------------
 ! End of file
@@ -209,7 +210,6 @@ END IF
 
 END IF
 ! ----------------------------------------------------------------------
-
 !print *,"line_ith ", line_ith
 
 
@@ -252,8 +252,11 @@ END DO
 
 END IF
 ! ----------------------------------------------------------------------
+word1_ln = ''
+line_ith = ''
 
 END IF
+
 ! ----------------------------------------------------------------------
 END DO
 CLOSE (UNIT=UNIT_IN)

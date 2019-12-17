@@ -245,6 +245,10 @@ IF (beta*180/Pi .gt. 0.d0) yaw= -yaw ! In accordance with the IGS convention
 sclfa=(AU/Ds)**2
 
 ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate srpcoef"
+        goto 100
+end if
 
 ! ECOM1 model
 ! ***********************************************************************
@@ -451,7 +455,7 @@ END IF
      ft = fx*et(1)+fy*et(2)+fz*et(3)
      fn = fx*en(1)+fy*en(2)+fz*en(3)
 
-END SUBROUTINE
+ 100 END SUBROUTINE
 END MODULE
 
 

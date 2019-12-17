@@ -100,6 +100,8 @@ SUBROUTINE prm_main (PRMfname)
       END IF
 ! ----------------------------------------------------------------------
 
+! FIXME: Init time_in to nonsense value
+time_in = 0
 ! ----------------------------------------------------------------------
 ! Read input file
 i = 0

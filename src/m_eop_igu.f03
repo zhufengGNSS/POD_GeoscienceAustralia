@@ -122,6 +122,10 @@ SUBROUTINE eop_igu (mjd, ERP_fname, EOP_days, EOP_int)
       !CALL eop_finals2000A (EOP_fname, mjd_UTC_day , EOP_data)
       !dX = EOP_data(6) 
       !dY = EOP_data(7) 
+      !----------------------------------------------------------
+      ! FIXME: init next two var to something sensible
+dX_eop = 0.d0
+dY_eop = 0.d0
 sz1_EOP = SIZE (EOP_days,DIM=1)
 sz2_EOP = SIZE (EOP_days,DIM=2)
 DO i = 1 , sz1_EOP  

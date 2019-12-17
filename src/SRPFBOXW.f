@@ -277,7 +277,7 @@ c         ABSNCFIR = ALBFAC*PHASEIR
          NCFVEC(3) = (-1.d0)*D_SUN(3)
          ALBFAC = (S0/C)
          ABSNCFVI = ALBFAC*1.d0
-         ABSNCFIR = ALBFAC*(2/3)
+         ABSNCFIR = ALBFAC*(2.d0/3.d0)
 
 
          CALL SURFBOXW(AREAS,REFLS,DIFUS,ABSPS,

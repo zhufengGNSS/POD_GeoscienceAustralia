@@ -46,6 +46,10 @@ SUBROUTINE empirical_cor (Xmatrix, Bias_0, CPR_0, Bias_apos, CPR_apos)
       REAL (KIND = prec_d) :: Bias_corr(3), CPR_corr(3,2)
 ! ----------------------------------------------------------------------  
 
+! ----------------------------------------------------------------------
+! FIXME: variable initialisation
+Bias_corr = 0.d0
+CPR_corr = 0.d0
 
 ! ----------------------------------------------------------------------  
 If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 1) Then

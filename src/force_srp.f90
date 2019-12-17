@@ -127,71 +127,135 @@ SUBROUTINE force_srp (lambda, eBX_ecl, GM, prnnum,  srpid, r, v, r_sun, fx, fy, 
 ! initialize the SRP force
 ! -------------------------
      DO i=1,3
-     fsrp(i)=0.0d0
+        fsrp(i)=0.0d0
      END DO
 
 ! GPS constellation
 ! -----------------
-      if(prnnum.le.100)then
-! IIF
-         if(SVNID.ge.62.and.SVNID.le.73) then
-         Z_SIDE = 5.05D0
-         X_SIDE = 4.55D0
-         A_SOLAR= 22.25D0
-         F0 = 16.7d-5
-! IIR
-         else
-         Z_SIDE = 4.25D0
-         X_SIDE = 4.11D0
-         A_SOLAR= 13.92D0
-         F0 = 11.15d-5
-         end if
+     if(prnnum.le.100)then
+! BLK I
+        if( BLKTYP(1:7) .eq. 'GPS-I  ' ) then
+           Z_SIDE = 3.020D0
+           X_SIDE = 1.728D0
+           A_SOLAR= 6.053D0
+           F0 = 4.54d-5
+! BLK II and IIA
+        elseif( BLKTYP(1:7) .eq. 'GPS-II ' .or. BLKTYP(1:7) .eq. 'GPS-IIA' ) then
+           Z_SIDE = 2.881D0 
+           X_SIDE = 2.893D0
+           A_SOLAR= 11.871D0        
+           F0 = 8.695d-5
+! BLK IIR (-A, -B, -M)
+        elseif( BLKTYP(1:7) .eq. 'GPS-IIR' ) then     
+           Z_SIDE = 4.25D0
+           X_SIDE = 4.11D0
+           A_SOLAR= 13.92D0
+           F0 = 11.15d-5
+! BLK IIF
+        elseif( BLKTYP(1:7) .eq. 'GPS-IIF' ) then     
+!        if(SVNID.ge.62.and.SVNID.le.73) then
+           Z_SIDE = 5.05D0
+           X_SIDE = 4.55D0
+           A_SOLAR= 22.25D0
+           F0 = 16.7d-5
+! BLK IIIA
+        elseif( BLKTYP(1:8) .eq. 'GPS-IIIA' ) then     
+           Z_SIDE = 4.38D0
+           X_SIDE = 6.05D0
+           A_SOLAR= 22.25D0         
+           F0 = 1.5d-4
+! BLK Type Unknown
+        else
+           print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+           STOP
+        end if
 
 ! GLONASS constellation
 ! ---------------------
-      else if (prnnum .gt. 100 .and. prnnum .le. 200) then
-         Z_SIDE = 1.6620D0
-         X_SIDE = 4.200D0
-         A_SOLAR= 23.616D0
-! GLONASS-K
-         if(SVNID.eq.801.or.SVNID.eq.802.or.SVNID.eq.855)then
-         F0 = 10.0d-5
+     else if (prnnum .gt. 100 .and. prnnum .le. 200) then
+        Z_SIDE = 1.6620D0
+        X_SIDE = 4.200D0
+        A_SOLAR= 23.616D0
 ! GLONASS-M
-         else
-         F0 = 20.9d-5
-         end if
+        if ( BLKTYP(1:7).eq.'GLO    '.or.BLKTYP(1:7).eq.'GLO-M  '.or.BLKTYP(1:7).eq.'GLO-M+ ' ) then
+           F0 = 20.9d-5
+! GLONASS-K
+        elseif( BLKTYP(1:7).eq.'GLO-K1A' .or. BLKTYP(1:7).eq.'GLO-K1B' ) then
+!        if(SVNID.eq.801.or.SVNID.eq.802.or.SVNID.eq.855)then
+           F0 = 10.6d-5
+! BLK Type Unknown
+        else
+           print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+           STOP      
+        end if
 
 ! GALILEO constellation
 ! ---------------------
-      else if (prnnum .gt. 200 .and. prnnum .le. 300) then
-         Z_SIDE = 3.002D0
-         X_SIDE = 1.323D0
-         A_SOLAR= 11.0D0
-         F0 = 8.35d-5
+     else if (prnnum .gt. 200 .and. prnnum .le. 300) then
+        Z_SIDE = 3.002D0
+        X_SIDE = 1.323D0
+        A_SOLAR= 11.0D0
+! GALILEO -1 & -2
+        if (BLKTYP(1:7)=='GAL-1  ' .or. BLKTYP(1:7)=='GAL-2  ') then
+!        F0 = 8.35d-5
+           F0 = 7.93d-5
+! BLK Type Unknown
+        else
+           print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+           STOP
+        endif
+
 ! BDS constellation
 ! -----------------
-      else if (prnnum .gt. 300 .and. prnnum .le. 400) then
-         Z_SIDE = 3.96D0
-         X_SIDE = 4.5D0
-         A_SOLAR= 22.44D0
+     else if (prnnum .gt. 300 .and. prnnum .le. 400) then
+        Z_SIDE = 3.96D0
+        X_SIDE = 4.5D0
+        A_SOLAR= 22.44D0
 ! BDS MEO
-         if(SVNID.ge.12.and.SVNID.le.15)then
-         F0 = 8.35d-5
+        if     ( BLKTYP(1:3) .eq. 'BDS' .and. BLKTYP(6:6) .eq. 'M' ) then
+!         if (SVNID.ge.12.and.SVNID.le.15)then
+           F0 = 10.4d-5
 ! BDS IGSO
-         elseif(SVNID.ge.7.and.SVNID.le.10.or.SVNID.eq.5.or.SVNID.eq.17)then
-         F0 = 50.1d-5
-         end if
+        elseif ( BLKTYP(1:3) .eq. 'BDS' .and. BLKTYP(6:6) .eq. 'I' ) then
+!         elseif (SVNID.ge.7.and.SVNID.le.10.or.SVNID.eq.5.or.SVNID.eq.17)then
+           F0 = 17.0d-5
+! BDS GEO
+        elseif ( BLKTYP(1:3) .eq. 'BDS' .and. BLKTYP(6:6) .eq. 'G' ) then
+!            print*,'Beidou GEO: ',BLKTYP
+           F0 = 21.8d-5
+! BLK Type Unknown
+        else 
+           print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+           STOP
+        end if
+
 ! QZSS constellation
 ! ------------------
-      else if (prnnum .gt. 400 .and. prnnum .le. 500) then
-         if(SVNID.eq.1)then
-         Z_SIDE = 6.00D0
-         X_SIDE = 12.2D0
-         A_SOLAR= 40.0D0
-         F0 = 50.1d-5 ! Assumed to be the same with BDS/IGSO
-         end if
+     else if (prnnum .gt. 400 .and. prnnum .le. 500) then
+        Z_SIDE = 6.00D0
+        X_SIDE = 12.2D0
+        A_SOLAR= 40.0D0
+! QZSS-1
+        if( BLKTYP(1:6) .eq. 'QZS-1 ' ) then
+           F0 = 35.0d-5 ! Guess
+! QZSS-2I
+        elseif ( BLKTYP(1:6) .eq. 'QZS-2I') then
+           F0 = 25.0d-5 ! Guess
+! QZSS-2G
+        elseif ( BLKTYP(1:6) .eq. 'QZS-2G') then
+           F0 = 25.0d-5 ! Guess
+! BLK Type Unknown
+        else 
+           print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+           STOP
+        end if
+!
+! Unknown Constellation
+! ---------------------
+      else
+        print*,'FORCE_SRP - Unknown Constellation type: ',prnnum
+        STOP
       end if
-
 
 ! The unit vector ez SAT->EARTH
       er(1)=r(1)/sqrt(r(1)**2+r(2)**2+r(3)**2)
@@ -368,6 +432,10 @@ END IF
      IF (srpid == 3) THEN 
 
 ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate srpcoef"
+        goto 100
+end if
 
 ! ECOM1 model
 ! ***********************************************************************
@@ -593,4 +661,4 @@ END IF
 ! end of ECOM-based model
 ! ---------------------------------------------------------
 
-END
+ 100 END

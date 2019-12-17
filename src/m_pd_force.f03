@@ -272,6 +272,10 @@ End If
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
+! FIXME: set some sensible values
+vSun = 0.d0
+
+! ----------------------------------------------------------------------
 ! Planetary/Lunar orbital perturbations
 ! ----------------------------------------------------------------------
 If (FMOD_GRAV(2) > 0) Then
@@ -638,8 +642,13 @@ Fvec = SF
 ! PD w.r.t position vector
 PDr = Ugrav_icrf + PD_EMP_r
 ! PD  w.r.t velocity vector
-!PDv
+!PDv - FIXME: initilaise to zero for now
 ! ----------------------------------------------------------------------
+Do i = 1, 3
+Do j = 1, 3
+        PDv(i,j) = 0.d0
+End Do
+End Do
 
 ! ----------------------------------------------------------------------
 ! Partial derivatives w.r.t unknown parameters to be estimated

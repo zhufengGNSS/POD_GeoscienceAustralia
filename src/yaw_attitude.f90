@@ -272,7 +272,9 @@ yaw = (/ 0.D0, 0.D0 /)
 
 ! ----------------------------------------------------------------------
 ! Modelling of yaw-attitude during eclipse seasons based on eclips.f
+! FIXME: initialise MURATE
 ! ----------------------------------------------------------------------
+MURATE = 0.d0
 if (Nsat == 64) then
 
 ! Modified Version (2016) of the eclips.f v.2013

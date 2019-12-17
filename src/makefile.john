@@ -1,0 +1,468 @@
+BIN = ../bin
+LIB = ../lib
+LIBEXT=a
+LIBPREFIX=lib
+OBJ=o
+
+LIBRARY = pod
+PROGRAM = pod
+PROGRAM2 = crs2trs
+PROGRAM3 = brdc2ecef
+
+# Fortan compiler
+#FC = /opt/intel/bin/ifort
+FC = gfortran
+AR = ar
+
+# Compiler flags
+FCFLAGS = -O3 -frecursive -Wuninitialized -fcheck=all -fall-intrinsics -Wunused-dummy-argument -Winteger-division -fbacktrace
+#FCFLAGS = -O3 -frecursive -Wuninitialized -ffast-math -m64 -Winteger-division
+#FCFLAGS = -O3 -llapack -lblas -frecursive  
+#-fcheck=all -std=legacy
+#-O3 -Wuninitialized -fno-f2c -ffast-math -fno-automatic -fno-backslash -m64 -mcmodel=large 
+# Linker flags
+FLFLAGS = -L/usr/lib64 -L/opt/OpenBLAS/lib -lopenblas -L$(LIB) -l$(LIBRARY)
+#F90CFLAGS= -std=f95
+#F03CFLAGS= -std=f2003
+#FLEGACYCFLAGS= -std=legacy
+#FORCFLAGS= -std=legacy
+F90CFLAGS=
+F03CFLAGS=
+FLEGACYCFLAGS=
+FORCFLAGS=
+
+F90SRCS1= f90getopt.F90
+
+F90OBJS1=$(F90SRCS1:.F90=.$(OBJ))
+
+F90SRCS= mdl_precision.f90 mdl_num.f90 mdl_eop.f90 mdl_planets.f90 mdl_tides.f90 mdl_arr.f90 \
+m_shadow.f90 m_pd_ECOM.f90 m_satinfo.f90 m_betainfo.f90 m_orbinfo.f90 m_antoffset.f90 \
+arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 matrix_inv3.f90 matrix_Rr.f90 matrix_RxR.f90 \
+time_TT.f90 time_GPS.f90 time_UTC.f90 time_TAI.f90 time_GPSweek.f90 time_GPSweek2.f90 time_GPSweek3.f90 \
+time_TT_sec.f90 crs_trs.f90 eop_rd.f90 eop_c04.f90 eop_finals2000A.f90 erp_igu.f90 interp_lin.f90 \
+EOP.f90 era_matrix.f90 orb_frame.f90 crf_bff.f90 kepler_eq.f90 kepler_k2z.f90 kepler_z2k.f90 \
+force_gm.f90 GM_de.f90 CATfile.f90 asc2eph.f90 m_meanstd.f90 readbrdcmessg.f90 \
+force_gm3rd.f90 indirectJ2.f90 delaunay.f90 tides_solid1.f90 tides_solid2.f90 tide_perm.f90 \
+tides_fes2004.f90 tide_pole_se.f90 tide_pole_oc.f90 rel_schwarzschild.f90 rel_LenseThirring.f90 rel_deSitter.f90 \
+force_srp.f90 prn_shift.f03 surfprop.f90 cross_product.f90 force_erp.f90 force_ant.f90 \
+beta_angle.f90 yaw_nom.f90 yaw_angle.f90 STATE.f90 brdc_qc_gal.f90 brdc_qc_gps.f90 \
+yaw_attitude.f90 beta_pred.f90 yaw_bds.f90 yaw_gal.f90 yawdyn.f90 
+
+F90OBJS=$(F90SRCS:.f90=.$(OBJ))
+
+F03SRCS = mdl_config.f03 mdl_param.f03 m_matrixreverse.f03 m_matrixmerge.f03 gblinit.f03 \
+m_integrEQM.f03 m_matrixRxR.f03 m_legendre.f03 m_legendre1.f03 m_force_tides.f03 m_tides_ocean.f03 m_legendre2.f03 \
+m_pd_geopotential.f03 m_force_gfm.f03 pd_forceZ.f03 m_pd_empirical.f03 \
+m_pd_force.f03 m_veq_rkn768.f03 m_veqC2T.f03 m_integrVEQ.f03 m_orbinteg.f03 m_matrixinv.f03 m_orb_estimator.f03 \
+m_orbC2T.f03 m_orbT2C.f03 m_statist.f03 m_statdelta.f03 m_statorbit.f03 m_statorbit2.f03 m_writearray.f03 m_writearray2.f03 m_orbresize.f03 \
+m_orbext.f03 m_orbext2.f03 m_gfc.f03 m_gfc3.f03 m_obsorbT2C.f03 m_write_prmfile_init.f03 m_writedata.f03 m_writeorbit.f03 m_writeorbit_multi.f03 \
+m_clock_read.f03 m_write_orb2sp3.f03 m_rso.f03 m_sp3.f03 m_sp3_PRN.f03 m_lagrange.f03 m_interporb.f03 m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03 m_keplerorb.f03 \
+m_orbdet.f03 m_orbitmain.f03 m_orbitIC.f03 m_pod_gnss.f03 m_read_leapsec.f03 m_write_brd2sp3.f03 prn2str.f03 \
+write_prmfile_init0.f03 writeparam.f03 writeparam1.f03 write_prmfile.f03 write_prmfile2.f03 readparam.f03 readbrdcheader.f03 \
+gmst_iers.f03 empirical_init_file.f03 empirical_init.f03 empirical_cor.f03 prn_shift_brdc.f03 \
+attitude.f03 force_sum.f03 integr_rkn768.f03 integr_rk87.f03 integr_rk4.f03 pd_gm.f03 eclipse_integstep.f03 \
+prm_main.f03 prm_emp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.f03 prm_orbext.f03 prm_planets.f03 scan0orb.f03 prm_pseudobs.f03 \
+ecom_init.f03 prm_srp.f03 read_cmdline.f03 m_read_satsnx.f03 m_read_svsinex.f03
+
+F03OBJS=$(F03SRCS:.f03=.$(OBJ))
+
+FORSRCS = jd2cal.for cal2jd.for taiutc.for fad03.for faf03.for fal03.for fama03.for fane03.for  fapa03.for faur03.for \
+fae03.for  faju03.for falp03.for fame03.for faom03.for fasa03.for fave03.for xy06.for s06.for c2ixys.for \
+xys00a.for pnm00a.for bpn2xy.for s00.for pn00a.for nut00a.for pn00.for pr00.for obl80.for bp00.for numat.for bi00.for \
+ir.for rz.for ry.for rx.for anp.for era00.for gmst00.for gmst06.for sp00.for pom00.for \
+rxr.for tr.for cr.for cp.for R3.for R1.for 
+
+FOROBJS=$(FORSRCS:.for=.$(OBJ))
+
+F1SRCS = m_get_lambda.f brdc2ecef.f glnorbint.f glnacc.f reformbrdc.f chkbrdc.f \
+interp_iers.f \
+PLEPH.f CONST.f SPLIT.f INTERP.f FSIZER3.f \
+SRPFBOXW.f ERPFBOXW.f SURFBOXW.f PROPBOXW.f \
+eclips.f eclips2017.f eclips201707.f 
+
+F1OBJS=$(F1SRCS:.f=.$(OBJ))
+
+F2SRCS = ORTHO_EOP.F CNMTX.F UTLIBR.F PMSDNUT2.F FUNDARG.F RG_ZONT2.F IERS_CMP_2015.F
+
+F2OBJS=$(F2SRCS:.F=.$(OBJ))
+
+%.$(OBJ): %.F90
+	$(FC) $(FCFLAGS) $(F90CFLAGS) -c $< -o $@
+	-test -f $(*F).mod && touch $(*F).mod
+
+%.mod: %.F90
+	$(FC) $(FCFLAGS) $(F90CFLAGS) -c $<
+
+%.$(OBJ): %.f90
+	$(FC) $(FCFLAGS) $(F90CFLAGS) -c $< -o $@
+	-test -f $(*F).mod && touch $(*F).mod
+
+%.mod: %.f90
+	$(FC) $(FCFLAGS) $(F90CFLAGS) -c $<
+
+%.$(OBJ): %.f03
+	$(FC) $(FCFLAGS) $(F03CFLAGS) -c $< -o $@
+	-test -f $(*F).mod && touch $(*F).mod
+
+%.mod: %.f03
+	$(FC) $(FCFLAGS) $(F03CFLAGS) -c $<
+
+%.$(OBJ): %.for
+	$(FC) $(FCFLAGS) $(FORCFLAGS) -c $< -o $@
+	-test -f $(*F).mod && touch $(*F).mod
+
+%.mod: %.for
+	$(FC) $(FCFLAGS) $(FORCFLAGS) -c $<
+
+%.$(OBJ): %.f
+	$(FC) $(FCFLAGS) $(FLEGACYCFLAGS) -c $< -o $@
+	-test -f $(*F).mod && touch $(*F).mod
+
+%.$(OBJ): %.F
+	$(FC) $(FCFLAGS) $(FLEGACYCFLAGS) -c $< -o $@
+	-test -f $(*F).mod && touch $(*F).mod
+
+LIBOBJS= anp.$(OBJ) arctan.$(OBJ) bi00.$(OBJ) bp00.$(OBJ) bpn2xy.$(OBJ) cal2jd.$(OBJ) CNMTX.$(OBJ) coord_r2sph.$(OBJ) \
+	cp.$(OBJ) cr.$(OBJ) crs_trs.$(OBJ) eop_c04.$(OBJ) eop_finals2000A.$(OBJ) eop_rd.$(OBJ) era00.$(OBJ) era_matrix.$(OBJ) \
+	erp_igu.$(OBJ) fad03.$(OBJ) fae03.$(OBJ) faf03.$(OBJ) faju03.$(OBJ) fal03.$(OBJ) falp03.$(OBJ) fama03.$(OBJ) \
+	fame03.$(OBJ) fane03.$(OBJ) faom03.$(OBJ) fapa03.$(OBJ) fasa03.$(OBJ) faur03.$(OBJ) fave03.$(OBJ) FUNDARG.$(OBJ) \
+	gmst00.$(OBJ) gmst06.$(OBJ) interp_iers.$(OBJ) interp_lin.$(OBJ) ir.$(OBJ) jd2cal.$(OBJ) matrix_Rr.$(OBJ) \
+	matrix_RxR.$(OBJ) mdl_arr.$(OBJ) mdl_eop.$(OBJ) mdl_num.$(OBJ) mdl_param.$(OBJ) mdl_precision.$(OBJ) m_eop_cor.$(OBJ) \
+	m_eop_data.$(OBJ) m_eop_igu.$(OBJ) m_matrixinv.$(OBJ) m_matrixRxR.$(OBJ) m_writearray.$(OBJ) numat.$(OBJ) \
+	nut00a.$(OBJ) obl80.$(OBJ) ORTHO_EOP.$(OBJ) PMSDNUT2.$(OBJ) pn00a.$(OBJ) pn00.$(OBJ) pnm00a.$(OBJ) pom00.$(OBJ) \
+	pr00.$(OBJ) productcross.$(OBJ) productdot.$(OBJ) RG_ZONT2.$(OBJ) rx.$(OBJ) rxr.$(OBJ) ry.$(OBJ) rz.$(OBJ) \
+	s00.$(OBJ) s06.$(OBJ) sp00.$(OBJ) taiutc.$(OBJ) time_GPS.$(OBJ) time_GPSweek.$(OBJ) time_TAI.$(OBJ) time_TT.$(OBJ) \
+	time_UTC.$(OBJ) tr.$(OBJ) UTLIBR.$(OBJ) xy06.$(OBJ) xys00a.$(OBJ) c2ixys.$(OBJ) 
+
+PODOBJS= asc2eph.$(OBJ) attitude.$(OBJ) beta_angle.$(OBJ) beta_pred.$(OBJ) CATfile.$(OBJ) CONST.$(OBJ) \
+	crf_bff.$(OBJ) cross_product.$(OBJ) delaunay.$(OBJ) eclips201707.$(OBJ) eclips2017.$(OBJ) eclipse_integstep.$(OBJ) \
+	eclips.$(OBJ) ecom_init.$(OBJ) empirical_cor.$(OBJ) empirical_init.$(OBJ) empirical_init_file.$(OBJ) EOP.$(OBJ) \
+	ERPFBOXW.$(OBJ) f90getopt.$(OBJ) force_ant.$(OBJ) force_erp.$(OBJ) force_gm3rd.$(OBJ) force_gm.$(OBJ) force_srp.$(OBJ) \
+	force_sum.$(OBJ) FSIZER3.$(OBJ) GM_de.$(OBJ) gmst_iers.$(OBJ) IERS_CMP_2015.$(OBJ) indirectJ2.$(OBJ) integr_rk4.$(OBJ) \
+	integr_rk87.$(OBJ) integr_rkn768.$(OBJ) INTERP.$(OBJ) kepler_eq.$(OBJ) kepler_k2z.$(OBJ) kepler_z2k.$(OBJ) \
+	matrix_inv3.$(OBJ) m_betainfo.$(OBJ) m_clock_read.$(OBJ) mdl_config.$(OBJ) mdl_planets.$(OBJ) mdl_tides.$(OBJ) \
+	m_force_gfm.$(OBJ) m_force_tides.$(OBJ) m_get_lambda.$(OBJ) m_gfc3.$(OBJ) m_gfc.$(OBJ) m_integrEQM.$(OBJ) \
+	m_integrVEQ.$(OBJ) m_interporb.$(OBJ) m_keplerorb.$(OBJ) m_lagrange.$(OBJ) m_legendre1.$(OBJ) m_legendre2.$(OBJ) \
+	m_legendre.$(OBJ) m_matrixmerge.$(OBJ) m_matrixreverse.$(OBJ) m_obsorbT2C.$(OBJ) m_orbC2T.$(OBJ) m_orbdet.$(OBJ) \
+	m_orb_estimator.$(OBJ) m_orbext2.$(OBJ) m_orbext.$(OBJ) m_orbinfo.$(OBJ) m_orbinteg.$(OBJ) m_orbitIC.$(OBJ) \
+	m_orbitmain.$(OBJ) m_orbresize.$(OBJ) m_orbT2C.$(OBJ) m_pd_ECOM.$(OBJ) m_pd_empirical.$(OBJ) m_pd_force.$(OBJ) \
+	m_pd_geopotential.$(OBJ) m_pod_gnss.$(OBJ) m_read_leapsec.$(OBJ) m_read_satsnx.$(OBJ) m_read_svsinex.$(OBJ) \
+	m_rso.$(OBJ) m_satinfo.$(OBJ) m_shadow.$(OBJ) m_sp3.$(OBJ) m_sp3_PRN.$(OBJ) m_statdelta.$(OBJ) m_statist.$(OBJ) \
+	m_statorbit2.$(OBJ) m_statorbit.$(OBJ) m_tides_ocean.$(OBJ) m_veqC2T.$(OBJ) m_veq_rkn768.$(OBJ) m_writearray2.$(OBJ) \
+	m_writedata.$(OBJ) m_write_orb2sp3.$(OBJ) m_writeorbit.$(OBJ) m_writeorbit_multi.$(OBJ) m_write_prmfile_init.$(OBJ) \
+	orb_frame.$(OBJ) pd_forceZ.$(OBJ) pd_gm.$(OBJ) PLEPH.$(OBJ) prm_emp.$(OBJ) prm_grav.$(OBJ) prm_gravity.$(OBJ) \
+	prm_main.$(OBJ) prm_nongrav.$(OBJ) prm_ocean.$(OBJ) prm_orbext.$(OBJ) prm_planets.$(OBJ) prm_pseudobs.$(OBJ) \
+	prm_srp.$(OBJ) prn_shift.$(OBJ) PROPBOXW.$(OBJ) R1.$(OBJ) R3.$(OBJ) read_cmdline.$(OBJ) readparam.$(OBJ) \
+	rel_deSitter.$(OBJ) rel_LenseThirring.$(OBJ) rel_schwarzschild.$(OBJ) scan0orb.$(OBJ) SPLIT.$(OBJ) SRPFBOXW.$(OBJ) \
+	STATE.$(OBJ) SURFBOXW.$(OBJ) surfprop.$(OBJ) tide_perm.$(OBJ) tide_pole_oc.$(OBJ) tide_pole_se.$(OBJ) \
+	tides_fes2004.$(OBJ) tides_solid1.$(OBJ) tides_solid2.$(OBJ) time_GPSweek2.$(OBJ) time_GPSweek3.$(OBJ) \
+	time_TT_sec.$(OBJ) writeparam1.$(OBJ) writeparam.$(OBJ) write_prmfile2.$(OBJ) write_prmfile.$(OBJ) \
+	write_prmfile_init0.$(OBJ) yaw_angle.$(OBJ) yaw_attitude.$(OBJ) yaw_bds.$(OBJ) yawdyn.$(OBJ) yaw_gal.$(OBJ) \
+	yaw_nom.$(OBJ) gblinit.$(OBJ) main_pod.$(OBJ)
+
+CRS2TRSOBJS= main_crs2trs.$(OBJ)
+
+BRDC2ECEFOBJS = cal2jd.$(OBJ) asc2eph.$(OBJ) brdc2ecef.$(OBJ) brdc_cmdline.$(OBJ) brdc_qc_gal.$(OBJ) brdc_qc_gps.$(OBJ) \
+	CATfile.$(OBJ) chkbrdc.$(OBJ) CONST.$(OBJ) reformbrdc.$(OBJ) EOP.$(OBJ) f90getopt.$(OBJ) FSIZER3.$(OBJ) \
+	glnacc.$(OBJ) glnorbint.$(OBJ) INTERP.$(OBJ) m_antoffset.$(OBJ) mdl_brdconfig.$(OBJ) \
+	mdl_planets.$(OBJ) m_meanstd.$(OBJ) m_read_leapsec.$(OBJ) m_write_brd2sp3.$(OBJ) PLEPH.$(OBJ) prn2str.$(OBJ) \
+	prn_shift_brdc.$(OBJ) readbrdcheader.$(OBJ) readbrdcmessg.$(OBJ) SPLIT.$(OBJ) STATE.$(OBJ) time_GPSweek2.$(OBJ) \
+	main_brdcorbit.$(OBJ)
+
+all: directories library $(PROGRAM) $(PROGRAM2) $(PROGRAM3)
+
+depend:
+	sfmakedepend $(F1SRCS) $(F2SRCS) $(FORSRCS) $(F90SRCS) $(F90SRCS1) $(F03SRCS)
+
+directories: $(BIN) $(LIB)
+
+$(BIN): 
+	mkdir -p $(BIN)
+
+$(LIB):
+	mkdir -p $(LIB)
+
+library: $(LIBOBJS)
+	$(AR) cr $(LIB)/$(LIBPREFIX)$(LIBRARY).$(LIBEXT) $(LIBOBJS)
+
+$(PROGRAM): $(PODOBJS) 
+	 $(FC) -o $(BIN)/$@ $(PODOBJS) $(FLFLAGS)
+
+$(PROGRAM2): $(CRS2TRSOBJS) 
+	$(FC) -o $(BIN)/$@ $(CRS2TRSOBJS) $(FLFLAGS)
+
+$(PROGRAM3): $(BRDC2ECEFOBJS) 
+	$(FC) -o $(BIN)/$@ $(BRDC2ECEFOBJS) $(FLFLAGS)
+
+clean:
+	rm -f *.o *.mod $(LIB)/lib$(LIBRARY).$(LIBEXT) $(BIN)/$(PROGRAM) $(BIN)/$(PROGRAM2) $(BIN)/$(PROGRAM3)
+
+# DO NOT DELETE THIS LINE - used by make depend
+EOP.o: m_eop_cor.mod m_eop_igu.mod mdl_eop.mod mdl_num.mod mdl_precision.mod
+GM_de.o: mdl_num.mod mdl_planets.mod mdl_precision.mod
+STATE.o: mdl_planets.mod
+arctan.o: mdl_num.mod mdl_precision.mod
+asc2eph.o: mdl_planets.mod
+attitude.o: mdl_num.mod mdl_precision.mod
+beta_angle.o: mdl_num.mod mdl_precision.mod
+beta_pred.o: mdl_num.mod mdl_planets.mod mdl_precision.mod
+brdc_qc_gal.o: m_meanstd.mod mdl_precision.mod
+brdc_qc_gps.o: m_meanstd.mod mdl_precision.mod
+coord_r2sph.o: mdl_precision.mod
+crf_bff.o: mdl_num.mod mdl_precision.mod
+crs_trs.o: mdl_num.mod mdl_precision.mod
+delaunay.o: mdl_num.mod mdl_precision.mod
+eclipse_integstep.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+ecom_init.o: mdl_config.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+empirical_cor.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+empirical_init.o: mdl_num.mod mdl_precision.mod
+empirical_init_file.o: m_write_prmfile_init.mod mdl_num.mod mdl_precision.mod
+eop_c04.o: mdl_num.mod mdl_precision.mod
+eop_finals2000A.o: mdl_num.mod mdl_precision.mod
+eop_rd.o: mdl_num.mod mdl_precision.mod
+era_matrix.o: mdl_num.mod mdl_precision.mod
+erp_igu.o: mdl_num.mod mdl_precision.mod
+force_ant.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+force_erp.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+force_gm.o: mdl_precision.mod
+force_gm3rd.o: mdl_precision.mod
+force_srp.o: mdl_config.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+force_sum.o: m_force_gfm.mod m_force_tides.mod m_pd_empirical.mod m_shadow.mod
+force_sum.o: m_tides_ocean.mod m_writedata.mod mdl_eop.mod mdl_num.mod
+force_sum.o: mdl_param.mod mdl_planets.mod mdl_precision.mod mdl_tides.mod
+gmst_iers.o: mdl_num.mod mdl_precision.mod
+indirectJ2.o: mdl_num.mod mdl_precision.mod
+integr_rk4.o: mdl_num.mod mdl_precision.mod
+integr_rk87.o: mdl_num.mod mdl_precision.mod
+integr_rkn768.o: mdl_num.mod mdl_precision.mod
+interp_lin.o: mdl_num.mod mdl_precision.mod
+kepler_eq.o: mdl_num.mod mdl_precision.mod
+kepler_k2z.o: mdl_num.mod mdl_precision.mod
+kepler_z2k.o: mdl_num.mod mdl_precision.mod
+m_antoffset.o: mdl_precision.mod
+m_betainfo.o: m_shadow.mod mdl_num.mod mdl_param.mod mdl_planets.mod
+m_betainfo.o: mdl_precision.mod
+m_clock_read.o: m_sp3.mod mdl_num.mod mdl_precision.mod
+m_eop_cor.o: mdl_num.mod mdl_precision.mod
+m_eop_data.o: mdl_num.mod mdl_precision.mod
+m_eop_igu.o: mdl_num.mod mdl_precision.mod
+m_force_gfm.o: m_legendre.mod m_legendre1.mod mdl_num.mod mdl_param.mod
+m_force_gfm.o: mdl_precision.mod
+m_force_tides.o: m_legendre.mod m_legendre1.mod mdl_precision.mod
+m_gfc.o: mdl_num.mod mdl_precision.mod
+m_gfc3.o: m_gfc.mod mdl_num.mod mdl_precision.mod
+m_integrEQM.o: mdl_num.mod mdl_precision.mod
+m_integrVEQ.o: m_veq_rkn768.mod m_veqc2t.mod mdl_config.mod mdl_num.mod
+m_integrVEQ.o: mdl_precision.mod
+m_interporb.o: m_lagrange.mod m_sp3.mod mdl_num.mod mdl_precision.mod
+m_keplerorb.o: mdl_num.mod mdl_precision.mod
+m_lagrange.o: mdl_num.mod mdl_precision.mod
+m_legendre.o: mdl_num.mod mdl_precision.mod
+m_legendre1.o: m_legendre.mod mdl_num.mod mdl_precision.mod
+m_legendre2.o: m_legendre.mod m_legendre1.mod mdl_num.mod mdl_precision.mod
+m_matrixRxR.o: mdl_precision.mod
+m_matrixinv.o: mdl_precision.mod
+m_matrixmerge.o: mdl_precision.mod
+m_matrixreverse.o: mdl_precision.mod
+m_meanstd.o: mdl_precision.mod
+m_obsorbT2C.o: mdl_precision.mod
+m_orbC2T.o: mdl_precision.mod
+m_orbT2C.o: mdl_precision.mod
+m_orb_estimator.o: m_matrixinv.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+m_orbdet.o: m_matrixmerge.mod m_matrixreverse.mod m_orb_estimator.mod
+m_orbdet.o: m_orbc2t.mod m_orbinteg.mod m_orbresize.mod m_statdelta.mod
+m_orbdet.o: m_statorbit.mod m_writearray.mod mdl_config.mod mdl_num.mod
+m_orbdet.o: mdl_param.mod mdl_planets.mod mdl_precision.mod mdl_tides.mod
+m_orbext.o: m_statdelta.mod m_statorbit.mod m_statorbit2.mod m_writearray.mod
+m_orbext.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+m_orbext2.o: m_statdelta.mod m_statorbit.mod m_writearray.mod mdl_num.mod
+m_orbext2.o: mdl_param.mod mdl_precision.mod
+m_orbinfo.o: m_shadow.mod mdl_num.mod mdl_param.mod mdl_planets.mod
+m_orbinfo.o: mdl_precision.mod
+m_orbinteg.o: m_integreqm.mod m_integrveq.mod mdl_num.mod mdl_param.mod
+m_orbinteg.o: mdl_precision.mod
+m_orbitIC.o: mdl_config.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+m_orbitmain.o: m_orbdet.mod m_orbext.mod m_orbext2.mod m_writearray.mod
+m_orbitmain.o: m_writeorbit.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+m_orbresize.o: mdl_precision.mod
+m_pd_ECOM.o: mdl_config.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+m_pd_empirical.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+m_pd_force.o: m_force_gfm.mod m_force_tides.mod m_matrixrxr.mod m_pd_ecom.mod
+m_pd_force.o: m_pd_empirical.mod m_pd_geopotential.mod m_shadow.mod
+m_pd_force.o: m_tides_ocean.mod mdl_eop.mod mdl_num.mod mdl_param.mod
+m_pd_force.o: mdl_planets.mod mdl_precision.mod mdl_tides.mod
+m_pd_geopotential.o: m_legendre.mod m_legendre1.mod m_legendre2.mod
+m_pd_geopotential.o: m_matrixrxr.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+m_pod_gnss.o: m_orbdet.mod m_orbext.mod m_orbitic.mod m_orbitmain.mod
+m_pod_gnss.o: m_read_satsnx.mod m_sp3_prn.mod m_write_orb2sp3.mod
+m_pod_gnss.o: m_writearray.mod m_writeorbit.mod m_writeorbit_multi.mod
+m_pod_gnss.o: mdl_config.mod mdl_eop.mod mdl_num.mod mdl_param.mod
+m_pod_gnss.o: mdl_planets.mod mdl_precision.mod mdl_tides.mod
+m_read_leapsec.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+m_read_satsnx.o: m_read_svsinex.mod mdl_config.mod mdl_num.mod mdl_param.mod
+m_read_satsnx.o: mdl_precision.mod
+m_read_svsinex.o: mdl_num.mod mdl_precision.mod
+m_rso.o: mdl_num.mod mdl_precision.mod
+m_satinfo.o: mdl_precision.mod
+m_shadow.o: m_get_lambda.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+m_sp3.o: mdl_num.mod mdl_precision.mod
+m_sp3_PRN.o: mdl_num.mod mdl_precision.mod
+m_statdelta.o: m_statist.mod mdl_num.mod mdl_precision.mod
+m_statist.o: mdl_num.mod mdl_precision.mod
+m_statorbit.o: m_statist.mod mdl_num.mod mdl_precision.mod
+m_statorbit2.o: m_orbinfo.mod m_statist.mod mdl_num.mod mdl_param.mod
+m_statorbit2.o: mdl_planets.mod mdl_precision.mod
+m_tides_ocean.o: mdl_num.mod mdl_precision.mod mdl_tides.mod
+m_veqC2T.o: mdl_eop.mod mdl_precision.mod
+m_veq_rkn768.o: m_matrixrxr.mod m_pd_force.mod mdl_num.mod mdl_precision.mod
+m_write_brd2sp3.o: mdl_num.mod mdl_precision.mod
+m_write_orb2sp3.o: mdl_config.mod mdl_num.mod mdl_precision.mod
+m_write_prmfile_init.o: mdl_num.mod mdl_precision.mod
+m_writearray.o: mdl_num.mod mdl_precision.mod
+m_writearray2.o: mdl_num.mod mdl_precision.mod
+m_writedata.o: mdl_num.mod mdl_precision.mod
+m_writeorbit.o: mdl_num.mod mdl_precision.mod
+m_writeorbit_multi.o: m_read_satsnx.mod mdl_config.mod mdl_num.mod mdl_param.mod
+m_writeorbit_multi.o: mdl_precision.mod
+matrix_Rr.o: mdl_precision.mod
+matrix_RxR.o: mdl_arr.mod mdl_precision.mod
+matrix_inv3.o: mdl_precision.mod
+mdl_arr.o: mdl_precision.mod
+mdl_config.o: mdl_precision.mod
+mdl_eop.o: mdl_precision.mod
+mdl_num.o: mdl_precision.mod
+mdl_param.o: mdl_precision.mod
+mdl_planets.o: mdl_precision.mod
+mdl_tides.o: mdl_precision.mod
+orb_frame.o: mdl_num.mod mdl_precision.mod
+pd_forceZ.o: m_force_gfm.mod m_force_tides.mod m_matrixrxr.mod
+pd_forceZ.o: m_pd_geopotential.mod m_tides_ocean.mod mdl_eop.mod mdl_num.mod
+pd_forceZ.o: mdl_param.mod mdl_planets.mod mdl_precision.mod mdl_tides.mod
+pd_gm.o: mdl_precision.mod
+prm_emp.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+prm_grav.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+prm_gravity.o: m_gfc.mod m_gfc3.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+prm_main.o: m_eop_data.mod mdl_arr.mod mdl_eop.mod mdl_num.mod mdl_param.mod
+prm_main.o: mdl_precision.mod
+prm_nongrav.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+prm_ocean.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+prm_orbext.o: m_interporb.mod m_keplerorb.mod m_orbc2t.mod m_orbt2c.mod
+prm_orbext.o: m_rso.mod m_sp3.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+prm_planets.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+prm_pseudobs.o: m_interporb.mod m_obsorbt2c.mod m_orbt2c.mod m_sp3.mod
+prm_pseudobs.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+prm_srp.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+prn2str.o: mdl_num.mod mdl_precision.mod
+prn_shift.o: mdl_num.mod mdl_precision.mod
+prn_shift_brdc.o: mdl_num.mod mdl_precision.mod
+productcross.o: mdl_precision.mod
+productdot.o: mdl_precision.mod
+read_cmdline.o: f90getopt.mod mdl_config.mod
+readbrdcheader.o: mdl_num.mod mdl_precision.mod
+readbrdcmessg.o: m_shadow.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+readparam.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+rel_LenseThirring.o: mdl_precision.mod
+rel_deSitter.o: mdl_precision.mod
+rel_schwarzschild.o: mdl_precision.mod
+scan0orb.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+surfprop.o: mdl_num.mod mdl_precision.mod
+taiutc.o: mdl_param.mod
+tide_perm.o: mdl_precision.mod
+tide_pole_oc.o: mdl_precision.mod
+tide_pole_se.o: mdl_precision.mod
+tides_fes2004.o: m_writearray.mod mdl_num.mod mdl_param.mod mdl_precision.mod
+tides_fes2004.o: mdl_tides.mod
+tides_solid1.o: m_legendre.mod mdl_num.mod mdl_planets.mod mdl_precision.mod
+tides_solid2.o: mdl_num.mod mdl_precision.mod
+time_GPS.o: mdl_precision.mod
+time_GPSweek.o: mdl_precision.mod
+time_GPSweek2.o: mdl_precision.mod
+time_GPSweek3.o: mdl_precision.mod
+time_TAI.o: mdl_precision.mod
+time_TT.o: mdl_precision.mod
+time_TT_sec.o: mdl_precision.mod
+time_UTC.o: mdl_precision.mod
+write_prmfile.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+write_prmfile2.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+write_prmfile_init0.o: mdl_num.mod mdl_precision.mod
+writeparam.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+writeparam1.o: mdl_num.mod mdl_param.mod mdl_precision.mod
+yaw_angle.o: mdl_num.mod mdl_precision.mod
+yaw_attitude.o: mdl_num.mod mdl_precision.mod
+yaw_bds.o: mdl_num.mod mdl_precision.mod
+yaw_gal.o: mdl_num.mod mdl_precision.mod
+yaw_nom.o: mdl_num.mod mdl_precision.mod
+yawdyn.o: mdl_num.mod mdl_precision.mod
+f90getopt.mod: .//f90getopt.o
+m_antoffset.mod: .//m_antoffset.o
+m_betainfo.mod: .//m_betainfo.o
+m_clock_read.mod: .//m_clock_read.o
+m_eop_cor.mod: .//m_eop_cor.o
+m_eop_data.mod: .//m_eop_data.o
+m_eop_igu.mod: .//m_eop_igu.o
+m_force_gfm.mod: .//m_force_gfm.o
+m_force_tides.mod: .//m_force_tides.o
+m_get_lambda.mod: .//m_get_lambda.o
+m_gfc.mod: .//m_gfc.o
+m_gfc3.mod: .//m_gfc3.o
+m_integreqm.mod: .//m_integrEQM.o
+m_integrveq.mod: .//m_integrVEQ.o
+m_interporb.mod: .//m_interporb.o
+m_keplerorb.mod: .//m_keplerorb.o
+m_lagrange.mod: .//m_lagrange.o
+m_legendre.mod: .//m_legendre.o
+m_legendre1.mod: .//m_legendre1.o
+m_legendre2.mod: .//m_legendre2.o
+m_matrixinv.mod: .//m_matrixinv.o
+m_matrixmerge.mod: .//m_matrixmerge.o
+m_matrixreverse.mod: .//m_matrixreverse.o
+m_matrixrxr.mod: .//m_matrixRxR.o
+m_meanstd.mod: .//m_meanstd.o
+m_obsorbt2c.mod: .//m_obsorbT2C.o
+m_orb_estimator.mod: .//m_orb_estimator.o
+m_orbc2t.mod: .//m_orbC2T.o
+m_orbdet.mod: .//m_orbdet.o
+m_orbext.mod: .//m_orbext.o
+m_orbext2.mod: .//m_orbext2.o
+m_orbinfo.mod: .//m_orbinfo.o
+m_orbinteg.mod: .//m_orbinteg.o
+m_orbitic.mod: .//m_orbitIC.o
+m_orbitmain.mod: .//m_orbitmain.o
+m_orbresize.mod: .//m_orbresize.o
+m_orbt2c.mod: .//m_orbT2C.o
+m_pd_ecom.mod: .//m_pd_ECOM.o
+m_pd_empirical.mod: .//m_pd_empirical.o
+m_pd_force.mod: .//m_pd_force.o
+m_pd_geopotential.mod: .//m_pd_geopotential.o
+m_pod_gnss.mod: .//m_pod_gnss.o
+m_read_leapsec.mod: .//m_read_leapsec.o
+m_read_satsnx.mod: .//m_read_satsnx.o
+m_read_svsinex.mod: .//m_read_svsinex.o
+m_rso.mod: .//m_rso.o
+m_satinfo.mod: .//m_satinfo.o
+m_shadow.mod: .//m_shadow.o
+m_sp3.mod: .//m_sp3.o
+m_sp3_prn.mod: .//m_sp3_PRN.o
+m_statdelta.mod: .//m_statdelta.o
+m_statist.mod: .//m_statist.o
+m_statorbit.mod: .//m_statorbit.o
+m_statorbit2.mod: .//m_statorbit2.o
+m_tides_ocean.mod: .//m_tides_ocean.o
+m_veq_rkn768.mod: .//m_veq_rkn768.o
+m_veqc2t.mod: .//m_veqC2T.o
+m_write_brd2sp3.mod: .//m_write_brd2sp3.o
+m_write_orb2sp3.mod: .//m_write_orb2sp3.o
+m_write_prmfile_init.mod: .//m_write_prmfile_init.o
+m_writearray.mod: .//m_writearray.o
+m_writearray2.mod: .//m_writearray2.o
+m_writedata.mod: .//m_writedata.o
+m_writeorbit.mod: .//m_writeorbit.o
+m_writeorbit_multi.mod: .//m_writeorbit_multi.o
+mdl_arr.mod: .//mdl_arr.o
+mdl_config.mod: .//mdl_config.o
+mdl_eop.mod: .//mdl_eop.o
+mdl_num.mod: .//mdl_num.o
+mdl_param.mod: .//mdl_param.o
+mdl_planets.mod: .//mdl_planets.o
+mdl_precision.mod: .//mdl_precision.o
+mdl_tides.mod: .//mdl_tides.o
