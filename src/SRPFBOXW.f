@@ -271,13 +271,13 @@ c         PHASEIR = (1-ALB)/(4*PI)
 c         ABSNCFVI = ALBFAC*PHASEVI
 c         ABSNCFIR = ALBFAC*PHASEIR
 
-!     CHANGE THE RADIATION DIRECTION TO SUN-SAT
+!     CHANGE THE RADIATION DIRECTION TO SUN->SAT
          NCFVEC(1) = (-1.d0)*D_SUN(1)
          NCFVEC(2) = (-1.d0)*D_SUN(2)
          NCFVEC(3) = (-1.d0)*D_SUN(3)
          ALBFAC = (S0/C)
          ABSNCFVI = ALBFAC*1.d0
-         ABSNCFIR = ALBFAC*(2.d0/3.d0)
+         ABSNCFIR = ALBFAC*1.d0
 
 
          CALL SURFBOXW(AREAS,REFLS,DIFUS,ABSPS,
@@ -371,9 +371,15 @@ C     MASS OF SATELLITES
          else
             mass = 710.d0   ! Average 19/07/22 == 708.597kg
          endif
+* BDS
+      ELSEIF(BLKNUM.eq.301) then
+         MASS = 1550D0
+      ELSEIF(BLKNUM.eq.302 .or.BLKNUM.eq.303) then
+         MASS = 1900D0
+
       else
          print *,'No MASS for BLKNUM ',BLKNUM
-         stop 'NO MASS: ERPFBOXW'
+         stop 'NO MASS: SRPFBOXW'
       ENDIF
 
 C     CONVERSION TO ACCELERATION

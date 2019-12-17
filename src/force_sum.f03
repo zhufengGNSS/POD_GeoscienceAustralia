@@ -203,6 +203,8 @@ End IF
 
 ! ----------------------------------------------------------------------
 ! Gravity Field
+Fgrav_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
+Fgrav_itrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 If (FMOD_GRAV(1) == 0) Then
 
 ! Setting to Zero
@@ -359,6 +361,7 @@ Re = aEarth
 CALL indirectJ2(C20,Re,GM_moon,rMoon_ITRS,GM_sun,rSun_ITRS , a_iJ2)
 
 ! Acceleration vector transformation from terrestrial to inertial frame
+a_iJ2_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 CALL matrix_Rr (TRS2CRS, a_iJ2 , a_iJ2_icrf)
 ! ----------------------------------------------------------------------
 
@@ -384,20 +387,20 @@ If (FMOD_GRAV(3) > 0) Then
 ! Solid Earth Tides
 ! ----------------------------------------------------------------------
 ! Frequency-independent : Step 1 (IERS Conventions 2010)
+      dCnm_solid1 = 0.0D0
+      dSnm_solid1 = 0.0D0
 If (FMOD_TIDES(1) > 0) Then 
-
       CALL tides_solid1(rMoon_ITRS, rSun_ITRS, GMearth, aEarth, GM_moon, GM_sun, dCnm_solid1, dSnm_solid1)
-	  
 Else If (FMOD_TIDES(1) == 0) Then  
       dCnm_solid1 = 0.0D0
       dSnm_solid1 = 0.0D0
 End if
 
 ! Frequency-dependent : Step 2 (IERS Conventions 2010)
+      dCnm_solid2 = 0.0D0
+      dSnm_solid2 = 0.0D0
 If (FMOD_TIDES(2) > 0) Then 
-
       CALL tides_solid2(mjd, ut1_utc , dCnm_solid2, dSnm_solid2)
-	  
 Else If (FMOD_TIDES(2) == 0) Then
       dCnm_solid2 = 0.0D0
       dSnm_solid2 = 0.0D0
@@ -468,18 +471,17 @@ dCnm_tides(2+1,1+1) = dCnm_tides(2+1,1+1) + dC21_pse + dC21_poc
 dSnm_tides(2+1,1+1) = dSnm_tides(2+1,1+1) + dS21_pse + dS21_poc
 
 ! Acceleration cartesian components
+a_solidtides = (/ 0.D0, 0.0D0, 0.0D0 /)
 CALL force_tides(rsat_itrf, GMearth, aEarth, sz_tides-1, sz_tides-1, dCnm_tides, dSnm_tides, ax,ay,az)
 a_solidtides(1) = ax
 a_solidtides(2) = ay
 a_solidtides(3) = az
 
-!PRINT *,"dCnm_tides",dCnm_tides
-!PRINT *,"dSnm_tides",dSnm_tides
-
 !DEALLOCATE (dCnm_tides,   STAT = DeAllocateStatus)
 !DEALLOCATE (dSnm_tides,   STAT = DeAllocateStatus)
 sz_tides = 0
 ! ----------------------------------------------------------------------
+!print *,"Pole Tide dC,dS", dC21_pse, dC21_poc, dS21_pse, dS21_poc
 
 ! ----------------------------------------------------------------------
 ! Ocean Tides
@@ -491,8 +493,8 @@ If (FMOD_TIDES(3) == 1) Then
       a_ocean (1) = ax
       a_ocean (2) = ay
       a_ocean (3) = az
-      DEALLOCATE (dCnm_ocean,   STAT = DeAllocateStatus)
-      DEALLOCATE (dSnm_ocean,   STAT = DeAllocateStatus)
+      !DEALLOCATE (dCnm_ocean,   STAT = DeAllocateStatus)
+      !DEALLOCATE (dSnm_ocean,   STAT = DeAllocateStatus)
       sz_tides = 0
 End if
 ! ----------------------------------------------------------------------
@@ -514,6 +516,32 @@ Ftides_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
 End IF
 ! End of Tidal effects
 ! ----------------------------------------------------------------------
+
+IF (abs(a_solidtides(1))>1.D0 .OR. abs(a_solidtides(2))>1.D0 .OR. abs(a_solidtides(3))>1.D0) THEN
+print *," "
+print *,"PRN", PRN
+print *,"mjd ", mjd
+print *,"a_solidtides ", a_solidtides
+PRINT *,"dCnm_tides",dCnm_tides
+print *," "
+PRINT *,"dSnm_tides",dSnm_tides
+print *," "
+PRINT *,"dCnm_solid1",dCnm_solid1
+print *," "
+PRINT *,"dSnm_solid1",dSnm_solid1
+print *," "
+PRINT *,"dCnm_solid2",dCnm_solid2
+print *," "
+PRINT *,"dSnm_solid2",dSnm_solid2
+print *," "
+print *,"Pole Tide dC,dS", dC21_pse, dC21_poc, dS21_pse, dS21_poc
+print *," "
+print *,"PRN", PRN
+print *,"mjd ", mjd
+STOP
+END IF 
+!print *,"a_ocean      ", a_ocean
+
 
 ! ----------------------------------------------------------------------
 ! Relativistic effects
@@ -550,6 +578,10 @@ End IF
 SFgrav = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf 
 ! End of Gravitational Effects
 ! ----------------------------------------------------------------------
+!print *,"Fgrav_icrf       ", Fgrav_icrf
+!print *,"Fplanets_icrf    ", Fplanets_icrf
+!print *,"Ftides_icrf      ", Ftides_icrf
+!print *,"Frelativity_icrf ", Frelativity_icrf
 
 
 ! ----------------------------------------------------------------------
@@ -587,17 +619,6 @@ CALL shadow (rsat_icrf, rSun, rMoon, lambda, ECLTYP )
 ! ----------------------------------------------------------------------
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
-
-if (FMOD_NONGRAV(1) > 0 .OR. FMOD_NONGRAV(2) > 0 .or. FMOD_NONGRAV (3) > 0) Then
-! PRN: GNSS constellation ID letter + Satellite number
-fmt_line = '(A1,I2.2)'
-READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
-
-CALL prn_shift (GNSSid, PRN_no, PRN_no)
-!print*,GNSSid, PRN_no
-
-END IF
- 
 ! ----------------------------------------------------------------------
 ! Solar Radiation
 ! ----------------------------------------------------------------------
@@ -608,7 +629,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 srpid =  SRP_MOD_glb
 
 
-CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
+CALL force_srp (lambda, eBX_ecl, eclipsf, GMearth, GNSSid, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
@@ -623,7 +644,7 @@ if (FMOD_NONGRAV(2) > 0) Then
 
 CALL force_erp (mjd, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
 Ferp_icrf = (/ fx, fy, fz /)
-!print*,'force_erp=', sqrt(fx**2+fy**2+fz**2)
+
 Else IF (FMOD_NONGRAV(2) == 0) Then
 
         Ferp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)
@@ -676,6 +697,9 @@ SFx = SF(1)
 SFy = SF(2)
 SFz = SF(3)
 ! ----------------------------------------------------------------------
+!print *,"SFgrav   ", SFgrav
+!print *,"SFnongrav", SFnongrav
+!print *,"SFemp    ", SFemp
 
 
 

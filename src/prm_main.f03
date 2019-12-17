@@ -15,6 +15,8 @@ SUBROUTINE prm_main (PRMfname)
 !                                             is switched on.
 !               21-02-2019 Tzupang Tseng: added a function capable of switching
 !                                         on and off some parameters in ECOM models
+!               03-12-2019 Tzupang Tseng: added a function of estimating the
+!                                         parameters in simple box wing model
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -479,7 +481,7 @@ End	If
 ! --------------------------------------------------------------------
 ! Solar radiation pressure model
 ! -------------------------------------------------------------------
-If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
+If (ECOM_param_glb <= 2) Then
 ! Bias parameters
         If (ECOM_Bias_glb(1) == 1) Then
                 NPARAM_glb = NPARAM_glb + 1
@@ -514,6 +516,13 @@ If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
         End If
 !print*,'ECOM_Bias_glb=',ECOM_Bias_glb, 'ECOM_CPR_glb=',ECOM_CPR_glb
 !print*,'NPARAM_glb=',NPARAM_glb
+ELSEIF (ECOM_param_glb == 3) THEN
+        NPARAM_glb = 9
+
+ELSEIF (ECOM_param_glb < 0) THEN
+        PRINT*,'PLEASE CHECK THE SRP MODEL SETTING IN CONFIGURATION FILE !'
+        PRINT*,'PROGRAM STOP !'
+        STOP
 End If
 
 ! ----------------------------------------------------------------------

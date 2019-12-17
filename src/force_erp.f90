@@ -57,17 +57,8 @@ YSAT(4:6) = vsat
 KAPPA = 0.d0
 MONTH = 1
 
-if( first_call ) then
-   first_call = .false.
-!   print*,'Block type, SVNID, BLKID,  power, MASS = ', BLKTYP, SVNID, BLKID,power, MASS
-endif
-
-! Currently there is no SV Box/Wing info for Beidou SV's so we can't compute ERP force (SCM 20191123)
-if ( BLKTYP(1:3) .ne. 'BDS' ) then
-  CALL ERPFBOXW(ERM,ANT,GRD,REFF,YSAT,R_SUN,KAPPA,MONTH,BLKID,SVNID,MJD,ACCEL)
-else
-  ACCEL = 0.0d0
-endif
+!print*,'Block type, SVNID, BLKID,  power, MASS = ', BLKTYP, SVNID, BLKID,power, MASS
+CALL ERPFBOXW(ERM,ANT,GRD,REFF,YSAT,R_SUN,KAPPA,MONTH,BLKID,SVNID,MJD,ACCEL)
 
 fx_erp = ACCEL(1) 
 fy_erp = ACCEL(2)

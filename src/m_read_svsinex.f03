@@ -201,6 +201,30 @@ READ(UNIT_IN,'(a)',iostat=ioerr) record
    END IF 
 END DO 
 
+! Prepare SVNID and BLKID for the global variables
+! ------------------------------------------------
+SVNID = satid
+IF(BLKTYP=='GPS-I')      BLKID = 1
+IF(BLKTYP=='GPS-II')     BLKID = 2
+IF(BLKTYP=='GPS-IIA')    BLKID = 3
+IF(BLKTYP=='GPS-IIR')    BLKID = 4
+IF(BLKTYP=='GPS-IIR-A')  BLKID = 5
+IF(BLKTYP=='GPS-IIR-B')  BLKID = 6
+IF(BLKTYP=='GPS-IIR-M')  BLKID = 7
+IF(BLKTYP=='GPS-IIF')    BLKID = 8
+IF(BLKTYP=='GPS-IIIA')   BLKID = 9
+IF(BLKTYP=='GLO')        BLKID = 101
+IF(BLKTYP=='GLO-M'  .or.BLKTYP == 'GLO-M+')  BLKID = 102
+IF(BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B') BLKID = 103
+IF(BLKTYP=='GLA-1')     BLKID = 201 ! Galileo (IOV)
+IF(BLKTYP=='GLA-2')     BLKID = 202 ! Galileo (FOC)
+IF(BLKTYP=='BDS-2G'.or.BLKTYP == 'BDS-3G')            BLKID = 301 ! BDS GEO
+IF(BLKTYP=='BDS-2I'.or.BLKTYP == 'BDS-3I'.or.&
+   BLKTYP=='BDS-3SI-SECM'.or.BLKTYP =='BDS-3SI-CAST') BLKID = 302 ! BDS IGSO
+IF(BLKTYP=='BDS-2M'.or.BLKTYP == 'BDS-3M'.or.&
+   BLKTYP=='BDS-3M-SECM'.or.BLKTYP =='BDS-3M-CAST')   BLKID = 303 ! BDS MEO
+
+
 ! Get the satellite mass ( SATELLITE/MASS block )
 REWIND(UNIT_IN)
 found = .false.
@@ -256,7 +280,11 @@ found = .false.
 DO WHILE (.not.found)
    READ(UNIT_IN,'(a)',IOSTAT=ioerr) record
    IF(record(1:3)=='-SAT'.or.ioerr/=0) THEN
-   IF( ioerr/=0 ) print*,'Failed to find SV in TX_POWER block',ioerr
+   IF( ioerr/=0 ) then
+   print*,'Failed to find SV in TX_POWER block and the POWER is set to 185 W'
+   POWER=185 ! assumed to be consistent with BDS IGSO
+   RETURN
+   END IF
    ELSE IF(record(1:1)==' ') THEN
       READ(record,'(1x,a4,2(1x,i4,1x,i3,1x,F5.0),1x,i4)',IOSTAT=ioerr) svn,yr1,doy1,sod1,yr2,doy2,sod2,POWER
       IF(yr2==0000) THEN
@@ -275,25 +303,6 @@ DO WHILE (.not.found)
       END IF
     END IF
 END DO
-
-! Prepare SVNID and BLKID for the global variables
-! ------------------------------------------------
-SVNID = satid
-IF(BLKTYP=='GPS-I')      BLKID = 1
-IF(BLKTYP=='GPS-II')     BLKID = 2
-IF(BLKTYP=='GPS-IIA')    BLKID = 3
-IF(BLKTYP=='GPS-IIR')    BLKID = 4
-IF(BLKTYP=='GPS-IIR-A')  BLKID = 5
-IF(BLKTYP=='GPS-IIR-B')  BLKID = 6
-IF(BLKTYP=='GPS-IIR-M')  BLKID = 7
-IF(BLKTYP=='GPS-IIF')    BLKID = 8
-IF(BLKTYP=='GPS-IIIA')   BLKID = 9
-IF(BLKTYP=='GLO')        BLKID = 101
-IF(BLKTYP=='GLO-M'  .or.BLKTYP == 'GLO-M+')  BLKID = 102
-IF(BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B') BLKID = 103
-IF(trim(BLKTYP)=='GAL-1')     BLKID = 201 ! Galileo (IOV)
-IF(trim(BLKTYP)=='GAL-2')     BLKID = 202 ! Galileo (FOC)
-!print*,'blktyp,blkid: ',blktyp,blkid
 
 END SUBROUTINE
 

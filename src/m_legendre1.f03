@@ -91,7 +91,7 @@ SUBROUTINE legendre_drv1 (phi, nmax, dPnm_norm)
 !         STOP "*** Not enough memory ***"
       END IF
 ! ----------------------------------------------------------------------
-
+dPnm_norm = 0.0D0
 
 ! ----------------------------------------------------------------------
 ! Numerical Constants

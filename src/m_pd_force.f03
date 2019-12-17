@@ -563,16 +563,6 @@ CALL shadow (rsat_icrf, rSun, rMoon, lambda, ECLTYP )
 ! ----------------------------------------------------------------------
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
-if (FMOD_NONGRAV(1) > 0 .OR. FMOD_NONGRAV(2) > 0 .or. FMOD_NONGRAV (3) > 0) Then
-! PRN: GNSS constellation ID letter + Satellite number
-fmt_line = '(A1,I2.2)'
-READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
-
-CALL prn_shift (GNSSid, PRN_no, PRN_no)
-!print*,GNSSid, PRN_no
-
-END IF
-
 ! ----------------------------------------------------------------------
 ! Solar Radiation
 ! ----------------------------------------------------------------------
@@ -582,13 +572,13 @@ if (FMOD_NONGRAV(1) > 0) Then
 ! SRP model
 srpid =  SRP_MOD_glb
 
-CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
+CALL force_srp (lambda, eBX_ecl, eclipsf, GMearth, GNSSid, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 
 Fsrp_icrf = (/ fx, fy, fz /)
 
 IF (ECOM_param_glb /= 0) THEN ! Condition added 5/6/2019 in order to avoid program segment fault
 
-CALL pd_ECOM (lambda, eBX_ecl, GMearth, PRN_no, rsat_icrf, vsat_icrf, rSun, PD_ECOM_param )
+CALL pd_ECOM (lambda, eBX_ecl, eclipsf, GMearth, GNSSid, rsat_icrf, vsat_icrf, rSun, PD_ECOM_param )
 
 END IF
 
@@ -658,7 +648,7 @@ PD_param = PD_EMP_param
 End IF
 
 
-IF (ECOM_param_glb == 1 .or.  ECOM_param_glb == 2) Then
+IF (ECOM_param_glb <= 3) Then
 PD_param = PD_ECOM_param
 END IF
 !print*,'ECOM_param_glb=',ECOM_param_glb

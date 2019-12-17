@@ -102,7 +102,7 @@
  
  ---------------------------------------------------------------------------
  %% ECOM SRP parameters
- ECOM_param                                1                             ! ECOM_param = 1 (ECOM1); ECOM_param = 2 (ECOM2)
+ ECOM_param                                1   ! ECOM_param = 1 (ECOM1); ECOM_param = 2 (ECOM2); ECOM_param = 3 (SIMPLE BOX WING WITH 9 PARAMETERS)
  ! Bias accelerations in D, Y and B directions
  bias_D                                    1
  bias_Y                                    1

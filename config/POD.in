@@ -136,11 +136,14 @@ satsinex_filename_cfg        igs_metadata_2063.snx
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
-%% A priori SRP value 
+%% A priori SRP value ("ONLY" work with the ECOM1 and ECOM2 model selected in EQM.in and VEQ.in)
 ! 1 : use the simple box-wing model as a priori SRP value
-! 2 : use the box-wing model from repro3 routines as a
-!     priori SRP value
+!     (Here the simple box-wing roughly generates a total force by considering the SRP effect on satellite bus and solar panel. 
+!     Later on, the ECOM1 or ECOM2 is used to adjust this a priori model)
+! 2 : use the box-wing model from repro3 routines as a priori SRP value
+!
 ! 0 : use the constant f0 as a priori SRP value
+!
 ! other numbers : directly estimate the SRP parameters
 
 Flag_BW_cfg        1

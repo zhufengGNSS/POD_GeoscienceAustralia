@@ -99,7 +99,7 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf,orbits_ics_icrf,P
       INTEGER Iyear, Imonth, Iday, J_flag
       DOUBLE PRECISION FD  
       REAL (KIND = prec_d) :: Sec_00, mjd, mjd_1, jd0
-      INTEGER (KIND = prec_int4) :: DOY
+      !INTEGER (KIND = prec_int4) :: DOY
       CHARACTER (LEN=10) :: srp_model
 ! ----------------------------------------------------------------------
     CHARACTER(LEN=8)  :: date_mach
