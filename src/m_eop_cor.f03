@@ -124,6 +124,12 @@ SUBROUTINE eop_cor (mjd, EOP_days, EOP_sol, n_interp , EOP_cr)
 ! EOP data array
 sz1_EOP = SIZE (EOP_days,DIM=1)
 sz2_EOP = SIZE (EOP_days,DIM=2)
+! ----------------------------------------------------------------------
+! FIXME: Ensure LOD, dX_eop, dY_eop are set to something sensible
+LOD = 0.d0
+dX_eop = 0.d0
+dY_eop = 0.d0
+
       DO i = 1 , sz1_EOP
          MJDint_ar(i) = EOP_days(i,1)
 ! xp,yp (arcsec)

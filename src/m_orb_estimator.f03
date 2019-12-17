@@ -132,12 +132,15 @@ Ncommon = Nepochs
 
 ! ----------------------------------------------------------------------
 ! Dynamic Allocatable arrays
+! FIXME: Initialise dyn memory
 ALLOCATE (Xmatrix(6+Nparam,1), STAT = AllocateStatus)
 ALLOCATE (Wmatrix(3*Ncommon,1), STAT = AllocateStatus)
 
 ALLOCATE (Amatrix(3*Ncommon,6+Nparam), STAT = AllocateStatus)
 ALLOCATE (AmatrixZ(3*Ncommon,6), STAT = AllocateStatus)
+AmatrixZ = 0.d0
 ALLOCATE (AmatrixP(3*Ncommon,Nparam), STAT = AllocateStatus)
+AmatrixP = 0.d0
 ALLOCATE (Amatrix_T(6+Nparam,3*Ncommon), STAT = AllocateStatus)
 
 ALLOCATE (NEQn(6+Nparam,6+Nparam), STAT = AllocateStatus)
@@ -145,6 +148,7 @@ ALLOCATE (NEQu(6+Nparam,1), STAT = AllocateStatus)
 ALLOCATE (NEQn_inv(6+Nparam,6+Nparam), STAT = AllocateStatus)
 
 ALLOCATE (ObsEpochs(Ncommon,2), STAT = AllocateStatus)
+ObsEpochs = 0.d0
 ! ----------------------------------------------------------------------
 
 

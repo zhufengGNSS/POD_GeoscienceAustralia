@@ -207,7 +207,7 @@ CALL readparam (EQM_fname_cfg, param_id, param_value)
 !READ ( TRIM(ADJUSTR(param_value)), FMT = * , IOSTAT=ios_key ) DE_fname_data
 DE_fname_data =  TRIM(param_value) 
 ln = LEN_TRIM (DE_fname_data)
-WRITE (EPH_name, FMT = '(A2,A3)' , IOSTAT=ios_key ), 'DE', DE_fname_data(ln-2:ln)
+WRITE (EPH_name, FMT = '(A2,A3)' , IOSTAT=ios_key ) 'DE', DE_fname_data(ln-2:ln)
 
 ! General orbit parameterization											
 Call prm_main (EQMfname)

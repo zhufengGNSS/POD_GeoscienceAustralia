@@ -125,9 +125,9 @@ ALLOCATE (param_value_array(Nparam), STAT = AllocateStatus)
 param_id_array(1) = 'cpr_radial'
 param_id_array(2) = 'cpr_along'
 param_id_array(3) = 'cpr_cross'
-write (param_value_array(1), *), CPR_CS_0(1,1), CPR_CS_0(1,2)
-write (param_value_array(2), *), CPR_CS_0(2,1), CPR_CS_0(2,2)
-write (param_value_array(3), *), CPR_CS_0(3,1), CPR_CS_0(3,2)
+write (param_value_array(1), *) CPR_CS_0(1,1), CPR_CS_0(1,2)
+write (param_value_array(2), *) CPR_CS_0(2,1), CPR_CS_0(2,2)
+write (param_value_array(3), *) CPR_CS_0(3,1), CPR_CS_0(3,2)
 !print *,"param_id_array", param_id_array
 !print *,"param_value_array", param_value_array
 

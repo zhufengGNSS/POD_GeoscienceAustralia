@@ -350,6 +350,11 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 ! Fraction of absorbed photons  = 1-v
 ! Fraction of reflected photons = uv
 ! Fraction of diffused photons  = v(1-u)
+!FIXME: Initialise variables G_REFL
+G_REFL = 0.d0
+G_ABSP = 0.d0
+G_DIFU = 0.d0
+
 IF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
 !*********
 ! X_SIDE *
@@ -401,7 +406,8 @@ IF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
 ! Compute the ratio of physical interactions at each side
        G_REFL(3)=TOTAL_Z_REFL_AREA/(Z_side(1,1)+Z_side(2,1))
        G_DIFU(3)=TOTAL_Z_DIFU_AREA/(Z_side(1,1)+Z_side(2,1))
-       G_ABSP(3)=1-(G_REFL(1)+G_DIFU(1))
+! FIXME: Index into G_REFL was 1 - corrected to 3?
+       G_ABSP(3)=1-(G_REFL(3)+G_DIFU(1))
 
 !***************
 ! SOLAR PANELS *

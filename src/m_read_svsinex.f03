@@ -291,8 +291,9 @@ IF(BLKTYP=='GPS-IIIA')   BLKID = 9
 IF(BLKTYP=='GLO')        BLKID = 101
 IF(BLKTYP=='GLO-M'  .or.BLKTYP == 'GLO-M+')  BLKID = 102
 IF(BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B') BLKID = 103
-IF(BLKTYP=='GLA-1')     BLKID = 201 ! Galileo (IOV)
-IF(BLKTYP=='GLA-2')     BLKID = 202 ! Galileo (FOC)
+IF(trim(BLKTYP)=='GAL-1')     BLKID = 201 ! Galileo (IOV)
+IF(trim(BLKTYP)=='GAL-2')     BLKID = 202 ! Galileo (FOC)
+!print*,'blktyp,blkid: ',blktyp,blkid
 
 END SUBROUTINE
 

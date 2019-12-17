@@ -133,8 +133,8 @@ SUBROUTINE rso (fname, PRN, orbRSO)
          PRINT *, "OPEN IOSTAT=", ios
       END IF
 ! ----------------------------------------------------------------------
-
-
+! FIXME: variable initialisation
+Nvec = 3
 
 ! ----------------------------------------------------------------------
 ! Read data file
