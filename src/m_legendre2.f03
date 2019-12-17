@@ -89,7 +89,7 @@ SUBROUTINE legendre2 (phi, nmax, d2Pnm_norm)
 !         STOP "*** Not enough memory ***"
       END IF
 ! ----------------------------------------------------------------------
-
+d2Pnm_norm = 0.0D0
 
 ! Numerical Constants
 pi = PI_global

@@ -79,7 +79,7 @@ r_sun = rbody
 ! Beta angle (degrees)
 CALL beta_angle (r_sat, v_sat, r_sun, beta)
 ! ----------------------------------------------------------------------
-print *,"beta", beta
+print *,'day of year',YR,DOY,PRN,'  ',"beta", beta
 
 ! ----------------------------------------------------------------------
 ! Criteria for changing orbit integration stepsize

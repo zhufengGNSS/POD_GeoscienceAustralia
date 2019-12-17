@@ -216,7 +216,10 @@ SUBROUTINE gfc1 (gfmfilename, n_trunc, sigma_shc, GM_gfc, ae_gfc, Nmax_gfc, tide
 		
       END IF
 ! ----------------------------------------------------------------------
-
+Cnm = 0.0D0
+Snm = 0.0D0
+sCnm = 0.0D0
+sSnm = 0.0D0
 
 ! ----------------------------------------------------------------------
 ! Read Spherical Harmonic Coefficients of .gfc file
@@ -500,7 +503,10 @@ SUBROUTINE gfc2 (gfmfilename,n_trunc,sigma_shc, mjd_t, Ntv_trunc, GM_gfc, ae_gfc
       	END DO
       END DO	  
 ! ----------------------------------------------------------------------
-
+if (sigma_shc /= 0) then
+sCnm = 0.0D0
+sSnm = 0.0D0
+end if
 
 ! ----------------------------------------------------------------------
 ! Read Spherical Harmonic Coefficients of .gfc file

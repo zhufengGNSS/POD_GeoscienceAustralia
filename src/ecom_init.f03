@@ -13,6 +13,8 @@ SUBROUTINE ecom_init (Niteration,ECOM_0_coef)
 !
 ! Created:	28-05-2019 
 !
+! Changes:      03-12-2019 Tzupang Tseng: a option for the simple box wing  
+!                                         is created
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -62,6 +64,14 @@ END IF
 IF (srp_i == 2) THEN
 fname = 'ECOM2_srp.in'
 param_id = 'ECOM2'
+write (param_value, *) ECOM_0_coef
+!Call write_prmfile (fname, fname_id, param_id, param_value)
+CALL write_prmfile_init0 (fname, param_id, param_value)
+END IF
+
+IF (srp_i == 3) THEN
+fname = 'SBOXW_srp.in'
+param_id = 'SBOXW'
 write (param_value, *) ECOM_0_coef
 !Call write_prmfile (fname, fname_id, param_id, param_value)
 CALL write_prmfile_init0 (fname, param_id, param_value)

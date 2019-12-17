@@ -5,8 +5,8 @@ project(pod)
 #project (add_vectors Fortran)
 enable_language(Fortran)
 
-#set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Wmaybe-uninitialized -fcheck=all -fbacktrace")
-set (CMAKE_Fortran_FLAGS "-O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -finit-local-zero -fbacktrace")
+set (CMAKE_Fortran_FLAGS "-O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -finit-local-zero")
+#set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -finit-local-zero -fbacktrace")
 find_package(LAPACK REQUIRED)
 find_package(BLAS REQUIRED)
 #message("Fortran default extensions = ${CMake_Fortran_SOURCE_FILE_EXTENSIONS}")
@@ -84,6 +84,7 @@ src/m_eop_cor.f03
 src/m_eop_igu.f03 
 src/m_eop_data.f03 
 src/m_keplerorb.f03 
+src/doy2str.f03
 src/m_orbdet.f03 
 src/m_orbitmain.f03 
 src/m_orbitIC.f03
