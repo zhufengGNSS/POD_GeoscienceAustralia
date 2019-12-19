@@ -145,85 +145,120 @@ IF (GNSSid == 'G') THEN
 ! GPS constellation
 ! -----------------
 ! I
-         if (BLKTYP=='GPS-I')then
+         if (TRIM(BLKTYP)=='GPS-I')then
          Z_SIDE = 3.020D0
          X_SIDE = 1.728D0
          A_SOLAR= 6.053D0
          F0 = 4.54d-5
 
 ! II and IIA
-         else if (BLKTYP=='GPS-II' .or. BLKTYP=='GPS-IIA') then
+         else if (TRIM(BLKTYP)=='GPS-II' .or. TRIM(BLKTYP)=='GPS-IIA') then
          Z_SIDE = 2.881D0
          X_SIDE = 2.893D0
          A_SOLAR= 11.871D0
          F0 = 8.695d-5
 ! IIF
-         else if(BLKTYP=='GPS-IIF') then
+         else if(TRIM(BLKTYP)=='GPS-IIF') then
          Z_SIDE = 5.05D0
          X_SIDE = 4.55D0
          A_SOLAR= 22.25D0
          F0 = 16.7d-5
 ! IIR
-         else if (BLKTYP=='GPS-IIR' .or. BLKTYP=='GPS-IIR-A' .or. &
-                  BLKTYP=='GPS-IIR-B'.or.BLKTYP=='GPS-IIR-M') then
+         else if (TRIM(BLKTYP)=='GPS-IIR' .or. TRIM(BLKTYP)=='GPS-IIR-A' .or. &
+                  TRIM(BLKTYP)=='GPS-IIR-B'.or.TRIM(BLKTYP)=='GPS-IIR-M') then
          Z_SIDE = 4.25D0
          X_SIDE = 4.11D0
          A_SOLAR= 13.92D0
          F0 = 11.15d-5
 ! III
-         else if (BLKTYP=='GPS-IIIA') then
+         else if (TRIM(BLKTYP)=='GPS-IIIA') then
          Z_SIDE = 4.38D0
          X_SIDE = 6.05D0
          A_SOLAR= 22.25D0
          F0 = 11.0d-5
+
+         else
+                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+                 STOP     
          end if
+
 ELSE IF (GNSSid == 'R') THEN
 ! GLONASS constellation
 ! ---------------------
-         if(BLKTYP=='GLO' .or. BLKTYP=='GLO-M' .or. BLKTYP == 'GLO-M+' .or.&
-            BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B')then
+         if(TRIM(BLKTYP)=='GLO'.or.TRIM(BLKTYP)=='GLO-M'.or.TRIM(BLKTYP)=='GLO-M+'.or.&
+            TRIM(BLKTYP)=='GLO-K1A'.or.TRIM(BLKTYP)=='GLO-K1B')then
          Z_SIDE = 1.6620D0
          X_SIDE = 4.200D0
          A_SOLAR= 23.616D0
 ! GLONASS-K
-         if(BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B') F0 = 10.0d-5
+         if(TRIM(BLKTYP)=='GLO-K1A'.or.TRIM(BLKTYP)=='GLO-K1B') F0 = 10.6d-5
 ! GLONASS-M
-         if (BLKTYP=='GLO' .or. BLKTYP=='GLO-M' .or. BLKTYP == 'GLO-M+') F0 = 20.9d-5
+         if(TRIM(BLKTYP)=='GLO'.or.TRIM(BLKTYP)=='GLO-M'.or.TRIM(BLKTYP)=='GLO-M+') F0 = 20.9d-5
 
+         else
+                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+                 STOP     
          end if
 
 ELSE IF (GNSSid == 'E') THEN
 ! GALILEO constellation
 ! ---------------------
-         if (BLKTYP=='GAL-1' .or. BLKTYP=='GAL-2') then
+         if (TRIM(BLKTYP)=='GAL-1'.or.TRIM(BLKTYP)=='GAL-2') then
          Z_SIDE = 3.002D0
          X_SIDE = 1.323D0
          A_SOLAR= 11.0D0
          F0 = 8.35d-5
+       
+         else
+                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+                 STOP     
          end if
 
 ELSE IF (GNSSid == 'C') THEN
 ! BDS constellation
 ! -----------------
-         if (BLKTYP=='BDS-2M'.or. BLKTYP=='BDS-2G'.or.BLKTYP=='BDS-2I') then
          Z_SIDE = 3.96D0
          X_SIDE = 4.5D0
          A_SOLAR= 22.44D0
+! BDS GEO
+         if(TRIM(BLKTYP)=='BDS-2G') F0 = 21.8d-5
 ! BDS MEO
-         if(BLKTYP=='BDS-2M') F0 = 8.35d-5
+         if(TRIM(BLKTYP)=='BDS-2M') F0 = 10.4d-5
 ! BDS IGSO
-         if(BLKTYP=='BDS-2I'.or. BLKTYP=='BDS-2G') F0 = 50.1d-5
+         if(TRIM(BLKTYP)=='BDS-2I') F0 = 17.0d-5
+         
+         if (BLKTYP(1:3)/='BDS') then
+                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+                 STOP     
          end if
 
 ELSE IF (GNSSid == 'J') THEN
 ! QZSS constellation
 ! ------------------
-         if (BLKTYP=='QZS-1'.or.BLKTYP=='QZS-2I'.or.BLKTYP=='QZS-2G') then
-         Z_SIDE = 6.00D0
-         X_SIDE = 12.2D0
-         A_SOLAR= 40.0D0
-         F0 = 50.1d-5 ! Assumed to be the same with BDS/IGSO
+! QZSS-1
+         if (TRIM(BLKTYP)=='QZS-1') then
+         Z_SIDE = 5.6D0
+         X_SIDE = 9.0D0
+         A_SOLAR= 45.0D0
+         F0 = 35.0d-5
+! QZSS-2I
+         else if (TRIM(BLKTYP)=='QZS-2I') then
+         Z_SIDE = 5.6D0
+         X_SIDE = 10.1D0
+         A_SOLAR= 29.8D0
+         F0 = 25.0d-5
+! QZSS-2G
+         else if (TRIM(BLKTYP)=='QZS-2G') then
+         Z_SIDE = 5.6D0
+         X_SIDE = 10.1D0
+         A_SOLAR= 29.8D0
+         F0 = 25.0d-5
+
+         else
+                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
+                 STOP
          end if
+
 END IF
 
 
@@ -416,7 +451,7 @@ end do
          YSAT(1:3) = r
          YSAT(4:6) = v
          CALL SRPFBOXW(REFF,YSAT,R_SUN,BLKID,SVNID,ACCEL)
-         alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
+         alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)/MASS
 
       else if (Flag_BW_cfg == 0) then
          alpha = F0/MASS

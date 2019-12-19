@@ -60,7 +60,11 @@ MONTH = 1
 !print*,'Block type, SVNID, BLKID,  power, MASS = ', BLKTYP, SVNID, BLKID,power, MASS
 CALL ERPFBOXW(ERM,ANT,GRD,REFF,YSAT,R_SUN,KAPPA,MONTH,BLKID,SVNID,MJD,ACCEL)
 
-fx_erp = ACCEL(1) 
-fy_erp = ACCEL(2)
-fz_erp = ACCEL(3)
+fx_erp = ACCEL(1)/MASS 
+fy_erp = ACCEL(2)/MASS
+fz_erp = ACCEL(3)/MASS
+!IF (BLKTYP(1:3) == 'GAL' .OR. BLKTYP(1:3) == 'GLO') THEN
+!PRINT*,'fx_erp, fy_erp, fz_erp =', fx_erp, fy_erp, fz_erp
+!END IF
+
 END SUBROUTINE

@@ -35,8 +35,14 @@ CC                           102 = GLONASS-M (Added TAH 190702)
 CC                           103 = GLONASS-K (Added TAH 190702)
 CC                           201 = Galileo (IOV) (Added from acc_albedo_propboxw.f)
 CC                           202 = Galileo (FOC) (Added from acc_albedo_propboxw.f)
+CC                           301 = BDS GEO
+CC                           302 = BDS IGSO
+CC                           303 = BDS MEO
+CC                           401 = QZSS-1
+CC                           402 = QZSS-2I
+CC                           403 = QZSS-2G
 CC                           NB: when adding a new block number, check last block in this function!
-
+CC
 CC        OUT :  AREA(I,J)  : AREAS OF FLAT SURFACES [m^2]
 CC               REFL(I,J)  : REFLEXION COEFFICIENT
 CC               DIFU(I,J)  : DIFFUSION COEFFICIENT
@@ -548,39 +554,118 @@ C      SOLAR PANELS
 CC ========================================================
 CC BDS satellites (Temporally using)
 CC Information: http://mgex.igs.org/IGS_MGEX_Status_BDS.php
+CC The BDS orbit is 30000 km, so the ERP effect could be tiny.
 CC ========================================================
         ELSEIF (BLKNUM.EQ.301.OR.BLKNUM.EQ.302.OR.BLKNUM.EQ.303)THEN 
           blk_found = .true. 
   
 C      +/- X SIDE
-          X_SIDE(1,1) = 4.50D0
-          X_SIDE(1,2) = 0.20D0 ! assumed to be identical to GPS III
-          X_SIDE(1,3) = 0.56D0 ! assumed to be identical to GPS III
+          X_SIDE(1,1) = 3.78D0
+          X_SIDE(1,2) = 0.20D0 ! guess 
+          X_SIDE(1,3) = 0.56D0 ! guess
           X_SIDE(1,4) = 1D0
 
 C      +/- Y SIDE
-          Y_SIDE(1,1) = 5.50D0
-          Y_SIDE(1,2) = 0.20D0 ! assumed to be identical to GPS III
-          Y_SIDE(1,3) = 0.56D0 ! assumed to be identical to GPS III
+          Y_SIDE(1,1) = 4.40D0
+          Y_SIDE(1,2) = 0.20D0 
+          Y_SIDE(1,3) = 0.56D0 
           Y_SIDE(1,4) = 1D0
 
 C      -Z SIDE
-          Z_SIDE(1,1) = 3.96D0
+          Z_SIDE(1,1) = 3.44D0
           Z_SIDE(1,2) = 0.0D0 
           Z_SIDE(1,3) = 0.0D0 
           Z_SIDE(1,4) = 1D0
 
 C      +Z SIDE
-          Z_SIDE(3,1) = 3.96D0
+          Z_SIDE(3,1) = 3.44D0
           Z_SIDE(3,2) = 0.0D0
-          Z_SIDE(3,3) = 0.0D0
+          Z_SIDE(3,3) = 0.13D0 !guess
           Z_SIDE(3,4) = 1D0
 
 C      SOLAR PANELS
-          S_SIDE(1,1) = 22.440D0
+          S_SIDE(1,1) = 22.70D0
           S_SIDE(1,2) = 0.85D0
-          S_SIDE(1,3) = 0.23D0
+          S_SIDE(1,3) = 0.28D0
           S_SIDE(1,4) = 1D0
+
+CC ========================================================
+CC Cabinet Office; QZS-1 Satellite Information; SPI-QZS1_A;
+CC https://qzss.go.jp/en/technical/qzssinfo/khp0mf0000000wuf-att/spi-qzs1_a.pdf                                           
+CC Cabinet Office; QZS-2 Satellite Information; SPI-QZS2_C;
+CC https://qzss.go.jp/en/technical/qzssinfo/khp0mf0000000wuf-att/spi-qzs2_c.pdf                                           
+CC Cabinet Office; QZS-3 Satellite Information; SPI-QZS3_B; 
+CC https://qzss.go.jp/en/technical/qzssinfo/khp0mf0000000wuf-att/spi-qzs3_b.pdf                                           
+CC Cabinet Office; QZS-4 Satellite Information; SPI-QZS4_C; 
+CC https://qzss.go.jp/en/technical/qzssinfo/khp0mf0000000wuf-att/spi-qzs4_c.pdf 
+CC The QZSS orbit is 40000 km, so the ERP effect could be very tiny.               
+CC ========================================================
+      ELSEIF (BLKNUM.EQ.401)THEN 
+       blk_found = .true.
+
+C      +/- X SIDE
+          X_SIDE(1,1) = 10.10D0
+          X_SIDE(1,2) = 0.47D0 
+          X_SIDE(1,3) = 0.07D0 
+          X_SIDE(1,4) = 1D0
+
+C      +/- Y SIDE
+          Y_SIDE(1,1) = 10.10D0
+          Y_SIDE(1,2) = 0.47D0 
+          Y_SIDE(1,3) = 0.07D0 
+          Y_SIDE(1,4) = 1D0
+
+C      -Z SIDE
+          Z_SIDE(1,1) = 5.60D0
+          Z_SIDE(1,2) = 0.47D0
+          Z_SIDE(1,3) = 0.07D0
+          Z_SIDE(1,4) = 1D0
+
+C      +Z SIDE
+          Z_SIDE(3,1) = 5.60D0
+          Z_SIDE(3,2) = 0.47D0
+          Z_SIDE(3,3) = 0.07D0
+          Z_SIDE(3,4) = 1D0
+
+C      SOLAR PANELS
+          S_SIDE(1,1) = 45.00D0
+          S_SIDE(1,2) = 0.88D0
+          S_SIDE(1,3) = 0.07D0
+          S_SIDE(1,4) = 1D0
+      
+      ELSEIF(BLKNUM.EQ.402.OR.BLKNUM.EQ.403)THEN
+       blk_found = .true.
+
+C      +/- X SIDE
+          X_SIDE(1,1) = 10.10D0
+          X_SIDE(1,2) = 0.47D0 
+          X_SIDE(1,3) = 0.07D0 
+          X_SIDE(1,4) = 1D0
+
+C      +/- Y SIDE
+          Y_SIDE(1,1) = 10.10D0
+          Y_SIDE(1,2) = 0.47D0 
+          Y_SIDE(1,3) = 0.07D0 
+          Y_SIDE(1,4) = 1D0
+
+C      -Z SIDE
+          Z_SIDE(1,1) = 5.60D0
+          Z_SIDE(1,2) = 0.47D0
+          Z_SIDE(1,3) = 0.07D0
+          Z_SIDE(1,4) = 1D0
+
+C      +Z SIDE
+          Z_SIDE(3,1) = 5.60D0
+          Z_SIDE(3,2) = 0.47D0
+          Z_SIDE(3,3) = 0.07D0
+          Z_SIDE(3,4) = 1D0
+
+C      SOLAR PANELS
+          S_SIDE(1,1) = 29.80D0
+          S_SIDE(1,2) = 0.88D0
+          S_SIDE(1,3) = 0.07D0
+          S_SIDE(1,4) = 1D0
+
 
       ENDIF
 

@@ -647,52 +647,55 @@ C        FORCE IN ORBITAL REFERENCE FRAME
          ENDDO
       ENDIF
 
+! In the following, the satellite mass has been extracted from IGS SINEX
+! file (19-12-2019, Tzupang Tseng)
 
 C     MASS OF SATELLITES
 * MOD TAH 190722: Updated the masses for Block IIF, IIIA, and
 *     Galileo.  Made values consistent with igs_metadata.snx
-      IF(BLKNUM.EQ.1)THEN
-         MASS = 455D0
-      ELSEIF(BLKNUM.EQ.2)THEN 
-         MASS = 843D0
-      ELSEIF(BLKNUM.EQ.3)THEN
-         MASS = 930D0
-      ELSEIF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
-         MASS = 1080D0
-      ELSEIF(BLKNUM.EQ.8)THEN
-         MASS = 1633D0
-      ELSEIF(BLKNUM.EQ.9)THEN
-         MASS = 2161D0
+!      IF(BLKNUM.EQ.1)THEN
+!         MASS = 455D0
+!      ELSEIF(BLKNUM.EQ.2)THEN 
+!         MASS = 843D0
+!      ELSEIF(BLKNUM.EQ.3)THEN
+!         MASS = 930D0
+!      ELSEIF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
+!         MASS = 1080D0
+!      ELSEIF(BLKNUM.EQ.8)THEN
+!         MASS = 1633D0
+!      ELSEIF(BLKNUM.EQ.9)THEN
+!         MASS = 2161D0
 * GLONASS
-      ELSEIF((BLKNUM.EQ.101).OR.(BLKNUM.EQ.102))THEN
-         MASS = 1415D0
-      ELSEIF(BLKNUM.EQ.103)THEN
-         MASS = 995D0
+!      ELSEIF((BLKNUM.EQ.101).OR.(BLKNUM.EQ.102))THEN
+!         MASS = 1415D0
+!      ELSEIF(BLKNUM.EQ.103)THEN
+!         MASS = 995D0
 * GALILEO
-      ELSEIF(BLKNUM.eq.201) then
-         mass =  695.D0    ! Average value
-      ELSEIF(BLKNUM.eq.202) then
+!      ELSEIF(BLKNUM.eq.201) then
+!         mass =  695.D0    ! Average value
+!      ELSEIF(BLKNUM.eq.202) then
 *        Need to treat hi-eccentricity SV with different mass
-         if ( svn.ge.201 .and. svn.le.202 ) then
-            mass = 660.d0   ! Typical value
-         else
-            mass = 710.d0   ! Average 19/07/22 == 708.597kg
-         endif
+!         if ( svn.ge.201 .and. svn.le.202 ) then
+!            mass = 660.d0   ! Typical value
+!         else
+!            mass = 710.d0   ! Average 19/07/22 == 708.597kg
+!         endif
 * BDS
-      ELSEIF(BLKNUM.eq.301) then
-         MASS = 1550D0
-      ELSEIF(BLKNUM.eq.302 .or.BLKNUM.eq.303) then
-         MASS = 1900D0
+!      ELSEIF(BLKNUM.eq.301) then
+!         MASS = 1550D0
+!      ELSEIF(BLKNUM.eq.302 .or.BLKNUM.eq.303) then
+!         MASS = 1900D0
 
-      else
-         print *,'No MASS for BLKNUM ',BLKNUM
-         stop 'NO MASS: ERPFBOXW'
+!      else
+!         print *,'No MASS for BLKNUM ',BLKNUM
+!         stop 'NO MASS: ERPFBOXW'
  
-      ENDIF
+!      ENDIF
 
 C     CONVERSION TO ACCELERATION
       DO K=1,3
-         ACCEL(K) = FORCE(K)/MASS
+         !ACCEL(K) = FORCE(K)/MASS
+         ACCEL(K) = FORCE(K)
       ENDDO
                     
 cd      write(*,*) 'force mass accel '

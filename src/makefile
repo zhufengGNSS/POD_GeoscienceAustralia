@@ -5,7 +5,7 @@ FC = gfortran
 
 # Compiler flags
 
-OPENBLAS = -L/data/OpenBLAS -lopenblas
+OPENBLAS = -L /data/OpenBLAS -lopenblas
 FCFLAGS = -O3 -frecursive $(OPENBLAS)
 
 #FCFLAGS = -O3 -llapack -lblas -frecursive  
