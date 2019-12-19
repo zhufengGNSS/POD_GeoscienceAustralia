@@ -282,12 +282,14 @@ Do isat = 1 , Nsat
 ! Rewrite :: PRN
 ! ----------------------------------------------------------------------
 PRN_isat = PRNmatrix(isat)
-print *,"Satellite: ", PRNmatrix(isat) ! isat
+!print *,"Satellite: ", PRNmatrix(isat) ! isat
 ! Read Satellite infromation from SINEX file
 ! ----------------------------------------------------------------------
 CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat)
-print*,'GNSS Block Type: ', BLKTYP
+!print*,'GNSS Block Type: ', BLKTYP
 
+write(*,10) trim(PRN_isat),SVNID,trim(BLKTYP),BLKID,POWER,MASS
+10 format(' PRN: ',a,', SVN: ',i03,', BLK TYP: ',a,', BLKID: ',i3,', TX PWR:',i3,', MASS: ',f8.3)
 ! ----------------------------------------------------------------------
 ! Copy Initial Configuration files 
 write (fname_id, FMT='(A1,A3)') '_', PRN_isat
@@ -310,6 +312,7 @@ IF (IC_MODE_cfg == 1) THEN
 Call prm_main     (EQMfname_PRN)
 CALL prm_pseudobs (EQMfname_PRN)
 Zo = pseudobs_ITRF(1,3:8)
+PRINT*,"IC: ", pseudobs_ITRF(1,:)
 
 ELSE IF (IC_MODE_cfg == 2) THEN
 ! Initial Conditions file option
@@ -319,6 +322,9 @@ sz1 = size(IC_matrix_glb, DIM = 1)
 sz2 = size(IC_matrix_glb, DIM = 2)
 ALLOCATE (IC_sat_glb(sz2), STAT = AllocateStatus)
 IC_sat_glb = IC_matrix_glb (isat,1:sz2)
+PRINT*,"Zo", IC_matrix_glb (isat,1:)
+ELSE
+PRINT*,"Zo", Zo
 END IF
 !print *,"Zo", Zo
 

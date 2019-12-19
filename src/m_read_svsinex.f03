@@ -204,26 +204,28 @@ END DO
 ! Prepare SVNID and BLKID for the global variables
 ! ------------------------------------------------
 SVNID = satid
-IF(BLKTYP=='GPS-I')      BLKID = 1
-IF(BLKTYP=='GPS-II')     BLKID = 2
-IF(BLKTYP=='GPS-IIA')    BLKID = 3
-IF(BLKTYP=='GPS-IIR')    BLKID = 4
-IF(BLKTYP=='GPS-IIR-A')  BLKID = 5
-IF(BLKTYP=='GPS-IIR-B')  BLKID = 6
-IF(BLKTYP=='GPS-IIR-M')  BLKID = 7
-IF(BLKTYP=='GPS-IIF')    BLKID = 8
-IF(BLKTYP=='GPS-IIIA')   BLKID = 9
-IF(BLKTYP=='GLO')        BLKID = 101
-IF(BLKTYP=='GLO-M'  .or.BLKTYP == 'GLO-M+')  BLKID = 102
-IF(BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B') BLKID = 103
-IF(BLKTYP=='GLA-1')     BLKID = 201 ! Galileo (IOV)
-IF(BLKTYP=='GLA-2')     BLKID = 202 ! Galileo (FOC)
-IF(BLKTYP=='BDS-2G'.or.BLKTYP == 'BDS-3G')            BLKID = 301 ! BDS GEO
-IF(BLKTYP=='BDS-2I'.or.BLKTYP == 'BDS-3I'.or.&
-   BLKTYP=='BDS-3SI-SECM'.or.BLKTYP =='BDS-3SI-CAST') BLKID = 302 ! BDS IGSO
-IF(BLKTYP=='BDS-2M'.or.BLKTYP == 'BDS-3M'.or.&
-   BLKTYP=='BDS-3M-SECM'.or.BLKTYP =='BDS-3M-CAST')   BLKID = 303 ! BDS MEO
-
+IF(TRIM(BLKTYP)=='GPS-I')      BLKID = 1
+IF(TRIM(BLKTYP)=='GPS-II')     BLKID = 2
+IF(TRIM(BLKTYP)=='GPS-IIA')    BLKID = 3
+IF(TRIM(BLKTYP)=='GPS-IIR')    BLKID = 4
+IF(TRIM(BLKTYP)=='GPS-IIR-A')  BLKID = 5
+IF(TRIM(BLKTYP)=='GPS-IIR-B')  BLKID = 6
+IF(TRIM(BLKTYP)=='GPS-IIR-M')  BLKID = 7
+IF(TRIM(BLKTYP)=='GPS-IIF')    BLKID = 8
+IF(TRIM(BLKTYP)=='GPS-IIIA')   BLKID = 9
+IF(TRIM(BLKTYP)=='GLO')        BLKID = 101
+IF(TRIM(BLKTYP)=='GLO-M'  .or.TRIM(BLKTYP) == 'GLO-M+')  BLKID = 102
+IF(TRIM(BLKTYP)=='GLO-K1A'.or.TRIM(BLKTYP) == 'GLO-K1B') BLKID = 103
+IF(TRIM(BLKTYP)=='GAL-1')     BLKID = 201 ! Galileo (IOV)
+IF(TRIM(BLKTYP)=='GAL-2')     BLKID = 202 ! Galileo (FOC)
+IF(TRIM(BLKTYP)=='BDS-2G'.or.TRIM(BLKTYP) == 'BDS-3G')            BLKID = 301 ! BDS GEO
+IF(TRIM(BLKTYP)=='BDS-2I'.or.TRIM(BLKTYP) == 'BDS-3I'.or.&
+   TRIM(BLKTYP)=='BDS-3SI-SECM'.or.TRIM(BLKTYP) =='BDS-3SI-CAST') BLKID = 302 ! BDS IGSO
+IF(TRIM(BLKTYP)=='BDS-2M'.or.TRIM(BLKTYP) == 'BDS-3M'.or.&
+   TRIM(BLKTYP)=='BDS-3M-SECM'.or.TRIM(BLKTYP) =='BDS-3M-CAST')   BLKID = 303 ! BDS MEO
+IF(TRIM(BLKTYP)=='QZS-1')     BLKID = 401 
+IF(TRIM(BLKTYP)=='QZS-2I')    BLKID = 402 ! QZSS-IGSO
+IF(TRIM(BLKTYP)=='QZS-2G')    BLKID = 403 ! QZSS-GEO
 
 ! Get the satellite mass ( SATELLITE/MASS block )
 REWIND(UNIT_IN)
@@ -281,7 +283,7 @@ DO WHILE (.not.found)
    READ(UNIT_IN,'(a)',IOSTAT=ioerr) record
    IF(record(1:3)=='-SAT'.or.ioerr/=0) THEN
    IF( ioerr/=0 ) then
-   print*,'Failed to find SV in TX_POWER block and the POWER is set to 185 W'
+!   print*,'Failed to find SV in TX_POWER block and the POWER is set to 185 W'
    POWER=185 ! assumed to be consistent with BDS IGSO
    RETURN
    END IF
@@ -304,28 +306,6 @@ DO WHILE (.not.found)
     END IF
 END DO
 
-! Prepare SVNID and BLKID for the global variables
-! ------------------------------------------------
-!SVNID = satid
-!IF(BLKTYP=='GPS-I')      BLKID = 1
-!IF(BLKTYP=='GPS-II')     BLKID = 2
-!IF(BLKTYP=='GPS-IIA')    BLKID = 3
-!IF(BLKTYP=='GPS-IIR')    BLKID = 4
-!IF(BLKTYP=='GPS-IIR-A')  BLKID = 5
-!IF(BLKTYP=='GPS-IIR-B')  BLKID = 6
-!IF(BLKTYP=='GPS-IIR-M')  BLKID = 7
-!IF(BLKTYP=='GPS-IIF')    BLKID = 8
-!IF(BLKTYP=='GPS-IIIA')   BLKID = 9
-!IF(BLKTYP=='GLO')        BLKID = 101
-!IF(BLKTYP=='GLO-M'  .or.BLKTYP == 'GLO-M+')  BLKID = 102
-!IF(BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B') BLKID = 103
-!IF(BLKTYP=='GLA-1')     BLKID = 201 ! Galileo (IOV)
-!IF(BLKTYP=='GLA-2')     BLKID = 202 ! Galileo (FOC)
-!IF(BLKTYP=='BDS-2G'.or.BLKTYP == 'BDS-3G')            BLKID = 301 ! BDS GEO
-!IF(BLKTYP=='BDS-2I'.or.BLKTYP == 'BDS-3I'.or.&
-!   BLKTYP=='BDS-3SI-SECM'.or.BLKTYP =='BDS-3SI-CAST') BLKID = 302 ! BDS IGSO
-!IF(BLKTYP=='BDS-2M'.or.BLKTYP == 'BDS-3M'.or.&
-!   BLKTYP=='BDS-3M-SECM'.or.BLKTYP =='BDS-3M-CAST')   BLKID = 303 ! BDS MEO
 
 END SUBROUTINE
 
