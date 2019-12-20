@@ -44,6 +44,12 @@ CC                           102 = GLONASS-M (Added TAH 190702)
 CC                           103 = GLONASS-K (Added TAH 190702)
 CC                           201 = Galileo (IOV) (Added from acc_albedo_propboxw.f)
 CC                           202 = Galileo (FOC) (Added from acc_albedo_propboxw.f)
+CC                           301 = BDS GEO
+CC                           302 = BDS IGSO
+CC                           303 = BDS MEO
+CC                           401 = QZSS-1
+CC                           402 = QZSS-2I
+CC                           403 = QZSS-2G
 CC                           NB: when adding a new block number, check last block in this function!
 CC               SVN       : SPACE VEHICLE NUMBER          
 CC               MJD       : MODIFIED JULIAN DAY
@@ -64,8 +70,8 @@ C
 C MOD TAH 190722: Introduced max_blk for number of block types
 C     that can be stored (was 15 for GPS+GLONASS).
       integer*4 max_blk   ! Max number of block types indices
-                          ! 0-10 GPS, 11-20 Glonass, 21-30 Galileo
-      parameter ( max_blk = 30 ) 
+                          ! 0-10 GPS, 11-20 Glonass, 21-30 Galileo, 31-40 BDS, 41-50 QZSS
+      parameter ( max_blk = 50 ) 
 C
       INTEGER*4 BLKNUM,ERM,ANT,GRD,REFF,SBLK,INDB,MONTH,SVN
       INTEGER*4 IFIRST,II,JJ,K,LFNLOC,IOSTAT,LENPATH
@@ -119,7 +125,9 @@ C     when other constellations added.
 
       data known_blks /  1,   2,   3,   4,   5,  6,  7,  8,  9,  0,
      .                 101, 102, 103,   0,   0,  0,  0,  0,  0,  0,
-     .                 201, 202,   0,   0,   0,  0,  0,  0,  0,  0 /
+     .                 201, 202,   0,   0,   0,  0,  0,  0,  0,  0,
+     .                 301, 302, 303,   0,   0,  0,  0,  0,  0,  0,
+     .                 401, 402, 403,   0,   0,  0,  0,  0,  0,  0 /
 C
       DATA IFIRST/1/
       DATA (F_MONTH(K),K=1,12)/
@@ -159,6 +167,11 @@ C Initialization of force vector
       ACCEL(3) = 0D0
 
       LFNLOC = 999
+C ----------------------------------------
+C FIXME: Default variable initialisation LONKMX, LATKMX, GRDNUM
+      LONKMX = 0
+      LATKMX = 0
+      GRDNUM = 1.d0
 
 C ----------------------------------------
 C LOAD SATELLITE PROPERTIES AND CERES DATA
@@ -176,6 +189,7 @@ C           IF((SBLK.LE.10).OR.(SBLK.GT.100))THEN
             CALL PROPBOXW(SBLK,AREAS,REFLS,DIFUS,ABSPS,AREA2S,REFL2S,
      1                    DIFU2S,ABSP2S,REFLIRS,DIFUIRS,ABSPIRS)
 
+!            print*,'SBLK, ERM, AREAS: ',SBLK,ERM,AREAS
 C           IF(SBLK.LE.10)THEN
 C              INDB = SBLK
 C           ELSEIF(SBLK.GT.100)THEN
@@ -422,8 +436,14 @@ C ----------------------------
          ELSEIF(BLKNUM.GT.100 .and. BLKNUM.lt.200 )THEN
             INDB = BLKNUM - 90
 C MOD TAH 190722: Added Galileo
-         ELSEIF(BLKNUM.gt.200) then
+         ELSEIF(BLKNUM.gt.200 .and. BLKNUM.lt.300 ) then
             indb = blknum - 180
+C MOD SCM 191219: Added BDS
+         ELSEIF(BLKNUM.gt.300 .and. BLKNUM.lt.400 ) then
+            indb = blknum - 270
+C MOD SCM 191219: Added QZSS
+         ELSEIF(BLKNUM.gt.400) then
+            indb = blknum - 360
          ENDIF
          DO II = 1,4
             DO JJ = 1,2
@@ -580,6 +600,10 @@ C                 Non-conservative force
 C     ANTENNA POWER OF GPS SATELLITES (IN WATTS)
 C     IGS MODEL (JIM RAY, 2011)
 
+C     NO ANTENNA POWER INFORMATION FOR GLONASS SATELLITES
+C     FIXME: initialisation of ANTPOW
+      ANTPOW = 0.d0
+
 C     GPS BLOCK IIA (ASSUMED THE SAME FOR BLOCK I AND II) 
       IF(BLKNUM.LE.3)THEN
          ANTPOW = 76D0
@@ -601,7 +625,6 @@ C           NO M-CODE FOR SVN62/PRN25 STARTING 05APR2011; NANU 2011026
          ENDIF
       ENDIF
 
-C     NO ANTENNA POWER INFORMATION FOR GLONASS SATELLITES
 
 
 C     NAVIGATION ANTENNA THRUST (SIMPLE MODEL)
