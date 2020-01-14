@@ -114,3 +114,36 @@ partials_velocity_cfg	  	  0
 %% Leap second
 leapsec_filename_cfg        leap.second
 ! ----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+%% Write partials of the velocity vector w.r.t. parameters into the orbits_partials output file: 
+----------------------------------------------------------------------
+! 0. partials_velocity_cfg = 0 :: Do not write Velocity vector's partials elements
+! 1. partials_velocity_cfg > 0 :: Write Velocity vector's partials elements
+partials_velocity_cfg	  	  0
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+%% Leap second
+leapsec_filename_cfg        leap.second
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
+%% Satellite metadata SINEX
+satsinex_filename_cfg        igs_metadata_2063.snx
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+%% A priori SRP value 
+! 1 : use the simple box-wing model as a priori SRP value
+! 2 : use the box-wing model from repro3 routines as a
+!     priori SRP value
+! 0 : use the constant f0 as a priori SRP value
+! other numbers : directly estimate the SRP parameters
+
+Flag_BW_cfg        1
+
+! ----------------------------------------------------------------------
+

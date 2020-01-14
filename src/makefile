@@ -40,7 +40,7 @@ prm_main.f03 prm_emp.f03 prm_grav.f03 prm_gravity.f03 prm_nongrav.f03 prm_ocean.
 ecom_init.f03 prm_srp.f03 \
 f90getopt.F90 read_cmdline.f03 \
 m_read_satsnx.f03 m_read_svsinex.f03 \
-mat2quater.f03 \
+m_attitude_orb.f03 att_matrix.f03 mat2quater.f03 m_write_orbex.f03 \
 main_pod.f03
 
 CRS2TRSSRCS = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 m_writearray.f03 \
