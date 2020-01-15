@@ -15,7 +15,7 @@ ln -s ../tables/leap.second .           >& /dev/null
 ln -s ../tables/eopc04_14_IAU2000.62-now . >& /dev/null
 
 # Run the POD
-../pod | tee pod.out
+../bin/pod | tee pod.out
 
 # Diff output
 diff pod.out pod.out.good
