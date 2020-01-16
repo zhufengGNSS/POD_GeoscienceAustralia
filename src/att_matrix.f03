@@ -186,13 +186,16 @@ CALL matrix_inv3 (Rcrf_bff, Rbff2crf)
 CALL EOP (mjd, EOP_cr, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2CRS)	  
 
 ! Body-fixed frame to Terrestrial frame
-Rbff2trf = Rbff2crf * CRS2TRS
+!Rbff2trf = Rbff2crf * CRS2TRS
+Rbff2trf = MATMUL(Rbff2crf,CRS2TRS)
 
 ! Rotation matrix: Terrestrial reference frame to body-fixed frame
 !An = size(Rbff2trf, DIM = 2)
 !Call matrixinv (Rbff2trf, Rtrf2bff, An)
 CALL matrix_inv3 (Rbff2trf, Rtrf2bff)
 ! ----------------------------------------------------------------------
+
+Rtrf2bff = MATMUL(TRS2CRS,Rcrf_bff)
 
 ! ----------------------------------------------------------------------
 ! Quaternions computation based on rotation matrix
@@ -201,7 +204,5 @@ CALL matrix_inv3 (Rbff2trf, Rtrf2bff)
 CALL mat2quater(Rtrf2bff,quater)
 Quaternions_trf2bff = quater
 ! ----------------------------------------------------------------------
-
-
 
 end
