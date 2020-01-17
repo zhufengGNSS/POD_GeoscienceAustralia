@@ -175,6 +175,7 @@ CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRNsat, satblk, BDSorbtype, &
 Yaw_angle = Yangle_array(2)
 CALL crf_bff (rsat_icrf, vsat_icrf, Yaw_angle, Rcrf_bff, Rrtn_bff)
 
+IF (1<0) THEN
 ! Inverse matrix
 !Rbff2crf = inv(Rcrf_bff)
 !An = size(Rcrf_bff, DIM = 2)
@@ -193,9 +194,16 @@ Rbff2trf = MATMUL(Rbff2crf,CRS2TRS)
 !An = size(Rbff2trf, DIM = 2)
 !Call matrixinv (Rbff2trf, Rtrf2bff, An)
 CALL matrix_inv3 (Rbff2trf, Rtrf2bff)
+
+END IF 
 ! ----------------------------------------------------------------------
 
-Rtrf2bff = MATMUL(TRS2CRS,Rcrf_bff)
+CALL EOP (mjd, EOP_cr, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2CRS)	  
+
+!Rtrf2bff = MATMUL(TRS2CRS,Rcrf_bff)
+Rtrf2bff = MATMUL(Rcrf_bff,TRS2CRS)
+! ----------------------------------------------------------------------
+
 
 ! ----------------------------------------------------------------------
 ! Quaternions computation based on rotation matrix
