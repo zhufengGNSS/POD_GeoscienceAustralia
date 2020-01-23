@@ -118,20 +118,36 @@ mjd    = orbits_partials_icrf(i_epoch,1,i_sat)
 Sec_00 = orbits_partials_icrf(i_epoch,2,i_sat)
 rsat_icrf = orbits_partials_icrf(i_epoch,3:5,i_sat)
 vsat_icrf = orbits_partials_icrf(i_epoch,6:8,i_sat)
+print *,"PRN, Sec00 ", PRN_GNSS, Sec_00 
 
 ! Computation of satellite attitude and transformation matrix between terrestrial and satellite body-fixed frame
 CALL att_matrix (mjd, rsat_icrf, vsat_icrf, PRN_GNSS, satsinex_filename,       & 
 				& eclipse_status, Yangle_array, Rtrf2bff, Quaternions_trf2bff)
+print *,"Yangle", Yangle_array 
+print *,"  "
 
 attitude_array(i_epoch,1,i_sat) = mjd
 attitude_array(i_epoch,2,i_sat) = Sec_00
 attitude_array(i_epoch,3,i_sat) = eclipse_status
 attitude_array(i_epoch,4,i_sat) = Yangle_array(1)
 attitude_array(i_epoch,5,i_sat) = Yangle_array(2)
-attitude_array(i_epoch,6:8,i_sat)   = Rtrf2bff(1,1:3)
-attitude_array(i_epoch,9:11,i_sat)  = Rtrf2bff(2,1:3)
-attitude_array(i_epoch,12:14,i_sat) = Rtrf2bff(3,1:3)
-attitude_array(i_epoch,15:18,i_sat) = Quaternions_trf2bff(1:4)
+!attitude_array(i_epoch,6:8,i_sat)   = Rtrf2bff(1,1:3)
+attitude_array(i_epoch,6,i_sat)   = Rtrf2bff(1,1)
+attitude_array(i_epoch,7,i_sat)   = Rtrf2bff(1,2)
+attitude_array(i_epoch,8,i_sat)   = Rtrf2bff(1,3)
+!attitude_array(i_epoch,9:11,i_sat)  = Rtrf2bff(2,1:3)
+attitude_array(i_epoch,9,i_sat)  = Rtrf2bff(2,1)
+attitude_array(i_epoch,10,i_sat)  = Rtrf2bff(2,2)
+attitude_array(i_epoch,11,i_sat)  = Rtrf2bff(2,3)
+!attitude_array(i_epoch,12:14,i_sat) = Rtrf2bff(3,1:3)
+attitude_array(i_epoch,12,i_sat) = Rtrf2bff(3,1)
+attitude_array(i_epoch,13,i_sat) = Rtrf2bff(3,2)
+attitude_array(i_epoch,14,i_sat) = Rtrf2bff(3,3)
+!attitude_array(i_epoch,15:18,i_sat) = Quaternions_trf2bff(1:4)
+attitude_array(i_epoch,15,i_sat) = Quaternions_trf2bff(1)
+attitude_array(i_epoch,16,i_sat) = Quaternions_trf2bff(2)
+attitude_array(i_epoch,17,i_sat) = Quaternions_trf2bff(3)
+attitude_array(i_epoch,18,i_sat) = Quaternions_trf2bff(4)
 
 	END DO
 END DO
