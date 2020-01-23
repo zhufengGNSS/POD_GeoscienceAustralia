@@ -49,9 +49,9 @@ SUBROUTINE att_matrix(mjd, rsat_icrf, vsat_icrf, PRNsat, satsinex_filename, &
       REAL (KIND = prec_q), INTENT(IN) :: rsat_icrf(3), vsat_icrf(3)
       CHARACTER (LEN=3) , INTENT(IN) :: PRNsat
       CHARACTER (LEN=100), INTENT(IN) :: satsinex_filename
+! OUT
       INTEGER (KIND = 4) :: eclipse_status
       REAL (KIND = prec_d) :: Yangle_array(2)	  
-! OUT
       REAL (KIND = prec_q), INTENT(OUT) :: Rtrf2bff(3,3)
       REAL (KIND = prec_q), INTENT(OUT) :: Quaternions_trf2bff(4)
 ! ----------------------------------------------------------------------
@@ -82,9 +82,12 @@ SUBROUTINE att_matrix(mjd, rsat_icrf, vsat_icrf, PRNsat, satsinex_filename, &
       REAL (KIND = prec_d) :: d_CRS2TRS(3,3), d_TRS2CRS(3,3)
 	  DOUBLE PRECISION, Dimension(4) :: quater 
 ! ----------------------------------------------------------------------
+      REAL (KIND = prec_d) :: Rz_yaw(3,3)
+      REAL (KIND = prec_d) :: Yangle_rad
 
 
 
+print *,"att_matrix SINEX entry"
 
 ! ----------------------------------------------------------------------
 ! Read SINEX file for satellite metadata (SVN number,Satellite Block type,..)  
@@ -99,13 +102,15 @@ SUBROUTINE att_matrix(mjd, rsat_icrf, vsat_icrf, PRNsat, satsinex_filename, &
    CALL read_satsnx (satsinex_filename, Iyear, DOY, Sec_00, PRNsat) 
 ! ----------------------------------------------------------------------
 
+print *,"att_matrix SINEX exit"
+
 ! ----------------------------------------------------------------------
 ! GNSS Satellite Block Type
 ! ----------------------------------------------------------------------
 ! BLK_TYP :: Global variable in mdl_param
 ! ----------------------------------------------------------------------
 ! GPS case: Satellite Block ID:        1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
-satblk = 3
+satblk = 6
 IF(BLKTYP=='GPS-I')			  THEN
 	satblk = 1
 ELSE IF(BLKTYP=='GPS-II')	  THEN
@@ -135,17 +140,17 @@ IF(BLKTYP=='BDS-2M'.or.BLKTYP == 'BDS-3M'.or.&
    BLKTYP=='BDS-3M-SECM'.or.BLKTYP =='BDS-3M-CAST')   BDSorbtype = 'MEO'
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 ! Sun position vector computation
 ! ----------------------------------------------------------------------
-NTARG_body = 11
-
 ! Julian Day Number of the input epoch
 JD = mjd + 2400000.5D0
-
+! Center celestial body: Earth
+NCTR = 3 
 ! Celestial body's (NTARG) Cartesian coordinates w.r.t. Center body (NCTR)
-      NTARG = NTARG_body
+! Sun: 11 
+NTARG = 11
+
       CALL  PLEPH ( JD, NTARG, NCTR, Zbody )
 	  
 ! Cartesian coordinates of the celestial body in meters: KM to M
@@ -158,7 +163,6 @@ JD = mjd + 2400000.5D0
 	  !vSun = (/ Zbody(4), Zbody(5), Zbody(6) /) * 1000.D0 ! KM/sec to m/sec	  
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 ! Satellite Attitude computation 
 ! ----------------------------------------------------------------------
@@ -166,7 +170,6 @@ JD = mjd + 2400000.5D0
 CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRNsat, satblk, BDSorbtype, &
                      eclipse_status, beta, Mangle, Yangle_array, eBX_nom, eBX_ecl)
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Rotation matrices
@@ -201,9 +204,10 @@ END IF
 CALL EOP (mjd, EOP_cr, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2CRS)	  
 
 !Rtrf2bff = MATMUL(TRS2CRS,Rcrf_bff)
-Rtrf2bff = MATMUL(Rcrf_bff,TRS2CRS)
-! ----------------------------------------------------------------------
 
+Rtrf2bff = MATMUL(Rcrf_bff,TRS2CRS)
+!Rtrf2bff = Rcrf_bff
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Quaternions computation based on rotation matrix

@@ -599,7 +599,6 @@ CALL clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
 !print *,"CLKformat, CLKfname ",CLKformat,CLKfname
 
 
-
 ! ----------------------------------------------------------------------
 ! Output filenames prefix
 ! ----------------------------------------------------------------------
@@ -610,6 +609,7 @@ CALL time_GPSweek  (mjd, GPS_week, GPS_wsec, GPSweek_mod1024)
 !CALL time_GPSweek2 (mjd, GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
 GPS_day = ( GPS_wsec/86400.0D0 )  
 ! ----------------------------------------------------------------------
+
 
 ! ----------------------------------------------------------------------
 ! Write satellite orbits and partial derivatives to one .orb output file (internal format)
@@ -634,23 +634,6 @@ CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sat_vel, CLK
 ! ----------------------------------------------------------------------
 
 
-! ---------------------------------------------------------------------- 
-! Satellite Attitude
-! ---------------------------------------------------------------------- 
-! Satellite attitude matrix
-CALL attitude_orb (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, satsinex_filename_cfg, attitude_array)
-! ---------------------------------------------------------------------- 
-!print *, "attitude_array", attitude_array(1,:,1)
-
-! ----------------------------------------------------------------------
-! Write satellite attitude to orbex format
-! ----------------------------------------------------------------------
-! Orbex filename
-write (ORBEX_fname, FMT='(A3,I4,I1,A6)') 'gag', (GPS_week), INT(GPS_day) ,'.orbex'
-! Write attitude matrix to orbex format
-CALL write_orbex (attitude_array, PRNmatrix, ORBEX_fname)
-! ----------------------------------------------------------------------
-
 ! ----------------------------------------------------------------------
 ! Extract residual filename tag from input .sp3 filename
 ! ----------------------------------------------------------------------
@@ -674,6 +657,30 @@ Call writearray (orbit_resN, filename)
 ! Write combined orbit residuals file (RTN)
 write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbdiff_rtn.out'
 Call writearray2 (orbdiff2, filename)
+! ----------------------------------------------------------------------
+
+
+! ---------------------------------------------------------------------- 
+! Satellite Attitude
+! ---------------------------------------------------------------------- 
+! Satellite attitude matrix
+CALL attitude_orb (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, satsinex_filename_cfg, attitude_array)
+! ---------------------------------------------------------------------- 
+!print *, "attitude_array", attitude_array(1,:,1)
+
+! ----------------------------------------------------------------------
+! Write satellite attitude to orbex format
+! ----------------------------------------------------------------------
+! Orbex filename
+write (ORBEX_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.obx'
+! Write attitude matrix to orbex format
+CALL write_orbex (attitude_array, PRNmatrix, ORBEX_fname)
+! ----------------------------------------------------------------------
+! Write satellite attitude per epoch to out ascii file 
+write (filename, FMT='(A3,I4,I1,A13)') 'gag', (GPS_week), INT(GPS_day), '_attitude.out'
+Call writearray2 (attitude_array, filename)
+! ----------------------------------------------------------------------
+
 
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
