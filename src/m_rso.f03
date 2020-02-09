@@ -133,7 +133,7 @@ SUBROUTINE rso (fname, PRN, orbRSO)
          PRINT *, "OPEN IOSTAT=", ios
       END IF
 ! ----------------------------------------------------------------------
-! FIXME: variable initialisation
+! variable initialisation
 Nvec = 3
 
 ! ----------------------------------------------------------------------

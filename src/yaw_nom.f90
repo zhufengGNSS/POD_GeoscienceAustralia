@@ -128,7 +128,7 @@ SUBROUTINE yaw_nom (e_BX, v_sat, beta, satblk, cosE, ANOON, ANIGHT, Mangle, Yang
 ! ----------------------------------------------------------------------
 ! Yaw angle (Phi) and Orbital angle (Mangle)
 ! ----------------------------------------------------------------------
-! FIXME: init PHI
+! init PHI
 PHI = PI/2.d0
 IF ( (NIGHT .OR. NOON) ) THEN
       DET = SQRT( (180.d0-acos(svbcos)/DTR)**2 - BETADG**2)

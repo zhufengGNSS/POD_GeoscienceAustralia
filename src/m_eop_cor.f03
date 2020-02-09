@@ -16,7 +16,6 @@ MODULE m_eop_cor
       IMPLICIT NONE
       !SAVE 			
  
-	  
 Contains
 
 
@@ -100,8 +99,6 @@ SUBROUTINE eop_cor (mjd, EOP_days, EOP_sol, n_interp , EOP_cr)
       DOUBLE PRECISION x_int, y_int, ut1_int
       REAL (KIND = prec_d) :: MJDint_ar(n_interp), xint_ar(n_interp), yint_ar(n_interp), UT1int_ar(n_interp)
 
-
-
 ! ----------------------------------------------------------------------
 ! Time Systems transformation											 
 ! ----------------------------------------------------------------------
@@ -119,13 +116,12 @@ SUBROUTINE eop_cor (mjd, EOP_days, EOP_sol, n_interp , EOP_cr)
       mjd_UTC_day = INT (mjd_UTC)
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 ! EOP data array
 sz1_EOP = SIZE (EOP_days,DIM=1)
 sz2_EOP = SIZE (EOP_days,DIM=2)
 ! ----------------------------------------------------------------------
-! FIXME: Ensure LOD, dX_eop, dY_eop are set to something sensible
+! Ensure LOD, dX_eop, dY_eop are set to something sensible
 LOD = 0.d0
 dX_eop = 0.d0
 dY_eop = 0.d0
@@ -146,19 +142,19 @@ dY_eop = 0.d0
 !		 dY_ar = EOP_days(i,7)
 
 If (mjd_UTC_day == EOP_days(i,1) ) then
-	  LOD =    EOP_days(i,5)
+      LOD =    EOP_days(i,5)
       dX_eop = EOP_days(i,6)
       dY_eop = EOP_days(i,7)
 End If
       END DO
 ! ----------------------------------------------------------------------
-  
+
 ! ----------------------------------------------------------------------
 ! Diurnal and semi-diurnal tidal corrections to EOP data by IERS
 ! "Polar motion" and "UT1" corrections due to ocean tidal and libration effects at interpolation epoch
       CALL INTERP_iers (MJDint_ar, xint_ar, yint_ar, UT1int_ar, n_interp, mjd_UTC, x_int,y_int,ut1_int)
 ! ----------------------------------------------------------------------
-  
+
 ! ----------------------------------------------------------------------
 ! xp,yp corrected (arcsec) 											
       xp_cor = x_int

@@ -115,9 +115,7 @@ SUBROUTINE veq_rkn768(zo, veqZo, veqPo, step, lamda_h, Np, z_q, e_r, veqZ, veqP)
       !REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: U3n, P3n		
       INTEGER (KIND = prec_int8) :: sz1, sz2 
 ! ----------------------------------------------------------------------
-
-! ----------------------------------------------------------------------
-! FIXME: initialise output var
+! initialise output var
 e_r = 0.d0
 
 ! Integration step
@@ -151,27 +149,27 @@ sz2 = size(veqPo, DIM = 2)
 
 ALLOCATE (veqP(6,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate veqP"
+        print *, "failed to allocated veqP"
         goto 100
 end if
 ALLOCATE (veqP_ro(3,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate veqP_ro"
+        print *, "failed to allocated veqP_ro"
         goto 100
 end if
 ALLOCATE (veqP_vo(3,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate veqP_vo"
+        print *, "failed to allocated veqP_vo"
         goto 100
 end if
 ALLOCATE (veqP_r (3,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate veqP_r"
+        print *, "failed to allocated veqP_r"
         goto 100
 end if
 ALLOCATE (veqP_v (3,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate veqP_v"
+        print *, "failed to allocated veqP_v"
         goto 100
 end if
 
@@ -181,14 +179,12 @@ veqP_ro(3,:) = veqPo(3,:)
 veqP_vo(1,:) = veqPo(4,:)
 veqP_vo(2,:) = veqPo(5,:)
 veqP_vo(3,:) = veqPo(6,:)
-
-! ---------------------------------------------------------------------
-! FIXME: missing initialisation below?
-veqP = 0.0D0
+! ----------------------------------------------------------------------
+! initialise
+veqP = 0.d0
 veqP_r = 0.d0
 veqP_v = 0.d0
 
-! ----------------------------------------------------------------------	  
 
 ! ----------------------------------------------------------------------	  
 Np2 = Np
@@ -196,60 +192,65 @@ If (Np == 0) Then
 Np2 = 1
 End IF
 
-! ----------------------------------------------------------------------	  
-! Coefficients ci, aij, bi 
-! ----------------------------------------------------------------------	  
-! s-stage Function evaluations k(s), s=0..to...
-s = 8
-!% order p=7
+! Allocatable arrays
+If (Np2 /= 0) Then
 
 ALLOCATE (kP_i(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate kP_i"
+        print *, "failed to allocated kP_i"
         goto 100
 end if
-ALLOCATE (k_P(3,Np2,s+1), STAT = AllocateStatus)
+ALLOCATE (k_P(3,Np2,9), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate k_P"
+        print *, "failed to allocated k_P"
         goto 100
 end if
 ALLOCATE (G_kP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate G_kP"
+        print *, "failed to allocated G_kP"
         goto 100
 end if
 ALLOCATE (sum_agP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate sum_agP"
+        print *, "failed to allocated sum_agP"
         goto 100
 end if
 ALLOCATE (sum_bq_r_gP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate sum_bq_r_gP"
+        print *, "failed to allocated sum_bq_r_gP"
         goto 100
 end if
 ALLOCATE (sum_bq_v_gP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate sum_bq_v_gP"
+        print *, "failed to allocated sum_bq_v_gP"
         goto 100
 end if
 ALLOCATE (sumkP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate sumkP"
+        print *, "failed to allocated sumkP"
         goto 100
 end if
 
 sumkP   = 0.d0
 sum_agP = 0.d0
 sum_ag  = 0.d0
-! ---------------------------------------------------------------------
-! FIXME: missing initialisation below?
-sum_bq_r_gP = 0.d0
-sum_bq_v_gP = 0.d0
+
 kP_i = 0.d0
 G_kP = 0.d0
 k_P = 0.d0
 
+sum_bq_r_gP = 0.d0
+sum_bq_v_gP = 0.d0
+
+End IF
+
+
+! ----------------------------------------------------------------------	  
+! Coefficients ci, aij, bi 
+! ----------------------------------------------------------------------	  
+! s-stage Function evaluations k(s), s=0..to...
+s = 8
+!% order p=7
 
 ! ci coefficients, i=0,....,s
 c(1:9) = (/ 0.D0, 1.D0/10.D0, 1.D0/5.D0, 3.D0/8.D0, 1.D0/2.D0, (7.D0-sqrt(21.D0))/14.D0, (7.D0+sqrt(21.D0))/14.D0, 1.D0, 1.D0 /)
@@ -390,7 +391,7 @@ End IF
 		!print *,"h**2*sum_ag", h**2 * sum_ag 										 
 
 	   ! Re-Initialize to zero
-              sum_ag = 0.0D0
+           sum_ag = 0.0D0
 		
 		! Position transition matrix : k_Z 3x6 matrix
 		kZ_i = MATMUL(pd_Fr, veqZ_r) 		
@@ -403,15 +404,16 @@ End IF
 If (Np /= 0) Then
         Do j = 0 , i-1	
 			Do i1 = 1 , 3
-			   Do j1 = 1 , Np2
+			   Do j1 = 1 , Np
                   G_kP(i1,j1) = k_P(i1,j1,j+1)
 			   End Do	  
 			End Do
             sum_agP = sum_agP + a(i+1,j+1) * G_kP
         End Do
         veqP_r = veqP_ro + c(i+1) * h * veqP_vo + h**2 * sum_agP
-	! Re-Initialize to zero
-        sum_agP = 0.0D0
+		! Re-Initialize to zero
+              sum_agP = 0.0D0
+		
         !gp = pd_Fr * veqP_ro + pd_Fp  ! 3xNp matrix
 		kP_i = MATMUL(pd_Fr, veqP_r) 		
 		kP_i = kP_i + pd_Fp
@@ -454,12 +456,8 @@ er = abs(r_q - r_p)
 ! State Transition matrix
 ! ----------------------------------------------------------------------
 ! Increment function for State Transition matrix
-Do i1 = 1 , 3
-   Do j1 = 1 , 6
-	sum_bq_r_g(i1,j1) = 0.0D0
-	sum_bq_v_g(i1,j1) = 0.0D0 
-   End Do	  
-End Do
+	sum_bq_r_g = 0.0D0
+	sum_bq_v_g = 0.0D0 
 
 Do i = 0 , s
     sumkZ = k_Z(:,:,i+1)
@@ -482,8 +480,12 @@ veqZ(4:6,:) = veqZ_v
 If (Np /= 0) Then
 
 ! Increment function for Sensitivity matrix
-	sum_bq_r_gP = 0.0D0
-	sum_bq_v_gP = 0.0D0
+Do i1 = 1 , 3
+   Do j1 = 1 , Np
+	sum_bq_r_gP(i1,j1) = 0.0D0
+	sum_bq_v_gP(i1,j1) = 0.0D0
+   End Do	  
+End Do
 
 Do i = 0 , s
 	sumkP = k_P(:,:,i+1)
@@ -501,7 +503,8 @@ veqP(4:6,:) = veqP_v
 
 End IF
 ! ----------------------------------------------------------------------
-! No need to deallocate - compiler automatically deallocates the arrays
+
+
  100 END SUBROUTINE
 
 

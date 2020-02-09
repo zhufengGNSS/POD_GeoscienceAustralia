@@ -74,7 +74,7 @@ SUBROUTINE prm_ocean (PRMfname)
       END IF
 ! ----------------------------------------------------------------------
 
-! FIXME: Init ForceMod_Tides and ForceMod_Ocean to nonsense values
+! Init ForceMod_Tides and ForceMod_Ocean to nonsense values
 ForceMod_Tides = -1
 ForceMod_Ocean = -1
 

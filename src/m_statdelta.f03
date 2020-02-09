@@ -106,13 +106,13 @@ if (AllocateStatus .ne. 0) then
       print *, "failed to allocate ds1_2"
       goto 100
 end if
-ds1_2 = ds1
+ds1_2 = ds1(:,1:NParam)
 ALLOCATE (ds2_2(Nepochs2,Nparam), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
        print *, "failed to allocate ds2_2"
        goto 100
 end if
-ds2_2 = ds2
+ds2_2 = ds2(:,1:NParam)
 ! ----------------------------------------------------------------------
 ! get around compiler warning - check we have allocated the arrays
 !if (.not. Allocated(ds1_2) .or. .not. Allocated(ds2_2)) goto 100

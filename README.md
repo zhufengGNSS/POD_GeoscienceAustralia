@@ -49,16 +49,21 @@ The `ACS` Version 0.0.1 beta release supports:
 To build the `POD` ...
 
     $ cd pod
-    $ make
+    $ mkdir build
+    $ cd build
+    $ cmake3 .. >cmake.out 2>cmake.err
+    $ make >make.out 2>make.err
+    $ less make.err (to verify everything was built correctly)
 
-You should now have the executable 'main_orb.e'
+You should now have the executables in the bin directory: pod crs2trs brdc2ecef
 
 
 ### Configuration File
 
-The `POD` Precise Orbit Determination (`./main_orb.e`) uses the configuration file:
+The `POD` Precise Orbit Determination (`./bin/pod`) uses the configuration file:
     ├── EQM.in (Full force model equation of motion)
     ├── VEQ.in (For variational equations)
+    ├── POD.in (For all other config)
 
 
 ### Processing Example #1
@@ -68,7 +73,7 @@ In this example the pod will perform a dynamic orbit determination for PRN04 ove
   
 To run the `POD` ...
 
-    $ ./main_orb.e
+    $ bin/pod
 
 This should output the following to `stdout`...
 
@@ -131,7 +136,7 @@ SRP_model                 3
 
 run the `POD` ...
 
-    $ ./main_orb.e
+    $ bin/pod
 
 This should output the following to `stdout`...
 

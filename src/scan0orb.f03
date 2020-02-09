@@ -87,11 +87,13 @@ if (AllocateStatus .ne. 0) then
         print *, "failed to allocate pseudo_ICRF3"
         goto 100
 end if
+pseudobs_ICRF3 = 0.d0
 ALLOCATE (pseudobs_ITRF3(it,sz3), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
         print *, "failed to allocate pseudo_ITRF3"
         goto 100
 end if
+pseudobs_ITRF3 = 0.d0
 
 INEW1 = 0
 DO k=1, sz1

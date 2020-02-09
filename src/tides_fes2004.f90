@@ -271,6 +271,7 @@ Doodson_mult_T = RESHAPE ( (/                              &
          PRINT *, "Error: Allocatable Array: dCnm_p | Nmax:", nmax
 !         STOP "*** Not enough memory ***"
       END IF  
+      dCnm_p = 0.d0
 
       ALLOCATE (dSnm_p(nmax+1,nmax+1,Nfrq), STAT = AllocateStatus)
       IF (AllocateStatus /= 0) THEN
@@ -279,7 +280,7 @@ Doodson_mult_T = RESHAPE ( (/                              &
          PRINT *, "Error: Allocatable Array: dSnm_p | Nmax:", nmax
 !         STOP "*** Not enough memory ***"
       END IF  
-	  
+      dSnm_p = 0.d0  
       ALLOCATE (dCnm_m(nmax+1,nmax+1,Nfrq), STAT = AllocateStatus)
       IF (AllocateStatus /= 0) THEN
          PRINT *, "Error: Not enough memory"
@@ -287,7 +288,7 @@ Doodson_mult_T = RESHAPE ( (/                              &
          PRINT *, "Error: Allocatable Array: dCnm_m | Nmax:", nmax
 !         STOP "*** Not enough memory ***"
       END IF  
-
+      dCnm_m = 0.d0
       ALLOCATE (dSnm_m(nmax+1,nmax+1,Nfrq), STAT = AllocateStatus)
       IF (AllocateStatus /= 0) THEN
          PRINT *, "Error: Not enough memory"
@@ -295,6 +296,7 @@ Doodson_mult_T = RESHAPE ( (/                              &
          PRINT *, "Error: Allocatable Array: dSnm_m | Nmax:", nmax
 !         STOP "*** Not enough memory ***"
       END IF  
+      dSnm_m =0.d0
 ! ---------------------------------------------------------------------------
 
 

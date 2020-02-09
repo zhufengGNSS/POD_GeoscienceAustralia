@@ -85,8 +85,9 @@ SUBROUTINE integr_EQM (MJDo, tsec_start, ro, vo, arc, integID, step, orbc)
       REAL (KIND = prec_d), DIMENSION(8) :: Zo 
       REAL (KIND = prec_d), DIMENSION(6) :: yo, yn, ey 
 ! ----------------------------------------------------------------------	  
-
-
+      EXTERNAL integr_rk4
+      EXTERNAL integr_rkn768
+      EXTERNAL integr_rk87
 
 ! ----------------------------------------------------------------------
 ! Initial Conditions

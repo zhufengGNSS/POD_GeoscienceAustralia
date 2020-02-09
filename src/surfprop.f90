@@ -1,4 +1,4 @@
-SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
+SUBROUTINE surfprop (BLKID,AREA,REFL,DIFU,ABSP)
 !
 ! NAME       : surfprop
 !
@@ -10,7 +10,7 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 !              Fliegel et al. (1992),Rodrigue-Solano et al. (2012)
 !
 ! PARAMETERS :
-!         IN :  BLKNUM      : BLOCK NUMBER
+!         IN :  BLKID      : BLOCK NUMBER
 !
 !        OUT :  area(I)     : area of flat surface facing to the Sun [m^2] 
 !               refl(I)     : reflection coefficient
@@ -56,7 +56,7 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
       REAL (KIND = prec_q) :: area(4), refl(4), difu(4), absp(4)
       REAL (KIND = prec_q) :: G_REFL(4), G_DIFU(4), G_ABSP(4)
 
-      INTEGER              :: BLKNUM,i
+      INTEGER              :: BLKID,i
       INTEGER              :: II,JJ
 ! ----------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 !     GPS BLOCK II, IIA
 !     -----------------
 
-      IF((BLKNUM.EQ.2).OR.(BLKNUM.EQ.3))THEN
+      IF((BLKID.EQ.2).OR.(BLKID.EQ.3))THEN
 
 !     +X SIDE (including the cylindrical areas )
          X_side(1,1) = 2.607D0
@@ -165,7 +165,7 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 !     GPS Block IIR
 !  ----------------------------------
 !
-      ELSEIF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
+      ELSEIF((BLKID.GE.4).AND.(BLKID.LE.7))THEN
 
 !     + AND -X FACES
         X_side(1,1) = 3.05D0
@@ -230,7 +230,7 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 !     -------------
 !     GPS BLOCK IIF
 !     -------------
-      ELSEIF(BLKNUM.EQ.8)THEN
+      ELSEIF(BLKID.EQ.8)THEN
 !     +/- X SIDE
         X_side(1,1) = 5.72D0
         X_side(1,2) = 0.20D0
@@ -264,7 +264,7 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 !     -------
 !     GLONASS
 !     -------
-      ELSEIF((BLKNUM.EQ.101).OR.(BLKNUM.EQ.102))THEN
+      ELSEIF((BLKID.EQ.101).OR.(BLKID.EQ.102))THEN
 !     +/- X SIDE (FLAT)
         X_side(1,1) = 1.258D0
         X_side(1,2) = 0.20D0
@@ -325,12 +325,12 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 !     ---------
 !     GLONASS-M
 !     ---------
-!      ELSEIF(BLKNUM.GT.102)THEN
+!      ELSEIF(BLKID.GT.102)THEN
 
 !     ---------
 !     GLONASS-K
 !     ---------
-!      ELSEIF(BLKNUM.GT.103)THEN
+!      ELSEIF(BLKID.GT.103)THEN
 
        ENDIF
 
@@ -350,12 +350,12 @@ SUBROUTINE surfprop (BLKNUM,AREA,REFL,DIFU,ABSP)
 ! Fraction of absorbed photons  = 1-v
 ! Fraction of reflected photons = uv
 ! Fraction of diffused photons  = v(1-u)
-!FIXME: Initialise variables G_REFL
+! Initialise variables G_REFL, G_ABSP, G_DIFU
 G_REFL = 0.d0
 G_ABSP = 0.d0
 G_DIFU = 0.d0
 
-IF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
+IF((BLKID.GE.4).AND.(BLKID.LE.7))THEN
 !*********
 ! X_SIDE *
 !*********
@@ -406,8 +406,8 @@ IF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
 ! Compute the ratio of physical interactions at each side
        G_REFL(3)=TOTAL_Z_REFL_AREA/(Z_side(1,1)+Z_side(2,1))
        G_DIFU(3)=TOTAL_Z_DIFU_AREA/(Z_side(1,1)+Z_side(2,1))
-! FIXME: Index into G_REFL was 1 - corrected to 3?
-       G_ABSP(3)=1-(G_REFL(3)+G_DIFU(1))
+! FIXME: Index into G_REFL is 1 - corrected to 3?
+       G_ABSP(3)=1-(G_REFL(3)+G_DIFU(3))
 
 !***************
 ! SOLAR PANELS *
@@ -428,7 +428,7 @@ IF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
        G_ABSP(4) = 1-(G_REFL(4)+G_DIFU(4))
 
 
-ELSEIF(BLKNUM.EQ.8)THEN
+ELSEIF(BLKID.EQ.8)THEN
 
 !*********
 ! X_SIDE *

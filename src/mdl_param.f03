@@ -20,7 +20,6 @@ MODULE mdl_param
 ! POD Mode : Orbit Determination, Propagation, Prediction, .. (1,2,3,4)
       INTEGER (KIND = prec_int2) :: POD_MODE_glb	  	  
       REAL (KIND = prec_d) :: ORBPRED_ARC_glb
-      LOGICAL :: first_call
 
 ! ---------------------------------------------------------------------------
 	  
@@ -142,8 +141,6 @@ INTEGER (KIND = prec_int2) :: ECOM_CPR_glb(3)
 !REAL (KIND = prec_q) :: ECOM_accel_glb(9)
 !REAL (KIND = prec_q) :: ECOM_accel_aposteriori(9)
 REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_glb
-!only used in m_orbdet: make it local there
-!REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_aposteriori
 
 ! ----------------------------------------------------------------------
 
@@ -181,5 +178,33 @@ INTEGER (KIND = prec_int8) :: NPARAM_glb
       CHARACTER (LEN=5)  :: BDSorbtype_glb
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Boxwing properties
+! ----------------------------------------------------------------------
+
+      integer (kind=4) :: max_blk   ! Max number of block types indices
+                          ! 0-10 GPS, 11-20 Glonass, 21-30 Galileo, 31-40 BDS, 41-50 QZSS
+      parameter ( max_blk = 50 ) 
+!
+!     EARTH AND SATELLITE PROPERTIES
+      REAL (kind=prec_q) :: AREA(4,2,max_blk),REFL(4,2,max_blk)
+      REAL (kind=prec_q) :: DIFU(4,2,max_blk),ABSP(4,2,max_blk)
+      REAL (kind=prec_q) :: AREA2(4,2,max_blk),REFL2(4,2,max_blk)
+      REAL (KIND=prec_q) :: DIFU2(4,2,max_blk),ABSP2(4,2,max_blk)
+      REAL (kind=prec_q) :: REFLIR(4,2,max_blk)
+      REAL (kind=prec_q) :: DIFUIR(4,2,max_blk),ABSPIR(4,2,max_blk)
+!
+      REAL (kind=prec_q) :: CERES_R(72,144),CERES_E(72,144)
+      REAL (kind=prec_q) :: CERGRE(72,144),CERGEM(72,144)
+      REAL (kind=prec_q) :: D_AREA_ALL(72,144),V_NS_ALL(72,144,3)
+
+      ! size of the above arrays
+      INTEGER (kind = 4) :: LATKMX, LONKMX
+      REAL (kind=prec_q) :: GRDNUM
+
+      CHARACTER (LEN=2) :: F_MONTH(12)
+
+      integer (kind=4) known_blkids(max_blk)  ! Block numbers by the type
+                  ! we known and have coded.  0 value unknown
 
 END

@@ -118,6 +118,7 @@ End Do
 
 Deallocate(L, STAT = DeAllocateStatus)
 else
+        ! only hit if the allocation fails
         yint = 1.d0
 end if
 

@@ -123,7 +123,7 @@ SUBROUTINE eop_igu (mjd, ERP_fname, EOP_days, EOP_int)
       !dX = EOP_data(6) 
       !dY = EOP_data(7) 
       !----------------------------------------------------------
-      ! FIXME: init next two var to something sensible
+      ! init next two var to something sensible
 dX_eop = 0.d0
 dY_eop = 0.d0
 sz1_EOP = SIZE (EOP_days,DIM=1)

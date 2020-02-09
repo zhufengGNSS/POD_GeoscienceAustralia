@@ -96,6 +96,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       USE m_orbresize
       USE m_matrixreverse
       USE m_matrixmerge
+      USE m_ecom_init
       IMPLICIT NONE
 	  
 	  
@@ -264,11 +265,11 @@ IF (ECOM_param_glb /= 0) THEN
 IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
 IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
 IF (ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
-ALLOCATE (ECOM_0_coef(NPARAM_glb), STAT = AllocateStatus)
-if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate ECOM_0_coef"
-        goto 100
-end if
+!ALLOCATE (ECOM_0_coef(NPARAM_glb), STAT = AllocateStatus)
+!if (AllocateStatus .ne. 0) then
+!        print *, "failed to allocate ECOM_0_coef"
+!        goto 100
+!end if
 ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
         print *, "failed to allocate ECOM_coef"
@@ -283,9 +284,9 @@ end if
 !DO ii=1,NPARAM_glb
 !ECOM_0_coef(ii) = 0.0D0
 !END DO
-ECOM_0_coef = 0.d0
+!ECOM_0_coef = 0.d0
 !print*,'ECOM_0_coef=',ECOM_0_coef
-CALL ecom_init (i,ECOM_0_coef)
+CALL ecom_init (ECOM_0_coef)
 ELSE
 PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
 END IF
@@ -418,7 +419,7 @@ End If  ! End of empirical model
 ! ECOM-based SRP model
 ! **********************************************************************
 ! added by Dr. Tzupang Tseng 11-12-2018
-If ( ECOM_param_glb /= 0) Then
+If ( ECOM_param_glb.eq.1 .or. ECOM_param_glb.eq.2) Then
 
       PD_Param_ID = 0
 If (ECOM_Bias_glb(1) == 1) Then
@@ -773,7 +774,8 @@ time_sys = TIME_SCALE
 CALL orbC2T (orb_icrf_final, time_sys, orb_itrf_final)
 ! ----------------------------------------------------------------------
 
- 100 END SUBROUTINE
+ 100  if (allocated(ECOM_0_coef)) deallocate(ECOM_0_coef, stat=DeallocateStatus)
+      END SUBROUTINE
 
 End
 

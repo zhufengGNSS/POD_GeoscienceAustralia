@@ -273,7 +273,6 @@ YR = Iyear
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 Do isat = 1 , Nsat
-first_call = .true.
 
 ! ----------------------------------------------------------------------
 ! Modify/Rewrite the Configuration files
@@ -284,7 +283,7 @@ first_call = .true.
 ! ----------------------------------------------------------------------
 PRN_isat = PRNmatrix(isat)
 !print *,"Satellite: ", PRNmatrix(isat) ! isat
-! Read Satellite infromation from SINEX file
+! Read Satellite information from SINEX file
 ! ----------------------------------------------------------------------
 CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat)
 
