@@ -84,7 +84,7 @@ SUBROUTINE orbinfo (mjd, prnnum, rsat, vsat, beta, del_u, yaw, lambda, angX, ang
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
       REAL (KIND = prec_q), DIMENSION(4) :: cosang
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
-      REAL (KIND = prec_q) :: Pi, Ps, AU, sclfa
+      REAL (KIND = prec_q) :: sclfa
       REAL (KIND = prec_d) :: GM, Ds
       REAL (KIND = prec_d) :: u_sat, i_sat, omega_sat
       REAL (KIND = prec_q) :: fxo,fyo,fzo
@@ -101,23 +101,25 @@ SUBROUTINE orbinfo (mjd, prnnum, rsat, vsat, beta, del_u, yaw, lambda, angX, ang
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: X_SIDE,Z_SIDE
-      REAL (KIND = prec_q) :: AREA
       REAL (KIND = prec_q) :: A_SOLAR
 ! ----------------------------------------------------------------------
-      INTEGER*4 BLKNUM,SVN,REFF,ERM,ANT,GRD,MONTH
+      INTEGER*4 SVN,REFF,ERM,ANT,GRD,MONTH
       REAL*8  ACCEL(3),SUN(3)
       REAL*8  YSAT(6)
       CHARACTER (LEN=1) :: GNSSid
       CHARACTER (LEN=100) :: fmt_line
 ! ----------------------------------------------------------------------
+      EXTERNAL SRPFBOXW
 
+! default init
+Z_SIDE = 0.d0
+X_SIDE = 0.d0
+F0 = 0.d0
+A_SOLAR = 0.d0
 
 ! Numerical Constants
 
-      GM = 0.39860044150D+15
-      Ps = 4.5567D-6 ! (Nm^-2)
-      AU = 1.496d11 ! (m)
-      Pi = 4*atan(1.0d0)
+      GM = GM_global
 ! initialize the SRP force
 ! -------------------------
      DO i=1,3
@@ -281,9 +283,9 @@ END IF
 ! computation of the satellite argument of latitude and orbit
 ! inclination
       CALL kepler_z2k (rsat, vsat, GM, kepler)
-      u_sat = kepler(9)*Pi/180.d0
-      i_sat = kepler(3)*Pi/180.d0
-      omega_sat = kepler(4)*Pi/180.d0
+      u_sat = kepler(9)*Pi_global/180.d0
+      i_sat = kepler(3)*Pi_global/180.d0
+      omega_sat = kepler(4)*Pi_global/180.d0
 !print*,'ACS POD=', kepler(3), kepler(9), kepler(4)
 ! compute the sun position in the satellite orbit plane by rotating omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
@@ -322,25 +324,25 @@ END IF
       CALL matrix_Rr(R11,r_sun1,r_sun2)
 
       beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2)) ! in rad
-!write (*,*) beta*180.0d0/Pi
+!write (*,*) beta*180.0d0/Pi_global
 
 ! yaw angle
       yaw= acos(ex(1)*et(1)+ex(2)*et(2)+ex(3)*et(3))
 
-      IF (beta*180/Pi .gt. 0.d0) yaw= -yaw ! In accordance with the IGS convention (yaw-steering only)
+      IF (beta*180/Pi_global .gt. 0.d0) yaw= -yaw ! In accordance with the IGS convention (yaw-steering only)
 
 
       u_sun = atan2(r_sun2(2),r_sun2(1)) ! in rad
       del_u = u_sat - u_sun
-      if (del_u*180/Pi .gt.360.0d0) then
-      del_u=del_u-2*Pi
-      else if(del_u*180/Pi .lt.0.0d0) then
-      del_u=del_u+2*Pi
+      if (del_u*180/Pi_global .gt.360.0d0) then
+      del_u=del_u-2*Pi_global
+      else if(del_u*180/Pi_global .lt.0.0d0) then
+      del_u=del_u+2*Pi_global
       end if
 
 ! BDS yaw angles for the orbit normal attitude
 !     if(prnnum > 300) then
-!        if (abs(beta*180.0d0/Pi) < 4.d0) ex = et
+!        if (abs(beta*180.0d0/Pi_global) < 4.d0) ex = et
 
 !     end if
       if(BLKID == 301)then
@@ -360,10 +362,10 @@ END IF
       ed_on(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 
       yaw= acos(ed(1)*ed_on(1)+ed(2)*ed_on(2)+ed(3)*ed_on(3))
-      IF (beta*180/Pi .gt. 0.d0) yaw= -yaw
+      IF (beta*180/Pi_global .gt. 0.d0) yaw= -yaw
 
       elseif(BLKID == 302 .or. BLKID == 303)then
-      if (abs(beta*180.0d0/Pi) < 4.5d0) then
+      if (abs(beta*180.0d0/Pi_global) < 4.5d0) then
       CALL productcross (ez,ev,yy)
       ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
       ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
@@ -380,7 +382,7 @@ END IF
       ed_on(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 
       yaw= acos(ed(1)*ed_on(1)+ed(2)*ed_on(2)+ed(3)*ed_on(3))
-      IF (beta*180/Pi .gt. 0.d0) yaw= -yaw
+      IF (beta*180/Pi_global .gt. 0.d0) yaw= -yaw
 
       end if
       end if
@@ -423,7 +425,7 @@ end do
 
 sclfa=(AU/Ds)**2
 
-! A PRIORI SRP ACCELERQTION
+! A PRIORI SRP ACCELERATION
 !---------------------------
 ! SIMPLE BOX-WING
       if (Flag_BW_cfg == 1 ) then
@@ -506,9 +508,9 @@ END IF
 
 ALLOCATE (srpcoef(PD_Param_ID), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate srpcoef"
+        print *, "failed to allocate srpceof"
         goto 100
-end if
+endif
 
 srpcoef = 0.d0
 
@@ -748,6 +750,7 @@ End If
      ft = fx*et(1)+fy*et(2)+fz*et(3)
      fn = fx*en(1)+fy*en(2)+fz*en(3)
 
+     !PRINT*,'SP FORCE=',fr,ft,fn
  100 END SUBROUTINE
 END MODULE
 

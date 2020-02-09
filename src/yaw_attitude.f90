@@ -127,7 +127,11 @@ SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbd
       REAL (KIND = prec_q) :: Ds
 ! ----------------------------------------------------------------------
 	 
-
+! init variables
+ECLSTM=0.d0
+ECLETM=0.d0
+MU = 0.d0
+MURATE = 0.d0
 	 
 	 
 	 
@@ -272,9 +276,7 @@ yaw = (/ 0.D0, 0.D0 /)
 
 ! ----------------------------------------------------------------------
 ! Modelling of yaw-attitude during eclipse seasons based on eclips.f
-! FIXME: initialise MURATE
 ! ----------------------------------------------------------------------
-MURATE = 0.d0
 if (Nsat == 64) then
 
 ! Modified Version (2016) of the eclips.f v.2013

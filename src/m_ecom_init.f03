@@ -1,4 +1,8 @@
-SUBROUTINE ecom_init (Niteration,ECOM_0_coef)
+MODULE m_ecom_init
+
+contains
+
+SUBROUTINE ecom_init (ECOM_0_coef)
 
 
 ! ----------------------------------------------------------------------
@@ -22,6 +26,7 @@ SUBROUTINE ecom_init (Niteration,ECOM_0_coef)
       USE mdl_num
       USE mdl_param
       USE mdl_config
+      USE mdl_param
       IMPLICIT NONE
 	  
 	  
@@ -29,9 +34,10 @@ SUBROUTINE ecom_init (Niteration,ECOM_0_coef)
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-       REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_0_coef
+       REAL (KIND = prec_q), DIMENSION(:), INTENT(OUT), ALLOCATABLE :: ECOM_0_coef
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int2) :: Niteration,srp_i 
+!      INTEGER (KIND = prec_int2) :: Niteration,srp_i 
+      INTEGER (KIND = prec_int2) :: srp_i 
       INTEGER (KIND = prec_int8) :: i, ii, PD_Param_ID 
       INTEGER (KIND = prec_int2) :: AllocateStatus
 ! ----------------------------------------------------------------------
@@ -44,8 +50,8 @@ SUBROUTINE ecom_init (Niteration,ECOM_0_coef)
 ! ----------------------------------------------------------------------
 ALLOCATE (ECOM_0_coef(NPARAM_glb))
 srp_i = ECOM_param_glb
-i = Niteration
-write (fname_id, *) i
+!i = Niteration
+!write (fname_id, *) i
 ECOM_0_coef = 0.d0
 IF (IC_MODE_cfg == 2) THEN
 	ECOM_0_coef = IC_sat_glb (9:8+NPARAM_glb)
@@ -80,4 +86,4 @@ END IF
 
 END SUBROUTINE
 
-
+END MODULE

@@ -108,7 +108,7 @@ If (N_param == 0) Then
 N_param = 1
 End If
 ALLOCATE (PD_param(3,N_param), STAT = AllocateStatus)
-! FIXME: init needed
+! init needed
 PD_param = 0.d0
 
 ! Bias partial derivatives matrix allocation
@@ -281,7 +281,7 @@ If (EMP_CPR_glb(1) == 1 .OR. EMP_CPR_glb(2) == 1 .OR. EMP_CPR_glb(3) == 1) Then
 Else
 	CPR_icrf = (/ 0.0D0, 0.0D0, 0.0D0 /)
 ! ----------------------------------------------------------------------
-! FIXME: dummy init until more knowledge known
+! dummy init until more knowledge known
         u_rad = 0.d0
         pd_aT_u = 0.d0
         pd_aN_u = 0.d0

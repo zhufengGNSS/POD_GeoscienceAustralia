@@ -253,7 +253,7 @@ End IF
 End If
 ! ----------------------------------------------------------------------
 
-! FIXME: variable initialisation (vSun)
+! variable initialisation (vSun)
 vSun = 0.d0
 
 ! ----------------------------------------------------------------------
@@ -626,7 +626,7 @@ Fvec = SF
 ! PD w.r.t position vector
 PDr = Ugrav_icrf
 ! PD  w.r.t velocity vector
-!PDv - FIXME: Initialise to zero for now
+!PDv - Initialise to zero for now
 ! ----------------------------------------------------------------------
 PDv = 0.d0
 

@@ -132,7 +132,8 @@ Ncommon = Nepochs
 
 ! ----------------------------------------------------------------------
 ! Dynamic Allocatable arrays
-! FIXME: Initialise dyn memory
+! Initialise dyn memory
+! TODO: check the alloc status for each of the below
 ALLOCATE (Xmatrix(6+Nparam,1), STAT = AllocateStatus)
 ALLOCATE (Wmatrix(3*Ncommon,1), STAT = AllocateStatus)
 

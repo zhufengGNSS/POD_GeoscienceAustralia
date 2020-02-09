@@ -48,14 +48,16 @@ SUBROUTINE eop_c04 (filename,mjd , eop)
       CHARACTER (LEN=170) :: line_ith, eop_line 
       INTEGER (KIND = prec_int8) :: year,month,day, mjd_day
       REAL (KIND = prec_d) :: xp,yp,UT1_UTC,LOD,dX,dY, xErr,yErr,UT1_UTC_Err,LOD_Err,dX_Err,dY_Err
+      LOGICAL found
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
+      found = .FALSE.
       UNIT_IN = 9
       Format_eop = '(3(I4),I7,2(F11.6),2(F12.7),2(F11.6),2(F11.6),2(F11.7),2F12.6)'
 ! ----------------------------------------------------------------------
-
+!        just some debug to be deleted
+!        print *, "reading EOP data from ", TRIM(filename), " for day ", mjd
 
 ! ----------------------------------------------------------------------
 ! Open data file
@@ -75,13 +77,14 @@ SUBROUTINE eop_c04 (filename,mjd , eop)
 	     i = i + 1
 !  	     PRINT *, "READ Line (i,ios):", i, ios_line
 ! ----------------------------------------------------------------------
-! End of file
+! End of file condition
+! ----------------------------------------------------------------------
          IF (ios_line < 0) THEN
 !            PRINT *, "End of file, i=", i
             EXIT		
          END IF
 ! ----------------------------------------------------------------------
-! Data
+! Data - check how much we read
          len_line = len(line_ith)
          IF (len_line >= 155) THEN
 	        READ (line_ith, '(3(I4),I7, 170A)' , IOSTAT=ios_data) year,month,day, mjd_day, eop_line			
@@ -97,12 +100,18 @@ SUBROUTINE eop_c04 (filename,mjd , eop)
                eop(5) = LOD
                eop(6) = dX
                eop(7) = dY
+               found = .TRUE.
                EXIT
             END IF
           END IF           
-! ----------------------------------------------------------------------
       END DO
 
       CLOSE (UNIT=UNIT_IN)
+      if (.not. found) then
+              ! fill up with some nonsense
+              print *, "mjd_day ", mjd, " entry not found in ", TRIM(filename)
+              eop = 0.d0
+              eop(1) = mjd
+      end if
 
 END

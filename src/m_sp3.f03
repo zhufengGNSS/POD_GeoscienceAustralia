@@ -145,7 +145,7 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
 	  
       UNIT_IN = 9  												
 
-      !FIXME: default initial value
+      !default initial value
       Nvec = 3
 
 ! ----------------------------------------------------------------------
@@ -199,8 +199,7 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
 			else if (Zvec == 'V') then
 			   Nvec = 6
                    else
-                           ! FIXME: add error condition here?
-                           print *, "ERROR! Zvec = ", Zvec, ", Nvec not set"
+                           print *, "ERROR! Zvec = ", Zvec, ", Nvec default vaule set"
                            Nvec = 3
 			end if
 

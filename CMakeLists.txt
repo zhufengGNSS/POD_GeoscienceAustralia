@@ -6,14 +6,13 @@ project(pod)
 enable_language(Fortran)
 
 set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
-#set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -finit-local-zero -fbacktrace")
 find_package(LAPACK REQUIRED)
 find_package(BLAS REQUIRED)
 #message("Fortran default extensions = ${CMake_Fortran_SOURCE_FILE_EXTENSIONS}")
 set (CMAKE_Fortran_SOURCE_FILE_EXTENSIONS "f03;F90;f90;for;f;F")
-set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin")
 file(GLOB_RECURSE sources src/*.f90 src/*.F90 src/*.f03 src/*.f src/*.for src/*.F)
 foreach (file ${sources})
 	execute_process(COMMAND /usr/bin/basename -z ${file} OUTPUT_VARIABLE srcfile)
@@ -84,6 +83,7 @@ src/m_lagrange.f03
 src/m_interporb.f03 
 src/m_eop_data.f03 
 src/m_keplerorb.f03 
+src/m_ecom_init.f03
 src/m_orbdet.f03 
 src/m_orbitmain.f03 
 src/m_orbitIC.f03
@@ -182,10 +182,11 @@ src/time_TT_sec.f90
 )
 
 add_library(boxwing
-src/ERPFBOXW.f
+src/BOXWINIT.f90
+src/ERPFBOXW.f90
 src/SURFBOXW.f
 src/PROPBOXW.f
-src/SRPFBOXW.f
+src/SRPFBOXW.f90
 )
 
 add_library(tides
@@ -229,6 +230,7 @@ src/force_srp.f90
 src/force_erp.f90 
 src/force_ant.f90 
 src/force_sum.f03 
+src/apr_srp.f90
 )
 
 add_library(rel
@@ -305,7 +307,6 @@ src/beta_pred.f90
 src/attitude.f03 
 src/pd_gm.f03 
 src/pd_forceZ.f03 
-src/ecom_init.f03 
 src/main_pod.f03
 )
 

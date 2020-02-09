@@ -122,10 +122,14 @@
 ! ----------------------------------------------------------------------
       ALLOCATE (CVAL_2(NMAX), STAT = AllocateStatus)
 ! ----------------------------------------------------------------------
-! FIXME: variable init, NUMDE, EMRAT ,AU
+! variable init, NUMDE, EMRAT ,AU
 NUMDE = 0
 EMRAT = 0.d0
 AU = 0.d0
+
+Do i = 1, NMAX
+CNAM(I) = "      "
+Enddo
 
 !C ***********************************************************************
 !C

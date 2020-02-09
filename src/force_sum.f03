@@ -166,8 +166,9 @@ END IF
 ! State Vector in ICRF
 rsat_icrf = rsat
 vsat_icrf = vsat
+rsat_itrf = 0.d0
 
-! FIXME: Init vars
+! Init var
 vSun = 0.d0
 
 ! ----------------------------------------------------------------------
