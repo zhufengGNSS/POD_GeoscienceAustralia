@@ -5,7 +5,7 @@ set -euo pipefail
 
 #cd "$PROJECT_HOME"
 
-organization=geoscienceaustralia
+organization=gamichaelmoore
 repository=pod-pipelines
 
 docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
