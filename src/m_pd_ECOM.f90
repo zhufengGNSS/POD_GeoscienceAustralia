@@ -591,7 +591,7 @@ End If
 ! use the shadow coefficient for scaling the SRP effect
 !-------------------------------------------------------
 IF (lambda .lt. 1) THEN
-IF(ECOM_param_glb <= 2) Asrp(1:3,1) = lambda*Asrp(1:3,1)*alpha
+IF(ECOM_param_glb <= 2) Asrp(1:3,1) = lambda*Asrp(1:3,1)
 IF(ECOM_param_glb == 3) Asrp(1:9,1) = lambda*Asrp(1:9,1)
 END IF
 !-------------------------------------------------------
