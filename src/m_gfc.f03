@@ -187,7 +187,8 @@ SUBROUTINE gfc1 (gfmfilename, n_trunc, sigma_shc, GM_gfc, ae_gfc, Nmax_gfc, tide
          PRINT *, "Error: Allocatable Array: Cnm, Nmax =", n_limit
 !         STOP "*** Not enough memory ***"
       END IF  
-	  
+      Cnm = 0.0D0
+
       ALLOCATE (Snm(n_limit+1,n_limit+1), STAT = AllocateStatus)
       IF (AllocateStatus /= 0) THEN
          PRINT *, "Error: Not enough memory"
@@ -195,8 +196,9 @@ SUBROUTINE gfc1 (gfmfilename, n_trunc, sigma_shc, GM_gfc, ae_gfc, Nmax_gfc, tide
          PRINT *, "Error: Allocatable Array: Snm, Nmax =", n_limit
 !         STOP "*** Not enough memory ***"
       END IF  
-	  
-      IF (sigma_shc /= 0) THEN	  
+      Snm = 0.0D0
+
+      IF (sigma_shc /= 0) THEN   
 	  
       ALLOCATE (sCnm(n_limit+1,n_limit+1), STAT = AllocateStatus)
       IF (AllocateStatus /= 0) THEN
@@ -204,8 +206,9 @@ SUBROUTINE gfc1 (gfmfilename, n_trunc, sigma_shc, GM_gfc, ae_gfc, Nmax_gfc, tide
          PRINT *, "Error: SUBROUTINE gfc1 in m_gfc.f03"
          PRINT *, "Error: Allocatable Array: sCnm, Nmax =", n_limit
 !         STOP "*** Not enough memory ***"
-      END IF  	
-		
+      END IF 
+      sCnm = 0.0D0
+
       ALLOCATE (sSnm(n_limit+1,n_limit+1), STAT = AllocateStatus) 
       IF (AllocateStatus /= 0) THEN
          PRINT *, "Error: Not enough memory"
@@ -213,13 +216,10 @@ SUBROUTINE gfc1 (gfmfilename, n_trunc, sigma_shc, GM_gfc, ae_gfc, Nmax_gfc, tide
          PRINT *, "Error: Allocatable Array: sSnm, Nmax =", n_limit
 !         STOP "*** Not enough memory ***"
       END IF  
-		
+      sSnm = 0.0D0
+
       END IF
 ! ----------------------------------------------------------------------
-Cnm = 0.0D0
-Snm = 0.0D0
-sCnm = 0.0D0
-sSnm = 0.0D0
 
 ! ----------------------------------------------------------------------
 ! Read Spherical Harmonic Coefficients of .gfc file
@@ -490,6 +490,8 @@ SUBROUTINE gfc2 (gfmfilename,n_trunc,sigma_shc, mjd_t, Ntv_trunc, GM_gfc, ae_gfc
 !         STOP "*** Not enough memory ***"
       END IF  
 		
+      sCnm = 0.0D0
+      sSnm = 0.0D0
       END IF
 ! ----------------------------------------------------------------------
 
@@ -503,8 +505,6 @@ SUBROUTINE gfc2 (gfmfilename,n_trunc,sigma_shc, mjd_t, Ntv_trunc, GM_gfc, ae_gfc
       	END DO
       END DO	  
 ! ----------------------------------------------------------------------
-sCnm = 0.0D0
-sSnm = 0.0D0
 
 ! ----------------------------------------------------------------------
 ! Read Spherical Harmonic Coefficients of .gfc file

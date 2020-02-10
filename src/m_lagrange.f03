@@ -81,7 +81,8 @@ n = size(X_interp, DIM = 1)
 
 
 Allocate( L(n), STAT = AllocateStatus)
-
+!print *, "AllocateStatus=", AllocateStatus
+if (AllocateStatus == 0) then
 
 ! Computation of coefficients Li (xint)
 DO i = 1 , n
@@ -116,13 +117,16 @@ End Do
 
 
 Deallocate(L, STAT = DeAllocateStatus)
+else
+        ! only hit if the allocation fails
+        yint = 1.d0
+end if
 
 
 !print *,"yint",yint
 
 
 End subroutine
-
 
 
 

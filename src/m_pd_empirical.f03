@@ -108,6 +108,8 @@ If (N_param == 0) Then
 N_param = 1
 End If
 ALLOCATE (PD_param(3,N_param), STAT = AllocateStatus)
+! init needed
+PD_param = 0.d0
 
 ! Bias partial derivatives matrix allocation
 PD_Param_ID = 0
@@ -122,6 +124,7 @@ If (EMP_Bias_glb(3) == 1) Then
 End IF
 ALLOCATE (PD_Bias_param(3,PD_Param_ID), STAT = AllocateStatus)
 Param_Bias = PD_Param_ID
+PD_Bias_param = 0.d0
 PD_Param_ID = 0
 
 ! CPR partial derivatives matrix allocation
@@ -137,8 +140,8 @@ If (EMP_CPR_glb(3) == 1) THEN
 End If
 ALLOCATE (PD_CPR_param(3,PD_Param_ID), STAT = AllocateStatus)
 Param_CPR = PD_Param_ID
+PD_CPR_param = 0.d0
 PD_Param_ID = 0
-! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! State Vector in ICRF
@@ -277,6 +280,13 @@ If (EMP_CPR_glb(1) == 1 .OR. EMP_CPR_glb(2) == 1 .OR. EMP_CPR_glb(3) == 1) Then
 	CPR_icrf = MATMUL(Rrtn_inv, CPR_RTN)
 Else
 	CPR_icrf = (/ 0.0D0, 0.0D0, 0.0D0 /)
+! ----------------------------------------------------------------------
+! dummy init until more knowledge known
+        u_rad = 0.d0
+        pd_aT_u = 0.d0
+        pd_aN_u = 0.d0
+        pd_aR_u = 0.d0
+        nCPR = 0
 End IF	
 ! ----------------------------------------------------------------------
 
@@ -385,6 +395,7 @@ PDr = Pd_aCPR_xyz
 
 ! ----------------------------------------------------------------------
 ! Partial derivatives w.r.t unknown parameters to be estimated
+! FIXME: tried but still cannot get rid of warnings in this block
 ! ----------------------------------------------------------------------
 !PD_param = [PD_Bias_param PD_CPR_param]
 If (Param_Bias>0 .and. Param_CPR==0) Then
@@ -415,6 +426,10 @@ j = size(PD_param, DIM = 2)
 !print *,"Param_Bias,Param_CPR",Param_Bias,Param_CPR
 !print *,"PD_param",PD_param
 
+! ----------------------------------------------------------------------
+! FIXME: calculate PDv. Initialise to zero for now
+! ----------------------------------------------------------------------
+PDv = 0.d0
 
 END SUBROUTINE
 

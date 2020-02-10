@@ -82,7 +82,10 @@ Nepochs_1 = (Nepochs_0 - 1) / steprate +1
 !PRINT *,"Nepochs_0, Nepochs_1", Nepochs_0, Nepochs_1
 
 ALLOCATE (orbmatrix1(Nepochs_1, N2_0), STAT = AllocateStatus)
-IF (AllocateStatus /= 0) PRINT *, "ALLOCATE Error: Module m_orbresize.f03, Array orbmatrix1"
+IF (AllocateStatus /= 0) then
+        PRINT *, "ALLOCATE Error: Module m_orbresize.f03, Array orbmatrix1"
+        GOTO 100
+end if
 orbmatrix1 = 0.0D0
 
 j = 0 
@@ -95,13 +98,16 @@ ELSE IF (steprate <= 0) THEN
 
 ! Output matrix is set equal to the input matrix
 ALLOCATE (orbmatrix1(Nepochs_0, N2_0), STAT = AllocateStatus)
-IF (AllocateStatus /= 0) PRINT *, "ALLOCATE Error: Module m_orbresize.f03, Array orbmatrix1"
+IF (AllocateStatus /= 0) then
+        PRINT *, "ALLOCATE Error: Module m_orbresize.f03, Array orbmatrix1"
+        goto 100
+end if
 orbmatrix1 = orbmatrix0
 
 END IF
 
 
-END SUBROUTINE
+ 100 END SUBROUTINE
 
 
 End MODULE

@@ -18,8 +18,8 @@ SUBROUTINE prm_main (PRMfname)
 !               03-12-2019 Tzupang Tseng: added a function of estimating the
 !                                         parameters in simple box wing model
 ! ----------------------------------------------------------------------
-	  
-	  
+
+
       USE mdl_precision
       USE mdl_num
       USE mdl_param
@@ -33,7 +33,7 @@ SUBROUTINE prm_main (PRMfname)
 ! Dummy arguments declaration
 ! ----------------------------------------------------------------------
 ! IN
-      CHARACTER (LEN=100), INTENT(IN) :: PRMfname				
+      CHARACTER (LEN=100), INTENT(IN) :: PRMfname 
 
 ! OUT
 
@@ -51,7 +51,7 @@ SUBROUTINE prm_main (PRMfname)
 
       CHARACTER (LEN=7) :: integrator
 
-      REAL (KIND = prec_d) :: Zo(6), ro(3), vo(3)	  
+      REAL (KIND = prec_d) :: Zo(6), ro(3), vo(3) 
       INTEGER IY, IM, ID, J_flag
       DOUBLE PRECISION DJM0, Sec, FD
       REAL (KIND = prec_d) :: mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
@@ -73,21 +73,19 @@ SUBROUTINE prm_main (PRMfname)
       INTEGER (KIND = prec_int2) :: UNIT_IN, ios
       INTEGER (KIND = prec_int2) :: ios_line, ios_key, ios_data
       INTEGER (KIND = prec_int2) :: space_i
-      INTEGER (KIND = prec_int2) :: AllocateStatus
+      INTEGER (KIND = prec_int2) :: AllocateStatus, DeallocateStatus
       CHARACTER (LEN=7) :: Format1, Format2, Format3
-      CHARACTER (LEN=500) :: line_ith	  
-      CHARACTER (LEN=150) :: word1_ln, word_i, t0	  
+      CHARACTER (LEN=500) :: line_ith  
+      CHARACTER (LEN=150) :: word1_ln, word_i, t0   
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: EOP_days	  
-
-
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: EOP_days   
 
 ! ----------------------------------------------------------------------
 ! Orbit parameterization INPUT file read:
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
-      UNIT_IN = 9  												
+      UNIT_IN = 9 
       Format1 = '(A)'
       Format2 = '(F)'
       Format3 = '(I100)'
@@ -102,6 +100,14 @@ SUBROUTINE prm_main (PRMfname)
       END IF
 ! ----------------------------------------------------------------------
 
+! Init time_in and time_system to nonsense value
+time_in = 0
+time_system = ""
+
+! Init Integrator and integmeth to nonsense value
+integrator = ""
+integmeth = 0
+
 ! ----------------------------------------------------------------------
 ! Read input file
 i = 0
@@ -115,7 +121,7 @@ i = i + 1
 ! End of file
          IF (ios_line < 0) THEN
 !            PRINT *, "End of file, i=", i
-            EXIT		
+            EXIT 
          END IF
 ! ----------------------------------------------------------------------
 
@@ -140,7 +146,7 @@ IF (word1_ln == "Reference_frame") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, REF_Zo 
 END IF
 ! ----------------------------------------------------------------------
-		 
+
 ! ----------------------------------------------------------------------
 ! Time System of the input initial epoch:
 ! 1. TT
@@ -321,7 +327,12 @@ CLOSE (UNIT=UNIT_IN)
 ! Close of input parameterization file
 ! ----------------------------------------------------------------------
 
-
+if (time_in == 0) then
+        print *, "warning: time system not set for model: ", PRMfname
+end if
+if (integmeth == 0) then
+        print *, "warning: integrator method not set for model: ", PRMfname
+end if 
 
 
 
@@ -378,6 +389,7 @@ End If
 ! EOP data reading and save global variables to module mdl_eop.f90
 ! ----------------------------------------------------------------------
 CALL eop_data (mjd_TT, EOP_fname, EOP_sol, EOP_Nint , EOP_day_glb)
+
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -479,7 +491,7 @@ End	If
 ! --------------------------------------------------------------------
 ! Solar radiation pressure model
 ! -------------------------------------------------------------------
-If (ECOM_param_glb <= 2) Then
+If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
 ! Bias parameters
         If (ECOM_Bias_glb(1) == 1) Then
                 NPARAM_glb = NPARAM_glb + 1
@@ -525,10 +537,10 @@ End If
 
 ! ----------------------------------------------------------------------
 
-
 if (1<0) then
+!if (0 .eq. 0) then
 ! ----------------------------------------------------------------------
-PRINT *,"--------------------- INPUT ----------------------------"
+PRINT *, "--------------------- INPUT ----------------------------"
 PRINT *, "Reference Frame:               ", REF_Zo
 PRINT *, "Time System:                   ", time_system
 PRINT *, "GNSS Satellite PRN:            ", PRN
@@ -546,12 +558,12 @@ PRINT *, "IAU Precession-Nutation model: ", iau_model
 PRINT *, "Numerical Integrator method    ", integrator
 PRINT *, "Numerical Integrator ID        ", integmeth
 PRINT *, "Numerical Integration step     ", integstep
-PRINT *,"--------------------------------------------------------"
-PRINT *," "
+PRINT *, "--------------------------------------------------------"
+PRINT *, " "
 ! ----------------------------------------------------------------------
 end if
 
-
+if (allocated(EOP_days)) Deallocate(EOP_days, stat=DeallocateStatus)
 
 
 END

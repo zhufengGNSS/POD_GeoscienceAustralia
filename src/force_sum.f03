@@ -166,7 +166,10 @@ END IF
 ! State Vector in ICRF
 rsat_icrf = rsat
 vsat_icrf = vsat
+rsat_itrf = 0.d0
 
+! Init var
+vSun = 0.d0
 
 ! ----------------------------------------------------------------------
 ! EOP data and Tranformation matrices between ITRF and ICRF

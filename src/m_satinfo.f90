@@ -141,6 +141,10 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn, satblk)
 ! ----------------------------
 !print*,'nlin=',nlin
   ALLOCATE(satellite(nlin),stat=iac)
+  if (iac .ne. 0) then
+          print *, "failed to allocate satellite"
+          goto 100
+  end if
 
   REWIND(ifile)
 
@@ -198,8 +202,8 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn, satblk)
   END DO
 
  DEALLOCATE(satellite)
- CLOSE(UNIT = 88)
+ 100 CLOSE(UNIT = 88)
 
-END SUBROUTINE 
+ END SUBROUTINE 
 
 END MODULE

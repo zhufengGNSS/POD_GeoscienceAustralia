@@ -117,6 +117,7 @@ double precision , dimension(3,3) :: xmat
 double precision , dimension(4) :: quater, quater_0
 
 
+NPARAM_glb = 0
 
 ! CPU Times
 CALL cpu_time (CPU_t0)
@@ -125,6 +126,9 @@ CALL cpu_time (CPU_t0)
 ! POD Version:
 POD_version = 'v.1.0.1'
 ! ----------------------------------------------------------------------
+
+! init globals
+CALL globals_init()
 
 ! ----------------------------------------------------------------------
 ! POD major configuration file
@@ -451,6 +455,7 @@ CALL read_leapsec(leapsec_filename_cfg)
 
 ! ----------------------------------------------------------------------
 ! Copy Initial Configuration files 
+! TODO: Read the epoch start from sp3 file and update first
 ! ----------------------------------------------------------------------
 fname_id = '0'
 CALL write_prmfile2 (EQM_fname_cfg, fname_id, EQMfname)
@@ -669,6 +674,16 @@ Call writearray (orbit_resN, filename)
 write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbdiff_rtn.out'
 Call writearray2 (orbdiff2, filename)
 
+if (allocated(CLKmatrix)) Deallocate(CLKmatrix, stat=DeAllocateStatus)
+if (allocated(orbits_partials_icrf)) Deallocate(orbits_partials_icrf, stat=DeAllocateStatus)
+if (allocated(orbits_partials_itrf)) Deallocate(orbits_partials_itrf, stat=DeAllocateStatus)
+if (allocated(orbits_ics_icrf)) Deallocate(orbits_ics_icrf, stat=DeAllocateStatus)
+if (allocated(orbit_resN)) Deallocate(orbit_resN, stat=DeAllocateStatus)
+if (allocated(orbit_resR)) Deallocate(orbit_resR, stat=DeAllocateStatus)
+if (allocated(orbit_resT)) Deallocate(orbit_resT, stat=DeAllocateStatus)
+if (allocated(orbdiff2)) Deallocate(orbdiff2, stat=DeAllocateStatus)
+if (allocated(PRNmatrix)) Deallocate(PRNmatrix, stat=DeAllocateStatus)
+call globals_fini()
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
 

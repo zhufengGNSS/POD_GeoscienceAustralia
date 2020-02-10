@@ -78,6 +78,9 @@ CLKV3  = 0.d0
 ! Read broadcast message 
 !-------------------------------
 
+!stop compiler warning
+N2 = 25
+
 IF(VERSION.EQ.1) THEN
    N2 = 25
 ELSE IF(VERSION.EQ.2) THEN

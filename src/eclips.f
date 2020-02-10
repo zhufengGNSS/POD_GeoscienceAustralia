@@ -203,7 +203,9 @@ C
 C     IF SV IN NIGHT SHADOW OR NOON TURN DURING FORWARD PASS
 C     STORE START AND END TIME OF YAW MANEUVRE (FOR THE BACKWARD RUN)
 C
-C YAW ANLGE
+C init PHI
+      PHI = PI/2.d0
+C YAW ANGLE
       YANGLE=   acos((santxyz(1)*vsvc(1) +
      &santxyz(2)*vsvc(2)+santxyz(3)*vsvc(3))/sqrt(vsvc(1)**2+vsvc(2)**2+
      & vsvc(3)**2))/DTR

@@ -74,6 +74,10 @@ SUBROUTINE prm_ocean (PRMfname)
       END IF
 ! ----------------------------------------------------------------------
 
+! Init ForceMod_Tides and ForceMod_Ocean to nonsense values
+ForceMod_Tides = -1
+ForceMod_Ocean = -1
+
 ! ----------------------------------------------------------------------
 ! Read input file
 i = 0
@@ -97,6 +101,7 @@ READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 !READ (line_ith, * , IOSTAT=ios_data) word1_ln, charN 
 ! ----------------------------------------------------------------------
 !PRINT *, "word1_ln: ", word1_ln
+
 
 
 ! ----------------------------------------------------------------------

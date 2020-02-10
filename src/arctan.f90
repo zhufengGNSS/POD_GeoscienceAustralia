@@ -46,28 +46,32 @@ SUBROUTINE arctan ( y,x , angle )
 
 
 ! ----------------------------------------------------------------------
-      a = atan( abs( y/x ) )
-      if (x > 0.0D0) THEN
-          if (y > 0.0D0) THEN
-              angle = a
-          else if (y < 0.0D0) THEN
-              angle = 2.0D0 * pi - a
-          else
-              angle = 0.0D0
-          end IF
-      else if (x < 0.0D0) THEN
-          if (y > 0.0D0) THEN
-              angle = pi - a
-          else if (y < 0.0D0) THEN
-              angle = pi + a
-          else
-              angle = pi
-          end IF
+      if (x .ne. 0.d0) then
+          a = atan( abs( y/x ) )
+          if (x > 0.0D0) THEN
+              if (y > 0.0D0) THEN
+                  angle = a
+              else if (y < 0.0D0) THEN
+                  angle = 2.0D0 * pi - a
+              else
+                  angle = 0.0D0
+              end IF
+          else if (x < 0.0D0) THEN
+              if (y > 0.0D0) THEN
+                  angle = pi - a
+              else if (y < 0.0D0) THEN
+                  angle = pi + a
+              else
+                  angle = pi
+              end IF
+          end if
       else
           if (y > 0.0D0) THEN
               angle = pi / 2.0D0
           else if (y < 0.0D0) THEN
               angle = 3.0D0 * pi / 2.0D0
+          else
+              angle = 0.d0
           end IF
       end IF
 ! ----------------------------------------------------------------------

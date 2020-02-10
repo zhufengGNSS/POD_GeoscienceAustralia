@@ -275,6 +275,8 @@ Else
 	Nsat_lines = 5
 End IF
 
+! stop compiler warning
+i_sat1 = 0
 
 Do i = 1 , Nsat_lines
 

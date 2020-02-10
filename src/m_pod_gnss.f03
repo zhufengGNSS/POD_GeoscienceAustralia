@@ -273,7 +273,7 @@ YR = Iyear
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 Do isat = 1 , Nsat
- 
+
 ! ----------------------------------------------------------------------
 ! Modify/Rewrite the Configuration files
 ! ----------------------------------------------------------------------
@@ -283,13 +283,12 @@ Do isat = 1 , Nsat
 ! ----------------------------------------------------------------------
 PRN_isat = PRNmatrix(isat)
 !print *,"Satellite: ", PRNmatrix(isat) ! isat
-! Read Satellite infromation from SINEX file
+! Read Satellite information from SINEX file
 ! ----------------------------------------------------------------------
 CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat)
-!print*,'GNSS Block Type: ', BLKTYP
 
 write(*,10) trim(PRN_isat),SVNID,trim(BLKTYP),BLKID,POWER,MASS
-10 format(' PRN: ',a,', SVN: ',i03,', BLK TYP: ',a,', BLKID: ',i3,', TX PWR:',i3,', MASS: ',f8.3)
+10 format(' PRN: ',a,', SVN: ',i03,', BLK TYP: ',a,', BLKID: ',i3,', TX PWR: ',i3,', MASS: ',f8.3)
 ! ----------------------------------------------------------------------
 ! Copy Initial Configuration files 
 write (fname_id, FMT='(A1,A3)') '_', PRN_isat
@@ -312,7 +311,7 @@ IF (IC_MODE_cfg == 1) THEN
 Call prm_main     (EQMfname_PRN)
 CALL prm_pseudobs (EQMfname_PRN)
 Zo = pseudobs_ITRF(1,3:8)
-PRINT*,"IC: ", pseudobs_ITRF(1,:)
+print *,"IC: ", pseudobs_ITRF(1,:)
 
 ELSE IF (IC_MODE_cfg == 2) THEN
 ! Initial Conditions file option
@@ -322,11 +321,10 @@ sz1 = size(IC_matrix_glb, DIM = 1)
 sz2 = size(IC_matrix_glb, DIM = 2)
 ALLOCATE (IC_sat_glb(sz2), STAT = AllocateStatus)
 IC_sat_glb = IC_matrix_glb (isat,1:sz2)
-PRINT*,"Zo", IC_matrix_glb (isat,1:)
+print *,"Zo", IC_matrix_glb (isat,1:)
 ELSE
-PRINT*,"Zo", Zo
+print *,"Zo", Zo
 END IF
-!print *,"Zo", Zo
 
 ! Write Initial Conditions (state vector only) in the configuration files
 write (fname_id, *) '_imd' !isat
@@ -347,14 +345,12 @@ END IF
 ! End of update/rewrite configuration files
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 ! Precise Orbit Determination :: main subroutine
 !CAll orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
 CALL orbitmain (EQMfname_PRN, VEQfname_PRN, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, &
 		dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf, orbdiff) 
 ! ----------------------------------------------------------------------
-
 print *," "
 print *," "
 
