@@ -109,6 +109,7 @@ SUBROUTINE write_orb2sp3 (ORBmatrix, PRNmatrix, sp3_fname, sat_vel, CLKmatrix)
       INTEGER (KIND = prec_int2) :: num1
 ! ----------------------------------------------------------------------
 
+      external time_GPSweek3
 
 UNIT_IN = 7  												
 

@@ -16,7 +16,6 @@ MODULE m_eop_data
       IMPLICIT NONE
       !SAVE 			
  
-	  
 Contains
 
 
@@ -60,8 +59,6 @@ SUBROUTINE eop_data (mjd, EOP_fname, EOP_sol, n_interp , EOP_days)
 ! Created:	23 July 2018
 ! ----------------------------------------------------------------------
 
-
-
       USE mdl_precision
       USE mdl_num
       IMPLICIT NONE
@@ -76,7 +73,7 @@ SUBROUTINE eop_data (mjd, EOP_fname, EOP_sol, n_interp , EOP_days)
       INTEGER (KIND = prec_int1), INTENT(IN) :: EOP_sol
 ! OUT
       !REAL (KIND = prec_d), INTENT(OUT) :: EOP_data(n_interp,7)
-      REAL (KIND = prec_d), INTENT(OUT), DIMENSION(:,:), ALLOCATABLE :: EOP_days	  
+      REAL (KIND = prec_d), INTENT(OUT), DIMENSION(:,:), ALLOCATABLE :: EOP_days  
 ! ----------------------------------------------------------------------
 
 
@@ -98,12 +95,18 @@ SUBROUTINE eop_data (mjd, EOP_fname, EOP_sol, n_interp , EOP_days)
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
 
-
-	  
 ! ----------------------------------------------------------------------
 ! Dynamic allocatable arrays
 ALLOCATE (EOP_days(n_interp,7), STAT = AllocateStatus)
+
+if (AllocateStatus /= 0) then
+        print *,'ERROR: eop_data - allocating EOP_days(n_interp,7) n_interp:',n_interp
+        stop
+end if
+
 ! ----------------------------------------------------------------------
+! Mod - Initialise the EOP interpolation data array (SCM 04022020)
+EOP_days = 0.0d0
 
 ! ----------------------------------------------------------------------
 ! Time Systems transformation											 
@@ -141,7 +144,7 @@ ALLOCATE (EOP_days(n_interp,7), STAT = AllocateStatus)
 ! ----------------------------------------------------------------------
 ! Epochs center definition
       IF (n_interp/2 - INT(n_interp/2) == 0) THEN
-	     n_cent = n_interp/2
+         n_cent = n_interp/2
       ELSE
          n_cent = INT(n_interp/2) + 1
       END IF
@@ -160,7 +163,7 @@ DO i = 1 , n_interp
    xint_ar(i) = EOP_i(2)
    yint_ar(i) = EOP_i(3)
    UT1int_ar(i) = EOP_i(4)
-		 
+
 ! LOD (sec)
    LOD = EOP_i(5)
 ! dX,dY (arcsec)													
@@ -177,7 +180,6 @@ EOP_days(i,7) = EOP_i(7)
 
 END DO
 ! ----------------------------------------------------------------------
-
 
 END SUBROUTINE
 

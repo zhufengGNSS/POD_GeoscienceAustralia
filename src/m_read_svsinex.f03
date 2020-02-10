@@ -80,6 +80,14 @@ SUBROUTINE read_svsinex (UNIT_IN,idir,iyr,iday,ihr,imin,gnss,isat, &
       logical found  ! Used to indicate that blocks and SVNs have been found.
       logical debug / .false. /   ! Turn on ouput.
 
+!init ints to 0
+yr1 = 0
+yr2 = 0
+doy1 = 0
+doy2 = 0
+prn_in = "   "
+svn_in = "    "
+
 ! Put the requested time into a scale of year 
 time_id = iyr + iday/365.d0 + (ihr*3600.d0+imin*60.d0)/86400.d0/365.d0
 
@@ -98,9 +106,16 @@ found = .false.
 REWIND(UNIT_IN)
 DO WHILE (.not.found )
    READ(UNIT_IN,'(a)',IOSTAT=ioerr) record
-   IF(record(1:3)=='-SAT') THEN 
-     print*,'NO SVN CAn BE FOUND ',ioerr
-   ELSE IF (record(1:1)==' ' ) THEN
+   ! check for end of file
+   IF (ioerr/=0) then
+       found=.true. !spoof it
+   else IF(record(1:4)=='-SAT') THEN 
+     !skip and read next line
+     cycle
+   ! better detect if we are reading a valid line of the file!!!
+   ELSE IF (record(1:1)==' ' .and. record(11:11)==':') THEN
+   !ELSE IF (record(1:1)==' ') THEN
+     yr2 = 0
      READ(record,'(1x,a4,2(1x,i4,1x,i3,1x,f5.0),1x,a3)',IOSTAT=ioerr) svn,yr1,doy1,sod1,yr2,doy2,sod2,prn
      IF(yr2==0000) THEN
      yr2   = 2100
@@ -148,10 +163,11 @@ found = .false.
    found = .false.
    DO WHILE (.not.found)
    READ(UNIT_IN,'(a)',IOSTAT=ioerr) record
-      IF(record(1:3)=='-SAT'.or.ioerr.ne.0) THEN
+      IF(record(1:4)=='-SAT'.or.ioerr.ne.0) THEN
          If( ioerr/=0 ) print*,'Failed to find SV in FREQUENCY_CHANNEL SINEX block',ioerr
       ELSE 
-         IF(record(1:1)==' ') THEN
+         IF(record(1:1)==' ' .and. record(11:11)== ':') THEN
+         !IF(record(1:1)==' ') THEN
          READ(record,'(1x,a4,2(1x,i4,1x,i3,1x,f5.0),1x,i4)',IOSTAT=ioerr) svn,yr1,doy1,sod1,yr2,doy2,sod2,frqchn
          IF(ioerr/=0) print*,'Reading GLONASS frequency',ioerr
          IF(yr2==0000) THEN
@@ -187,9 +203,10 @@ END DO
 found = .false.
 DO WHILE (.not.found)
 READ(UNIT_IN,'(a)',iostat=ioerr) record
-   IF (record(1:3)=='-SAT'.or.ioerr/=0) THEN
+   IF (record(1:4)=='-SAT'.or.ioerr/=0) THEN
       If(ioerr/=0) print*,'Failed to find SV in IDENTIFIER SINEX block',ioerr
    ELSE 
+      !IF(record(1:1)==' ' .and. record(11:11)== ':') THEN
       IF(record(1:1)==' ') THEN
       READ(record,'(1x,a4,1x,a9,1x,A6,1x,a15)',iostat=ioerr)svn,cospar_id,SatCat,antbody_in
       IF(ioerr/=0) print*,'Fail to reading satellite id ',ioerr
@@ -305,7 +322,6 @@ DO WHILE (.not.found)
       END IF
     END IF
 END DO
-
 
 END SUBROUTINE
 

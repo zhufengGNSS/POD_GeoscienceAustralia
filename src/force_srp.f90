@@ -65,13 +65,12 @@ SUBROUTINE force_srp (lambda, eBX_ecl, eclipsf, GM, GNSSid, srpid, r, v, r_sun, 
       INTEGER                           :: srpid,ECOM
       INTEGER (KIND = 4):: eclipsf
       REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
-      REAL (KIND = prec_q)               :: fx,fy,fz
+      REAL (KIND = prec_q), INTENT(OUT)  :: fx,fy,fz
       CHARACTER (LEN=1) :: GNSSid
 
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_q) :: Ps,AU,Pi
       REAL (KIND = prec_q) :: Cr
       REAL (KIND = prec_q) :: ANG,GM
       REAL (KIND = prec_q) :: Ds,sclfa
@@ -97,7 +96,6 @@ SUBROUTINE force_srp (lambda, eBX_ecl, eclipsf, GM, GNSSid, srpid, r, v, r_sun, 
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: X_SIDE,Z_SIDE
-      REAL (KIND = prec_q) :: AREA
       REAL (KIND = prec_q) :: A_SOLAR
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: u_sat,i_sat,omega_sat
@@ -106,22 +104,17 @@ SUBROUTINE force_srp (lambda, eBX_ecl, eclipsf, GM, GNSSid, srpid, r, v, r_sun, 
 ! ----------------------------------------------------------------------
 ! Sun-related variables
 ! ----------------------------------------------------------------------
-       REAL (KIND = prec_q) :: S0, C
+       REAL (KIND = prec_q) :: xmul, zmul, solarmul
        REAL (KIND = prec_q) :: u_sun
        REAL (KIND = prec_q) :: beta,del_u
        REAL (KIND = prec_q), DIMENSION(3) :: r_sun1,r_sun2
 ! ----------------------------------------------------------------------
-       INTEGER*4 BLKNUM,SVN,REFF,ERM,ANT,GRD,MONTH
+       INTEGER*4 SVN,REFF,ERM,ANT,GRD,MONTH
        REAL*8  ACCEL(3),SUN(3)
        REAL*8  YSAT(6)
 ! ---------------------------------------------------------------------- 
 ! Numerical Constants
-      S0 = 1367.d0
-      C  = 299792458.d0
-      Ps = S0/C !4.5567D-6 ! (Nm^-2)
       Cr = 1.5 ! SRP coefficient ranges from 1.3 to 1.5
-      AU = 1.496d11 ! (m)
-      Pi = 4*atan(1.0d0)
 ! ---------------------------------------------------------------------
     ex_i = 0 ! change the definition of the unit vector ex 
              ! ex_i = 0 (default)
@@ -135,128 +128,16 @@ SUBROUTINE force_srp (lambda, eBX_ecl, eclipsf, GM, GNSSid, srpid, r, v, r_sun, 
 ! initialize the SRP force
 ! -------------------------
      DO i=1,3
-     fsrp(i)=0.0d0
+         fsrp(i)=0.0d0
      END DO
 
-IF (GNSSid == 'G') THEN
-! GPS constellation
-! -----------------
-! I
-         if (TRIM(BLKTYP)=='GPS-I')then
-         Z_SIDE = 3.020D0
-         X_SIDE = 1.728D0
-         A_SOLAR= 6.053D0
-         F0 = 4.54d-5
+! Initialise
+Z_SIDE = 0.d0
+X_SIDE = 0.d0
+A_SOLAR = 0.d0
+F0 = 0.d0
 
-! II and IIA
-         else if (TRIM(BLKTYP)=='GPS-II' .or. TRIM(BLKTYP)=='GPS-IIA') then
-         Z_SIDE = 2.881D0
-         X_SIDE = 2.893D0
-         A_SOLAR= 11.871D0
-         F0 = 8.695d-5
-! IIF
-         else if(TRIM(BLKTYP)=='GPS-IIF') then
-         Z_SIDE = 5.05D0
-         X_SIDE = 4.55D0
-         A_SOLAR= 22.25D0
-         F0 = 16.7d-5
-! IIR
-         else if (TRIM(BLKTYP)=='GPS-IIR' .or. TRIM(BLKTYP)=='GPS-IIR-A' .or. &
-                  TRIM(BLKTYP)=='GPS-IIR-B'.or.TRIM(BLKTYP)=='GPS-IIR-M') then
-         Z_SIDE = 4.25D0
-         X_SIDE = 4.11D0
-         A_SOLAR= 13.92D0
-         F0 = 11.15d-5
-! III
-         else if (TRIM(BLKTYP)=='GPS-IIIA') then
-         Z_SIDE = 4.38D0
-         X_SIDE = 6.05D0
-         A_SOLAR= 22.25D0
-         F0 = 11.0d-5
-
-         else
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP
-         end if
-
-ELSE IF (GNSSid == 'R') THEN
-! GLONASS constellation
-! ---------------------
-         if(TRIM(BLKTYP)=='GLO'.or.TRIM(BLKTYP)=='GLO-M'.or.TRIM(BLKTYP)=='GLO-M+'.or.&
-            TRIM(BLKTYP)=='GLO-K1A'.or.TRIM(BLKTYP)=='GLO-K1B')then
-         Z_SIDE = 1.6620D0
-         X_SIDE = 4.200D0
-         A_SOLAR= 23.616D0
-! GLONASS-K
-         if(TRIM(BLKTYP)=='GLO-K1A'.or.TRIM(BLKTYP)=='GLO-K1B') F0 = 10.6d-5
-! GLONASS-M
-         if(TRIM(BLKTYP)=='GLO'.or.TRIM(BLKTYP)=='GLO-M'.or.TRIM(BLKTYP)=='GLO-M+') F0 = 20.9d-5
-
-         else
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP
-         end if
-
-ELSE IF (GNSSid == 'E') THEN
-! GALILEO constellation
-! ---------------------
-         if (TRIM(BLKTYP)=='GAL-1'.or.TRIM(BLKTYP)=='GAL-2') then
-         Z_SIDE = 3.002D0
-         X_SIDE = 1.323D0
-         A_SOLAR= 11.0D0
-         F0 = 8.35d-5
-
-         else
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP
-         end if
-
-ELSE IF (GNSSid == 'C') THEN
-! BDS constellation
-! -----------------
-         Z_SIDE = 3.96D0
-         X_SIDE = 4.5D0
-         A_SOLAR= 22.44D0
-! BDS GEO
-         if(TRIM(BLKTYP)=='BDS-2G') F0 = 21.8d-5
-! BDS MEO
-         if(TRIM(BLKTYP)=='BDS-2M') F0 = 10.4d-5
-! BDS IGSO
-         if(TRIM(BLKTYP)=='BDS-2I') F0 = 17.0d-5
-
-         if(BLKTYP(1:3)/='BDS') then
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP
-         end if
-
-ELSE IF (GNSSid == 'J') THEN
-! QZSS constellation
-! ------------------
-! QZSS-1
-         if (TRIM(BLKTYP)=='QZS-1') then
-         Z_SIDE = 5.6D0
-         X_SIDE = 9.0D0
-         A_SOLAR= 45.0D0
-         F0 = 35.0d-5
-! QZSS-2I
-         else if (TRIM(BLKTYP)=='QZS-2I') then
-         Z_SIDE = 5.6D0
-         X_SIDE = 10.1D0
-         A_SOLAR= 29.8D0
-         F0 = 25.0d-5
-! QZSS-2G
-         else if (TRIM(BLKTYP)=='QZS-2G') then
-         Z_SIDE = 5.6D0
-         X_SIDE = 10.1D0
-         A_SOLAR= 29.8D0
-         F0 = 25.0d-5
-
-         else 
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP
-         end if
-
-END IF
+call apr_srp(GNSSid, BLKTYP, X_SIDE, Z_SIDE, A_SOLAR, F0)
 
 ! The unit vector ez SAT->EARTH
       er(1)=r(1)/sqrt(r(1)**2+r(2)**2+r(3)**2)
@@ -306,9 +187,9 @@ END IF
 
 ! computation of the satellite argument of latitude and orbit inclination
       CALL kepler_z2k (r,v,GM,kepler)
-      u_sat = kepler(9)*Pi/180.d0
-      i_sat = kepler(3)*Pi/180.d0
-      omega_sat = kepler(4)*Pi/180.d0
+      u_sat = kepler(9)*Pi_global/180.d0
+      i_sat = kepler(3)*Pi_global/180.d0
+      omega_sat = kepler(4)*Pi_global/180.d0
 
 ! compute the sun position in the satellite orbit plane by rotating omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
@@ -347,19 +228,19 @@ END IF
       CALL matrix_Rr(R11,r_sun1,r_sun2)
 
       beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2)) ! in rad
-!write (*,*) beta*180.0d0/Pi
+!write (*,*) beta*180.0d0/Pi_global
 
       u_sun = atan2(r_sun2(2),r_sun2(1)) ! in rad
 
       del_u = u_sat - u_sun
 
-      if (del_u*180/Pi .gt.360.0d0) then
-      del_u=del_u-2*Pi
-      else if(del_u*180/Pi .lt.0.0d0) then
-      del_u=del_u+2*Pi
+      if (del_u*180/Pi_global .gt.360.0d0) then
+      del_u=del_u-2*Pi_global
+      else if(del_u*180/Pi_global .lt.0.0d0) then
+      del_u=del_u+2*Pi_global
       end if
 
-!print*,'del_u=, lambda=',del_u*180/Pi, lambda
+!print*,'del_u=, lambda=',del_u*180/Pi_global, lambda
 
 ! Implement the orbit-normal attitude for BDS satellites when the beat < 4 deg
 ! ----------------------------------------------------------------------------
@@ -384,7 +265,7 @@ END IF
 
      elseif(BLKID == 302 .or.BLKID == 303) then
         if (eclipsf == 3) then 
-!        if (abs(beta*180.0d0/Pi) < 4.d0) then
+!        if (abs(beta*180.0d0/Pi_global) < 4.d0) then
 !        PRINT*,'ed_YS =',ed, sqrt(ed(1)**2+ed(2)**2+ed(3)**2)
 !        print*,'ey_YS =',ey, sqrt(ey(1)**2+ey(2)**2+ey(3)**2)
 !        print*,'eb_YS =',eb, sqrt(eb(1)**2+eb(2)**2+eb(3)**2)
@@ -446,7 +327,9 @@ end do
 !PRINT*,'FXX =', FXX
 !PRINT*,'FZZ =', FZZ
 !PRINT*,'FSP =', FSP
-
+xmul = 0.02
+zmul = 0.02
+solarmul = 1.7
 
 ! A scaling factor is applied to ECOM model
 !******************************************************************
@@ -454,9 +337,9 @@ end do
 
 ! SIMPLE BOX-WING 
       if (Flag_BW_cfg == 1 .or. srpid == 1) then
-         fxo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(1)+0.02*Z_SIDE*cosang(3)*nz(1)+1.7*A_SOLAR*cosang(4)*nd(1))
-         fyo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(2)+0.02*Z_SIDE*cosang(3)*nz(2)+1.7*A_SOLAR*cosang(4)*nd(2))
-         fzo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(3)+0.02*Z_SIDE*cosang(3)*nz(3)+1.7*A_SOLAR*cosang(4)*nd(3))
+         fxo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(1)+zmul*Z_SIDE*cosang(3)*nz(1)+solarmul*A_SOLAR*cosang(4)*nd(1))
+         fyo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(2)+zmul*Z_SIDE*cosang(3)*nz(2)+solarmul*A_SOLAR*cosang(4)*nd(2))
+         fzo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(3)+zmul*Z_SIDE*cosang(3)*nz(3)+solarmul*A_SOLAR*cosang(4)*nd(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
 !print*,'alpha=',(alpha-F0/MASS)/alpha*100, F0/MASS
 ! BOX-WING model from the repro3 routine
@@ -466,8 +349,8 @@ end do
                      ! 2: sun-fixed frame, 3: orbital frame 
          YSAT(1:3) = r
          YSAT(4:6) = v
-         CALL SRPFBOXW(REFF,YSAT,R_SUN,BLKID,SVNID,ACCEL)
-         alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)/MASS
+         CALL SRPFBOXW(REFF,YSAT,R_SUN,SVNID,ACCEL)
+         alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
 
       else if (Flag_BW_cfg == 0) then
          alpha = F0/MASS
@@ -481,36 +364,24 @@ IF (ECOM_param_glb <= 2) THEN
 PD_Param_ID = 0
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 
 ! CPR partial derivatives matrix allocation
 
 If (ECOM_CPR_glb(1) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-ELSE
-        PD_Param_ID = PD_Param_ID
 End If
 
 
@@ -528,6 +399,10 @@ END IF
 
 
 ALLOCATE (srpcoef(PD_Param_ID), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate srpfcoef"
+        goto 100
+endif
 
 !ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
 
@@ -546,8 +421,6 @@ If (ECOM_Bias_glb(1) == 1) Then
         END DO
 !print*,'ECOM1-caused accelerations'
 !print*,'D0'
-Else 
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -556,8 +429,6 @@ If (ECOM_Bias_glb(2) == 1) Then
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)*alpha
         END DO
 !print*,'Y0'
-Else
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -566,8 +437,6 @@ If (ECOM_Bias_glb(3) == 1) Then
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)*alpha
         END DO
 !print*,'B0'
-Else
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
@@ -584,8 +453,6 @@ If (ECOM_CPR_glb(1) == 1) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ed(i)*alpha
         END DO
 !print*,'DS'
-Else
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
@@ -602,8 +469,6 @@ If (ECOM_CPR_glb(2) == 1) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ey(i)*alpha
         END DO
 !print*,'YS'
-Else
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
@@ -620,8 +485,6 @@ If (ECOM_CPR_glb(3) == 1) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)*alpha
         END DO
 !print*,'BS'
-Else
-        PD_Param_ID = PD_Param_ID
 End If
 
 ! ECOM2 model
@@ -636,8 +499,6 @@ If (ECOM_Bias_glb(1) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)*alpha
         END DO
-Else
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -645,8 +506,6 @@ If (ECOM_Bias_glb(2) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)*alpha
         END DO
-Else
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -654,8 +513,6 @@ If (ECOM_Bias_glb(3) == 1) Then
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)*alpha
         END DO
-Else
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
@@ -670,8 +527,6 @@ If (ECOM_CPR_glb(1) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(2*del_u)*ed(i)*alpha
         END DO
-Else
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
@@ -686,8 +541,6 @@ If (ECOM_CPR_glb(2) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(4*del_u)*ed(i)*alpha
         END DO
-Else
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
@@ -702,8 +555,6 @@ If (ECOM_CPR_glb(3) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)*alpha
         END DO
-Else
-        PD_Param_ID = PD_Param_ID
 End If
 
 ! SIMPLE BOX WING
@@ -771,4 +622,4 @@ End If
 
      END IF 
 
-END
+ 100 END

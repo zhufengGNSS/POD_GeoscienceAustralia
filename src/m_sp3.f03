@@ -145,6 +145,9 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
 	  
       UNIT_IN = 9  												
 
+      !default initial value
+      Nvec = 3
+
 ! ----------------------------------------------------------------------
 ! Open file
       OPEN (UNIT = UNIT_IN, FILE = TRIM (fname), IOSTAT = ios)
@@ -195,14 +198,25 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
                Nvec = 3
 			else if (Zvec == 'V') then
 			   Nvec = 6
+                   else
+                           print *, "ERROR! Zvec = ", Zvec, ", Nvec default vaule set"
+                           Nvec = 3
 			end if
 
 ! Allocatable arrays
                Ncol = 2 + Nvec
                !ALLOCATE (orb1(Nepochs,Ncol), STAT = AllocateStatus)
                ALLOCATE (orbsp3(Nepochs,Ncol), STAT = AllocateStatus)
+               if (AllocateStatus .ne. 0) then
+                       print *, "failed to allocate orbsp3"
+                       goto 100
+               end if
 			   Ncol = 2 + Nvec/3
-               ALLOCATE (clock_matrix(Nepochs,Ncol), STAT = AllocateStatus)		   
+               ALLOCATE (clock_matrix(Nepochs,Ncol), STAT = AllocateStatus)		  
+               if (AllocateStatus .ne. 0) then
+                       print *, "failed to allocate clock_matrix"
+                       goto 100
+               end if
 		 End if
 ! ----------------------------------------------------------------------
 
@@ -287,7 +301,7 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
 ! ----------------------------------------------------------------------
 
       END DO
-      CLOSE (UNIT=UNIT_IN)
+ 100  CLOSE (UNIT=UNIT_IN)
 
 	  
 END SUBROUTINE

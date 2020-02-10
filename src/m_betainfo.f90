@@ -69,7 +69,7 @@ SUBROUTINE betainfo (mjd, rsat, vsat, beta )
       REAL (KIND = prec_q), DIMENSION(9) :: kepler
       REAL (KIND = prec_q), DIMENSION(4) :: cosang
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
-      REAL (KIND = prec_q) :: Pi, Ps, AU, sclfa
+      REAL (KIND = prec_q) :: sclfa
       REAL (KIND = prec_d) :: GM, Ds
       REAL (KIND = prec_d) :: u_sat, i_sat, omega_sat
       INTEGER (KIND = prec_int2) :: AllocateStatus
@@ -77,10 +77,7 @@ SUBROUTINE betainfo (mjd, rsat, vsat, beta )
 
 ! Numerical Constants
 
-      GM = 0.39860044150D+15
-      Ps = 4.5567D-6 ! (Nm^-2)
-      AU = 1.496d11 ! (m)
-      Pi = 4*atan(1.0d0)
+      GM = GM_gfm
 
 ! Julian Day Number of the input epoch
       JD = mjd + 2400000.5D0
@@ -144,9 +141,9 @@ SUBROUTINE betainfo (mjd, rsat, vsat, beta )
 
 ! computation of the satellite argument of latitude and orbit inclination
       CALL kepler_z2k (rsat, vsat, GM, kepler)
-      u_sat = kepler(9)*Pi/180.d0
-      i_sat = kepler(3)*Pi/180.d0
-      omega_sat = kepler(4)*Pi/180.d0
+      u_sat = kepler(9)*Pi_global/180.d0
+      i_sat = kepler(3)*Pi_global/180.d0
+      omega_sat = kepler(4)*Pi_global/180.d0
 
 ! compute the sun position in the satellite orbit plane by rotating omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
@@ -184,21 +181,21 @@ SUBROUTINE betainfo (mjd, rsat, vsat, beta )
       CALL matrix_Rr(R33,rSun,r_sun1)
       CALL matrix_Rr(R11,r_sun1,r_sun2)
 
-      beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2))*180.d0/Pi ! in deg
-!write (*,*) beta*180.0d0/Pi
+      beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2))*180.d0/Pi_global ! in deg
+!write (*,*) beta*180.0d0/Pi_global
 
       u_sun = atan2(r_sun2(2),r_sun2(1)) ! in rad
       del_u = u_sat - u_sun
-      if (del_u*180/Pi .gt.360.0d0) then
-      del_u=del_u-2*Pi
-      else if(del_u*180/Pi .lt.0.0d0) then
-      del_u=del_u+2*Pi
+      if (del_u*180/Pi_global .gt.360.0d0) then
+      del_u=del_u-2*Pi_global
+      else if(del_u*180/Pi_global .lt.0.0d0) then
+      del_u=del_u+2*Pi_global
       end if
 
 ! yaw angle
       yaw= acos(ex(1)*et(1)+ex(2)*et(2)+ex(3)*et(3))
 
-IF (beta*180/Pi .gt. 0.d0) yaw= -yaw ! In accordance with the IGS convention
+IF (beta*180/Pi_global .gt. 0.d0) yaw= -yaw ! In accordance with the IGS convention
 
 
        END SUBROUTINE

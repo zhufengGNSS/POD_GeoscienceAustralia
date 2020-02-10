@@ -1,5 +1,5 @@
 C*
-      SUBROUTINE PROPBOXW(BLKNUM,AREA,REFL,DIFU,ABSP,AREA2,REFL2,DIFU2,
+      SUBROUTINE PROPBOXW(BLKID,AREA,REFL,DIFU,ABSP,AREA2,REFL2,DIFU2,
      1                    ABSP2,REFLIR,DIFUIR,ABSPIR)
 CC
 CC NAME       :  PROPBOXW
@@ -20,7 +20,7 @@ CC               [IGSMAIL-5104] GLONASS-M dimensions and center-of-mass correcti
 CC               http://acc.igs.org/orbits/IIF_SV_DimensionsConfiguration.ppt
 CC
 CC PARAMETERS : 
-CC         IN :  BLKNUM     : BLOCK NUMBER
+CC         IN :  BLKID     : BLOCK NUMBER
 CC                             1 = GPS-I
 CC                             2 = GPS-II
 CC                             3 = GPS-IIA
@@ -79,7 +79,7 @@ CC            :  09-JUL-19 : Changed logical at end of routine to test if we fou
 C*
       IMPLICIT NONE
 C
-      INTEGER*4 BLKNUM,II,JJ,KK,SS
+      INTEGER*4 BLKID,II,JJ,KK,SS
 C
       REAL*8 AREA(4,2),REFL(4,2),DIFU(4,2),ABSP(4,2)
       REAL*8 AREA2(4,2),REFL2(4,2),DIFU2(4,2),ABSP2(4,2)
@@ -123,7 +123,7 @@ C     -----------
 C     GPS BLOCK I
 C     -----------
 C     SEE FLIEGEL ET AL (1992)
-      IF(BLKNUM.EQ.1)THEN
+      IF(BLKID.EQ.1)THEN
           blk_found = .true.   
 
 C     +X SIDE
@@ -190,7 +190,7 @@ C     -----------------
 C     GPS BLOCK II, IIA
 C     -----------------
 C     SEE FLIEGEL ET AL (1992)
-      ELSEIF((BLKNUM.EQ.2).OR.(BLKNUM.EQ.3))THEN
+      ELSEIF((BLKID.EQ.2).OR.(BLKID.EQ.3))THEN
           blk_found = .true.   
 
 C     +X SIDE                                                                                           
@@ -251,7 +251,7 @@ C     ----------------------------------
 C     GPS BLOCK IIR, IIR-A, IIR-B, IIR-M
 C     ----------------------------------
 C     SEE FLIEGEL AND GALINI (1996)
-      ELSEIF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN
+      ELSEIF((BLKID.GE.4).AND.(BLKID.LE.7))THEN
           blk_found = .true.   
 
 C      + AND -X FACES                                                                                
@@ -313,7 +313,7 @@ C     GPS BLOCK IIF
 C     -------------
 C     SEE IIF PRESENTATION
 C     OPTICAL PROPERTIES NOT KNOWN, SAME ASSUMPTIONS AS ZIEBART (2001)
-      ELSEIF(BLKNUM.EQ.8)THEN
+      ELSEIF(BLKID.EQ.8)THEN
           blk_found = .true.   
 
 C      +/- X SIDE
@@ -356,7 +356,7 @@ C     SOLAR PANEL CAN BE TAKEN FROM (span = 5.33 m)
 C     http://www.deagel.com/Space-Systems/GPS-Block-III_a000238005.aspx
 C     BUT SO FAR,SOLAR PANEL BLOCK IIF VALUES ARE USED
 C     OPTICAL PROPERTIES NOT KNOWN, COPIED FROM IIF
-      ELSEIF(BLKNUM.EQ.9)THEN
+      ELSEIF(BLKID.EQ.9)THEN
           blk_found = .true. 
   
 C      +/- X SIDE
@@ -395,10 +395,10 @@ C     -------
 C     SEE ZIEBART (2001)
 C     OPTICAL PROPERTIES NOT KNOWN, SAME ASSUMPTIONS AS ZIEBART (2001)
 C     ASSUMED SAME SHAPE FOR GLONASS-M, SEE END OF SUBROUTINE
-C     ELSEIF((BLKNUM.EQ.101).OR.(BLKNUM.EQ.102))THEN
+C     ELSEIF((BLKID.EQ.101).OR.(BLKID.EQ.102))THEN
 C MOD TAH 190702: Use different values for GLOSNASSM: Values below for
 C     GLONASS based on conversion of Table 5.6 Rodruguez-Solano Thesis (2013)
-      elseif (BLKNUM.EQ.101 ) then
+      elseif (BLKID.EQ.101 ) then
           blk_found = .true.
    
 C      +/- X SIDE (FLAT) TAH VALUES: +X   1.265   0.200   0.560  1
@@ -458,7 +458,7 @@ C      SOLAR PANELS  TAH VALUES: SP  23.616   0.848   0.230  1
 CC MOD TAH 190702: Add GLONASS-M (Values from Rodruguez-Solano Thesis (2013)
 CC      TUM, 
 CC https://mediatum.ub.tum.de/doc/1188612/719708.pdf
-      elseif (BLKNUM.EQ.102 ) then
+      elseif (BLKID.EQ.102 ) then
           blk_found = .true.
    
 C      +/- X SIDE (FLAT)
@@ -518,7 +518,7 @@ C      SOLAR PANELS
 CC MOD TAH 190702: Add GLONASS-K (Values from Rodruguez-Solano Thesis (2013)
 CC      TUM, 
 CC https://mediatum.ub.tum.de/doc/1188612/719708.pdf
-      elseif (BLKNUM.EQ.103 ) then   ! GLONASS-K (Like a IIF with flat bus)
+      elseif (BLKID.EQ.103 ) then   ! GLONASS-K (Like a IIF with flat bus)
           blk_found = .true. 
   
 C      +/- X SIDE
@@ -556,7 +556,7 @@ CC BDS satellites (Temporally using)
 CC Information: http://mgex.igs.org/IGS_MGEX_Status_BDS.php
 CC The BDS orbit is 30000 km, so the ERP effect could be tiny.
 CC ========================================================
-        ELSEIF (BLKNUM.EQ.301.OR.BLKNUM.EQ.302.OR.BLKNUM.EQ.303)THEN 
+        ELSEIF (BLKID.EQ.301.OR.BLKID.EQ.302.OR.BLKID.EQ.303)THEN 
           blk_found = .true. 
   
 C      +/- X SIDE
@@ -600,7 +600,7 @@ CC Cabinet Office; QZS-4 Satellite Information; SPI-QZS4_C;
 CC https://qzss.go.jp/en/technical/qzssinfo/khp0mf0000000wuf-att/spi-qzs4_c.pdf 
 CC The QZSS orbit is 40000 km, so the ERP effect could be very tiny.               
 CC ========================================================
-      ELSEIF (BLKNUM.EQ.401)THEN 
+      ELSEIF (BLKID.EQ.401)THEN 
        blk_found = .true.
 
 C      +/- X SIDE
@@ -633,7 +633,7 @@ C      SOLAR PANELS
           S_SIDE(1,3) = 0.07D0
           S_SIDE(1,4) = 1D0
       
-      ELSEIF(BLKNUM.EQ.402.OR.BLKNUM.EQ.403)THEN
+      ELSEIF(BLKID.EQ.402.OR.BLKID.EQ.403)THEN
        blk_found = .true.
 
 C      +/- X SIDE
@@ -816,10 +816,10 @@ C     -X CYLINDRICAL (ASSUMED FOR ALL BLOCKS)
       DIFU2(3,2) = G_DIFU2(1)
       ABSP2(3,2) = G_ABSP2(1)
 
-C     +Y FACE (ASSUMED FOR BLKNUM = 1...7)
-      IF((BLKNUM.GE.1).AND.(BLKNUM.LE.7))THEN
+C     +Y FACE (ASSUMED FOR BLKID = 1...7)
+      IF((BLKID.GE.1).AND.(BLKID.LE.7))THEN
 C        DUE TO BLOCK IIR W-SENSOR
-         IF((BLKNUM.GE.4).AND.(BLKNUM.LE.7))THEN      
+         IF((BLKID.GE.4).AND.(BLKID.LE.7))THEN      
             AREA(2,1) = ((AREA(1,1)-0.5D0) + AREA(3,1))/(2D0)
          ELSE
             AREA(2,1) = (AREA(1,1) + AREA(3,1))/(2D0)
@@ -878,7 +878,7 @@ C     BACK OF SOLAR PANELS (ASSUMED FOR ALL BLOCKS)
       ABSP(4,2) = 0.890D0
 
 C Added from acc_albedo_propboxw.f
-      IF(BLKNUM.EQ.201.OR.BLKNUM.EQ.202) THEN
+      IF(BLKID.EQ.201.OR.BLKID.EQ.202) THEN
          REFL(4,2) = 0.00D0
          DIFU(4,2) = 0.19D0
          ABSP(4,2) = 0.81D0
@@ -902,7 +902,7 @@ C     ASSUMED FOR ALL BLOCKS AND ALL SURFACES
       ENDDO
 
 C Added from acc_albedo_propboxw.f
-      IF(BLKNUM.EQ.201) THEN
+      IF(BLKID.EQ.201) THEN
           blk_found = .true.   
 
 CC The natural order of the next lines 
@@ -984,7 +984,7 @@ CC        SOLAR PANELS
 
       ENDIF
 
-      IF(BLKNUM.EQ.202) THEN
+      IF(BLKID.EQ.202) THEN
           blk_found = .true.   
 
 CC        Implemented by PSakic 20171101
@@ -1099,7 +1099,7 @@ CC End addition from acc_albedo_propboxw.f
 C     NOT ENOUGH INFORMATION AVAILABLE FOR GLONASS-M
 C     SEE IGSMAIL-5104
 * MOD TAH 190809: Removed code once GLONASS-M added above.
-*     IF(BLKNUM.EQ.102)THEN
+*     IF(BLKID.EQ.102)THEN
 *        BUSFAC = 4.2D0/3.31D0
 *        DO SS=1,3
 *           DO II=1,2
@@ -1112,13 +1112,13 @@ C     SEE IGSMAIL-5104
 *    ENDIF
 
 C     NO (YET) INFORMATION AVAILABLE FOR GLONASS-K
-C     IF(((BLKNUM.GE.9).AND.(BLKNUM.LE.100))
-C     1  .OR.(BLKNUM.GE.103))THEN
+C     IF(((BLKID.GE.9).AND.(BLKID.LE.100))
+C     1  .OR.(BLKID.GE.103))THEN
 C MOD TAH 190709: Modified to account for new models.
 C     Added BLOCK IIA, GLONASS K-to exceptions.
-*     IF(((BLKNUM.GE.10).AND.(BLKNUM.LE.100))
-*    1  .OR.(BLKNUM.GE.104.AND.BLKNUM.LE.200)
-*    2  .OR.(BLKNUM.GE.203)) THEN
+*     IF(((BLKID.GE.10).AND.(BLKID.LE.100))
+*    1  .OR.(BLKID.GE.104.AND.BLKID.LE.200)
+*    2  .OR.(BLKID.GE.203)) THEN
 * MOD TAH 190709: Only reset value if blk_found is .fasle.
       if( .not. blk_found ) then
 

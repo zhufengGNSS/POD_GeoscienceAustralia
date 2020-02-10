@@ -82,7 +82,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, eclipsf, GM, GNSSid, r, v, r_sun, Asrp)
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_q) :: AU,Pi,Ps
       REAL (KIND = prec_q) :: Cr,ab,Lab
       REAL (KIND = prec_q) :: ANG,E,Edot
       REAL (KIND = prec_q) :: Ds,sclfa
@@ -92,7 +91,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, eclipsf, GM, GNSSid, r, v, r_sun, Asrp)
 ! Satellite physical informaiton
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q) :: X_SIDE,Z_SIDE
-      REAL (KIND = prec_q) :: AREA
       REAL (KIND = prec_q) :: A_SOLAR
       REAL (KIND = prec_q) :: F0,alpha
 ! ---------------------------------------------------------------------
@@ -112,7 +110,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, eclipsf, GM, GNSSid, r, v, r_sun, Asrp)
 ! Sun-related variables
 ! ----------------------------------------------------------------------
        REAL (KIND = prec_q) :: u_sun,beta,del_u, dang
-       REAL (KIND = prec_q) :: S0, C
+       REAL (KIND = prec_q) :: xmul, zmul, solarmul
        REAL (KIND = prec_q), DIMENSION(3) :: r_sun1,r_sun2
 
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
@@ -121,16 +119,10 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, eclipsf, GM, GNSSid, r, v, r_sun, Asrp)
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE,INTENT(OUT) :: Asrp
 ! ----------------------------------------------------------------------
       REAL (KIND = 8)      :: II, KN, U
-      INTEGER*4 BLKNUM,SVN,REFF,ERM,ANT,GRD,MONTH
+      INTEGER*4 SVN,REFF,ERM,ANT,GRD,MONTH
       REAL*8  ACCEL(3),SUN(3)
       REAL*8  YSAT(6)
-! ----------------------------------------------------------------------
-! Numerical Constants
-      AU = 1.4959787066d11 ! (m)
-      S0 = 1367.d0
-      C  = 299792458.d0
-      Ps = S0/C !4.5567D-6 ! (Nm^-2)
-      Pi = 4*atan(1.0d0)
+
 ! ---------------------------------------------------------------------
     ex_i = 0 ! change the definition of the unit vector ex
              ! ex_i = 0 (default)
@@ -141,126 +133,13 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, eclipsf, GM, GNSSid, r, v, r_sun, Asrp)
              !              for all beta angles
 ! ---------------------------------------------------------------------
 
-IF (GNSSid == 'G') THEN
-! GPS constellation
-! -----------------
-! I
-         if (TRIM(BLKTYP)=='GPS-I')then
-         Z_SIDE = 3.020D0
-         X_SIDE = 1.728D0
-         A_SOLAR= 6.053D0
-         F0 = 4.54d-5
+! default init
+Z_SIDE = 0.d0
+X_SIDE = 0.d0
+A_SOLAR = 0.d0
+F0 = 0.d0
 
-! II and IIA
-         else if (TRIM(BLKTYP)=='GPS-II' .or. TRIM(BLKTYP)=='GPS-IIA') then
-         Z_SIDE = 2.881D0
-         X_SIDE = 2.893D0
-         A_SOLAR= 11.871D0
-         F0 = 8.695d-5
-! IIF
-         else if(TRIM(BLKTYP)=='GPS-IIF') then
-         Z_SIDE = 5.05D0
-         X_SIDE = 4.55D0
-         A_SOLAR= 22.25D0
-         F0 = 16.7d-5
-! IIR
-         else if (TRIM(BLKTYP)=='GPS-IIR' .or. TRIM(BLKTYP)=='GPS-IIR-A' .or. &
-                  TRIM(BLKTYP)=='GPS-IIR-B'.or.TRIM(BLKTYP)=='GPS-IIR-M') then
-         Z_SIDE = 4.25D0
-         X_SIDE = 4.11D0
-         A_SOLAR= 13.92D0
-         F0 = 11.15d-5
-! III
-         else if (TRIM(BLKTYP)=='GPS-IIIA') then
-         Z_SIDE = 4.38D0
-         X_SIDE = 6.05D0
-         A_SOLAR= 22.25D0
-         F0 = 11.0d-5
-
-         else
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP     
-         end if
-
-ELSE IF (GNSSid == 'R') THEN
-! GLONASS constellation
-! ---------------------
-         if(TRIM(BLKTYP)=='GLO'.or.TRIM(BLKTYP)=='GLO-M'.or.TRIM(BLKTYP)=='GLO-M+'.or.&
-            TRIM(BLKTYP)=='GLO-K1A'.or.TRIM(BLKTYP)=='GLO-K1B')then
-         Z_SIDE = 1.6620D0
-         X_SIDE = 4.200D0
-         A_SOLAR= 23.616D0
-! GLONASS-K
-         if(TRIM(BLKTYP)=='GLO-K1A'.or.TRIM(BLKTYP)=='GLO-K1B') F0 = 10.6d-5
-! GLONASS-M
-         if(TRIM(BLKTYP)=='GLO'.or.TRIM(BLKTYP)=='GLO-M'.or.TRIM(BLKTYP)=='GLO-M+') F0 = 20.9d-5
-
-         else
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP     
-         end if
-
-ELSE IF (GNSSid == 'E') THEN
-! GALILEO constellation
-! ---------------------
-         if (TRIM(BLKTYP)=='GAL-1'.or.TRIM(BLKTYP)=='GAL-2') then
-         Z_SIDE = 3.002D0
-         X_SIDE = 1.323D0
-         A_SOLAR= 11.0D0
-         F0 = 8.35d-5
-       
-         else
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP     
-         end if
-
-ELSE IF (GNSSid == 'C') THEN
-! BDS constellation
-! -----------------
-         Z_SIDE = 3.96D0
-         X_SIDE = 4.5D0
-         A_SOLAR= 22.44D0
-! BDS GEO
-         if(TRIM(BLKTYP)=='BDS-2G') F0 = 21.8d-5
-! BDS MEO
-         if(TRIM(BLKTYP)=='BDS-2M') F0 = 10.4d-5
-! BDS IGSO
-         if(TRIM(BLKTYP)=='BDS-2I') F0 = 17.0d-5
-         
-         if (BLKTYP(1:3)/='BDS') then
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP     
-         end if
-
-ELSE IF (GNSSid == 'J') THEN
-! QZSS constellation
-! ------------------
-! QZSS-1
-         if (TRIM(BLKTYP)=='QZS-1') then
-         Z_SIDE = 5.6D0
-         X_SIDE = 9.0D0
-         A_SOLAR= 45.0D0
-         F0 = 35.0d-5
-! QZSS-2I
-         else if (TRIM(BLKTYP)=='QZS-2I') then
-         Z_SIDE = 5.6D0
-         X_SIDE = 10.1D0
-         A_SOLAR= 29.8D0
-         F0 = 25.0d-5
-! QZSS-2G
-         else if (TRIM(BLKTYP)=='QZS-2G') then
-         Z_SIDE = 5.6D0
-         X_SIDE = 10.1D0
-         A_SOLAR= 29.8D0
-         F0 = 25.0d-5
-
-         else
-                 print*,'FORCE_SRP - Unknown block type: ',BLKTYP
-                 STOP
-         end if
-
-END IF
-
+call apr_srp(GNSSid, BLKTYP, X_SIDE, Z_SIDE, A_SOLAR, F0)
 
 
 ! The unit vector ez SAT->EARTH
@@ -310,9 +189,9 @@ END IF
 
 ! computation of the satellite argument of latitude and orbit inclination
       CALL kepler_z2k (r,v,GM,kepler)
-      u_sat = kepler(9)*Pi/180.d0
-      i_sat = kepler(3)*Pi/180.d0
-      omega_sat = kepler(4)*Pi/180.d0
+      u_sat = kepler(9)*Pi_global/180.d0
+      i_sat = kepler(3)*Pi_global/180.d0
+      omega_sat = kepler(4)*Pi_global/180.d0
 
 ! compute the sun position in the satellite orbit plane by rotating big Omega_sat and i_sat,
 ! allowing us for the computation of u_sun and sun elevation angles (beta)
@@ -359,10 +238,10 @@ END IF
       beta  = atan2(r_sun2(3),sqrt(r_sun2(1)**2+r_sun2(2)**2)) ! in rad
 
       del_u = u_sat - u_sun ! in rad
-      IF (del_u*180/Pi .GT.360.0d0) THEN
-      del_u=del_u-2*Pi
-      ELSE IF(del_u*180/Pi .LT.0.0d0) THEN
-      del_u=del_u+2*Pi
+      IF (del_u*180/Pi_global .GT.360.0d0) THEN
+      del_u=del_u-2*Pi_global
+      ELSE IF(del_u*180/Pi_global .LT.0.0d0) THEN
+      del_u=del_u+2*Pi_global
       END IF 
 
 ! Implement the orbit-normal attitude for BDS satellites when the beat < 4 deg
@@ -385,7 +264,7 @@ END IF
         ed(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
 
      elseif(BLKID == 302 .or.BLKID == 303) then
-!        if (abs(beta*180.0d0/Pi) < 4.d0) then
+!        if (abs(beta*180.0d0/Pi_global) < 4.d0) then
         if (eclipsf == 3) then
         CALL productcross (ez,ev,yy)
         ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
@@ -435,15 +314,18 @@ FZZ(j) = Ps/MASS * Z_SIDE * cosang(3) * nz(j)
 FSP(j) = Ps/MASS * A_SOLAR* nd(j)
 end do
 
+xmul = 0.02
+zmul = 0.02
+solarmul = 1.7
 
 ! A scaling factor is applied to ECOM model
 !******************************************************************
       sclfa=(AU/Ds)**2
 ! SIMPLE BOX-WING model as the a priori SRP value
       if (Flag_BW_cfg == 1) then
-         fxo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(1)+0.02*Z_SIDE*cosang(3)*nz(1)+1.7*A_SOLAR*cosang(4)*nd(1))
-         fyo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(2)+0.02*Z_SIDE*cosang(3)*nz(2)+1.7*A_SOLAR*cosang(4)*nd(2))
-         fzo=Ps/MASS*(0.02*X_SIDE*cosang(1)*nx(3)+0.02*Z_SIDE*cosang(3)*nz(3)+1.7*A_SOLAR*cosang(4)*nd(3))
+         fxo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(1)+zmul*Z_SIDE*cosang(3)*nz(1)+solarmul*A_SOLAR*cosang(4)*nd(1))
+         fyo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(2)+zmul*Z_SIDE*cosang(3)*nz(2)+solarmul*A_SOLAR*cosang(4)*nd(2))
+         fzo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(3)+zmul*Z_SIDE*cosang(3)*nz(3)+solarmul*A_SOLAR*cosang(4)*nd(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
 
       else if (Flag_BW_cfg == 2) then
@@ -466,36 +348,24 @@ IF (ECOM_param_glb <= 2) THEN
 PD_Param_ID = 0
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 
 ! CPR partial derivatives matrix allocation
 
 If (ECOM_CPR_glb(1) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-ELSE
-        PD_Param_ID = PD_Param_ID
 End If
 
 

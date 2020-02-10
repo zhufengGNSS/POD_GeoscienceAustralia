@@ -24,7 +24,7 @@ SUBROUTINE matrixmerge (matrix0, matrix1)
 
 
 ! ----------------------------------------------------------------------
-! SUBROUTINE: orbmerge
+! SUBROUTINE: matrixmerge
 ! ----------------------------------------------------------------------
 ! Purpose:
 !  Merge input matrices 
@@ -94,7 +94,7 @@ Nepochs_1 = sz1
 N2_1 = sz2
 
 IF (N2_0 /= N2_1) THEN 
-	PRINT *, "m_orbmerge.f03 :: Matrices columns dimensions do not match. Merging matrices failed"
+	PRINT *, "m_matrixmerge.f03 :: Matrices columns dimensions do not match. Merging matrices failed"
 	STOP 
 END IF
 
@@ -102,7 +102,7 @@ END IF
 Nepochs_merge = Nepochs_0 - Nepoch_common + Nepochs_1
 
 ALLOCATE (matrix2(Nepochs_merge, N2_0), STAT = AllocateStatus)
-IF (AllocateStatus /= 0) PRINT *, "ALLOCATE Error: Module m_orbresize.f03, Array matrix2"
+IF (AllocateStatus /= 0) PRINT *, "ALLOCATE Error: Module m_matrixmerge.f03, Array matrix2"
 matrix2 = 0.0D0
 
 j = 0 
@@ -118,7 +118,7 @@ End Do
 
 DEALLOCATE (matrix1, STAT = DeAllocateStatus)
 ALLOCATE (matrix1(Nepochs_merge, N2_0), STAT = AllocateStatus)
-IF (AllocateStatus /= 0) PRINT *, "ALLOCATE Error: Module m_orbresize.f03, Array matrix1"
+IF (AllocateStatus /= 0) PRINT *, "ALLOCATE Error: Module m_matrixmerge.f03, Array matrix1"
 matrix1 = matrix2
 
 END SUBROUTINE

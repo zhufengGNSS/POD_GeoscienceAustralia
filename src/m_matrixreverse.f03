@@ -80,7 +80,7 @@ N2_0 = sz2
 !PRINT *,"sz1, sz2 ",sz1,sz2
 
 ALLOCATE (matrix1(Nepochs_0, N2_0), STAT = AllocateStatus)
-IF (AllocateStatus /= 0) PRINT *, "ALLOCATE Error: Module m_orbresize.f03, Array matrix1"
+IF (AllocateStatus /= 0) PRINT *, "ALLOCATE Error: Module m_matrixreverse.f03, Array matrix1"
 matrix1 = 0.0D0
 
 Do i = 1 , Nepochs_0
@@ -89,6 +89,7 @@ End Do
 
 matrix0 = matrix1
 
+DEALLOCATE(matrix1, STAT = DeAllocateStatus)
 
 END SUBROUTINE
 
