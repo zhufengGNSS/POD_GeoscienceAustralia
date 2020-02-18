@@ -102,6 +102,7 @@ SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orb
       INTEGER (KIND = prec_int2) :: Nveq_rv
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Smatrix_T, Pmatrix_T  
       INTEGER (KIND = prec_int2) :: VEQ_refsys
+      CHARACTER (LEN=100) :: mesg
 !      LOGICAL stored
 ! ----------------------------------------------------------------------	  
 
@@ -147,32 +148,35 @@ Nepochs = INT(arc / ABS(step)) + 1
 ! ----------------------------------------------------------------------
 ALLOCATE (orbc(Nepochs,8), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate orbc"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate orbc, dimension = (", Nepochs, ",8)"
+        call report ('FATAL', pgrm_name, 'integr_VEQ', mesg, 'src/m_integrVEQ.f03', 1)
 end if
 !ALLOCATE (Smatrix(Nepochs,6*6+2), STAT = AllocateStatus)
 ALLOCATE (Smatrix(Nepochs,6*Nveq_rv+2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate Smatrix"
-        goto 100
+        write(mesg, *) "Not enought memory - failed to allocate Smatrix, dimension=(", &
+                Nepochs, ",", 6*Nveq_rv+2, ")"
+        call report ('FATAL', pgrm_name, 'integr_VEQ', mesg, 'src/m_integrVEQ.f03', 1)
 end if
 !ALLOCATE (Pmatrix(Nepochs,Nparam*6+2), STAT = AllocateStatus)
 ALLOCATE (Pmatrix(Nepochs,Nparam*Nveq_rv+2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate Pmatrix"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate Pmatrix, dimension=(", &
+                Nepochs, ",", Nparam*Nveq_rv+2, ")"
+        call report ('FATAL', pgrm_name, 'integr_VEQ', mesg, 'src/m_integrVEQ.f03', 1)
 end if
 If (Nparam /= 0) Then
 ALLOCATE (veqPo(6,Nparam), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate veqPo"
-        goto 100
+        write(mesg, *) "Not enought memory - failed to allocate veqPo, dimension = (6,", &
+                Nparam, ")"
+        call report ('FATAL', pgrm_name, 'integr_VEQ', mesg, 'src/m_integrVEQ.f03', 1)
 end if
 Else
 ALLOCATE (veqPo(6,1), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate veqPo"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate veqPo, dimension = (6,1)"
+        call report ('FATAL', pgrm_name, 'integr_VEQ', mesg, 'src/m_integrVEQ.f03', 1)
 end if
 End IF
 Smatrix = 0
@@ -182,13 +186,15 @@ veqPo = 0.0D0
 
 ALLOCATE (Smatrix_T(Nepochs,6*Nveq_rv+2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate Smatrix_T"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate Smatrix_T, dimension=(", &
+                Nepochs, ",", 6*Nveq_rv+2, ")"
+        call report ('FATAL', pgrm_name, 'integr_VEQ', mesg, 'src/m_integrVEQ.f03', 1)
 end if
 ALLOCATE (Pmatrix_T(Nepochs,Nparam*Nveq_rv+2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate Pmatrix_T"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate Pmatrix_T, dimension=(", &
+                Nepochs, ",", Nparam*Nveq_rv+2, ")"
+        call report ('FATAL', pgrm_name, 'integr_VEQ', mesg, 'src/m_integrVEQ.f03', 1)
 end if
 Smatrix_T = 0.d0
 Pmatrix_T = 0.d0

@@ -25,6 +25,7 @@ SUBROUTINE scan0orb
       USE mdl_precision
       USE mdl_num
       USE mdl_param
+      USE mdl_config
 
       IMPLICIT NONE
 
@@ -41,6 +42,7 @@ SUBROUTINE scan0orb
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF2,pseudobs_ICRF2
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: pseudobs_ITRF3,pseudobs_ICRF3
+      CHARACTER (LEN=100) :: mesg
 ! ----------------------------------------------------------------------
 
 sz1 = SIZE (pseudobs_ICRF, DIM =1)
@@ -53,13 +55,15 @@ sz4 = SIZE (pseudobs_ITRF, DIM =2)
 
 ALLOCATE (pseudobs_ICRF2(sz1,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate pseudo_ICRF2"
-        goto 100
+        write(mesg, *) "failed to allocate pseudo_ICRF2, dimensions = (,", &
+                sz1, ",", sz2, ")"
+        call report('FATAL', pgrm_name, 'scan0orb', mesg, 'src/scan0orb.f03', 1)
 end if
 ALLOCATE (pseudobs_ITRF2(sz3,sz4), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate pseudo_ITRF2"
-        goto 100
+        write(mesg, *) "failed to allocate pseudo_ITRF2, dimensions = (,", &
+                sz3, ",", sz4, ")"
+        call report('FATAL', pgrm_name, 'scan0orb', mesg, 'src/scan0orb.f03', 1)
 end if
 
 pseudobs_ICRF2 = 0.d0
@@ -84,14 +88,16 @@ END DO
 
 ALLOCATE (pseudobs_ICRF3(ic,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate pseudo_ICRF3"
-        goto 100
+        write(mesg, *) "failed to allocate pseudo_ICRF3, dimensions = (,", &
+                ic, ",", sz2, ")"
+        call report('FATAL', pgrm_name, 'scan0orb', mesg, 'src/scan0orb.f03', 1)
 end if
 pseudobs_ICRF3 = 0.d0
 ALLOCATE (pseudobs_ITRF3(it,sz3), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate pseudo_ITRF3"
-        goto 100
+        write(mesg, *) "failed to allocate pseudo_ITRF3, dimensions = (,", &
+                it, ",", sz3, ")"
+        call report('FATAL', pgrm_name, 'scan0orb', mesg, 'src/scan0orb.f03', 1)
 end if
 pseudobs_ITRF3 = 0.d0
 
@@ -125,13 +131,15 @@ DEALLOCATE (pseudobs_ITRF, STAT = DeAllocateStatus)
 
 ALLOCATE (pseudobs_ICRF(ic,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to reallocate pseudoobs_ICRF"
-        goto 100
+        write(mesg, *) "failed to re-allocate pseudo_ICRF, dimensions = (,", &
+                ic, ",", sz2, ")"
+        call report('FATAL', pgrm_name, 'scan0orb', mesg, 'src/scan0orb.f03', 1)
 end if
 ALLOCATE (pseudobs_ITRF(it,sz3), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to reallocate pseudoobs_ITRF"
-        goto 100
+        write(mesg, *) "failed to re-allocate pseudo_ITRF, dimensions = (,", &
+                it, ",", sz3, ")"
+        call report('FATAL', pgrm_name, 'scan0orb', mesg, 'src/scan0orb.f03', 1)
 end if
 !print*,'Number of Epochs or Positions used for POD =', ic
 pseudobs_ICRF = 0.d0

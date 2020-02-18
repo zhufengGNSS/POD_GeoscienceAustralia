@@ -7,8 +7,11 @@ applications.
 
 We currently support the processing of:
 
-* the American Global Positioning System (`GPS`); and
-* the Chinese Navigation Satellite System (`Beidou`)
+* the American Global Positioning System (`GPS`)
+* the Russian GLONASS system ('GLONASS')
+* The European Gallileo system ('Gallileo')
+* the Chinese Navigation Satellite System ('Beidou`); and
+* The Japanese QZSS develop system ('QZSS')
 
 We are actively developing the ACS to have the following capabilities and features:
 
@@ -42,7 +45,9 @@ The `ACS` Version 0.0.1 beta release supports:
 ### Dependencies
 
 1. The lapack numerical linear algebra library (lapack.x86_64) (You may need to run the command ln -s /usr/lib64/liblapack.so.3 /usr/lib64/liblapack.so)
-1. The basic linear algebra library (blas.x86_64,liblas-libs.x86_64) (You may need to run the command ln -s /usr/lib64/libblas.so.3 /usr/lib64/libblas.so)
+2. The basic linear algebra library (blas.x86_64,liblas-libs.x86_64) (You may need to run the command ln -s /usr/lib64/libblas.so.3 /usr/lib64/libblas.so)
+3. A working C compiler (gcc will do), a working C++ compiler (gcc-g++ will do) and a fortran compiler (we have used gfortran)
+4. If the flags set in CMakeLists.txt do not work with your compiler please remove the ones that don't
 
 ### Build
 
