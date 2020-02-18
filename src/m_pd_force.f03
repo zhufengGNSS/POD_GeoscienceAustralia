@@ -644,7 +644,7 @@ PD_param = PD_EMP_param
 End IF
 
 
-IF (ECOM_param_glb <= 3) Then
+IF (ECOM_param_glb /= 0) Then
 PD_param = PD_ECOM_param
 END IF
 !print*,'ECOM_param_glb=',ECOM_param_glb
