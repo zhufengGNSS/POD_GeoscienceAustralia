@@ -17,6 +17,9 @@ ln -s ../tables/eopc04_14_IAU2000.62-now . >& /dev/null
 # Run the POD
 ../bin/pod | tee pod.out
 
+# Test for workaround
+grep "mjd_day .* entry not found in" pod.out
+
 # Diff output
 diff pod.out pod.out.good
 diff gag19424.sp3 gag19424.sp3.good

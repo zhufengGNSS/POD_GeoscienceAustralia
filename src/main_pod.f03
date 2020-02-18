@@ -148,12 +148,16 @@ End If
 pod_config_exists = .true.
 INQUIRE(FILE=PODfname, EXIST=pod_config_exists)
 
+pgm_name = 'pod'
 If ( .not. pod_config_exists) then
 	call get_command_argument( 0, pgm_name )
     write(*,'(3a)') 'No Default config file found (POD.in)  - Type: ',trim(pgm_name),' --help'
     write(*,'(3a)') 'If using a non-default config.filename - Type: ',trim(pgm_name),' -c config.filename'
 	STOP
 End If
+
+pgrm_name = TRIM(pgm_name)
+call report ('CLEAR', pgrm_name, ' ', ' ', ' ', 0)
 
 ! ----------------------------------------------------------------------
 

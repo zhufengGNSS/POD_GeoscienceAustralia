@@ -43,6 +43,7 @@ SUBROUTINE orbresize (orbmatrix0, steprate, orbmatrix1)
 	  
 	  
       USE mdl_precision
+      use mdl_config
 !      USE mdl_num
 !      USE mdl_param
       IMPLICIT NONE
@@ -66,6 +67,7 @@ SUBROUTINE orbresize (orbmatrix0, steprate, orbmatrix1)
       INTEGER (KIND = prec_int8) :: sz1, sz2 
       INTEGER (KIND = prec_int8) :: Nepochs, Nepochs_0, Nepochs_1, N2_0
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
+      CHARACTER (LEN=100) :: mesg
 ! ----------------------------------------------------------------------
 
 
@@ -83,8 +85,9 @@ Nepochs_1 = (Nepochs_0 - 1) / steprate +1
 
 ALLOCATE (orbmatrix1(Nepochs_1, N2_0), STAT = AllocateStatus)
 IF (AllocateStatus /= 0) then
-        PRINT *, "ALLOCATE Error: Module m_orbresize.f03, Array orbmatrix1"
-        GOTO 100
+        write(mesg, *) "Not enough memory - Array orbmatrix1, dimension = (", &
+                Nepochs_1, ",", N2_0, ")"
+        call report ('FATAL', pgrm_name, 'orbresize', mesg, 'src/m_orbresize.f03', 1)
 end if
 orbmatrix1 = 0.0D0
 
@@ -99,8 +102,9 @@ ELSE IF (steprate <= 0) THEN
 ! Output matrix is set equal to the input matrix
 ALLOCATE (orbmatrix1(Nepochs_0, N2_0), STAT = AllocateStatus)
 IF (AllocateStatus /= 0) then
-        PRINT *, "ALLOCATE Error: Module m_orbresize.f03, Array orbmatrix1"
-        goto 100
+        write(mesg, *) "Not enough memory - Array orbmatrix1, dimension = (", &
+                Nepochs_0, ",", N2_0, ")"
+        call report ('FATAL', pgrm_name, 'orbresize', mesg, 'src/m_orbresize.f03', 1)
 end if
 orbmatrix1 = orbmatrix0
 
