@@ -298,7 +298,7 @@ END IF
 !========================================
 ! angles between ed and each surface(k)
 ! k=1: +X
-!   2: +Y
+!   2: +Yi
 !   3: +Z
 !   4: solar panels
 !=======================================
@@ -308,92 +308,98 @@ END IF
      cosang(3)=ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3)
      cosang(4)=ed(1)*ed(1)+ed(2)*ed(2)+ed(3)*ed(3)
 
-nx = ex
-nz = ez
-nd = ed
 
-if(cosang(3)<0.d0) nz = ez*(-1.d0)
-
-!PRINT*,'COSANG =', cosang(1), cosang(3), cosang(4)
-!PRINT*,'MASS, AREA =', MASS, X_SIDE, Z_SIDE, A_SOLAR
-!PRINT*,'nx,nz,nd',nx,nz,nd
-
-do j = 1,3
-FXX(j) = Ps/MASS * X_SIDE * cosang(1) * nx(j)
-FZZ(j) = Ps/MASS * Z_SIDE * cosang(3) * nz(j)
-FSP(j) = Ps/MASS * A_SOLAR* nd(j)
-end do
-
-!PRINT*,'FXX =', FXX
-!PRINT*,'FZZ =', FZZ
-!PRINT*,'FSP =', FSP
-xmul = 0.02
-zmul = 0.02
-solarmul = 1.7
-
-! A scaling factor is applied to ECOM model
+! A scaling factor is applied to SRP model
 !******************************************************************
       sclfa=(AU/Ds)**2
 
+! Cannoball model
+      if (srpid == 1 .or. Flag_BW_cfg == 0) then
+         fx=-F0/MASS*ed(1)*lambda
+         fy=-F0/MASS*ed(2)*lambda
+         fz=-F0/MASS*ed(3)*lambda
+         alpha = F0/MASS
 ! SIMPLE BOX-WING 
-      if (Flag_BW_cfg == 1 .or. srpid == 1) then
-         fxo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(1)+zmul*Z_SIDE*cosang(3)*nz(1)+solarmul*A_SOLAR*cosang(4)*nd(1))
-         fyo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(2)+zmul*Z_SIDE*cosang(3)*nz(2)+solarmul*A_SOLAR*cosang(4)*nd(2))
-         fzo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(3)+zmul*Z_SIDE*cosang(3)*nz(3)+solarmul*A_SOLAR*cosang(4)*nd(3))
+      else if (srpid == 2 .or. Flag_BW_cfg == 1) then
+         xmul = 0.02
+         zmul = 0.02
+         solarmul = 1.7
+
+         if(cosang(3)<0.d0) ez = ez*(-1.d0)
+         fxo=Ps/MASS*(xmul*X_SIDE*cosang(1)*ex(1)+zmul*Z_SIDE*cosang(3)*ez(1)+solarmul*A_SOLAR*cosang(4)*ed(1))
+         fyo=Ps/MASS*(xmul*X_SIDE*cosang(1)*ex(2)+zmul*Z_SIDE*cosang(3)*ez(2)+solarmul*A_SOLAR*cosang(4)*ed(2))
+         fzo=Ps/MASS*(xmul*X_SIDE*cosang(1)*ex(3)+zmul*Z_SIDE*cosang(3)*ez(3)+solarmul*A_SOLAR*cosang(4)*ed(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
+         fx=-fxo*lambda
+         fy=-fyo*lambda
+         fz=-fzo*lambda
+
 !print*,'alpha=',(alpha-F0/MASS)/alpha*100, F0/MASS
 ! BOX-WING model from the repro3 routine
 ! --------------------------------------
-      else if (Flag_BW_cfg == 2 .or. srpid == 2) then
+      else if (srpid == 3 .or. Flag_BW_cfg == 2) then
          REFF = 0    ! 0: inertial frame,  1: satellite body-fixed frame, 
                      ! 2: sun-fixed frame, 3: orbital frame 
          YSAT(1:3) = r
          YSAT(4:6) = v
          CALL SRPFBOXW(REFF,YSAT,R_SUN,SVNID,ACCEL)
          alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
+         fx=ACCEL(1)*lambda
+         fy=ACCEL(2)*lambda
+         fz=ACCEL(3)*lambda
 
-      else if (Flag_BW_cfg == 0) then
-         alpha = F0/MASS
-      else
-         alpha = 1.d0
+      else if (Flag_BW_cfg >= 3) then
+
+      alpha = 1.d0
+
       end if
 
-     IF (srpid == 3) THEN 
-IF (ECOM_param_glb <= 2) THEN
+      
+     IF (srpid == 4) THEN 
+IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
 ! Bias partial derivatives matrix allocation
-PD_Param_ID = 0
-If (ECOM_Bias_glb(1) == 1) Then
+    PD_Param_ID = 0
+    If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-End IF
-If (ECOM_Bias_glb(2) == 1) Then
+    End IF
+    If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-End IF
-If (ECOM_Bias_glb(3) == 1) Then
+    End IF
+    If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-End IF
+    End IF
 
 ! CPR partial derivatives matrix allocation
 
-If (ECOM_CPR_glb(1) == 1) THEN
+    If (ECOM_CPR_glb(1) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-End IF
-If (ECOM_CPR_glb(2) == 1) THEN
+    End IF
+    If (ECOM_CPR_glb(2) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-End IF
-If (ECOM_CPR_glb(3) == 1) THEN
+    End IF
+    If (ECOM_CPR_glb(3) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-End If
+    End If
 
 
-
-IF (NPARAM_glb /= PD_Param_ID) THEN
-PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-PRINT*,           'NPARAM_glb  =', NPARAM_glb
-PRINT*,           'PD_Param_ID =', PD_Param_ID
-END IF
+    IF (NPARAM_glb /= PD_Param_ID) THEN
+    PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+    PRINT*,           'NPARAM_glb  =', NPARAM_glb
+    PRINT*,           'PD_Param_ID =', PD_Param_ID
+    PRINT*,'PROGRAM STOP AT force_srp.f90'
+    STOP
+    END IF
 
 ELSE IF (ECOM_param_glb == 3) THEN
-PD_Param_ID = NPARAM_glb
+    PD_Param_ID = NPARAM_glb
+
+   IF (NPARAM_glb /= 7) THEN
+   PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+   PRINT*,           'NPARAM_glb  =', NPARAM_glb
+   PRINT*,           'PD_Param_ID =', PD_Param_ID
+   PRINT*,'PROGRAM STOP AT force_srp.f90'
+   STOP
+   END IF
 
 END IF
 
@@ -560,25 +566,24 @@ End If
 ! SIMPLE BOX WING
 ! *******************************************************************
       ELSE IF (ECOM_param_glb == 3 ) THEN
-      PD_Param_ID = 9
-      DO PD_Param_ID = 1, 9
+      DO PD_Param_ID = 1, 7
          IF (PD_Param_ID == 1) THEN
          srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
          IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
          DO i=1,3
-         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FXX(i)*ed(i)
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ex(i)
          END DO
          ELSE IF (PD_Param_ID == 2) THEN
          srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
          IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
          DO i=1,3
-         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FZZ(i)*ed(i)
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ez(i)
          END DO
          ELSE IF (PD_Param_ID == 3) THEN
          srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
          IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
          DO i=1,3
-         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FSP(i)
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)
          END DO
          ELSE IF (PD_Param_ID == 4) THEN
          srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
@@ -588,24 +593,14 @@ End If
          ELSE IF (PD_Param_ID == 5) THEN
          srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
          DO i=1,3
-         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FXX(i)*eb(i)
+         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
          END DO
          ELSE IF (PD_Param_ID == 6) THEN
          srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
          DO i=1,3
-         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*FZZ(i)*eb(i)
-         END DO
-         ELSE IF (PD_Param_ID == 7) THEN
-         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
-         DO i=1,3
-         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)
-         END DO
-         ELSE IF (PD_Param_ID == 8) THEN
-         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
-         DO i=1,3
          fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)
          END DO
-         ELSE IF (PD_Param_ID == 9) THEN
+         ELSE IF (PD_Param_ID == 7) THEN
          srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
          DO i=1,3
          fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)

@@ -229,7 +229,7 @@ END IF
 ! ----------------------------------------------------------------------
 print *,"Satellites number: ", Nsat, "IC Eopch: ", Iyear, Imonth, Iday, Sec_00
 print *," "
-
+PRINT*,'NUMBER OF FORCE PARAMETERS =', NPARAM_glb
 
 ! ----------------------------------------------------------------------
 ! Rewrite :: Initial Epoch
@@ -478,12 +478,14 @@ orbits_ics_icrf(3:8,isat) = SVEC_Zo
 !print *,"SVEC_Zo_ESTIM ", SVEC_Zo_ESTIM
 !print *,"SVEC_Zo       ", SVEC_Zo
 ! ----------------------------------------------------------------------
-
+  
 ! ----------------------------------------------------------------------
 ! IC :: Orbital parameters being estimated e.g. force emprical parameters
 ! ----------------------------------------------------------------------
 !orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_aposteriori !*1.0D9
+IF (NPARAM_glb /= 0) THEN
 orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_glb  ! Correction : Write the ECOM parameters in all POD cases including orbit propagation without estimation (POD MODE cases: 3 & 4)
+END IF
 !write(*,fmt='(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))') PRN_isat,orbits_ics_icrf(:,isat)
 ! ----------------------------------------------------------------------
 
