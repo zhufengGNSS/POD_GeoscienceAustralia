@@ -80,6 +80,14 @@ SUBROUTINE read_svsinex (UNIT_IN,idir,iyr,iday,ihr,imin,gnss,isat, &
       logical found  ! Used to indicate that blocks and SVNs have been found.
       logical debug / .false. /   ! Turn on ouput.
 
+!init ints to 0
+yr1 = 0
+yr2 = 0
+doy1 = 0
+doy2 = 0
+prn_in = "   "
+svn_in = "    "
+
 ! Put the requested time into a scale of year 
 time_id = iyr + iday/365.d0 + (ihr*3600.d0+imin*60.d0)/86400.d0/365.d0
 
@@ -98,9 +106,16 @@ found = .false.
 REWIND(UNIT_IN)
 DO WHILE (.not.found )
    READ(UNIT_IN,'(a)',IOSTAT=ioerr) record
-   IF(record(1:3)=='-SAT') THEN 
-     print*,'NO SVN CAn BE FOUND ',ioerr
-   ELSE IF (record(1:1)==' ' ) THEN
+   ! check for end of file
+   IF (ioerr/=0) then
+       found=.true. !spoof it
+   else IF(record(1:4)=='-SAT') THEN 
+     !skip and read next line
+     cycle
+   ! better detect if we are reading a valid line of the file!!!
+   ELSE IF (record(1:1)==' ' .and. record(11:11)==':') THEN
+   !ELSE IF (record(1:1)==' ') THEN
+     yr2 = 0
      READ(record,'(1x,a4,2(1x,i4,1x,i3,1x,f5.0),1x,a3)',IOSTAT=ioerr) svn,yr1,doy1,sod1,yr2,doy2,sod2,prn
      IF(yr2==0000) THEN
      yr2   = 2100
@@ -148,10 +163,11 @@ found = .false.
    found = .false.
    DO WHILE (.not.found)
    READ(UNIT_IN,'(a)',IOSTAT=ioerr) record
-      IF(record(1:3)=='-SAT'.or.ioerr.ne.0) THEN
+      IF(record(1:4)=='-SAT'.or.ioerr.ne.0) THEN
          If( ioerr/=0 ) print*,'Failed to find SV in FREQUENCY_CHANNEL SINEX block',ioerr
       ELSE 
-         IF(record(1:1)==' ') THEN
+         IF(record(1:1)==' ' .and. record(11:11)== ':') THEN
+         !IF(record(1:1)==' ') THEN
          READ(record,'(1x,a4,2(1x,i4,1x,i3,1x,f5.0),1x,i4)',IOSTAT=ioerr) svn,yr1,doy1,sod1,yr2,doy2,sod2,frqchn
          IF(ioerr/=0) print*,'Reading GLONASS frequency',ioerr
          IF(yr2==0000) THEN
@@ -187,9 +203,10 @@ END DO
 found = .false.
 DO WHILE (.not.found)
 READ(UNIT_IN,'(a)',iostat=ioerr) record
-   IF (record(1:3)=='-SAT'.or.ioerr/=0) THEN
+   IF (record(1:4)=='-SAT'.or.ioerr/=0) THEN
       If(ioerr/=0) print*,'Failed to find SV in IDENTIFIER SINEX block',ioerr
    ELSE 
+      !IF(record(1:1)==' ' .and. record(11:11)== ':') THEN
       IF(record(1:1)==' ') THEN
       READ(record,'(1x,a4,1x,a9,1x,A6,1x,a15)',iostat=ioerr)svn,cospar_id,SatCat,antbody_in
       IF(ioerr/=0) print*,'Fail to reading satellite id ',ioerr
@@ -204,26 +221,28 @@ END DO
 ! Prepare SVNID and BLKID for the global variables
 ! ------------------------------------------------
 SVNID = satid
-IF(BLKTYP=='GPS-I')      BLKID = 1
-IF(BLKTYP=='GPS-II')     BLKID = 2
-IF(BLKTYP=='GPS-IIA')    BLKID = 3
-IF(BLKTYP=='GPS-IIR')    BLKID = 4
-IF(BLKTYP=='GPS-IIR-A')  BLKID = 5
-IF(BLKTYP=='GPS-IIR-B')  BLKID = 6
-IF(BLKTYP=='GPS-IIR-M')  BLKID = 7
-IF(BLKTYP=='GPS-IIF')    BLKID = 8
-IF(BLKTYP=='GPS-IIIA')   BLKID = 9
-IF(BLKTYP=='GLO')        BLKID = 101
-IF(BLKTYP=='GLO-M'  .or.BLKTYP == 'GLO-M+')  BLKID = 102
-IF(BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B') BLKID = 103
-IF(BLKTYP=='GAL-1')     BLKID = 201 ! Galileo (IOV)
-IF(BLKTYP=='GAL-2')     BLKID = 202 ! Galileo (FOC)
-IF(BLKTYP=='BDS-2G'.or.BLKTYP == 'BDS-3G')            BLKID = 301 ! BDS GEO
-IF(BLKTYP=='BDS-2I'.or.BLKTYP == 'BDS-3I'.or.&
-   BLKTYP=='BDS-3SI-SECM'.or.BLKTYP =='BDS-3SI-CAST') BLKID = 302 ! BDS IGSO
-IF(BLKTYP=='BDS-2M'.or.BLKTYP == 'BDS-3M'.or.&
-   BLKTYP=='BDS-3M-SECM'.or.BLKTYP =='BDS-3M-CAST')   BLKID = 303 ! BDS MEO
-
+IF(TRIM(BLKTYP)=='GPS-I')      BLKID = 1
+IF(TRIM(BLKTYP)=='GPS-II')     BLKID = 2
+IF(TRIM(BLKTYP)=='GPS-IIA')    BLKID = 3
+IF(TRIM(BLKTYP)=='GPS-IIR')    BLKID = 4
+IF(TRIM(BLKTYP)=='GPS-IIR-A')  BLKID = 5
+IF(TRIM(BLKTYP)=='GPS-IIR-B')  BLKID = 6
+IF(TRIM(BLKTYP)=='GPS-IIR-M')  BLKID = 7
+IF(TRIM(BLKTYP)=='GPS-IIF')    BLKID = 8
+IF(TRIM(BLKTYP)=='GPS-IIIA')   BLKID = 9
+IF(TRIM(BLKTYP)=='GLO')        BLKID = 101
+IF(TRIM(BLKTYP)=='GLO-M'  .or.TRIM(BLKTYP) == 'GLO-M+')  BLKID = 102
+IF(TRIM(BLKTYP)=='GLO-K1A'.or.TRIM(BLKTYP) == 'GLO-K1B') BLKID = 103
+IF(TRIM(BLKTYP)=='GAL-1')     BLKID = 201 ! Galileo (IOV)
+IF(TRIM(BLKTYP)=='GAL-2')     BLKID = 202 ! Galileo (FOC)
+IF(TRIM(BLKTYP)=='BDS-2G'.or.TRIM(BLKTYP) == 'BDS-3G')            BLKID = 301 ! BDS GEO
+IF(TRIM(BLKTYP)=='BDS-2I'.or.TRIM(BLKTYP) == 'BDS-3I'.or.&
+   TRIM(BLKTYP)=='BDS-3SI-SECM'.or.TRIM(BLKTYP) =='BDS-3SI-CAST') BLKID = 302 ! BDS IGSO
+IF(TRIM(BLKTYP)=='BDS-2M'.or.TRIM(BLKTYP) == 'BDS-3M'.or.&
+   TRIM(BLKTYP)=='BDS-3M-SECM'.or.TRIM(BLKTYP) =='BDS-3M-CAST')   BLKID = 303 ! BDS MEO
+IF(TRIM(BLKTYP)=='QZS-1')     BLKID = 401 
+IF(TRIM(BLKTYP)=='QZS-2I')    BLKID = 402 ! QZSS-IGSO
+IF(TRIM(BLKTYP)=='QZS-2G')    BLKID = 403 ! QZSS-GEO
 
 ! Get the satellite mass ( SATELLITE/MASS block )
 REWIND(UNIT_IN)
@@ -281,7 +300,7 @@ DO WHILE (.not.found)
    READ(UNIT_IN,'(a)',IOSTAT=ioerr) record
    IF(record(1:3)=='-SAT'.or.ioerr/=0) THEN
    IF( ioerr/=0 ) then
-   print*,'Failed to find SV in TX_POWER block and the POWER is set to 185 W'
+!   print*,'Failed to find SV in TX_POWER block and the POWER is set to 185 W'
    POWER=185 ! assumed to be consistent with BDS IGSO
    RETURN
    END IF
@@ -303,29 +322,6 @@ DO WHILE (.not.found)
       END IF
     END IF
 END DO
-
-! Prepare SVNID and BLKID for the global variables
-! ------------------------------------------------
-!SVNID = satid
-!IF(BLKTYP=='GPS-I')      BLKID = 1
-!IF(BLKTYP=='GPS-II')     BLKID = 2
-!IF(BLKTYP=='GPS-IIA')    BLKID = 3
-!IF(BLKTYP=='GPS-IIR')    BLKID = 4
-!IF(BLKTYP=='GPS-IIR-A')  BLKID = 5
-!IF(BLKTYP=='GPS-IIR-B')  BLKID = 6
-!IF(BLKTYP=='GPS-IIR-M')  BLKID = 7
-!IF(BLKTYP=='GPS-IIF')    BLKID = 8
-!IF(BLKTYP=='GPS-IIIA')   BLKID = 9
-!IF(BLKTYP=='GLO')        BLKID = 101
-!IF(BLKTYP=='GLO-M'  .or.BLKTYP == 'GLO-M+')  BLKID = 102
-!IF(BLKTYP=='GLO-K1A'.or.BLKTYP == 'GLO-K1B') BLKID = 103
-!IF(BLKTYP=='GLA-1')     BLKID = 201 ! Galileo (IOV)
-!IF(BLKTYP=='GLA-2')     BLKID = 202 ! Galileo (FOC)
-!IF(BLKTYP=='BDS-2G'.or.BLKTYP == 'BDS-3G')            BLKID = 301 ! BDS GEO
-!IF(BLKTYP=='BDS-2I'.or.BLKTYP == 'BDS-3I'.or.&
-!   BLKTYP=='BDS-3SI-SECM'.or.BLKTYP =='BDS-3SI-CAST') BLKID = 302 ! BDS IGSO
-!IF(BLKTYP=='BDS-2M'.or.BLKTYP == 'BDS-3M'.or.&
-!   BLKTYP=='BDS-3M-SECM'.or.BLKTYP =='BDS-3M-CAST')   BLKID = 303 ! BDS MEO
 
 END SUBROUTINE
 

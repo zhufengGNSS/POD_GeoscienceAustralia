@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../lib/libtides.a  CMakeFiles/tides.dir/src/tides_solid1.f90.o CMakeFiles/tides.dir/src/tides_solid2.f90.o CMakeFiles/tides.dir/src/tide_perm.f90.o CMakeFiles/tides.dir/src/tides_fes2004.f90.o CMakeFiles/tides.dir/src/tide_pole_se.f90.o CMakeFiles/tides.dir/src/tide_pole_oc.f90.o
+/usr/bin/ranlib ../lib/libtides.a

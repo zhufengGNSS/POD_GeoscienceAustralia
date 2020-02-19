@@ -39,6 +39,8 @@ MODULE mdl_num
 ! Earth Radius (meters):
 ! radius value provided by the latest Gravity Field Models
        REAL (KIND = prec_q), PARAMETER :: Earth_radius = 0.6378136460D+07
+       REAL (KIND = prec_q), PARAMETER :: Sun_radius = 696.0d+06
+       REAL (KIND = prec_q), PARAMETER :: Moon_radius = 1738.0d+03
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -61,5 +63,12 @@ MODULE mdl_num
       REAL (KIND = prec_q), PARAMETER :: ppn_gama = 1.0D0
 ! ----------------------------------------------------------------------
 
-
+! ----------------------------------------------------------------------
+! Other constants
+! ---------------------------------------------------------------------
+      REAL (KIND = prec_q), PARAMETER :: S0 =  1367.0D0 !solar constant
+      REAL (KIND = prec_q), PARAMETER :: AU =  149597870691.D0 !earth-sun dist
+      REAL (KIND = prec_q), PARAMETER :: TOA = 6371000.D0 + 30000.D0 !Top of troposphere
+      REAL (KIND = prec_q), PARAMETER :: ALB = 0.3 ! Earth albedo
+      REAL (KIND = prec_q), PARAMETER :: Ps = S0/cslight !solar radiation pressure
 END

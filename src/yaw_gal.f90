@@ -1,4 +1,4 @@
-SUBROUTINE yaw_gal (mjd, r_sat, v_sat, r_sun, beta_angle, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle, satbf)
+SUBROUTINE yaw_gal (mjd, r_sat, v_sat, r_sun, beta_angle, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle)
 
 
 ! ----------------------------------------------------------------------
@@ -13,10 +13,7 @@ SUBROUTINE yaw_gal (mjd, r_sat, v_sat, r_sun, beta_angle, eclipsf, eBX_nom, eBX_
 ! - r_sat: 		Satellite position vector (m) in ITRF
 ! - v_sat: 		Satellite velocity vector (m/sec) in ITRF
 ! - r_sun:		Sun position vector (m) in ITRF
-! - beta_angle:	Sun angle with respect to the orbital plane (degrees)
-! - satbf:		Body-frame definition type
-!				satbf=1 : Body-fixed frame according to the IGS Conventions (GPS Block IIA)  
-!				satbf=2 : Body-fixed frame X,Y axes reversal; Case of Galileo and GPS Block IIR 
+! - beta_angle:	Sun angle with respect to the orbital plane (degrees) 
 !
 ! Output arguments:
 ! - eclipsf:	non-nominal attitude status flag:
@@ -42,7 +39,6 @@ SUBROUTINE yaw_gal (mjd, r_sat, v_sat, r_sun, beta_angle, eclipsf, eBX_nom, eBX_
 ! ----------------------------------------------------------------------
 ! IN
       REAL (KIND = prec_d) :: mjd, r_sat(3), v_sat(3), r_sun(3), beta_angle
-      INTEGER (KIND = 4), INTENT(IN) :: satbf 
 	  
 ! OUT
       REAL (KIND = prec_d) :: Yangle(2)
@@ -71,19 +67,7 @@ SUBROUTINE yaw_gal (mjd, r_sat, v_sat, r_sun, beta_angle, eclipsf, eBX_nom, eBX_
 ! ----------------------------------------------------------------------
 
 
-! ----------------------------------------------------------------------
-! Body-frame definition type
-if (satbf == 1) then
-! IGS Conventions definition
-   satblk = 6 
-elseif (satbf == 2) then
-! Galileo body-fixed frame has same orientation with the GPS Block IIR satellites
-   satblk = 5 
-Else
-   Print *,"Error in input argument 'satbf': Galileo Body-frame type"
-end if
-! ----------------------------------------------------------------------
- 
+  
 ! ----------------------------------------------------------------------
 ! Unit Vectors
 ! ----------------------------------------------------------------------
@@ -113,17 +97,17 @@ end if
       CALL productcross (pcross,Xsat , pcross2 )
       eBX_nom = -1.0D0 * pcross2	  
   
-if (satbf == 2) then
-! Galileo body-fixed frame has same orientation with the GPS Block IIR satellites
 ! Galileo: Body-X unit vector reversal
       eBX_nom = -1.0D0 * eBX_nom
-end if
 ! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
 ! Satellite orbital angle (m)
 ! ----------------------------------------------------------------------
+! Galileo body-fixed frame has same orientation with the GPS Block IIR satellites
+satblk = 4
+
 ! Arguments to be removed from the yaw_nom.f90 subroutine
 ANOON  = 0.0D0
 ANIGHT = 0.0D0
@@ -131,6 +115,7 @@ ANIGHT = 0.0D0
 ! Mangle (in degrees)
 Call yaw_nom (eBX_nom, v_sat, beta_angle, satblk, SVBCOS, ANOON, ANIGHT, Mangle, Yangle_nom) 
 ! ----------------------------------------------------------------------
+
 
 
 ! ----------------------------------------------------------------------
@@ -149,13 +134,16 @@ Call yaw_nom (eBX_nom, v_sat, beta_angle, satblk, SVBCOS, ANOON, ANIGHT, Mangle,
 ! ----------------------------------------------------------------------
 
 
+
 ! eta: Orbital angle between satellite position vector and orbit noon (in degrees)
 eta = Mangle - 180.0D0
+
 
 ! Sun reference vector in orbital frame according to the GSC conventions (radial direction reversal) 
 So(1) = -sin(eta * (PI_global / 180.0D0) ) * cos(beta_angle * (PI_global / 180.0D0) )
 So(2) = -sin(beta_angle * (PI_global / 180.0D0) )
 So(3) = -cos(eta * (PI_global / 180.0D0) ) * cos(beta_angle * (PI_global / 180.0D0) )
+
 
 
 ! ----------------------------------------------------------------------
@@ -166,10 +154,9 @@ So(3) = -cos(eta * (PI_global / 180.0D0) ) * cos(beta_angle * (PI_global / 180.0
 Yangle_nom = ATAN2( -So(2) / sqrt(1.0D0 - So(3)**2) , -So(1) / sqrt(1.0D0 - So(3)**2) ) * (180.0D0 / PI_global)
 
 ! IGS Conventions
-IF (satbf == 1) then
-Yangle_nom = ATAN2( So(2) / sqrt(1.0D0 - So(3)**2) , So(1) / sqrt(1.0D0 - So(3)**2) ) * (180.0D0 / PI_global)
-END IF
+!Yangle_nom = ATAN2( So(2) / sqrt(1.0D0 - So(3)**2) , So(1) / sqrt(1.0D0 - So(3)**2) ) * (180.0D0 / PI_global)
 ! ----------------------------------------------------------------------
+
 
 
 ! ----------------------------------------------------------------------
@@ -192,6 +179,7 @@ If ( ( abs(So(1)) < sin(betaX*(PI_global / 180.0D0)) ) .and. &
 
 END IF
 ! ----------------------------------------------------------------------
+
 
 ! ----------------------------------------------------------------------
 IF (GALecl .EQV. .TRUE.) THEN
@@ -239,6 +227,7 @@ If (NOON) Then
 End If
 ! ----------------------------------------------------------------------
 
+
 ! Beta angle prediction at epoch to, te
 ! - to: Start of the auxiliary region (modified yaw-steering attitude) 
 ! - te: End of the auxiliary region 
@@ -256,8 +245,8 @@ if (abs(beta_to) <  abs(beta_te) )  Soy_to = -sin(beta_te * (PI_global / 180.0D0
 Gama = sign(1.D0 , Soy_to)
 ! ----------------------------------------------------------------------
 
-!Print *,"M,ft0,fti,ftE", Mangle, ft0, fti, ftE
-!Print *,"beta_to, beta_te, Soy_to, Gama", beta_to, beta_te, Soy_to, Gama 
+Print *,"M,ft0,fti,ftE", Mangle, ft0, fti, ftE
+Print *,"beta_to, beta_te, Soy_to, Gama", beta_to, beta_te, Soy_to, Gama 
 
 
 ! ----------------------------------------------------------------------
@@ -286,9 +275,7 @@ end if
 Yangle_ecl = atan2(-Sh(2) / sqrt(1.0D0 - Sh(3)**2) , -Sh(1) / sqrt(1.0D0 - Sh(3)**2) ) * (180.0D0 / PI_global)
 
 ! IGS Conventions
-IF (satbf == 1) then
-Yangle_ecl = atan2(Sh(2) / sqrt(1.0D0 - Sh(3)**2) , Sh(1) / sqrt(1.0D0 - Sh(3)**2) ) * (180.0D0 / PI_global)
-END IF
+!Yangle_ecl = atan2(Sh(2) / sqrt(1.0D0 - Sh(3)**2) , Sh(1) / sqrt(1.0D0 - Sh(3)**2) ) * (180.0D0 / PI_global)
 ! ----------------------------------------------------------------------
 
 
@@ -299,6 +286,7 @@ END IF
 ! Noon
    if ( abs(Mangle) >  90.0D0 ) eclipsf = 2     
 ! ----------------------------------------------------------------------
+
    
 
 ELSE
@@ -318,6 +306,12 @@ END IF
 Yangle(1) = Yangle_nom
 Yangle(2) = Yangle_ecl
 ! ----------------------------------------------------------------------
+
+
+
+
+
+
 
 
 ! ----------------------------------------------------------------------

@@ -144,6 +144,7 @@ Nsat = isat
          PRINT *, "Error: Allocatable Array: PRNmatrix"
 !         STOP "*** Not enough memory ***"
       END IF  
+      PRNMatrix = "";
 	ALLOCATE (IC_matrix(Nsat, Nparam+2), STAT = AllocateStatus)		   
       IF (AllocateStatus /= 0) THEN
          PRINT *, "Error: Not enough memory"
@@ -151,6 +152,7 @@ Nsat = isat
          PRINT *, "Error: Allocatable Array: IC_matrix"
 !         STOP "*** Not enough memory ***"
       END IF  
+      IC_matrix = 0.d0
 ! ----------------------------------------------------------------------
 
 

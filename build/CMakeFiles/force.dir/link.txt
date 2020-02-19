@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../lib/libforce.a  CMakeFiles/force.dir/src/force_gm.f90.o CMakeFiles/force.dir/src/force_gm3rd.f90.o CMakeFiles/force.dir/src/force_srp.f90.o CMakeFiles/force.dir/src/force_erp.f90.o CMakeFiles/force.dir/src/force_ant.f90.o CMakeFiles/force.dir/src/force_sum.f03.o CMakeFiles/force.dir/src/apr_srp.f90.o
+/usr/bin/ranlib ../lib/libforce.a

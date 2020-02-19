@@ -73,7 +73,6 @@ SUBROUTINE shadow ( r_sat, r_sun, r_moon, lambda, ECLTYP )
 ! Local variables declaration
 ! ----------------------------------------------------------------------
       CHARACTER (KIND = 1) :: ECLTYP
-      REAL (KIND = prec_q) :: AU,Pi
       REAL (KIND = prec_q) :: sunrad, moonrad, ertrad
       REAL (KIND = prec_q) :: Dsun, Dmoonsun
       REAL (KIND = prec_q) :: Ds,sclfa
@@ -88,10 +87,9 @@ SUBROUTINE shadow ( r_sat, r_sun, r_moon, lambda, ECLTYP )
 ! ----------------------------------------------------------------------
 ! Numerical Constants
 ! ----------------------------------------------------------------------
-Pi = 4*atan(1.0d0)
-sunrad = 696.d6         !Units = m
-moonrad = 1738.d3       !Units = m
-ertrad = 6378.13630d3   !Units = m
+sunrad = Sun_radius
+moonrad = Moon_radius
+ertrad = Earth_Radius
 lambda = 1.0d0
 ECLTYP = ' '
 

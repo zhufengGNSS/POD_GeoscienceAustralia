@@ -77,7 +77,7 @@ SUBROUTINE statorbit2 (ds1, ds2, orbdiff)
       REAL (KIND = prec_d), DIMENSION(3) :: r1i, v1i, r2i, v2i
       REAL (KIND = prec_d), DIMENSION(3) :: dr, dv, dr_RTN, dv_RTN
       REAL (KIND = prec_d) :: Rrtn(3,3)
-      REAL (KIND = prec_d) :: GM, Pi
+      REAL (KIND = prec_d) :: GM
 ! ----------------------------------------------------------------------	  
       DOUBLE PRECISION  JD, Zbody(6)
       REAL (KIND = prec_d) :: mjd
@@ -107,7 +107,6 @@ SUBROUTINE statorbit2 (ds1, ds2, orbdiff)
       INTEGER (KIND = prec_int4) :: PRN_no
       REAL    (KIND = 4)         :: prnnum
 
-Pi = 4*atan(1.0d0)
 
 ! Set the numerical differences digits limit for the common epochs
 dt_limit = 1.D-08
@@ -159,14 +158,50 @@ End Do
 ! Dynamic allocatable array
 ! Allocate the array of the numerical orbit comparison
 ALLOCATE (beta1(Nepochs_delta),beta2(Nepochs_delta), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate beta1 or beta2"
+        goto 100
+end if
 ALLOCATE (del_u1(Nepochs_delta),del_u2(Nepochs_delta), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate del_u1 or del_u2"
+        goto 100
+end if
 ALLOCATE (lambda1(Nepochs_delta),lambda2(Nepochs_delta), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate lambda1 or lambda2"
+        goto 100
+end if
 ALLOCATE (orbdiff(Nepochs_delta,sz2+8), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate orbdiff"
+        goto 100
+end if
 ALLOCATE (yaw1(Nepochs_delta),yaw2(Nepochs_delta), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate yaw1 or yaw2"
+        goto 100
+end if
 ALLOCATE (angX1(Nepochs_delta), angY1(Nepochs_delta), angZ1(Nepochs_delta), STAT= AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate angX1 or angY1 or angZ1"
+        goto 100
+end if
 ALLOCATE (angX2(Nepochs_delta), angY2(Nepochs_delta), angZ2(Nepochs_delta), STAT= AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate angX2 or angY2 or angZ2"
+        goto 100
+end if
 ALLOCATE (fr1(Nepochs_delta), ft1(Nepochs_delta), fn1(Nepochs_delta), STAT= AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate fr1 or ft1 or fn1"
+        goto 100
+end if
 ALLOCATE (fr2(Nepochs_delta), ft2(Nepochs_delta), fn2(Nepochs_delta), STAT= AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate fr2 or ft2 or fn2"
+        goto 100
+end if
 beta1 =0.d0
 beta2 =0.d0
 del_u1=0.d0
@@ -222,7 +257,7 @@ angZ1(k)  = angZ0
 fr1(k)  = fr0
 ft1(k)  = ft0
 fn1(k)  = fn0
-!print*,diel_u0*180/Pi, fr0, ft0, fn0
+!print*,diel_u0*180/Pi_global, fr0, ft0, fn0
 rsat = ds2(j,3:5)
 vsat = ds2(j,6:8)
 CALL orbinfo (ds2(j,1), PRN_no, rsat, vsat, beta0, del_u0, yaw0, lambda0, & 
@@ -250,12 +285,12 @@ fn2(k)  = fn0
          orbdiff(k,2)   = PRN_no 
          orbdiff(k,3)   = BLKID
          orbdiff(k,4)   = lambda2(k)
-         orbdiff(k,5)   = beta2(k)  *180/Pi
-         orbdiff(k,6)   = del_u2(k) *180/Pi
-         orbdiff(k,7)   = yaw2(k)   *180/Pi
-         orbdiff(k,8)   = angX2(k) *180/Pi
-         orbdiff(k,9)   = angY2(k) *180/Pi
-         orbdiff(k,10)   = angZ2(k) *180/Pi
+         orbdiff(k,5)   = beta2(k)  *180/Pi_global
+         orbdiff(k,6)   = del_u2(k) *180/Pi_global
+         orbdiff(k,7)   = yaw2(k)   *180/Pi_global
+         orbdiff(k,8)   = angX2(k) *180/Pi_global
+         orbdiff(k,9)   = angY2(k) *180/Pi_global
+         orbdiff(k,10)   = angZ2(k) *180/Pi_global
          orbdiff(k,11:13) = dr_RTN
          orbdiff(k,14)   = fr2(k)
          orbdiff(k,15)   = ft2(k)
@@ -268,7 +303,7 @@ End Do
 
 
 
-END SUBROUTINE
+ 100 END SUBROUTINE
 
 
 End Module

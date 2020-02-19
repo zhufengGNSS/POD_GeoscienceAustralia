@@ -63,6 +63,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 !                                       9 coefficients or 3 bias terms. The adjustable function has not been ready yet)
 !           21-02-2019  Tzupang Tseng : The adjustable function of the ECOM model has been activated.
 !           06-08-2019  Tzupang Tseng : Added a function to skip bad orbits with zero value in SP3 file
+!           03-12-2019  Tzupang Tseng : Added a function of estimating parameters in simple box wing model
 !
 ! Last modified:
 ! 20 May 2019,	Dr. Thomas Papanikolaou
@@ -95,6 +96,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       USE m_orbresize
       USE m_matrixreverse
       USE m_matrixmerge
+      USE m_ecom_init
       IMPLICIT NONE
 	  
 	  
@@ -116,6 +118,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 ! ----------------------------------------------------------------------  
       REAL (KIND = prec_d) :: CPU_t0, CPU_t1
       CHARACTER (LEN=100) :: filename
+      CHARACTER (LEN=10) :: DOYSTR
       INTEGER (KIND = prec_int2) :: VEQmode 
       INTEGER (KIND = prec_int2) :: ESTmode 
       INTEGER (KIND = prec_int2) :: Niter,srp_i 
@@ -144,6 +147,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 	  REAL (KIND = prec_q) :: Bias_0(3)
 	  REAL (KIND = prec_q) :: CPR_CS_0(3,2)
       REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_0_coef,ECOM_coef
+      REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_aposteriori
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: EQMfname_pred, VEQfname_pred
       REAL (KIND = prec_d) :: orbarc_sum
@@ -167,6 +171,9 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_back, veqSmatrix_back, veqPmatrix_back
 ! ----------------------------------------------------------------------
 	  
+! FIXME: Variable initialisation
+CPR_corr = 0.d0
+Bias_corr = 0.d0
 	  
 ! ----------------------------------------------------------------------
 ! Read orbit parameterization											
@@ -217,6 +224,7 @@ CALL scan0orb
 ! Reference system of Variational Equations solution' matrices (Smatrix, Pmatrix)
 ! and orbit parameter estimation 
 ! ----------------------------------------------------------------------
+VEQ_refsys = 0
 IF (VEQ_REFSYS_cfg == 'ICRS') THEN 
 	VEQ_refsys = 1 
 ELSE IF (VEQ_REFSYS_cfg == 'ITRS') THEN
@@ -256,16 +264,29 @@ END IF
 IF (ECOM_param_glb /= 0) THEN
 IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
 IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
-ALLOCATE (ECOM_0_coef(NPARAM_glb), STAT = AllocateStatus)
+IF (ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
+!ALLOCATE (ECOM_0_coef(NPARAM_glb), STAT = AllocateStatus)
+!if (AllocateStatus .ne. 0) then
+!        print *, "failed to allocate ECOM_0_coef"
+!        goto 100
+!end if
 ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate ECOM_coef"
+        goto 100
+end if
 ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate ECOM_accel_aposteroiri"
+        goto 100
+end if
 !srp_i = ECOM_param_glb
 !DO ii=1,NPARAM_glb
 !ECOM_0_coef(ii) = 0.0D0
 !END DO
-ECOM_0_coef = 0.d0
+!ECOM_0_coef = 0.d0
 !print*,'ECOM_0_coef=',ECOM_0_coef
-CALL ecom_init (i,ECOM_0_coef)
+CALL ecom_init (ECOM_0_coef)
 ELSE
 PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
 END IF
@@ -398,26 +419,20 @@ End If  ! End of empirical model
 ! ECOM-based SRP model
 ! **********************************************************************
 ! added by Dr. Tzupang Tseng 11-12-2018
-If ( ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
+If ( ECOM_param_glb.eq.1 .or. ECOM_param_glb.eq.2) Then
 
       PD_Param_ID = 0
 If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-ELSE    
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
@@ -426,8 +441,6 @@ If (ECOM_CPR_glb(1) == 1) THEN
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
@@ -436,8 +449,6 @@ If (ECOM_CPR_glb(2) == 1) THEN
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-ELSE
-        PD_Param_ID = PD_Param_ID
 End IF
 If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
@@ -446,14 +457,21 @@ If (ECOM_CPR_glb(3) == 1) THEN
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-ELSE
-        PD_Param_ID = PD_Param_ID
 End If
+
 
 IF (NPARAM_glb /= PD_Param_ID) THEN
 PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
 PRINT*,           'NPARAM_glb  =', NPARAM_glb
 PRINT*,           'PD_Param_ID =', PD_Param_ID
+END IF
+END IF
+
+IF (ECOM_param_glb == 3) THEN
+PD_Param_ID = NPARAM_glb
+DO PD_Param_ID = 1,9
+   ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+END DO
 END IF
 
 ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
@@ -464,9 +482,10 @@ ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
 
 ! ----------------------------------------------------------------------
 ! SRP parameters
-IF (ECOM_param_glb /= 0) THEN
 ECOM_0_coef = ECOM_accel_aposteriori
-fname_id = PRN
+!fname_id = PRN
+CALL doy2str(DOYSTR)
+fname_id = DOYSTR
 IF (ECOM_param_glb == 1) THEN
 fname = 'ECOM1_srp.in'
 param_id = 'ECOM1'
@@ -480,11 +499,18 @@ param_id = 'ECOM2'
 write (param_value, *) ECOM_0_coef
 Call write_prmfile (fname, fname_id, param_id, param_value)
 END IF
+
+IF (ECOM_param_glb == 3) THEN
+fname = 'SBOXW_srp.in'
+param_id = 'SBOXW'
+write (param_value, *) ECOM_0_coef
+Call write_prmfile (fname, fname_id, param_id, param_value)
 END IF
-! End of ECOM-based SRP model
+
+! End of SRP model
 ! **********************************************************************
   
-   END IF
+
 
 ! ----------------------------------------------------------------------
 
@@ -541,7 +567,7 @@ Nepochs_estim = sz1
 ! Copy Configuration files 
 fname_id = 'pred'
 CALL write_prmfile2 (EQMfname, fname_id, EQMfname_pred)
-!CALL write_prmfile2 (VEQfname, fname_id, VEQfname_pred)
+CALL write_prmfile2 (VEQfname, fname_id, VEQfname_pred)
 
 ! Orbit arc length (estimated part) :: "orbarc" via module mdl_param.f03
 !Call prm_main (EQMfname)
@@ -554,17 +580,25 @@ orbarc_sum = orbarc + ORBPRED_ARC_glb
 param_id = 'Orbit_arc_length'
 write (param_value, *) orbarc_sum
 Call write_prmfile (EQMfname_pred, fname_id, param_id, param_value) 
-!Call write_prmfile (VEQfname_pred, fname_id, param_id, param_value)
+Call write_prmfile (VEQfname_pred, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Orbit Integration 
+! Numerical Integration: Variational Equations
+VEQmode = 1
+Call orbinteg (VEQfname_pred, VEQmode, orb0, veqSmatrix, veqPmatrix)
+! Numerical Integration: Equation of Motion
 VEQmode = 0
 Call orbinteg (EQMfname_pred, VEQmode, orb_icrf, veq0, veq1)
 ! ----------------------------------------------------------------------
 
 ! Orbit estimated part without predicted part
 ALLOCATE (orb_icrf_estim(Nepochs_estim,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate orb_icrf_estim"
+        goto 100
+end if
 orb_icrf_estim = orb_icrf(1:Nepochs_estim,1:sz2)
 
 ! Orbit residuals; statistics ! ICRF
@@ -572,6 +606,10 @@ Call statdelta(pseudobs_ICRF, orb_icrf_estim, dorb_icrf, RMSdsr, Sigmadsr, MEANd
 sz1 = size(dorb_icrf, DIM = 1)
 sz2 = size(dorb_icrf, DIM = 2)
 ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate Vres"
+        goto 100
+end if
 Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3) 
 !print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
@@ -579,7 +617,7 @@ Vrms  = RMSdsr(1:3)
 ! Orbit residuals in orbital frame; statistics ! ICRF
 CALL statorbit (pseudobs_ICRF, orb_icrf_estim, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
 print *,"Orbit residuals: ICRF in orbital frame" 
-WRITE (*,FMT='(A17, A4, 3F14.4)'),"RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
+WRITE (*,FMT='(A17, A4, 3F14.4)') "RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
 
 ELSE 
 
@@ -595,6 +633,10 @@ Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MI
 sz1 = size(dorb_icrf, DIM = 1)
 sz2 = size(dorb_icrf, DIM = 2)
 ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate Vres"
+        goto 100
+end if
 Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3)
 !print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
@@ -602,7 +644,7 @@ Vrms  = RMSdsr(1:3)
 ! Orbit residuals in orbital frame; statistics ! ICRF
 CALL statorbit (pseudobs_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
 print *,"Orbit residuals: ICRF in orbital frame" 
-WRITE (*,FMT='(A17, A4, 3F14.4)'),"RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
+WRITE (*,FMT='(A17, A4, 3F14.4)') "RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
 ! ----------------------------------------------------------------------
 
 END IF
@@ -736,7 +778,8 @@ time_sys = TIME_SCALE
 CALL orbC2T (orb_icrf_final, time_sys, orb_itrf_final)
 ! ----------------------------------------------------------------------
 
-END SUBROUTINE
+ 100  if (allocated(ECOM_0_coef)) deallocate(ECOM_0_coef, stat=DeallocateStatus)
+      END SUBROUTINE
 
 End
 

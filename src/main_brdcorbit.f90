@@ -60,7 +60,7 @@ PROGRAM  main_brdcorbit
       INTEGER (KIND = prec_int4) :: IG, IR, IE, IC, IJ, TOTG
       INTEGER (KIND = prec_int4) :: IGAL, IBDS, IQZSS, IGLN
 !------------------------------------------------------------------
-      REAL (KIND = prec_d) :: DELT, DELT2, PI, DWEEK
+      REAL (KIND = prec_d) :: DELT, DELT2, DWEEK
       REAL (KIND = prec_d) :: XM021, DM0
       REAL (KIND = prec_d) :: M01, M02
       REAL (KIND = prec_q) :: MJD0, MJD
@@ -91,12 +91,6 @@ PROGRAM  main_brdcorbit
       DOUBLE PRECISION  JD, Zbody(6)
       INTEGER NTARG_SUN, NCTR
       CHARACTER (LEN=100) :: fname_header, fname_data, fname_out
-
-
-
-
-! ----------------------------------------------------------------
-PI = 4*ATAN(1.D0)        
 
 ! If PRINTID = 1, print out the debugging.
 PRINTID = 0

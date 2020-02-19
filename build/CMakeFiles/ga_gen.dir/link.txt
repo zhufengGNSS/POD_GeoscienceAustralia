@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../lib/libga_gen.a  CMakeFiles/ga_gen.dir/src/doy2str.f03.o CMakeFiles/ga_gen.dir/src/f90getopt.F90.o CMakeFiles/ga_gen.dir/src/read_cmdline.f03.o
+/usr/bin/ranlib ../lib/libga_gen.a

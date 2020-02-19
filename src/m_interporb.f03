@@ -108,6 +108,8 @@ SUBROUTINE interp_orb (fname_sp3, PRN, interv_in, NPint, orbint)
 ! 1. Interpolation is applied only within the data points (15 min less than 24h arc):  Set Nlimit to 1
 ! 2. Interpolation is applied also after the last data point's epoch (23h 45min 00sec) in order to cover a 24h arc:  Set Nlimit to 0
 Nlimit = 1
+! default initial value?
+data_rate = 1
 ! ----------------------------------------------------------------------
 	  
 	  ! Data rate of sp3 (in sec)

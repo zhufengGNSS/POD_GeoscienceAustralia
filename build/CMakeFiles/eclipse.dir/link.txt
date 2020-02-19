@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../lib/libeclipse.a  CMakeFiles/eclipse.dir/src/eclips.f.o CMakeFiles/eclipse.dir/src/eclips2017.f.o CMakeFiles/eclipse.dir/src/eclips201707.f.o CMakeFiles/eclipse.dir/src/eclipse_integstep.f03.o
+/usr/bin/ranlib ../lib/libeclipse.a

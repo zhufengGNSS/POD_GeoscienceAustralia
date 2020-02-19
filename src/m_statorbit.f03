@@ -155,10 +155,30 @@ End Do
 ! Dynamic allocatable array
 ! Allocate the array of the numerical orbit comparison
 ALLOCATE (dsr(Nepochs_delta,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate dsr"
+        goto 100
+end if
 ALLOCATE (dorb_XYZ(Nepochs_delta,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate dorb_XYZ"
+        goto 100
+end if
 ALLOCATE (dorb_RTN(Nepochs_delta,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate dorb_RTN"
+        goto 100
+end if
 ALLOCATE (dorb_Kepler(Nepochs_delta,sz2), STAT = AllocateStatus)
-
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate dorb_Kepler"
+        goto 100
+end if
+!initialise
+dsr = 0.d0
+dorb_XYZ = 0.d0
+dorb_RTN = 0.d0
+dorb_kepler = 0.d0
 
 ! ----------------------------------------------------------------------
 ! Compute the numerical differences
@@ -219,6 +239,10 @@ dorb_XYZ = dsr
 
 ! Allocate arrays
 ALLOCATE (dx(Nepochs_delta), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate dx"
+        goto 100
+end if
 
 
 ! Inertial frame
@@ -286,8 +310,7 @@ stat_Kepler(5,:) = MAXdsr
 
 
 
-
-END SUBROUTINE
+ 100 END SUBROUTINE
 
 
 End Module

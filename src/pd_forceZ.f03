@@ -253,6 +253,8 @@ End IF
 End If
 ! ----------------------------------------------------------------------
 
+! variable initialisation (vSun)
+vSun = 0.d0
 
 ! ----------------------------------------------------------------------
 ! Planetary/Lunar orbital perturbations
@@ -624,9 +626,9 @@ Fvec = SF
 ! PD w.r.t position vector
 PDr = Ugrav_icrf
 ! PD  w.r.t velocity vector
-!PDv
+!PDv - Initialise to zero for now
 ! ----------------------------------------------------------------------
-
+PDv = 0.d0
 
 !print *,"Fgrav_icrf      ", Fgrav_icrf
 !print *,"Fplanets_icrf   ", Fplanets_icrf

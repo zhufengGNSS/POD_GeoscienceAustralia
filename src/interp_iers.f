@@ -87,6 +87,7 @@ C     yout  - the y value returned to caller
       INTEGER i,j,k,m,n
 
       yout = 0.d0
+      k = 0
       do  i = 1,n-1
         if ( xint .ge. X(i) .and. xint .lt. X(i+1) ) k = i
       enddo
