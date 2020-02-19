@@ -306,8 +306,11 @@ solarmul = 1.7
 ! A scaling factor is applied to ECOM model
 !******************************************************************
       sclfa=(AU/Ds)**2
-! SIMPLE BOX-WING model as the a priori SRP value
-      if (Flag_BW_cfg == 1) then
+! A priori SRP model
+      if (SRP_MOD_arp == 1) then
+         alpha = F0/MASS
+
+      else if (SRP_MOD_arp == 2) then
          xmul = 0.02
          zmul = 0.02
          solarmul = 1.7
@@ -318,16 +321,14 @@ solarmul = 1.7
          fzo=Ps/MASS*(xmul*X_SIDE*cosang(1)*ex(3)+zmul*Z_SIDE*cosang(3)*ez(3)+solarmul*A_SOLAR*cosang(4)*ed(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
 
-      else if (Flag_BW_cfg == 2) then
+      else if (SRP_MOD_arp == 3) then
          REFF = 0
          YSAT(1:3) = r
          YSAT(4:6) = v
          CALL SRPFBOXW(REFF,YSAT,R_SUN,SVNID,ACCEL)
          alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
 
-      else if (Flag_BW_cfg == 0) then
-         alpha = F0/MASS
-      else 
+      else if (SRP_MOD_arp == 0) then
          alpha = 1.d0
       end if
 

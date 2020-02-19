@@ -364,10 +364,13 @@ PRINT*,'satsinex_filename =', satsinex_filename_cfg
 
 ! Flag of different models for A priori SRP value 
 ! ---------------------------------------------------------------------
-param_id = 'Flag_BW_cfg'
+param_id = 'SRP_MOD_arp'
 Call readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) Flag_BW_cfg
-PRINT*,'Flag_BW_cfg =', Flag_BW_cfg
+READ ( param_value, FMT = * , IOSTAT=ios_key ) SRP_MOD_arp
+IF (SRP_MOD_arp == 0) PRINT*,'no a priori SRP model'
+IF (SRP_MOD_arp == 1) PRINT*,'use cannonball f0 model as a priori SRP model'
+IF (SRP_MOD_arp == 2) PRINT*,'use simple box-wing model as a priori SRP model'
+IF (SRP_MOD_arp == 3) PRINT*,'use box-wing model from repro3 routines as a priori SRP model'
 ! ----------------------------------------------------------------------
 ! Reference System of Variational Equations' Partials & Parameter Estimation 
 ! ----------------------------------------------------------------------

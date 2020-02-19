@@ -62,6 +62,7 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       USE m_pd_empirical
       USE m_pd_ECOM
       USE m_shadow
+      USE mdl_config
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -570,7 +571,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 
 
 ! SRP model
-srpid =  SRP_MOD_glb
+srpid =  SRP_MOD_arp
 
 CALL force_srp (lambda, eBX_ecl, eclipsf, GMearth, GNSSid, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 
