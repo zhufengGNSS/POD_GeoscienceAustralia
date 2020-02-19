@@ -289,7 +289,7 @@ orbdir = 1
 
 ! Nominal and Eclipsing Yaw-attitude
 CALL yaw_attitude (mjd_GPS , r_CRS, v_CRS, r_sun_crs, beta, PRN_eclips, satblk, orbdir, & 
-				   eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle, Mangle_e, Mrate_e, Ynom_e, satbf)
+				   eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle, Mangle_e, Mrate_e, Ynom_e)
 				   
 !PRINT *,"Yangle", Yangle(1), Yangle(2)
 if (eclipsf == 0) then
@@ -303,9 +303,8 @@ end if
 Else if (yaw_mod == 'E') Then
 
 ! Yaw-steering as provided by the European GNSS Service Centre 
-CALL yaw_gal (mjd_GPS, r_CRS, v_CRS, r_sun_crs, beta, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle, satbf)
+CALL yaw_gal (mjd_GPS, r_CRS, v_CRS, r_sun_crs, beta, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle)
 !PRINT *,"Yangle", Yangle(1), Yangle(2)
-
 ! ----------------------------------------------------------------------	    
 
 ! ----------------------------------------------------------------------	    

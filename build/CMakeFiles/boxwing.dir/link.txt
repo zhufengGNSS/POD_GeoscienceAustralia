@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../lib/libboxwing.a  CMakeFiles/boxwing.dir/src/BOXWINIT.f90.o CMakeFiles/boxwing.dir/src/ERPFBOXW.f90.o CMakeFiles/boxwing.dir/src/SURFBOXW.f.o CMakeFiles/boxwing.dir/src/PROPBOXW.f.o CMakeFiles/boxwing.dir/src/SRPFBOXW.f90.o
+/usr/bin/ranlib ../lib/libboxwing.a

@@ -38,8 +38,6 @@
       USE m_writeorbit
 	  USE m_write_orb2sp3
 	  USE m_clock_read
-	  USE m_attitude_orb
-	  USE m_write_orbex
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -115,11 +113,11 @@
       CHARACTER (LEN=300) :: CLKfname
       INTEGER (KIND = prec_int2) :: CLKformat
 ! ----------------------------------------------------------------------
-      REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: attitude_array  
-      CHARACTER (LEN=100) :: ORBEX_fname				
-! ----------------------------------------------------------------------
+double precision , dimension(3,3) :: xmat
+double precision , dimension(4) :: quater, quater_0
 
 
+NPARAM_glb = 0
 
 ! CPU Times
 CALL cpu_time (CPU_t0)
@@ -128,6 +126,9 @@ CALL cpu_time (CPU_t0)
 ! POD Version:
 POD_version = 'v.1.0.1'
 ! ----------------------------------------------------------------------
+
+! init globals
+CALL globals_init()
 
 ! ----------------------------------------------------------------------
 ! POD major configuration file
@@ -454,6 +455,7 @@ CALL read_leapsec(leapsec_filename_cfg)
 
 ! ----------------------------------------------------------------------
 ! Copy Initial Configuration files 
+! TODO: Read the epoch start from sp3 file and update first
 ! ----------------------------------------------------------------------
 fname_id = '0'
 CALL write_prmfile2 (EQM_fname_cfg, fname_id, EQMfname)
@@ -598,7 +600,6 @@ CALL clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
 ! ---------------------------------------------------------------------- 
 !print *,"CLKformat, CLKfname ",CLKformat,CLKfname
 
-
 ! ----------------------------------------------------------------------
 ! Output filenames prefix
 ! ----------------------------------------------------------------------
@@ -609,7 +610,6 @@ CALL time_GPSweek  (mjd, GPS_week, GPS_wsec, GPSweek_mod1024)
 !CALL time_GPSweek2 (mjd, GPS_week, GPS_wsec, GPSweek_mod1024, GPS_day)
 GPS_day = ( GPS_wsec/86400.0D0 )  
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Write satellite orbits and partial derivatives to one .orb output file (internal format)
@@ -633,6 +633,22 @@ sat_vel = sp3_velocity_cfg
 CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sat_vel, CLKmatrix)
 ! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Write satellite attitude to orbex format
+! ----------------------------------------------------------------------
+! Orbex filename
+!write (ORBEX_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.att'
+!CALL write_orbex (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, ORBEX_fname)
+
+!xmat(1,1:3) = (/  0.0000000000000000D0, -0.5000000000000001D0, -0.8660254037844386D0 /)
+!xmat(2,1:3) = (/  0.9238795325112867D0, -0.3314135740355917D0,  0.1913417161825449D0 /)
+!xmat(3,1:3) = (/ -0.3826834323650897D0, -0.8001031451912655D0,  0.4619397662556435D0 /)
+!quater_0(1:4) = (/ 0.5316310262343734D0, -0.4662278970042302D0,  -0.2272920256568435D0, 0.6695807158758448D0 /)
+!CALL mat2quater(xmat,quater)
+!print *,"xmat   ", xmat
+!print *,"quaternions ", quater
+!print *,"delta-quaternions ", quater - quater_0
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Extract residual filename tag from input .sp3 filename
@@ -657,31 +673,17 @@ Call writearray (orbit_resN, filename)
 ! Write combined orbit residuals file (RTN)
 write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbdiff_rtn.out'
 Call writearray2 (orbdiff2, filename)
-! ----------------------------------------------------------------------
 
-
-! ---------------------------------------------------------------------- 
-! Satellite Attitude
-! ---------------------------------------------------------------------- 
-! Satellite attitude matrix
-CALL attitude_orb (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, satsinex_filename_cfg, attitude_array)
-! ---------------------------------------------------------------------- 
-!print *, "attitude_array", attitude_array(1,:,1)
-
-! ----------------------------------------------------------------------
-! Write satellite attitude to orbex format
-! ----------------------------------------------------------------------
-! Orbex filename
-write (ORBEX_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.obx'
-! Write attitude matrix to orbex format
-CALL write_orbex (attitude_array, PRNmatrix, ORBEX_fname)
-! ----------------------------------------------------------------------
-! Write satellite attitude per epoch to out ascii file 
-write (filename, FMT='(A3,I4,I1,A13)') 'gag', (GPS_week), INT(GPS_day), '_attitude.out'
-Call writearray2 (attitude_array, filename)
-! ----------------------------------------------------------------------
-
-
+if (allocated(CLKmatrix)) Deallocate(CLKmatrix, stat=DeAllocateStatus)
+if (allocated(orbits_partials_icrf)) Deallocate(orbits_partials_icrf, stat=DeAllocateStatus)
+if (allocated(orbits_partials_itrf)) Deallocate(orbits_partials_itrf, stat=DeAllocateStatus)
+if (allocated(orbits_ics_icrf)) Deallocate(orbits_ics_icrf, stat=DeAllocateStatus)
+if (allocated(orbit_resN)) Deallocate(orbit_resN, stat=DeAllocateStatus)
+if (allocated(orbit_resR)) Deallocate(orbit_resR, stat=DeAllocateStatus)
+if (allocated(orbit_resT)) Deallocate(orbit_resT, stat=DeAllocateStatus)
+if (allocated(orbdiff2)) Deallocate(orbdiff2, stat=DeAllocateStatus)
+if (allocated(PRNmatrix)) Deallocate(PRNmatrix, stat=DeAllocateStatus)
+call globals_fini()
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
 

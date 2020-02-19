@@ -115,7 +115,8 @@ SUBROUTINE veq_rkn768(zo, veqZo, veqPo, step, lamda_h, Np, z_q, e_r, veqZ, veqP)
       !REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: U3n, P3n		
       INTEGER (KIND = prec_int8) :: sz1, sz2 
 ! ----------------------------------------------------------------------
-
+! initialise output var
+e_r = 0.d0
 
 ! Integration step
 h = step
@@ -147,10 +148,30 @@ sz2 = size(veqPo, DIM = 2)
 !print *,"sz1, sz2", sz1,sz2
 
 ALLOCATE (veqP(6,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated veqP"
+        goto 100
+end if
 ALLOCATE (veqP_ro(3,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated veqP_ro"
+        goto 100
+end if
 ALLOCATE (veqP_vo(3,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated veqP_vo"
+        goto 100
+end if
 ALLOCATE (veqP_r (3,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated veqP_r"
+        goto 100
+end if
 ALLOCATE (veqP_v (3,sz2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated veqP_v"
+        goto 100
+end if
 
 veqP_ro(1,:) = veqPo(1,:)
 veqP_ro(2,:) = veqPo(2,:)
@@ -158,7 +179,12 @@ veqP_ro(3,:) = veqPo(3,:)
 veqP_vo(1,:) = veqPo(4,:)
 veqP_vo(2,:) = veqPo(5,:)
 veqP_vo(3,:) = veqPo(6,:)
-! ----------------------------------------------------------------------	  
+! ----------------------------------------------------------------------
+! initialise
+veqP = 0.d0
+veqP_r = 0.d0
+veqP_v = 0.d0
+
 
 ! ----------------------------------------------------------------------	  
 Np2 = Np
@@ -170,27 +196,51 @@ End IF
 If (Np2 /= 0) Then
 
 ALLOCATE (kP_i(3,Np2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated kP_i"
+        goto 100
+end if
 ALLOCATE (k_P(3,Np2,9), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated k_P"
+        goto 100
+end if
 ALLOCATE (G_kP(3,Np2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated G_kP"
+        goto 100
+end if
 ALLOCATE (sum_agP(3,Np2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated sum_agP"
+        goto 100
+end if
 ALLOCATE (sum_bq_r_gP(3,Np2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated sum_bq_r_gP"
+        goto 100
+end if
 ALLOCATE (sum_bq_v_gP(3,Np2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated sum_bq_v_gP"
+        goto 100
+end if
 ALLOCATE (sumkP(3,Np2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocated sumkP"
+        goto 100
+end if
 
 sumkP   = 0.d0
 sum_agP = 0.d0
 sum_ag  = 0.d0
 
-Else
+kP_i = 0.d0
+G_kP = 0.d0
+k_P = 0.d0
 
-N0 = 1 
-ALLOCATE (veqP(6,N0), STAT = AllocateStatus)
-
-Do i1 = 1 , 6
-   Do j1 = 1 , N0
-      veqP(i1,j1) = 0.0D0
-   End Do	  
-End Do
+sum_bq_r_gP = 0.d0
+sum_bq_v_gP = 0.d0
 
 End IF
 
@@ -340,12 +390,8 @@ End IF
 		!print *,"c*h*veqZ_vo", c(i+1) * h * veqZ_vo 										 
 		!print *,"h**2*sum_ag", h**2 * sum_ag 										 
 
-	   ! Initialize to zero
-		Do i1 = 1 , 3
-		   Do j1 = 1 , 6
-              sum_ag(i1,j1) = 0.0D0
-		   End Do	  
-		End Do
+	   ! Re-Initialize to zero
+           sum_ag = 0.0D0
 		
 		! Position transition matrix : k_Z 3x6 matrix
 		kZ_i = MATMUL(pd_Fr, veqZ_r) 		
@@ -365,12 +411,8 @@ If (Np /= 0) Then
             sum_agP = sum_agP + a(i+1,j+1) * G_kP
         End Do
         veqP_r = veqP_ro + c(i+1) * h * veqP_vo + h**2 * sum_agP
-		! Initialize to zero
-		Do i1 = 1 , 3
-		   Do j1 = 1 , Np
-              sum_agP(i1,j1) = 0.0D0
-		   End Do	  
-		End Do
+		! Re-Initialize to zero
+              sum_agP = 0.0D0
 		
         !gp = pd_Fr * veqP_ro + pd_Fp  ! 3xNp matrix
 		kP_i = MATMUL(pd_Fr, veqP_r) 		
@@ -414,12 +456,8 @@ er = abs(r_q - r_p)
 ! State Transition matrix
 ! ----------------------------------------------------------------------
 ! Increment function for State Transition matrix
-Do i1 = 1 , 3
-   Do j1 = 1 , 6
-	sum_bq_r_g(i1,j1) = 0.0D0
-	sum_bq_v_g(i1,j1) = 0.0D0 
-   End Do	  
-End Do
+	sum_bq_r_g = 0.0D0
+	sum_bq_v_g = 0.0D0 
 
 Do i = 0 , s
     sumkZ = k_Z(:,:,i+1)
@@ -467,7 +505,7 @@ End IF
 ! ----------------------------------------------------------------------
 
 
-END SUBROUTINE
+ 100 END SUBROUTINE
 
 
 End Module

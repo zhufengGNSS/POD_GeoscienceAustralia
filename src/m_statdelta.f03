@@ -91,40 +91,31 @@ sz3 = size(ds2, DIM = 1)
 sz4 = size(ds2, DIM = 2)
 Nepochs2 = sz3
 
+! FIXME: default initialisation
+Nparam = min0(sz2, sz4)
+
 ! ----------------------------------------------------------------------
 ! Test collumns dimension
 If (sz2 .NE. sz4) Then
 !print *,"Subroutine statdelta.f03 within Module mdl_statdelta.f03: Input matrices dimension(DIM=2) do not agree"
 !print *,"DIM=2", sz2, sz4   
 !         STOP "*** - ***"
-If (sz2 < sz4) Then
-	Nparam = sz2
-	ALLOCATE (ds2_2(Nepochs2,Nparam), STAT = AllocateStatus)
-	ds2_2 = ds2(:,1:Nparam)
-	!DEALLOCATE (ds2, STAT = DeAllocateStatus)
-	!ALLOCATE (ds2(Nepochs2,Nparam), STAT = AllocateStatus)
-	!ds2 = ds_temp
-	ALLOCATE (ds1_2(Nepochs,Nparam), STAT = AllocateStatus)
-	ds1_2 = ds1
-Else if (sz2 > sz4) Then
-	Nparam = sz4
-	ALLOCATE (ds1_2(Nepochs,Nparam), STAT = AllocateStatus)
-	ds1_2 = ds1(:,1:Nparam)
-	!DEALLOCATE (ds1, STAT = DeAllocateStatus)
-	!ALLOCATE (ds1(Nepochs,Nparam), STAT = AllocateStatus)
-	!ds1 = ds_temp
-	ALLOCATE (ds2_2(Nepochs2,Nparam), STAT = AllocateStatus)
-	ds2_2 = ds2
-End IF
-
-ELSE
-	Nparam = sz2
-	ALLOCATE (ds1_2(Nepochs,Nparam), STAT = AllocateStatus)
-	ds1_2 = ds1
-	ALLOCATE (ds2_2(Nepochs2,Nparam), STAT = AllocateStatus)
-	ds2_2 = ds2
-End If
+end if
+ALLOCATE (ds1_2(Nepochs,Nparam), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+      print *, "failed to allocate ds1_2"
+      goto 100
+end if
+ds1_2 = ds1(:,1:NParam)
+ALLOCATE (ds2_2(Nepochs2,Nparam), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+       print *, "failed to allocate ds2_2"
+       goto 100
+end if
+ds2_2 = ds2(:,1:NParam)
 ! ----------------------------------------------------------------------
+! get around compiler warning - check we have allocated the arrays
+!if (.not. Allocated(ds1_2) .or. .not. Allocated(ds2_2)) goto 100
 
 
 ! ----------------------------------------------------------------------
@@ -151,6 +142,10 @@ End Do
 ! Dynamic allocatable array
 ! Allocate the array of the numerical orbit comparison
 ALLOCATE (dsr(Nepochs_delta,Nparam), STAT = AllocateStatus)
+        if (AllocateStatus .ne. 0) then
+                print *, "failed to allocate dsr"
+                goto 100
+        end if
 
 
 ! ----------------------------------------------------------------------
@@ -183,11 +178,35 @@ Nelements = sz2 - 2
 
 ! Allocate arrays
 ALLOCATE (dx(Nepochs_delta), STAT = AllocateStatus)
+        if (AllocateStatus .ne. 0) then
+                print *, "failed to allocate dx"
+                goto 100
+        end if
 ALLOCATE (RMSdsr(Nelements), STAT = AllocateStatus)
+        if (AllocateStatus .ne. 0) then
+                print *, "failed to allocate RMSdsr"
+                goto 100
+        end if
 ALLOCATE (Sigmadsr(Nelements), STAT = AllocateStatus)
+        if (AllocateStatus .ne. 0) then
+                print *, "failed to allocate Sigmadsr"
+                goto 100
+        end if
 ALLOCATE (MEANdsr(Nelements), STAT = AllocateStatus)
+        if (AllocateStatus .ne. 0) then
+                print *, "failed to allocate MEANdsr"
+                goto 100
+        end if
 ALLOCATE (MINdsr(Nelements), STAT = AllocateStatus)
+        if (AllocateStatus .ne. 0) then
+                print *, "failed to allocate MINdsr"
+                goto 100
+        end if
 ALLOCATE (MAXdsr(Nelements), STAT = AllocateStatus)
+        if (AllocateStatus .ne. 0) then
+                print *, "failed to allocate MAXdsr"
+                goto 100
+        end if
 
 i = 0
 j = 0
@@ -204,7 +223,7 @@ End Do
 ! ----------------------------------------------------------------------
 
 
-END SUBROUTINE
+ 100 END SUBROUTINE
 
 
 End Module

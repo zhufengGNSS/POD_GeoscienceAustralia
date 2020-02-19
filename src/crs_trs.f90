@@ -81,7 +81,6 @@ SUBROUTINE crs_trs (mjd, EOP_ar, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2C
 ! ----------------------------------------------------------------------
       arcsec2rad = PI_global / (3600.0D0 * 180.0D0)
 ! ----------------------------------------------------------------------
-	  
 
 ! ----------------------------------------------------------------------
 ! EOP values
@@ -91,7 +90,6 @@ SUBROUTINE crs_trs (mjd, EOP_ar, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2C
       dX_eop = EOP_ar(6)
       dY_eop = EOP_ar(7)
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Time Systems transformation											 
@@ -107,15 +105,13 @@ SUBROUTINE crs_trs (mjd, EOP_ar, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2C
       TAI2 = mjd_TAI
 ! ----------------------------------------------------------------------
 ! UTC
-      mjd_UTC_day = INT (mjd_UTC)
+      mjd_UTC_day = IDINT(mjd_UTC)
 ! ----------------------------------------------------------------------
 ! UT1
       mjd_UT1 = mjd_UTC + UT1_UTC / 86400D0
       TT1_UT1 = 2400000.5D0
       TT2_UT1 = mjd_UT1  
 ! ----------------------------------------------------------------------
-
-
 
 ! ----------------------------------------------------------------------
 ! CIO based transformation
@@ -125,6 +121,11 @@ SUBROUTINE crs_trs (mjd, EOP_ar, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2C
 ! ----------------------------------------------------------------------
 ! Q(t)
 ! ----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! variable initialisation (X_iau, Y_iau, s_iau)
+X_iau = 0.d0
+Y_iau = 0.d0
+s_iau = 0.d0
 
 ! ----------------------------------------------------------------------
 ! Precession-Nutation model:  X, Y (in radians)
@@ -148,7 +149,7 @@ SUBROUTINE crs_trs (mjd, EOP_ar, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2C
       s_iau = s_iau06
       end if 
 ! ----------------------------------------------------------------------
-	  
+
 ! ----------------------------------------------------------------------
 ! EOP: dX,dY (arcsec to radians)
       !dX_eop_rad =  dX_eop * arcsec2rad
@@ -160,7 +161,6 @@ SUBROUTINE crs_trs (mjd, EOP_ar, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2C
       CALL iau_C2IXYS ( X_pn, Y_pn, s_iau, RC2I )
       CALL iau_TR ( RC2I, RC2I_T )
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! R(t)
@@ -210,11 +210,8 @@ SUBROUTINE crs_trs (mjd, EOP_ar, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2C
       CALL iau_TR ( RPOM, RPOM_T )
 ! ----------------------------------------------------------------------
 
-
-	  
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
-	  
 
 ! ----------------------------------------------------------------------
 ! Earth Orientation Matrix (EOM)
@@ -222,7 +219,7 @@ SUBROUTINE crs_trs (mjd, EOP_ar, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2C
 ! [GCRS] = Q(t) * R(t) * W(t) * [ITRS] = EOM * {ITRS}
 ! ----------------------------------------------------------------------
       Qt = RC2I_T
-	  Qt_inv = RC2I
+      Qt_inv = RC2I
 ! ----------------------------------------------------------------------
       Rt = R_era_n
       Rt_inv = R_era
@@ -294,7 +291,7 @@ SUBROUTINE crs_trs (mjd, EOP_ar, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2C
 ! Omega as derivative of Earth Rotation Angle (ERA), dERA/dt in rad/s
       dtheta = 2.0D0 * PI_global * 1.00273781191135448D0 * (1.0D0 / 86400D0)
 ! ----------------------------------------------------------------------
-	  
+
 ! ----------------------------------------------------------------------
 ! d_TRS2CRS
 ! ----------------------------------------------------------------------

@@ -1,0 +1,4 @@
+# The fortran modules provided by this target.
+provides
+ m_eop_cor.mod
+ m_eop_igu.mod

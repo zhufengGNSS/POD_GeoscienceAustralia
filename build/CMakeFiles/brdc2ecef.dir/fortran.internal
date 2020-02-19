@@ -1,0 +1,7 @@
+# The fortran modules provided by this target.
+provides
+ m_antoffset.mod
+ m_meanstd.mod
+ m_read_leapsec.mod
+ m_write_brd2sp3.mod
+ mdl_brdconfig.mod

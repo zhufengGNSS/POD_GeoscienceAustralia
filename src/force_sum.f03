@@ -166,7 +166,10 @@ END IF
 ! State Vector in ICRF
 rsat_icrf = rsat
 vsat_icrf = vsat
+rsat_itrf = 0.d0
 
+! Init var
+vSun = 0.d0
 
 ! ----------------------------------------------------------------------
 ! EOP data and Tranformation matrices between ITRF and ICRF
@@ -297,7 +300,7 @@ if (1<0) then
 ! Venus
 If (NTARG == 2) then
 !print *,"Venus", mjd, JD, rbody(1:3) 
-WRITE (writeline,FMT='(2F25.15, 3F25.5)'), mjd, JD, rbody(1:3)
+WRITE (writeline,FMT='(2F25.15, 3F25.5)') mjd, JD, rbody(1:3)
 filename = 'Venus.out'
 Call write_data (filename, writeline)
 End IF
@@ -305,7 +308,7 @@ End IF
 ! Jupiter
 If (NTARG == 5) then
 !print *,"Jupiter", mjd, JD, rbody(1:3) 
-WRITE (writeline,FMT='(2F25.15, 3F25.5)'), mjd, JD, rbody(1:3)
+WRITE (writeline,FMT='(2F25.15, 3F25.5)') mjd, JD, rbody(1:3)
 filename = 'Jupiter.out'
 Call write_data (filename, writeline)
 End IF
@@ -313,7 +316,7 @@ End IF
 ! Sun
 If (NTARG == 11) then
 !print *,"Sun", mjd, JD, rbody(1:3) 
-WRITE (writeline,FMT='(2F25.15, 3F25.5)'), mjd, JD, rbody(1:3)
+WRITE (writeline,FMT='(2F25.15, 3F25.5)') mjd, JD, rbody(1:3)
 filename = 'Sun.out'
 Call write_data (filename, writeline)
 End IF
@@ -321,7 +324,7 @@ End IF
 ! Moon
 If (NTARG == 10) then
 !print *,"Moon", mjd, JD, rbody(1:3) 
-WRITE (writeline,FMT='(2F25.15, 3F25.9)'), mjd, JD, rbody(1:3)
+WRITE (writeline,FMT='(2F25.15, 3F25.9)') mjd, JD, rbody(1:3)
 filename = 'Moon.out'
 Call write_data (filename, writeline)
 End IF
@@ -617,17 +620,6 @@ CALL shadow (rsat_icrf, rSun, rMoon, lambda, ECLTYP )
 ! ----------------------------------------------------------------------
 ! Non-Gravitational Effects
 ! ----------------------------------------------------------------------
-
-if (FMOD_NONGRAV(1) > 0 .OR. FMOD_NONGRAV(2) > 0 .or. FMOD_NONGRAV (3) > 0) Then
-! PRN: GNSS constellation ID letter + Satellite number
-fmt_line = '(A1,I2.2)'
-READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
-
-CALL prn_shift (GNSSid, PRN_no, PRN_no)
-!print*,GNSSid, PRN_no
-
-END IF
- 
 ! ----------------------------------------------------------------------
 ! Solar Radiation
 ! ----------------------------------------------------------------------
@@ -638,7 +630,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 srpid =  SRP_MOD_glb
 
 
-CALL force_srp (lambda, eBX_ecl, GMearth, PRN_no, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
+CALL force_srp (lambda, eBX_ecl, eclipsf, GMearth, GNSSid, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )
 Fsrp_icrf = (/ fx, fy, fz /)
 
 Else IF (FMOD_NONGRAV(1) == 0) Then
@@ -653,7 +645,7 @@ if (FMOD_NONGRAV(2) > 0) Then
 
 CALL force_erp (mjd, rsat_icrf, vsat_icrf, rSun, fx, fy, fz)
 Ferp_icrf = (/ fx, fy, fz /)
-!print*,'force_erp=', sqrt(fx**2+fy**2+fz**2)
+
 Else IF (FMOD_NONGRAV(2) == 0) Then
 
         Ferp_icrf = (/ 0.D0, 0.0D0, 0.0D0 /)

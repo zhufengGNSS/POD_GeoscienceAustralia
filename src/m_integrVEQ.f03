@@ -102,6 +102,7 @@ SUBROUTINE integr_VEQ (MJDo, tsec_start, ro, vo, arc, integID, step, Nparam, orb
       INTEGER (KIND = prec_int2) :: Nveq_rv
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Smatrix_T, Pmatrix_T  
       INTEGER (KIND = prec_int2) :: VEQ_refsys
+!      LOGICAL stored
 ! ----------------------------------------------------------------------	  
 
 
@@ -120,6 +121,9 @@ IF (VEQ_REFSYS_cfg == 'ICRS') THEN
 	VEQ_refsys = 1 
 ELSE IF (VEQ_REFSYS_cfg == 'ITRS') THEN
 	VEQ_refsys = 2 
+ELSE
+        ! FIXME: this is error condition?
+        VEQ_refsys = 0
 END IF
 ! ----------------------------------------------------------------------
  
@@ -142,18 +146,53 @@ Nepochs = INT(arc / ABS(step)) + 1
 ! Dynamic allocatable arrays 
 ! ----------------------------------------------------------------------
 ALLOCATE (orbc(Nepochs,8), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate orbc"
+        goto 100
+end if
 !ALLOCATE (Smatrix(Nepochs,6*6+2), STAT = AllocateStatus)
 ALLOCATE (Smatrix(Nepochs,6*Nveq_rv+2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate Smatrix"
+        goto 100
+end if
 !ALLOCATE (Pmatrix(Nepochs,Nparam*6+2), STAT = AllocateStatus)
 ALLOCATE (Pmatrix(Nepochs,Nparam*Nveq_rv+2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate Pmatrix"
+        goto 100
+end if
 If (Nparam /= 0) Then
 ALLOCATE (veqPo(6,Nparam), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate veqPo"
+        goto 100
+end if
 Else
 ALLOCATE (veqPo(6,1), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate veqPo"
+        goto 100
+end if
 End IF
+Smatrix = 0
+Pmatrix = 0
+! Sensitivity Matrix Initial values: veqPo = 0(6xNp)
+veqPo = 0.0D0
 
 ALLOCATE (Smatrix_T(Nepochs,6*Nveq_rv+2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate Smatrix_T"
+        goto 100
+end if
 ALLOCATE (Pmatrix_T(Nepochs,Nparam*Nveq_rv+2), STAT = AllocateStatus)
+if (AllocateStatus .ne. 0) then
+        print *, "failed to allocate Pmatrix_T"
+        goto 100
+end if
+Smatrix_T = 0.d0
+Pmatrix_T = 0.d0
+
 ! ----------------------------------------------------------------------
 
 
@@ -177,12 +216,6 @@ veqZo(4,1:6) = (/ 0.D0, 0.D0, 0.D0, 1.D0, 0.D0, 0.D0 /)
 veqZo(5,1:6) = (/ 0.D0, 0.D0, 0.D0, 0.D0, 1.D0, 0.D0 /)
 veqZo(6,1:6) = (/ 0.D0, 0.D0, 0.D0, 0.D0, 0.D0, 1.D0 /)
 
-! Sensitivity Matrix Initial values: veqPo = 0(6xNp)
-Do i1 = 1 , 6
-   Do j1 = 1 , Nparam
-      veqPo(i1,j1) = 0.0D0
-   End Do	  
-End Do
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -375,19 +408,20 @@ End DO
 
 
 ! ----------------------------------------------------------------------
-! Runge-Kutta RK8(7)-13 method
+! Runge-Kutta RK8(7)-13 method (FIXME: is this used?)
 ! ----------------------------------------------------------------------
 Else If (integID == 3) Then
 
 
 TT = to_sec
+yn = 0.d0
 Do j = 1 , Nepochs-1
 	! Epoch to	
     mjd_to = orbc(j,1) 
     yo = orbc(j,3:8) 
 	
     ! Numerical integration for computation of the state vector at next epoch
-	!Call integr_rk87 (mjd_to, yo, step, mjdn, yn, ey)
+    !Call integr_rk87 (mjd_to, yo, step, mjdn, yn, ey)
    
 	! Next epoch TT (to+h)
     TT = TT + step    
@@ -425,14 +459,27 @@ END IF
 	!   Pmatrix(j+1, 2+(iparam-1)*6+1 : 2+(iparam-1)*6+6 ) = & 
 	!   (/ veqP(1,iparam), veqP(2,iparam), veqP(3,iparam), veqP(4,iparam), veqP(5,iparam), veqP(6,iparam) /)
 	!End Do
-	i1 = 0
-	iparam = 0	
+        !stored = .false.
+        !if (allocated(veqP)) then 
+        !if (size(veqP, 1) == Nveq_rv) then
+        !if (size(veqP, 2) == Nparam) then
 	!Do i1 = 1 , 6 
 	Do i1 = 1 , Nveq_rv 
 	Do iparam = 1 , Nparam
 	   Pmatrix(j+1, 2+(i1-1)*Nparam+iparam) = veqP(i1,iparam) 
 	End Do
 	End Do
+        !stored = .true.
+        !End If
+        !End If
+        !End If
+        !if (.not.stored) then
+        !        DO i1 = 1, Nveq_rv
+        !        Do iparam = 1, Nparam
+        !        Pmatrix (j+1, 2+(i1-1)*Nparam+iparam) = 0.d0
+        !        End Do
+        !        End Do
+        !End if
 End DO
 ! ----------------------------------------------------------------------
 
@@ -447,7 +494,7 @@ IF (VEQ_refsys == 2) THEN
 END IF
 ! ----------------------------------------------------------------------
 
-End Subroutine
+ 100 End Subroutine
 
 
 

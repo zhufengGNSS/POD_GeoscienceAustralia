@@ -41,7 +41,7 @@ SUBROUTINE force_erp (mjd,rsat,vsat,r_sun,fx_erp,fy_erp,fz_erp)
       REAL (KIND = prec_q)               :: fx_erp,fy_erp,fz_erp
 
 !! repro3 albedo model
-       INTEGER*4 BLKNUM,ERM,ANT,GRD,REFF,MONTH,SVN
+       INTEGER*4 ERM,ANT,GRD,REFF,MONTH,SVN
        REAL*8 KAPPA(3,3)
        REAL (KIND = prec_q), DIMENSION(3) :: SUN,ACCEL
        REAL (KIND = prec_q), DIMENSION(6) :: YSAT
@@ -57,10 +57,14 @@ YSAT(4:6) = vsat
 KAPPA = 0.d0
 MONTH = 1
 
-!print*,'Block type, SVNID, BLKID,  power, MASS = ', antbody, SVNID, BLKID,power, MASS
-CALL ERPFBOXW(ERM,ANT,GRD,REFF,YSAT,R_SUN,KAPPA,MONTH,BLKID,SVNID,MJD,ACCEL)
+!print*,'Block type, SVNID, BLKID,  power, MASS = ', BLKTYP, SVNID, BLKID,power, MASS
+CALL ERPFBOXW(ERM,ANT,GRD,REFF,YSAT,R_SUN,KAPPA,MONTH,SVNID,MJD,ACCEL)
 
-fx_erp = ACCEL(1) 
+fx_erp = ACCEL(1)
 fy_erp = ACCEL(2)
 fz_erp = ACCEL(3)
+!IF (BLKTYP(1:3) == 'GAL' .OR. BLKTYP(1:3) == 'GLO') THEN
+!PRINT*,'fx_erp, fy_erp, fz_erp =', fx_erp, fy_erp, fz_erp
+!END IF
+
 END SUBROUTINE
