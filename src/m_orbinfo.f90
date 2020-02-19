@@ -411,14 +411,14 @@ sclfa=(AU/Ds)**2
 ! A PRIORI SRP ACCELERATION
 !---------------------------
 ! Cannoball model
-      if (SRP_MOD_glb == 1 .or. Flag_BW_cfg == 0) then
+      if (SRP_MOD_arp == 1) then
          fsrp(1)=F0/MASS*ed(1)*lambda
          fsrp(2)=F0/MASS*ed(2)*lambda
          fsrp(3)=F0/MASS*ed(3)*lambda
          alpha = F0/MASS
 
 ! SIMPLE BOX-WING
-      else if (SRP_MOD_glb == 2 .or. Flag_BW_cfg == 1) then
+      else if (SRP_MOD_arp == 2) then
          if(cosang(3)<0.d0) ez = ez*(-1.d0)
          fxo=Ps/MASS*(0.02*X_SIDE*cosang(1)*ex(1)+0.02*Z_SIDE*cosang(3)*ez(1)+1.7*A_SOLAR*cosang(4)*ed(1))
          fyo=Ps/MASS*(0.02*X_SIDE*cosang(1)*ex(2)+0.02*Z_SIDE*cosang(3)*ez(2)+1.7*A_SOLAR*cosang(4)*ed(2))
@@ -431,20 +431,20 @@ sclfa=(AU/Ds)**2
 
 ! BOX-WING model from the repro3 routine
 ! --------------------------------------
-      else if (SRP_MOD_glb == 3 .or. Flag_BW_cfg == 2) then
+      else if (SRP_MOD_arp == 3) then
          REFF = 0    ! 0: inertial frame,  1: satellite body-fixed frame,
                      ! 2: sun-fixed frame, 3: orbital frame
 
          YSAT(1:3) = rsat
          YSAT(4:6) = vsat
-         CALL SRPFBOXW(REFF,YSAT,rSun,BLKID,SVNID,ACCEL)
+         CALL SRPFBOXW(REFF,YSAT,rSun,SVNID,ACCEL)
          alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
         
          fsrp(1)=ACCEL(1)
          fsrp(2)=ACCEL(2)
          fsrp(3)=ACCEL(3)
  
-      else if (Flag_BW_cfg >= 3) then
+      else if (SRP_MOD_arp == 0) then
 
          alpha = 1.d0
 

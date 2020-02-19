@@ -137,6 +137,9 @@ X_SIDE = 0.d0
 A_SOLAR = 0.d0
 F0 = 0.d0
 
+fx = 0.d0
+fy = 0.d0
+fz = 0.d0
 call apr_srp(GNSSid, BLKTYP, X_SIDE, Z_SIDE, A_SOLAR, F0)
 
 ! The unit vector ez SAT->EARTH
@@ -314,13 +317,13 @@ END IF
       sclfa=(AU/Ds)**2
 
 ! Cannoball model
-      if (srpid == 1 .or. Flag_BW_cfg == 0) then
+      if (srpid == 1) then
          fx=-F0/MASS*ed(1)*lambda
          fy=-F0/MASS*ed(2)*lambda
          fz=-F0/MASS*ed(3)*lambda
          alpha = F0/MASS
 ! SIMPLE BOX-WING 
-      else if (srpid == 2 .or. Flag_BW_cfg == 1) then
+      else if (srpid == 2) then
          xmul = 0.02
          zmul = 0.02
          solarmul = 1.7
@@ -334,10 +337,9 @@ END IF
          fy=-fyo*lambda
          fz=-fzo*lambda
 
-!print*,'alpha=',(alpha-F0/MASS)/alpha*100, F0/MASS
 ! BOX-WING model from the repro3 routine
 ! --------------------------------------
-      else if (srpid == 3 .or. Flag_BW_cfg == 2) then
+      else if (srpid == 3) then
          REFF = 0    ! 0: inertial frame,  1: satellite body-fixed frame, 
                      ! 2: sun-fixed frame, 3: orbital frame 
          YSAT(1:3) = r
@@ -348,14 +350,14 @@ END IF
          fy=ACCEL(2)*lambda
          fz=ACCEL(3)*lambda
 
-      else if (Flag_BW_cfg >= 3) then
+      else if (srpid == 0) then
 
       alpha = 1.d0
 
       end if
 
       
-     IF (srpid == 4) THEN 
+     IF (ECOM_param_glb /= 0) THEN 
 IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
 ! Bias partial derivatives matrix allocation
     PD_Param_ID = 0

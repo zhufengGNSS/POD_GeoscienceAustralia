@@ -15,7 +15,7 @@ use mdl_num
         POD_MODE_glb = 0
         ORBPRED_ARC_glb = 0.d0
         ORBEXT_glb = 0
-        SRP_MOD_glb = 0
+        SRP_MOD_arp = 0
         ECOM_PARAM_glb = 0
         ECOM_Bias_glb = 0
         ECOM_CPR_glb = 0

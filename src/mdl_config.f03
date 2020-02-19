@@ -159,6 +159,6 @@ MODULE mdl_config
 
 ! ----------------------------------------------------------------------
 ! A priori SRP value
-      INTEGER (KIND = prec_int2) :: Flag_BW_cfg
+      INTEGER (KIND = prec_int2) :: SRP_MOD_arp
 ! ----------------------------------------------------------------------
 END
