@@ -393,9 +393,9 @@ IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
     END IF
 
 ELSE IF (ECOM_param_glb == 3) THEN
-    PD_Param_ID = NPARAM_glb
+    PD_Param_ID = 7
 
-   IF (NPARAM_glb /= 7) THEN
+   IF (NPARAM_glb /= PD_Param_ID) THEN
    PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
    PRINT*,           'NPARAM_glb  =', NPARAM_glb
    PRINT*,           'PD_Param_ID =', PD_Param_ID
