@@ -44,10 +44,10 @@ The `ACS` Version 0.0.1 beta release supports:
 
 ### Dependencies
 
-1. The lapack numerical linear algebra library (lapack.x86_64) (You may need to run the command ln -s /usr/lib64/liblapack.so.3 /usr/lib64/liblapack.so)
-2. The basic linear algebra library (blas.x86_64,liblas-libs.x86_64) (You may need to run the command ln -s /usr/lib64/libblas.so.3 /usr/lib64/libblas.so)
-3. A working C compiler (gcc will do), a working C++ compiler (gcc-g++ will do) and a fortran compiler (we have used gfortran)
-4. If the flags set in CMakeLists.txt do not work with your compiler please remove the ones that don't
+1. The open basic linear algebra library (Openblas.x86_64,liblas-libs.x86_64) (You may need to run the command ln -s /usr/lib64/libopenblas.so.3 /usr/lib64/libopenblas.so)
+2. A working C compiler (gcc will do), a working C++ compiler (gcc-g++ will do) and a fortran compiler (we have used gfortran)
+3. Cmake (from cmake.org) at least version 2.8
+4. If the flags set in CMakeLists.txt do not work with your compiler please remove/replace the ones that don't
 
 ### Build
 
@@ -56,7 +56,7 @@ To build the `POD` ...
     $ cd pod
     $ mkdir build
     $ cd build
-    $ cmake3 .. >cmake.out 2>cmake.err
+    $ cmake3 .. 
     $ make >make.out 2>make.err
     $ less make.err (to verify everything was built correctly)
 
