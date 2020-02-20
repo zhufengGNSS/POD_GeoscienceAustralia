@@ -73,7 +73,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  USE mdl_eop
 	  USE m_sp3_PRN
 	  USE m_write_orb2sp3
-          USE m_orbitIC
+      USE m_orbitIC
       USE mdl_config
       USE m_read_satsnx 
 	  
@@ -185,13 +185,13 @@ CLOSE (UNIT=7, STATUS="DELETE")
 ! Data reading: Gravitational Effects
 ! ----------------------------------------------------------------------
 ! General orbit parameterization											
-Call prm_main (EQMfname)
+!Call prm_main (EQMfname)
 ! Earth Gravity Field model
-CALL prm_gravity (EQMfname)												
+!CALL prm_gravity (EQMfname)												
 ! Planetary/Lunar ephemeris DE data 
-CALL prm_planets (EQMfname)												
+!CALL prm_planets (EQMfname)												
 ! Ocean Tides model
-CALL prm_ocean (EQMfname)												
+!CALL prm_ocean (EQMfname)												
 ! ----------------------------------------------------------------------
 
 
@@ -265,6 +265,23 @@ CALL iau_CAL2JD ( Iyear, 1, 1, MJDD0, MJDref, J )
 DOY = IDNINT(MJDD-MJDref) + 1
 YR = Iyear
 !PRINT*,'Day Of Year =', Iyear,DOY
+
+
+! Last modified: 19/02/2020 Thomas Papanikolaou: Correct MJD epoch for the computation of the time-variable gravity coefficients					
+! ----------------------------------------------------------------------
+! Satellite Orbits :: common configuration :: Forces model
+! ----------------------------------------------------------------------
+! Data reading: Gravitational Effects
+! ----------------------------------------------------------------------
+! General orbit parameterization											
+Call prm_main (EQMfname)
+! Earth Gravity Field model
+CALL prm_gravity (EQMfname)												
+! Planetary/Lunar ephemeris DE data 
+CALL prm_planets (EQMfname)												
+! Ocean Tides model
+CALL prm_ocean (EQMfname)												
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
