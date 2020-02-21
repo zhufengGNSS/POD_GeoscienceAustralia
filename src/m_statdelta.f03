@@ -50,6 +50,7 @@ SUBROUTINE statdelta (ds1, ds2, dsr, RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr)
       USE mdl_precision
       USE mdl_num
       USE m_statist
+      USE mdl_config
       IMPLICIT NONE
 
 	  
@@ -76,6 +77,7 @@ SUBROUTINE statdelta (ds1, ds2, dsr, RMSdsr, Sigmadsr, MEANdsr, MINdsr, MAXdsr)
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
       INTEGER (KIND = prec_int8) :: Nparam 
       REAL (KIND = prec_d), ALLOCATABLE, DIMENSION(:,:) :: ds_temp, ds1_2, ds2_2
+      CHARACTER (LEN=100) mesg
 ! ----------------------------------------------------------------------	  
 
 
@@ -91,7 +93,7 @@ sz3 = size(ds2, DIM = 1)
 sz4 = size(ds2, DIM = 2)
 Nepochs2 = sz3
 
-! FIXME: default initialisation
+! default initialisation
 Nparam = min0(sz2, sz4)
 
 ! ----------------------------------------------------------------------
@@ -103,20 +105,18 @@ If (sz2 .NE. sz4) Then
 end if
 ALLOCATE (ds1_2(Nepochs,Nparam), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-      print *, "failed to allocate ds1_2"
-      goto 100
+      write(mesg, *) "Not enough memory - failed to allocate ds1_2, dimensions (", &
+              Nepochs, ",", Nparam, ")"
+      call report('FATAL', pgrm_name, 'statdelta', mesg, 'src/m_statdelta.f03', 1)
 end if
 ds1_2 = ds1(:,1:NParam)
 ALLOCATE (ds2_2(Nepochs2,Nparam), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-       print *, "failed to allocate ds2_2"
-       goto 100
+      write(mesg, *) "Not enough memory - failed to allocate ds2_2, dimensions (", &
+              Nepochs2, ",", Nparam, ")"
+      call report('FATAL', pgrm_name, 'statdelta', mesg, 'src/m_statdelta.f03', 1)
 end if
 ds2_2 = ds2(:,1:NParam)
-! ----------------------------------------------------------------------
-! get around compiler warning - check we have allocated the arrays
-!if (.not. Allocated(ds1_2) .or. .not. Allocated(ds2_2)) goto 100
-
 
 ! ----------------------------------------------------------------------
 ! Find the number of the common epochs
@@ -143,8 +143,9 @@ End Do
 ! Allocate the array of the numerical orbit comparison
 ALLOCATE (dsr(Nepochs_delta,Nparam), STAT = AllocateStatus)
         if (AllocateStatus .ne. 0) then
-                print *, "failed to allocate dsr"
-                goto 100
+      write(mesg, *) "Not enough memory - failed to allocate dsr, dimensions (", &
+              Nepochs_delta, ",", Nparam, ")"
+      call report('FATAL', pgrm_name, 'statdelta', mesg, 'src/m_statdelta.f03', 1)
         end if
 
 
@@ -179,33 +180,39 @@ Nelements = sz2 - 2
 ! Allocate arrays
 ALLOCATE (dx(Nepochs_delta), STAT = AllocateStatus)
         if (AllocateStatus .ne. 0) then
-                print *, "failed to allocate dx"
-                goto 100
+      write(mesg, *) "Not enough memory - failed to allocate dx, dimension ", &
+              Nepochs_delta
+      call report('FATAL', pgrm_name, 'statdelta', mesg, 'src/m_statdelta.f03', 1)
         end if
 ALLOCATE (RMSdsr(Nelements), STAT = AllocateStatus)
         if (AllocateStatus .ne. 0) then
-                print *, "failed to allocate RMSdsr"
-                goto 100
+      write(mesg, *) "Not enough memory - failed to allocate RMSdsr, dimension ", &
+              Nelements
+      call report('FATAL', pgrm_name, 'statdelta', mesg, 'src/m_statdelta.f03', 1)
         end if
 ALLOCATE (Sigmadsr(Nelements), STAT = AllocateStatus)
         if (AllocateStatus .ne. 0) then
-                print *, "failed to allocate Sigmadsr"
-                goto 100
+      write(mesg, *) "Not enough memory - failed to allocate Sigmadsr, dimension ", &
+              Nelements
+      call report('FATAL', pgrm_name, 'statdelta', mesg, 'src/m_statdelta.f03', 1)
         end if
 ALLOCATE (MEANdsr(Nelements), STAT = AllocateStatus)
         if (AllocateStatus .ne. 0) then
-                print *, "failed to allocate MEANdsr"
-                goto 100
+      write(mesg, *) "Not enough memory - failed to allocate MEANdsr, dimension ", &
+              Nelements
+      call report('FATAL', pgrm_name, 'statdelta', mesg, 'src/m_statdelta.f03', 1)
         end if
 ALLOCATE (MINdsr(Nelements), STAT = AllocateStatus)
         if (AllocateStatus .ne. 0) then
-                print *, "failed to allocate MINdsr"
-                goto 100
+      write(mesg, *) "Not enough memory - failed to allocate MINdsr, dimension ", &
+              Nelements
+      call report('FATAL', pgrm_name, 'statdelta', mesg, 'src/m_statdelta.f03', 1)
         end if
 ALLOCATE (MAXdsr(Nelements), STAT = AllocateStatus)
         if (AllocateStatus .ne. 0) then
-                print *, "failed to allocate MAXdsr"
-                goto 100
+      write(mesg, *) "Not enough memory - failed to allocate MAXdsr, dimension ", &
+              Nelements
+      call report('FATAL', pgrm_name, 'statdelta', mesg, 'src/m_statdelta.f03', 1)
         end if
 
 i = 0

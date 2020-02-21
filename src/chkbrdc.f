@@ -53,6 +53,7 @@ C
 C
       REAL*8      EPH(20),AVE(8),STD(8)
       CHARACTER*8 STATUS
+      CHARACTER*256 mesg
 C
 C
 C INITIALIZE STATUS
@@ -78,9 +79,9 @@ C CHECK GPS WEEK
 C --------------
       IF (IWEEK == 0) RETURN
       IF(IWEEK.LE.0.OR.IWEEK.GT.2000) THEN
-        STATUS='BAD WEEK'
-        PRINT*,'STATUS =', STATUS, 'GPSWEEK =', IWEEK
-        GOTO 100
+        write(mesg,*) 'STATUS = BAD WEEK, GPSWEEK =', IWEEK
+        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+     .              'src/chkbrdc.f', 1)
       ENDIF
 C
 C CHECK T0E
@@ -89,8 +90,9 @@ C ---------
 !     1   (DABS(DMOD(T0E,100.D0)-3.D0).GT.1.D-5 .AND.
 !     2   (DMOD(T0E+1.D-5,100.D0)).GT.2.D-5)) THEN
 !        STATUS='BAD T0E'
-!        PRINT*,'STATUS =', STATUS
-!        GOTO 100
+!        write(mesg, *) 'STATUS = BAD T0E'
+!        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+!     .              'src/chkbrdc.f', 1)
 !      ENDIF
 C
 C CHECK A
@@ -98,80 +100,80 @@ C -------
       IF (A == 0.d0) RETURN
 !      IF(A.LT.26.0D6.OR.A.GT.27.0D6) THEN
       IF(ABS(A-AVE(1))>N*STD(1))THEN
-        STATUS='BAD A'
-        PRINT*,'STATUS =',STATUS
-        PRINT*,'ABS(OBSERVED-MEAN)',ABS(A-AVE(1))
-        GOTO 100
+        write(mesg, *) 'STATUS = BAD A, ABS(OBSERVED-MEAN) =',
+     .        ABS(A-AVE(1))
+        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+     .              'src/chkbrdc.f', 1)
       ENDIF
 C
 C CHECK E
 C -------
 !      IF(E.LT.0.D0.OR.E.GT.0.1D0) THEN
       IF(ABS(E-AVE(2))>N*STD(2))THEN
-        STATUS='BAD E'
-        PRINT*,'STATUS =',STATUS
-        PRINT*,'ABS(OBSERVED-MEAN)',ABS(E-AVE(2))
-        GOTO 100
+        write(mesg, *) 'STATUS = BAD E, ABS(OBSERVED-MEAN) =',
+     .        ABS(E-AVE(2))
+        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+     .              'src/chkbrdc.f', 1)
       ENDIF
 C
 C CHECK I
 C -------
       !IF((XI.GT.65.D0.OR.XI.LT.60.D0).AND.(XI.GT.58.OR.XI.LT.50)) THEN
       IF(ABS(XI-AVE(3)*180/PI)>N*STD(3)*180/PI)THEN
-        STATUS='BAD I'
-        PRINT*,'STATUS =',STATUS
-        PRINT*,'ABS(OBSERVED-MEAN)',ABS(XI-AVE(3)*180/PI)
-        GOTO 100
+        write(mesg, *) 'STATUS = BAD I, ABS(OBSERVED-MEAN) =',
+     .        ABS(XI-AVE(3)*180.d0/PI)
+        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+     .              'src/chkbrdc.f', 1)
       ENDIF
 C
 C CHECK NODE
 C ----------
       !IF(DABS(XNODE).LT.1.D-6) THEN
       IF(ABS(XNODE-AVE(4)*180/PI)>N*STD(4)*180/PI)THEN
-        STATUS='BAD NODE'
-        PRINT*,'STATUS =',STATUS
-        PRINT*,'ABS(OBSERVED-MEAN)',ABS(XNODE-AVE(4)*180/PI)
-        GOTO 100
+        write(mesg, *) 'STATUS = BAD NODE, ABS(OBSERVED-MEAN) =',
+     .        ABS(XNODE-AVE(4)*180.d0/PI)
+        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+     .              'src/chkbrdc.f', 1)
       ENDIF
 C
 C CHECK PERIGEE
 C -------------
       !IF(DABS(PER).LT.1.D-6) THEN
       IF(ABS(PER-AVE(5)*180/PI)>N*STD(5)*180/PI)THEN
-        STATUS='BAD PERI'
-        PRINT*,'STATUS=',STATUS
-        PRINT*,'ABS(OBSERVED-MEAN)',ABS(PER-AVE(5)*180/PI)
-        GOTO 100
+        write(mesg, *) 'STATUS = BAD PERI, ABS(OBSERVED-MEAN) =',
+     .        ABS(PER-AVE(5)*180.d0/PI)
+        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+     .              'src/chkbrdc.f', 1)
       ENDIF
 C
 C CHECK MEAN ANOMALY
 C ------------------
       !IF(DABS(XM0).LT.1.D-6) THEN
       IF(ABS(XM0-AVE(6)*180/PI)>N*STD(6)*180/PI)THEN
-        STATUS='BAD M0'
-        PRINT*,'STATUS=',STATUS
-        PRINT*,'ABS(OBSERVED-MEAN)',ABS(XM0-AVE(6)*180/PI)
-        GOTO 100
+        write(mesg, *) 'STATUS = BAD M0, ABS(OBSERVED-MEAN) =',
+     .        ABS(XM0-AVE(6)*180.d0/PI)
+        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+     .              'src/chkbrdc.f', 1)
       ENDIF
 C
 C CHECK CORRECTION TO MEAN MOTION
 C -------------------------------
       !IF(DN.LT.0.01D-8.OR.DN.GT.0.70D-8) THEN
       IF(ABS(DN-AVE(7))>N*STD(7))THEN
-        STATUS='BAD DN'
-        PRINT*,'STATUS =',STATUS
-        PRINT*,'ABS(OBSERVED-MEAN)', ABS(DN-AVE(7))
-        GOTO 100
+        write(mesg, *) 'STATUS = BAD DN, ABS(OBSERVED-MEAN) =',
+     .        ABS(DN-AVE(7))
+        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+     .              'src/chkbrdc.f', 1)
       ENDIF
 C
 C CHECK RATE OF NODE
 C ------------------
       !IF(ODOT.LT.-0.60D-6.OR.ODOT.GT.-0.25D-6) THEN
       IF(ABS(ODOT-AVE(8)*180/PI)>N*STD(8)*180/PI)THEN
-        STATUS='BAD ODOT'
-        PRINT*,'STATUS=',STATUS
-        PRINT*,'ABS(OBSERVED-MEAN)',ABS(ODOT-AVE(8)*180/PI)
-        GOTO 100
+        write(mesg, *) 'STATUS = BAD ODOT, ABS(OBSERVED-MEAN) =',
+     .        ABS(ODOT-AVE(8)*180.d0/PI)
+        call report('WARNING', 'brdc2ecef', 'chkbrdc', mesg, 
+     .              'src/chkbrdc.f', 1)
       ENDIF
 C
 C END

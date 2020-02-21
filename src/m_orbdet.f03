@@ -169,9 +169,11 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       CHARACTER (LEN=100) :: EQMfname_back, VEQfname_back
       REAL (KIND = prec_d) :: orbarc_back
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_back, veqSmatrix_back, veqPmatrix_back
+      CHARACTER (LEN=100):: mesg
+
 ! ----------------------------------------------------------------------
 	  
-! FIXME: Variable initialisation
+! Variable initialisation
 CPR_corr = 0.d0
 Bias_corr = 0.d0
 	  
@@ -265,20 +267,16 @@ IF (ECOM_param_glb /= 0) THEN
 IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
 IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
 IF (ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
-!ALLOCATE (ECOM_0_coef(NPARAM_glb), STAT = AllocateStatus)
-!if (AllocateStatus .ne. 0) then
-!        print *, "failed to allocate ECOM_0_coef"
-!        goto 100
-!end if
 ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate ECOM_coef"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate ECOM_coef, dimension = ", Nparam_glb
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
 end if
 ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate ECOM_accel_aposteroiri"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate ECOM_accel_aposteroiri, ", &
+                "dimension = ", Nparam_glb
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
 end if
 !srp_i = ECOM_param_glb
 !DO ii=1,NPARAM_glb
@@ -592,8 +590,9 @@ Call orbinteg (EQMfname_pred, VEQmode, orb_icrf, veq0, veq1)
 ! Orbit estimated part without predicted part
 ALLOCATE (orb_icrf_estim(Nepochs_estim,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate orb_icrf_estim"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate orb_icrf_estim, dimension=(", &
+                Nepochs_estim, ",", sz2, ")"
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
 end if
 orb_icrf_estim = orb_icrf(1:Nepochs_estim,1:sz2)
 
@@ -603,8 +602,9 @@ sz1 = size(dorb_icrf, DIM = 1)
 sz2 = size(dorb_icrf, DIM = 2)
 ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate Vres"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate Vres, dimension=(", &
+                sz1, ",5)"
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
 end if
 Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3) 
@@ -630,8 +630,9 @@ sz1 = size(dorb_icrf, DIM = 1)
 sz2 = size(dorb_icrf, DIM = 2)
 ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate Vres"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate Vres, dimension=(", &
+                sz1, ",5)"
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
 end if
 Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3)

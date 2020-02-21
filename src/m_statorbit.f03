@@ -66,6 +66,7 @@ SUBROUTINE statorbit (ds1, ds2, dorb_XYZ, dorb_RTN, dorb_Kepler, stat_XYZ, stat_
       USE mdl_precision
       USE mdl_num
       USE m_statist
+      USE mdl_config
       IMPLICIT NONE
 
 	  
@@ -100,6 +101,7 @@ SUBROUTINE statorbit (ds1, ds2, dorb_XYZ, dorb_RTN, dorb_Kepler, stat_XYZ, stat_
       REAL (KIND = prec_d) :: Rrtn(3,3)
       REAL (KIND = prec_d) :: GM  
       REAL (KIND = prec_d) :: kepler1(6), kepler2(6), kepler_9(9) 
+      CHARACTER (LEN=100) :: mesg
 ! ----------------------------------------------------------------------	  
 
 
@@ -124,9 +126,10 @@ Nepochs2 = sz3
 ! ----------------------------------------------------------------------
 ! Test collumns dimension
 If (sz2 .NE. sz4) Then
-print *,"Subroutine statdelta.f03 within Module mdl_statdelta.f03: Input matrices dimension(DIM=2) do not agree"
-print *,"DIM=2", sz2, sz4   
-!         STOP "*** - ***"
+write(mesg, *) "Subroutine statorbit.f03 within Module mdl_statorbit.f03: ", &
+        "Input matrices dimension(DIM=2) do not agree. DIM = 2 (", &
+        sz2, ",", sz4, ")" 
+call report ('WARNING', pgrm_name, 'statorbit', mesg, 'src/m_statorbit.f03', 1)
 End If
 ! ----------------------------------------------------------------------
 
@@ -156,23 +159,27 @@ End Do
 ! Allocate the array of the numerical orbit comparison
 ALLOCATE (dsr(Nepochs_delta,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate dsr"
-        goto 100
+        write (mesg, *) "failed to allocate dsr, dimensions = (", & 
+                Nepochs_delta, ",", sz2, ")"
+call report ('FATAL', pgrm_name, 'statorbit', mesg, 'src/m_statorbit.f03', 1)
 end if
 ALLOCATE (dorb_XYZ(Nepochs_delta,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate dorb_XYZ"
-        goto 100
+        write (mesg, *) "failed to allocate dorb_XYZ, dimensions = (", & 
+                Nepochs_delta, ",", sz2, ")"
+call report ('FATAL', pgrm_name, 'statorbit', mesg, 'src/m_statorbit.f03', 1)
 end if
 ALLOCATE (dorb_RTN(Nepochs_delta,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate dorb_RTN"
-        goto 100
+        write (mesg, *) "failed to allocate dorb_RTN, dimensions = (", & 
+                Nepochs_delta, ",", sz2, ")"
+call report ('FATAL', pgrm_name, 'statorbit', mesg, 'src/m_statorbit.f03', 1)
 end if
 ALLOCATE (dorb_Kepler(Nepochs_delta,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate dorb_Kepler"
-        goto 100
+        write (mesg, *) "failed to allocate dorb_Kepler, dimensions = (", & 
+                Nepochs_delta, ",", sz2, ")"
+call report ('FATAL', pgrm_name, 'statorbit', mesg, 'src/m_statorbit.f03', 1)
 end if
 !initialise
 dsr = 0.d0
@@ -240,8 +247,9 @@ dorb_XYZ = dsr
 ! Allocate arrays
 ALLOCATE (dx(Nepochs_delta), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate dx"
-        goto 100
+        write (mesg, *) "failed to allocate dx, dimension = ", & 
+                Nepochs_delta 
+call report ('FATAL', pgrm_name, 'statorbit', mesg, 'src/m_statorbit.f03', 1)
 end if
 
 

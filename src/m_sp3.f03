@@ -78,6 +78,7 @@ SUBROUTINE sp3 (fname, PRNid, orbsp3, clock_matrix)
 
       USE mdl_precision
       USE mdl_num
+      use mdl_config
       !USE mdl_arr
       IMPLICIT NONE
 	  
@@ -127,6 +128,7 @@ SUBROUTINE sp3 (fname, PRNid, orbsp3, clock_matrix)
       CHARACTER (LEN=1) :: GNSSlet
       CHARACTER (LEN=3) :: char3
       CHARACTER (LEN=200) :: charN 
+      CHARACTER (LEN=100) :: mesg 
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int2) :: space_i, pflag
       INTEGER (KIND = prec_int2) :: AllocateStatus
@@ -208,14 +210,16 @@ READ (PRNid, fmt_line , IOSTAT=ios) GNSSid, PRN
                !ALLOCATE (orb1(Nepochs,Ncol), STAT = AllocateStatus)
                ALLOCATE (orbsp3(Nepochs,Ncol), STAT = AllocateStatus)
                if (AllocateStatus .ne. 0) then
-                       print *, "failed to allocate orbsp3"
-                       goto 100
+                   write(mesg, *) "Not enough memory - failed to allocate orbsp3, dimension = (", &
+                               Nepochs, ",", Ncol, ")"
+                   call report('FATAL', pgrm_name, 'sp3', mesg, 'src/m_sp3.f03', 1)
                end if
 			   Ncol = 2 + Nvec/3
                ALLOCATE (clock_matrix(Nepochs,Ncol), STAT = AllocateStatus)		  
                if (AllocateStatus .ne. 0) then
-                       print *, "failed to allocate clock_matrix"
-                       goto 100
+                   write(mesg, *) "Not enough memory - failed to allocate clock_matrix, dimension = (", &
+                               Nepochs, ",", Ncol, ")"
+                   call report('FATAL', pgrm_name, 'sp3', mesg, 'src/m_sp3.f03', 1)
                end if
 		 End if
 ! ----------------------------------------------------------------------

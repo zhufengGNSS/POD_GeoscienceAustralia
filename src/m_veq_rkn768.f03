@@ -62,6 +62,7 @@ SUBROUTINE veq_rkn768(zo, veqZo, veqPo, step, lamda_h, Np, z_q, e_r, veqZ, veqP)
       USE mdl_num
       USE m_matrixRxR
       USE m_pd_force
+      USE mdl_config
       IMPLICIT NONE
 
 
@@ -114,6 +115,7 @@ SUBROUTINE veq_rkn768(zo, veqZo, veqPo, step, lamda_h, Np, z_q, e_r, veqZ, veqP)
       !REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: U33, U36, Z36
       !REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: U3n, P3n		
       INTEGER (KIND = prec_int8) :: sz1, sz2 
+      CHARACTER (len=100) :: mesg
 ! ----------------------------------------------------------------------
 ! initialise output var
 e_r = 0.d0
@@ -149,28 +151,33 @@ sz2 = size(veqPo, DIM = 2)
 
 ALLOCATE (veqP(6,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated veqP"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated veqP, dimensions (6,", &
+                sz2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (veqP_ro(3,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated veqP_ro"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated veqP_ro, dimensions (3,", &
+                sz2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (veqP_vo(3,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated veqP_vo"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated veqP_vo, dimensions (3,", &
+                sz2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (veqP_r (3,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated veqP_r"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated veqP_r, dimensions (3,", &
+                sz2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (veqP_v (3,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated veqP_v"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated veqP_v, dimensions (3,", &
+                sz2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 
 veqP_ro(1,:) = veqPo(1,:)
@@ -197,38 +204,45 @@ If (Np2 /= 0) Then
 
 ALLOCATE (kP_i(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated kP_i"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated kP_i, dimensions (3,", &
+                Np2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (k_P(3,Np2,9), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated k_P"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated k_P, dimensions (3,", &
+                Np2, ",9)"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (G_kP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated G_kP"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated G_kP, dimensions (3,", &
+                Np2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (sum_agP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated sum_agP"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated sum_agP, dimensions (3,", &
+                Np2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (sum_bq_r_gP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated sum_bq_r_gP"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated sum_bq_r_gP, dimensions (3,", &
+                Np2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (sum_bq_v_gP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated sum_bq_v_gP"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated sum_bq_v_gP, dimensions (3,", &
+                Np2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 ALLOCATE (sumkP(3,Np2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocated sumkP"
-        goto 100
+        write(mesg, *) "Not enough memory -failed to allocated sumkP, dimensions (3,", &
+                Np2, ")"
+        call report ('FATAL', pgrm_name, 'veq_rkn768', mesg, 'src/m_veq_rkn768.f03', 1)
 end if
 
 sumkP   = 0.d0
