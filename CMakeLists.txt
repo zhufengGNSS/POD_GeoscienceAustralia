@@ -5,7 +5,7 @@ project(pod)
 #project (add_vectors Fortran)
 enable_language(Fortran)
 
-set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
+set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
 #find_package(LAPACK REQUIRED)
 set (BLA_VENDOR OpenBLAS)
 find_package(BLAS)
