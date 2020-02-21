@@ -130,7 +130,6 @@ INTEGER (KIND = prec_int8) :: OCEAN_Nmax, OCEAN_Mmax
 ! ----------------------------------------------------------------------
 ! Non-gravitational forces modelling considered (on/off): defined in prm_nongrav.f03 
 INTEGER (KIND = prec_int2) :: FMOD_NONGRAV(3)
-INTEGER (KIND = prec_int2) :: SRP_MOD_glb
 ! ----------------------------------------------------------------------
 
 ! ECOM-based solar radiation pressure model

@@ -55,7 +55,7 @@ orbit_backwards_arc_cfg          2
 EOP_solution_cfg          1
 
 ! EOP data file name   {EOP_sol=1: eopc04_08_IAU2000.62-now	 EOP_sol=2: finals2000A.daily}
-EOP_fname_cfg             eopc04_14_IAU2000.62-now 		
+EOP_fname_cfg             eopc04_IAU2000.62-now 		
 
 ! ERP data file name
 ERP_fname_cfg             igu18543_12.erp
@@ -73,11 +73,11 @@ iau_model_cfg             2000
 ---------------------------------------------------------------------------
 %% Observation Model                                                       
 ! External orbit as pseudo-observations                                                
-pseudobs_orbit_filename_cfg		  igs19423.sp3
+pseudobs_orbit_filename_cfg		  igs19920.sp3
  
 ---------------------------------------------------------------------------
 %% External Orbit Comparison  
-ext_orbit_filename_cfg		  	  igs19423.sp3					
+ext_orbit_filename_cfg		  	  igs19920.sp3					
 
 
 ---------------------------------------------------------------------------
@@ -115,20 +115,6 @@ partials_velocity_cfg	  	  0
 leapsec_filename_cfg        leap.second
 ! ----------------------------------------------------------------------
 
-----------------------------------------------------------------------
-%% Write partials of the velocity vector w.r.t. parameters into the orbits_partials output file: 
-----------------------------------------------------------------------
-! 0. partials_velocity_cfg = 0 :: Do not write Velocity vector's partials elements
-! 1. partials_velocity_cfg > 0 :: Write Velocity vector's partials elements
-partials_velocity_cfg	  	  0
-! ----------------------------------------------------------------------
-
-
-! ----------------------------------------------------------------------
-%% Leap second
-leapsec_filename_cfg        leap.second
-! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 %% Satellite metadata SINEX
@@ -136,17 +122,13 @@ satsinex_filename_cfg        igs_metadata_2063.snx
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
-%% A priori SRP value ("ONLY" work with the ECOM1 and ECOM2 model selected in EQM.in and VEQ.in)
-! 1 : use the simple box-wing model as a priori SRP value
-!     (Here the simple box-wing roughly generates a total force by considering the SRP effect on satellite bus and solar panel. 
-!     Later on, the ECOM1 or ECOM2 is used to adjust this a priori model)
-! 2 : use the box-wing model from repro3 routines as a priori SRP value
-!
-! 0 : use the constant f0 as a priori SRP value
-!
-! other numbers : directly estimate the SRP parameters
+%% A priori SRP model 
+! 1 : use a cannonball f0 model 
+! 2 : use simple box-wing model 
+! 3 : use box-wing model from repro3 routines 
+! 0 : no a priori model  
 
-Flag_BW_cfg        1
+SRP_MOD_arp        1
 
 ! ----------------------------------------------------------------------
 
