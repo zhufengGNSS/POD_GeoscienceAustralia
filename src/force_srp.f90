@@ -67,6 +67,7 @@ SUBROUTINE force_srp (lambda, eBX_ecl, eclipsf, GM, GNSSid, srpid, r, v, r_sun, 
       REAL (KIND = prec_q), DIMENSION(3) :: r,v,r_sun
       REAL (KIND = prec_q), INTENT(OUT)  :: fx,fy,fz
       CHARACTER (LEN=1) :: GNSSid
+      CHARACTER (LEN=256) :: mesg
 
 ! ----------------------------------------------------------------------
 ! Local variables declaration
@@ -400,8 +401,8 @@ END IF
 
 ALLOCATE (srpcoef(PD_Param_ID), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate srpfcoef"
-        goto 100
+        write(mesg, *) "failed to allocate srpfcoef array, dimension=", PD_Param_ID
+        call report('FATAL', pgrm_name, 'force_srp', mesg, 'src/force_srp.f90', 1)
 endif
 
 !ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)

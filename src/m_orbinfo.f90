@@ -107,7 +107,7 @@ SUBROUTINE orbinfo (mjd, prnnum, rsat, vsat, beta, del_u, yaw, lambda, angX, ang
       REAL*8  ACCEL(3),SUN(3)
       REAL*8  YSAT(6)
       CHARACTER (LEN=1) :: GNSSid
-      CHARACTER (LEN=100) :: fmt_line
+      CHARACTER (LEN=100) :: fmt_line, mesg
 ! ----------------------------------------------------------------------
       EXTERNAL SRPFBOXW
 
@@ -508,8 +508,8 @@ END IF
 
 ALLOCATE (srpcoef(PD_Param_ID), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate srpceof"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate srpceof, dimension =", PD_Param_ID
+        call report('FATAL', pgrm_name, 'orbinfo', mesg, 'src/m_orbinfo.f90', 1)
 endif
 
 srpcoef = 0.d0
