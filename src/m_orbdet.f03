@@ -285,8 +285,9 @@ end if
 !ECOM_0_coef = 0.d0
 !print*,'ECOM_0_coef=',ECOM_0_coef
 CALL ecom_init (ECOM_0_coef)
-ELSE
-PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
+ELSE IF (EMP_param_glb == 1) THEN
+!PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
+PRINT*,'EMPIRICAL MODEL IS ACTIVATED FOR SRP EFFECT'
 END IF
 ! ----------------------------------------------------------------------
 
@@ -417,62 +418,74 @@ End If  ! End of empirical model
 ! ECOM-based SRP model
 ! **********************************************************************
 ! added by Dr. Tzupang Tseng 11-12-2018
-If ( ECOM_param_glb.eq.1 .or. ECOM_param_glb.eq.2) Then
+If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
 
       PD_Param_ID = 0
-If (ECOM_Bias_glb(1) == 1) Then
+   If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_Bias_glb(2) == 1) Then
+   End IF
+   If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_Bias_glb(3) == 1) Then
+   End IF
+   If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_CPR_glb(1) == 1) THEN
+   End IF
+   If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_CPR_glb(2) == 1) THEN
+   End IF
+   If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_CPR_glb(3) == 1) THEN
+   End IF
+   If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End If
+   End If
 
 
-IF (NPARAM_glb /= PD_Param_ID) THEN
-PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-PRINT*,           'NPARAM_glb  =', NPARAM_glb
-PRINT*,           'PD_Param_ID =', PD_Param_ID
-END IF
+   IF (NPARAM_glb /= PD_Param_ID) THEN
+   PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+   PRINT*,           'NPARAM_glb  =', NPARAM_glb
+   PRINT*,           'PD_Param_ID =', PD_Param_ID
+   PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+   STOP
+   END IF
 END IF
 
 IF (ECOM_param_glb == 3) THEN
-PD_Param_ID = NPARAM_glb
-DO PD_Param_ID = 1,9
-   ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-END DO
+   PD_Param_ID = 7   
+   DO k = 1,PD_Param_ID
+   ECOM_coef (k) = Xmatrix(6+k,1)
+   END DO
+
+   IF (NPARAM_glb /= PD_Param_ID) THEN
+   PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+   PRINT*,           'NPARAM_glb  =', NPARAM_glb
+   PRINT*,           'PD_Param_ID =', PD_Param_ID
+   PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+   STOP
+   END IF
+
 END IF
 
-ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
+IF (ECOM_param_glb /= 0) THEN
+   ECOM_accel_aposteriori = ECOM_accel_glb + ECOM_coef
 
 !print*,'ECOM_coef=',ECOM_coef
 !print*,'ECOM_accel_glb=',ECOM_accel_glb
@@ -480,31 +493,32 @@ ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
 
 ! ----------------------------------------------------------------------
 ! SRP parameters
-ECOM_0_coef = ECOM_accel_aposteriori
+   ECOM_0_coef = ECOM_accel_aposteriori
 !fname_id = PRN
-CALL doy2str(DOYSTR)
-fname_id = DOYSTR
-IF (ECOM_param_glb == 1) THEN
-fname = 'ECOM1_srp.in'
-param_id = 'ECOM1'
-write (param_value, *) ECOM_0_coef
-Call write_prmfile (fname, fname_id, param_id, param_value)
-END IF
+   CALL doy2str(DOYSTR)
+   fname_id = DOYSTR
+   IF (ECOM_param_glb == 1) THEN
+   fname = 'ECOM1_srp.in'
+   param_id = 'ECOM1'
+   write (param_value, *) ECOM_0_coef
+   Call write_prmfile (fname, fname_id, param_id, param_value)
+   END IF
 
-IF (ECOM_param_glb == 2) THEN
-fname = 'ECOM2_srp.in'
-param_id = 'ECOM2'
-write (param_value, *) ECOM_0_coef
-Call write_prmfile (fname, fname_id, param_id, param_value)
-END IF
+   IF (ECOM_param_glb == 2) THEN
+   fname = 'ECOM2_srp.in'
+   param_id = 'ECOM2'
+   write (param_value, *) ECOM_0_coef
+   Call write_prmfile (fname, fname_id, param_id, param_value)
+   END IF
 
-IF (ECOM_param_glb == 3) THEN
-fname = 'SBOXW_srp.in'
-param_id = 'SBOXW'
-write (param_value, *) ECOM_0_coef
-Call write_prmfile (fname, fname_id, param_id, param_value)
-END IF
+   IF (ECOM_param_glb == 3) THEN
+   fname = 'SBOXW_srp.in'
+   param_id = 'SBOXW'
+   write (param_value, *) ECOM_0_coef
+   Call write_prmfile (fname, fname_id, param_id, param_value)
+   END IF
 
+END IF
 ! End of SRP model
 ! **********************************************************************
   

@@ -443,19 +443,6 @@ IF (word1_ln == "Antenna_thrust") THEN
 END IF
 ! ----------------------------------------------------------------------
 
-! ----------------------------------------------------------------------
-! Solar Radiation
-! ----------------------------------------------------------------------
-! Solar Radiation pressure model options:
-! 1. Cannonball model
-! 2. Box-wing model
-! 3. ECOM model
-IF (word1_ln == "SRP_model") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, SRP_MOD_glb 
-END IF
-! ----------------------------------------------------------------------
-
-
 
 END DO
 CLOSE (UNIT=UNIT_IN)

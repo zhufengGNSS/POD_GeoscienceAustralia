@@ -34,6 +34,7 @@ SUBROUTINE pd_forceZ (mjd, rsat, vsat, Fvec, PDr, PDv)
       USE m_tides_ocean  
       USE m_pd_geopotential
       USE m_matrixRxR
+      USE mdl_config
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -587,7 +588,7 @@ READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
 eclpf = 0
 
 ! SRP model
-srpid =  SRP_MOD_glb
+srpid =  SRP_MOD_arp
 
 CALL force_srp (GMearth, PRN_no, satsvn, eclpf, srpid, rsat_icrf, vsat_icrf, rSun, fx,fy,fz )
 Fsrp_icrf = (/ fx, fy, fz /)

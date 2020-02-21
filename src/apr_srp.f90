@@ -10,13 +10,13 @@ SUBROUTINE apr_srp (GNSSid, BLKTYP, X_SIDE, Z_SIDE, A_SOLAR, F0)
 ! ----------------------------------------------------------------------
 ! Input arguments:
 ! - GNSSid       : id of satellite constellation  
-! - blktyp       : typ of satellite 
+! - blktyp       : satellite block type
 ! 
 ! Output arguments:
-! - X_SIDE       :
-! - Z_SIDE       :
-! - A_SOLAR      :
-! - F0           :
+! - X_SIDE       : area of X-sdie in body-fixed frame
+! - Z_SIDE       : area of Z-side in body-fixed frame
+! - A_SOLAR      : area of solar panel
+! - F0           : net force (computed from cannoball) in D direction
 ! ----------------------------------------------------------------------
 ! Author :	John Donovan
 !

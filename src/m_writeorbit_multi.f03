@@ -272,17 +272,13 @@ DO i_sat = 1 , Nsat
    PRN_isat = PRN_array(i_sat)
    CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat) 
    ! SRP model
-   IF (SRP_MOD_glb == 1) THEN
-      srp_model = 'Cannonball' 
-   ELSE IF (SRP_MOD_glb == 2) THEN
-      srp_model = 'Box-wing'   
-   ELSE IF (SRP_MOD_glb == 3) THEN
 	IF (ECOM_param_glb == 1) THEN
       srp_model = 'ECOM1'   
 	ELSE IF (ECOM_param_glb == 2) THEN
       srp_model = 'ECOM2'   
+        ELSE IF (ECOM_param_glb == 3) THEN
+      srp_model = 'SBOXW'
 	END IF
-   END IF
 ! IC INFO   
    WRITE (UNIT=UNIT_IN,FMT='(a,a,1x,a3,1x,a,1x,i3,1x,a,1x,a,1x,a,1x,F10.5,1x,a,1x,a,1x,a,1x,i3,1x,a)' ,IOSTAT=ios_ith) & 
           &'#IC_INFO ','PRN:',PRN_array(i_sat),'SVN:',SVNID,'BLK_TYP:',TRIM(BLKTYP),' MASS:',MASS, &
