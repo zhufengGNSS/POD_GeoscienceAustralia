@@ -24,3 +24,4 @@ test/VEQ01.in
 test/emp_bias.in
 test/emp_cpr.in
 test/ascp1950.430
+examples/pod_example.tar.gz
