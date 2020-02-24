@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "../lib/libyaw.a"
   "../lib/libyaw.pdb"
+  "CMakeFiles/yaw.dir/src/att_matrix.f03.o"
+  "CMakeFiles/yaw.dir/src/mat2quater.f03.o"
   "CMakeFiles/yaw.dir/src/yaw_angle.f90.o"
   "CMakeFiles/yaw.dir/src/yaw_attitude.f90.o"
   "CMakeFiles/yaw.dir/src/yaw_bds.f90.o"

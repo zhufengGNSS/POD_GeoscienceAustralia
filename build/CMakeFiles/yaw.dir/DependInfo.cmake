@@ -4,6 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_Fortran
+  "/data/thomas3/pod/src/att_matrix.f03" "/data/thomas3/pod/build/CMakeFiles/yaw.dir/src/att_matrix.f03.o"
+  "/data/thomas3/pod/src/mat2quater.f03" "/data/thomas3/pod/build/CMakeFiles/yaw.dir/src/mat2quater.f03.o"
   "/data/thomas3/pod/src/yaw_angle.f90" "/data/thomas3/pod/build/CMakeFiles/yaw.dir/src/yaw_angle.f90.o"
   "/data/thomas3/pod/src/yaw_attitude.f90" "/data/thomas3/pod/build/CMakeFiles/yaw.dir/src/yaw_attitude.f90.o"
   "/data/thomas3/pod/src/yaw_bds.f90" "/data/thomas3/pod/build/CMakeFiles/yaw.dir/src/yaw_bds.f90.o"

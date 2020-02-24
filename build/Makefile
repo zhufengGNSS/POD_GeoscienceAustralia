@@ -1095,6 +1095,33 @@ src/asc2eph.f90.s:
 	$(MAKE) -f CMakeFiles/pod.dir/build.make CMakeFiles/pod.dir/src/asc2eph.f90.s
 .PHONY : src/asc2eph.f90.s
 
+src/att_matrix.o: src/att_matrix.f03.o
+
+.PHONY : src/att_matrix.o
+
+# target to build an object file
+src/att_matrix.f03.o:
+	$(MAKE) -f CMakeFiles/yaw.dir/build.make CMakeFiles/yaw.dir/src/att_matrix.f03.o
+.PHONY : src/att_matrix.f03.o
+
+src/att_matrix.i: src/att_matrix.f03.i
+
+.PHONY : src/att_matrix.i
+
+# target to preprocess a source file
+src/att_matrix.f03.i:
+	$(MAKE) -f CMakeFiles/yaw.dir/build.make CMakeFiles/yaw.dir/src/att_matrix.f03.i
+.PHONY : src/att_matrix.f03.i
+
+src/att_matrix.s: src/att_matrix.f03.s
+
+.PHONY : src/att_matrix.s
+
+# target to generate assembly for a file
+src/att_matrix.f03.s:
+	$(MAKE) -f CMakeFiles/yaw.dir/build.make CMakeFiles/yaw.dir/src/att_matrix.f03.s
+.PHONY : src/att_matrix.f03.s
+
 src/attitude.o: src/attitude.f03.o
 
 .PHONY : src/attitude.o
@@ -3051,6 +3078,33 @@ src/m_antoffset.f90.s:
 	$(MAKE) -f CMakeFiles/brdc2ecef.dir/build.make CMakeFiles/brdc2ecef.dir/src/m_antoffset.f90.s
 .PHONY : src/m_antoffset.f90.s
 
+src/m_attitude_orb.o: src/m_attitude_orb.f03.o
+
+.PHONY : src/m_attitude_orb.o
+
+# target to build an object file
+src/m_attitude_orb.f03.o:
+	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.o
+.PHONY : src/m_attitude_orb.f03.o
+
+src/m_attitude_orb.i: src/m_attitude_orb.f03.i
+
+.PHONY : src/m_attitude_orb.i
+
+# target to preprocess a source file
+src/m_attitude_orb.f03.i:
+	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.i
+.PHONY : src/m_attitude_orb.f03.i
+
+src/m_attitude_orb.s: src/m_attitude_orb.f03.s
+
+.PHONY : src/m_attitude_orb.s
+
+# target to generate assembly for a file
+src/m_attitude_orb.f03.s:
+	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.s
+.PHONY : src/m_attitude_orb.f03.s
+
 src/m_betainfo.o: src/m_betainfo.f90.o
 
 .PHONY : src/m_betainfo.o
@@ -4632,6 +4686,33 @@ src/m_write_orb2sp3.f03.s:
 	$(MAKE) -f CMakeFiles/pod.dir/build.make CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.s
 .PHONY : src/m_write_orb2sp3.f03.s
 
+src/m_write_orbex.o: src/m_write_orbex.f03.o
+
+.PHONY : src/m_write_orbex.o
+
+# target to build an object file
+src/m_write_orbex.f03.o:
+	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.o
+.PHONY : src/m_write_orbex.f03.o
+
+src/m_write_orbex.i: src/m_write_orbex.f03.i
+
+.PHONY : src/m_write_orbex.i
+
+# target to preprocess a source file
+src/m_write_orbex.f03.i:
+	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.i
+.PHONY : src/m_write_orbex.f03.i
+
+src/m_write_orbex.s: src/m_write_orbex.f03.s
+
+.PHONY : src/m_write_orbex.s
+
+# target to generate assembly for a file
+src/m_write_orbex.f03.s:
+	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.s
+.PHONY : src/m_write_orbex.f03.s
+
 src/m_write_prmfile_init.o: src/m_write_prmfile_init.f03.o
 
 .PHONY : src/m_write_prmfile_init.o
@@ -4874,6 +4955,33 @@ src/main_pod.s: src/main_pod.f03.s
 src/main_pod.f03.s:
 	$(MAKE) -f CMakeFiles/pod.dir/build.make CMakeFiles/pod.dir/src/main_pod.f03.s
 .PHONY : src/main_pod.f03.s
+
+src/mat2quater.o: src/mat2quater.f03.o
+
+.PHONY : src/mat2quater.o
+
+# target to build an object file
+src/mat2quater.f03.o:
+	$(MAKE) -f CMakeFiles/yaw.dir/build.make CMakeFiles/yaw.dir/src/mat2quater.f03.o
+.PHONY : src/mat2quater.f03.o
+
+src/mat2quater.i: src/mat2quater.f03.i
+
+.PHONY : src/mat2quater.i
+
+# target to preprocess a source file
+src/mat2quater.f03.i:
+	$(MAKE) -f CMakeFiles/yaw.dir/build.make CMakeFiles/yaw.dir/src/mat2quater.f03.i
+.PHONY : src/mat2quater.f03.i
+
+src/mat2quater.s: src/mat2quater.f03.s
+
+.PHONY : src/mat2quater.s
+
+# target to generate assembly for a file
+src/mat2quater.f03.s:
+	$(MAKE) -f CMakeFiles/yaw.dir/build.make CMakeFiles/yaw.dir/src/mat2quater.f03.s
+.PHONY : src/mat2quater.f03.s
 
 src/matrix_Rr.o: src/matrix_Rr.f90.o
 
@@ -7254,6 +7362,9 @@ help:
 	@echo "... src/asc2eph.o"
 	@echo "... src/asc2eph.i"
 	@echo "... src/asc2eph.s"
+	@echo "... src/att_matrix.o"
+	@echo "... src/att_matrix.i"
+	@echo "... src/att_matrix.s"
 	@echo "... src/attitude.o"
 	@echo "... src/attitude.i"
 	@echo "... src/attitude.s"
@@ -7470,6 +7581,9 @@ help:
 	@echo "... src/m_antoffset.o"
 	@echo "... src/m_antoffset.i"
 	@echo "... src/m_antoffset.s"
+	@echo "... src/m_attitude_orb.o"
+	@echo "... src/m_attitude_orb.i"
+	@echo "... src/m_attitude_orb.s"
 	@echo "... src/m_betainfo.o"
 	@echo "... src/m_betainfo.i"
 	@echo "... src/m_betainfo.s"
@@ -7644,6 +7758,9 @@ help:
 	@echo "... src/m_write_orb2sp3.o"
 	@echo "... src/m_write_orb2sp3.i"
 	@echo "... src/m_write_orb2sp3.s"
+	@echo "... src/m_write_orbex.o"
+	@echo "... src/m_write_orbex.i"
+	@echo "... src/m_write_orbex.s"
 	@echo "... src/m_write_prmfile_init.o"
 	@echo "... src/m_write_prmfile_init.i"
 	@echo "... src/m_write_prmfile_init.s"
@@ -7671,6 +7788,9 @@ help:
 	@echo "... src/main_pod.o"
 	@echo "... src/main_pod.i"
 	@echo "... src/main_pod.s"
+	@echo "... src/mat2quater.o"
+	@echo "... src/mat2quater.i"
+	@echo "... src/mat2quater.s"
 	@echo "... src/matrix_Rr.o"
 	@echo "... src/matrix_Rr.i"
 	@echo "... src/matrix_Rr.s"

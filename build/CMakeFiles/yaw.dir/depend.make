@@ -3,6 +3,13 @@
 
 # Note that incremental build could trigger a call to cmake_copy_f90_mod on each re-build
 
+CMakeFiles/yaw.dir/src/att_matrix.f03.o: CMakeFiles/pod_lib.dir/m_matrixinv.mod.stamp
+CMakeFiles/yaw.dir/src/att_matrix.f03.o: CMakeFiles/pod_lib.dir/m_read_satsnx.mod.stamp
+CMakeFiles/yaw.dir/src/att_matrix.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
+CMakeFiles/yaw.dir/src/att_matrix.f03.o: CMakeFiles/pod_lib.dir/mdl_param.mod.stamp
+CMakeFiles/yaw.dir/src/att_matrix.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
+
+
 CMakeFiles/yaw.dir/src/yaw_angle.f90.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/yaw.dir/src/yaw_angle.f90.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
 
