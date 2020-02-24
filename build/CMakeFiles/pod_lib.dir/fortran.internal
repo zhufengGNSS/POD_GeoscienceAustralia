@@ -1,5 +1,6 @@
 # The fortran modules provided by this target.
 provides
+ m_attitude_orb.mod
  m_betainfo.mod
  m_ecom_init.mod
  m_eop_data.mod
@@ -50,6 +51,7 @@ provides
  m_tides_ocean.mod
  m_veq_rkn768.mod
  m_veqc2t.mod
+ m_write_orbex.mod
  m_write_prmfile_init.mod
  m_writearray.mod
  m_writearray2.mod

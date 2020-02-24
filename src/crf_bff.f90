@@ -119,6 +119,7 @@ SUBROUTINE crf_bff (r_CRS, v_CRS, Yangle, Rcrf_bff, Rrtn_bff)
       !Rcrf_bff = R3
       ! matrix_RxR equivalent to MATMUL 
       Rcrf_bff = MATMUL(Rrtn_bff, Rcrf_rtn)
+      !Rcrf_bff = MATMUL(Rcrf_rtn,Rrtn_bff)
 ! ----------------------------------------------------------------------
  
 

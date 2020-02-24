@@ -905,6 +905,32 @@ CMakeFiles/pod_lib.dir/src/m_orbitIC.f03.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling Fortran source to assembly CMakeFiles/pod_lib.dir/src/m_orbitIC.f03.s"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -S /data/thomas3/pod/src/m_orbitIC.f03 -o CMakeFiles/pod_lib.dir/src/m_orbitIC.f03.s
 
+CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.o: CMakeFiles/pod_lib.dir/flags.make
+CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.o: ../src/m_attitude_orb.f03
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_66) "Building Fortran object CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.o"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/m_attitude_orb.f03 -o CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.o
+
+CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing Fortran source to CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.i"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -E /data/thomas3/pod/src/m_attitude_orb.f03 > CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.i
+
+CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling Fortran source to assembly CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.s"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -S /data/thomas3/pod/src/m_attitude_orb.f03 -o CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.s
+
+CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.o: CMakeFiles/pod_lib.dir/flags.make
+CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.o: ../src/m_write_orbex.f03
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_67) "Building Fortran object CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.o"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/m_write_orbex.f03 -o CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.o
+
+CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing Fortran source to CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.i"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -E /data/thomas3/pod/src/m_write_orbex.f03 > CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.i
+
+CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling Fortran source to assembly CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.s"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -S /data/thomas3/pod/src/m_write_orbex.f03 -o CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.s
+
 # Object files for target pod_lib
 pod_lib_OBJECTS = \
 "CMakeFiles/pod_lib.dir/src/mdl_param.f03.o" \
@@ -971,7 +997,9 @@ pod_lib_OBJECTS = \
 "CMakeFiles/pod_lib.dir/src/m_ecom_init.f03.o" \
 "CMakeFiles/pod_lib.dir/src/m_orbdet.f03.o" \
 "CMakeFiles/pod_lib.dir/src/m_orbitmain.f03.o" \
-"CMakeFiles/pod_lib.dir/src/m_orbitIC.f03.o"
+"CMakeFiles/pod_lib.dir/src/m_orbitIC.f03.o" \
+"CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.o" \
+"CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.o"
 
 # External object files for target pod_lib
 pod_lib_EXTERNAL_OBJECTS =
@@ -1041,9 +1069,11 @@ pod_lib_EXTERNAL_OBJECTS =
 ../lib/libpod_lib.a: CMakeFiles/pod_lib.dir/src/m_orbdet.f03.o
 ../lib/libpod_lib.a: CMakeFiles/pod_lib.dir/src/m_orbitmain.f03.o
 ../lib/libpod_lib.a: CMakeFiles/pod_lib.dir/src/m_orbitIC.f03.o
+../lib/libpod_lib.a: CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.o
+../lib/libpod_lib.a: CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.o
 ../lib/libpod_lib.a: CMakeFiles/pod_lib.dir/build.make
 ../lib/libpod_lib.a: CMakeFiles/pod_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_66) "Linking Fortran static library ../lib/libpod_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_68) "Linking Fortran static library ../lib/libpod_lib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/pod_lib.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/pod_lib.dir/link.txt --verbose=$(VERBOSE)
 

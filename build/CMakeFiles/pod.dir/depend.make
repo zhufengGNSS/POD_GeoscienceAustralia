@@ -116,10 +116,12 @@ CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.o.provides.build:
 	$(CMAKE_COMMAND) -E touch CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.o.provides.build
 CMakeFiles/pod.dir/build: CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.o.provides.build
 
+CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod_lib.dir/m_attitude_orb.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod.dir/m_clock_read.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod.dir/m_pod_gnss.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod.dir/m_read_leapsec.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod.dir/m_write_orb2sp3.mod.stamp
+CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod_lib.dir/m_write_orbex.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod_lib.dir/m_writearray.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod_lib.dir/m_writearray2.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod_lib.dir/m_writeorbit.mod.stamp

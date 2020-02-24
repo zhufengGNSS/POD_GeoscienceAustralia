@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "../lib/libpod_lib.a"
   "../lib/libpod_lib.pdb"
+  "CMakeFiles/pod_lib.dir/src/m_attitude_orb.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_betainfo.f90.o"
   "CMakeFiles/pod_lib.dir/src/m_ecom_init.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_eop_data.f03.o"
@@ -51,6 +52,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/pod_lib.dir/src/m_tides_ocean.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_veqC2T.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_veq_rkn768.f03.o"
+  "CMakeFiles/pod_lib.dir/src/m_write_orbex.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_write_prmfile_init.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_writearray.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_writearray2.f03.o"

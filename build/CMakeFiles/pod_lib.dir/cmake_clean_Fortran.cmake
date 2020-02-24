@@ -1,5 +1,9 @@
 # Remove fortran modules provided by this target.
 FILE(REMOVE
+  "m_attitude_orb.mod"
+  "M_ATTITUDE_ORB.mod"
+  "CMakeFiles/pod_lib.dir/m_attitude_orb.mod.stamp"
+
   "m_betainfo.mod"
   "M_BETAINFO.mod"
   "CMakeFiles/pod_lib.dir/m_betainfo.mod.stamp"
@@ -199,6 +203,10 @@ FILE(REMOVE
   "m_veqc2t.mod"
   "M_VEQC2T.mod"
   "CMakeFiles/pod_lib.dir/m_veqc2t.mod.stamp"
+
+  "m_write_orbex.mod"
+  "M_WRITE_ORBEX.mod"
+  "CMakeFiles/pod_lib.dir/m_write_orbex.mod.stamp"
 
   "m_write_prmfile_init.mod"
   "M_WRITE_PRMFILE_INIT.mod"

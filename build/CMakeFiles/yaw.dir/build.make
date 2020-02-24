@@ -138,6 +138,32 @@ CMakeFiles/yaw.dir/src/yawdyn.f90.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling Fortran source to assembly CMakeFiles/yaw.dir/src/yawdyn.f90.s"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -S /data/thomas3/pod/src/yawdyn.f90 -o CMakeFiles/yaw.dir/src/yawdyn.f90.s
 
+CMakeFiles/yaw.dir/src/att_matrix.f03.o: CMakeFiles/yaw.dir/flags.make
+CMakeFiles/yaw.dir/src/att_matrix.f03.o: ../src/att_matrix.f03
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building Fortran object CMakeFiles/yaw.dir/src/att_matrix.f03.o"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/att_matrix.f03 -o CMakeFiles/yaw.dir/src/att_matrix.f03.o
+
+CMakeFiles/yaw.dir/src/att_matrix.f03.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing Fortran source to CMakeFiles/yaw.dir/src/att_matrix.f03.i"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -E /data/thomas3/pod/src/att_matrix.f03 > CMakeFiles/yaw.dir/src/att_matrix.f03.i
+
+CMakeFiles/yaw.dir/src/att_matrix.f03.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling Fortran source to assembly CMakeFiles/yaw.dir/src/att_matrix.f03.s"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -S /data/thomas3/pod/src/att_matrix.f03 -o CMakeFiles/yaw.dir/src/att_matrix.f03.s
+
+CMakeFiles/yaw.dir/src/mat2quater.f03.o: CMakeFiles/yaw.dir/flags.make
+CMakeFiles/yaw.dir/src/mat2quater.f03.o: ../src/mat2quater.f03
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building Fortran object CMakeFiles/yaw.dir/src/mat2quater.f03.o"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/mat2quater.f03 -o CMakeFiles/yaw.dir/src/mat2quater.f03.o
+
+CMakeFiles/yaw.dir/src/mat2quater.f03.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing Fortran source to CMakeFiles/yaw.dir/src/mat2quater.f03.i"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -E /data/thomas3/pod/src/mat2quater.f03 > CMakeFiles/yaw.dir/src/mat2quater.f03.i
+
+CMakeFiles/yaw.dir/src/mat2quater.f03.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling Fortran source to assembly CMakeFiles/yaw.dir/src/mat2quater.f03.s"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -S /data/thomas3/pod/src/mat2quater.f03 -o CMakeFiles/yaw.dir/src/mat2quater.f03.s
+
 # Object files for target yaw
 yaw_OBJECTS = \
 "CMakeFiles/yaw.dir/src/yaw_nom.f90.o" \
@@ -145,7 +171,9 @@ yaw_OBJECTS = \
 "CMakeFiles/yaw.dir/src/yaw_attitude.f90.o" \
 "CMakeFiles/yaw.dir/src/yaw_bds.f90.o" \
 "CMakeFiles/yaw.dir/src/yaw_gal.f90.o" \
-"CMakeFiles/yaw.dir/src/yawdyn.f90.o"
+"CMakeFiles/yaw.dir/src/yawdyn.f90.o" \
+"CMakeFiles/yaw.dir/src/att_matrix.f03.o" \
+"CMakeFiles/yaw.dir/src/mat2quater.f03.o"
 
 # External object files for target yaw
 yaw_EXTERNAL_OBJECTS =
@@ -156,9 +184,11 @@ yaw_EXTERNAL_OBJECTS =
 ../lib/libyaw.a: CMakeFiles/yaw.dir/src/yaw_bds.f90.o
 ../lib/libyaw.a: CMakeFiles/yaw.dir/src/yaw_gal.f90.o
 ../lib/libyaw.a: CMakeFiles/yaw.dir/src/yawdyn.f90.o
+../lib/libyaw.a: CMakeFiles/yaw.dir/src/att_matrix.f03.o
+../lib/libyaw.a: CMakeFiles/yaw.dir/src/mat2quater.f03.o
 ../lib/libyaw.a: CMakeFiles/yaw.dir/build.make
 ../lib/libyaw.a: CMakeFiles/yaw.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking Fortran static library ../lib/libyaw.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking Fortran static library ../lib/libyaw.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/yaw.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/yaw.dir/link.txt --verbose=$(VERBOSE)
 
