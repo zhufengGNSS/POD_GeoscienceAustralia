@@ -313,7 +313,7 @@ END IF
      cosang(4)=ed(1)*ed(1)+ed(2)*ed(2)+ed(3)*ed(3)
 
 
-! A scaling factor is applied to SRP model
+! A scaling factor is applied to ECOM model
 !******************************************************************
       sclfa=(AU/Ds)**2
 

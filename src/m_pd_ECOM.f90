@@ -256,7 +256,7 @@ END IF
         eb(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         eb(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         eb(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
-
+        
         CALL productcross (ey,eb,yy)
         ed(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         ed(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
