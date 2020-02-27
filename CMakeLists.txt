@@ -88,6 +88,8 @@ src/m_ecom_init.f03
 src/m_orbdet.f03 
 src/m_orbitmain.f03 
 src/m_orbitIC.f03
+src/m_attitude_orb.f03
+src/m_write_orbex.f03
 )
 
 add_library(iau_math
@@ -252,7 +254,9 @@ src/yaw_angle.f90
 src/yaw_attitude.f90 
 src/yaw_bds.f90 
 src/yaw_gal.f90 
-src/yawdyn.f90 
+src/yawdyn.f90
+src/att_matrix.f03
+src/mat2quater.f03 
 )
 
 add_library(eop
