@@ -23,6 +23,7 @@ PROGRAM  main_brdcorbit
       USE mdl_param
       USE mdl_brdconfig
       USE m_write_brd2sp3
+      USE m_write_orb2sp3
       USE m_read_leapsec
       USE m_antoffset
       USE m_eop_data
@@ -30,7 +31,7 @@ PROGRAM  main_brdcorbit
       IMPLICIT NONE
 
 !--------------------------------------------------------------------
-      INTEGER (KIND = prec_int4) :: I, J, K, II, JJ, INEW
+      INTEGER (KIND = prec_int4) :: I, J, K, KK, II, JJ, INEW
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus
        
       !CHARACTER (LEN=100) :: INFILENAME, OUTFILENAME
@@ -44,10 +45,13 @@ PROGRAM  main_brdcorbit
       REAL (KIND = prec_d),DIMENSION(4)::IONALPHA, IONBETA
       REAL (KIND = prec_q) :: AVE(8),STD(8)
 !      REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::EPH, CLK
-      REAL (KIND = prec_q) ::EPH(32,4000,220),CLK(32,4000,220)      
+!      REAL (KIND = prec_q) ::EPH(32,4000,220),CLK(32,4000,220)
+      REAL (KIND = prec_q) ::EPH(32,4000,220),CLK(3,4000,220)
+      REAL (KIND = prec_q) ::CLKNEW(3,4000,220),CLKNEW2(3,4000,220)
       REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::EPHNEW
       REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::EPHNEW2
       REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::ECEFPOS
+      REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::SATCLK
       REAL (KIND = prec_d),DIMENSION(:,:),ALLOCATABLE ::NEWEPOCH
       REAL (KIND = prec_d),DIMENSION(:,:),ALLOCATABLE ::NEWEPOCH2
       REAL (KIND = prec_d) :: A0UTC,A1UTC,ITUTC
@@ -91,6 +95,18 @@ PROGRAM  main_brdcorbit
       DOUBLE PRECISION  JD, Zbody(6)
       INTEGER NTARG_SUN, NCTR
       CHARACTER (LEN=100) :: fname_header, fname_data, fname_out
+!----------------------------------------------------------------
+      CHARACTER (LEN=3), ALLOCATABLE :: PRNmatrix(:)
+      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE ::ORBmatrix, CLKmatrix
+      INTEGER (KIND = prec_int2) :: sat_vel
+      INTEGER (KIND = prec_int4) :: Nepochs, Nsat
+      INTEGER (KIND = prec_int4) :: i_sat, k_sat, i_write
+      CHARACTER (LEN=3) :: PRN_ti
+      REAL (KIND = prec_q) :: Sec_00
+
+
+! ----------------------------------------------------------------
+PI = 4*ATAN(1.D0)        
 
 ! If PRINTID = 1, print out the debugging.
 PRINTID = 0
@@ -116,10 +132,12 @@ ALLOCATE(EPHNEW(MAXNPAR,MAXEPO,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(EPHNEW2(MAXNPAR,MAXEPO,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(IBAD(MAXEPO,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(ECEFPOS(86400/SAMPLE,3,MAXNSAT), STAT = AllocateStatus)
+ALLOCATE(SATCLK(86400/SAMPLE,1,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(NEWEPOCH(86400/SAMPLE,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(NEWEPOCH2(86400/SAMPLE,MAXNSAT), STAT = AllocateStatus)
-
-EPHNEW = 0.d0
+SATCLK = 999999.999999d0
+EPHNEW2 = 0.d0
+EPHNEW  = 0.d0
 ECEFPOS = 0.d0
 NEWEPOCH= 0.d0
 IPRN= 0
@@ -199,6 +217,7 @@ CALL asc2eph (fname_out)
 ! be the UTC 0h.)
 ! ------------------------------------------------------------------------------
 JJ = 0
+KK = 0
 K = 0
 DO I=1, MAXNSAT
 ! at the current stage the GLONASS is excluded in the broadcast-related processing.
@@ -209,7 +228,7 @@ IF (I < 50 .OR. I < 150 .AND. I > 100 .OR. &
         IF (EPH(3,J,I) .GT. 0.d0) THEN 
             K= K+1
             EPHNEW(1:20,K,I) = EPH(1:20,J,I)
-
+            CLKNEW(1:3, K,I) = CLK(1:3, J,I)
             IF (K .EQ. 1) THEN 
                DT = 0.d0
                DO II=1, 7
@@ -271,7 +290,8 @@ IF (I < 50 .OR. I < 150 .AND. I > 100 .OR. &
 
 END IF
 K=0 
-JJ = 0            
+JJ = 0
+KK = 0            
 END DO
 
 ! GLONASS process
@@ -290,12 +310,6 @@ K = 0
    END IF
 END DO
 
-! Check leap seconds ? (by using dat.for) (To be processed)
-! -----------------------------------------
-!         LEAPTST=DGPSUT(TFIRST)
-!         IF (LEAP.EQ.0 .OR. LEAPTST.NE.LEAP) LEAP=LEAPTST
-!         NEPO=IDINT((TLAST-TFIRST)/DTTAB*86400.D0)+1
-
 
 
 IG = 0 ! GPS
@@ -309,28 +323,18 @@ DO I = 1,MAXNSAT
    IF (I < 50 .AND. EPHNEW(3,1,I) > 0.d0) THEN
         IG = IG + 1 
         IPRN(I) = I ! used for SP3 orbital information
-        ISTR(IG)= I ! used for SP3 header information
-!print*,'GPS PRN =', IG, IPRN(I), ISTR(IG)
    ELSE IF (I < 100 .AND. I > 50 .AND. ABS(EPHNEW(5,1,I)) > 0.d0) THEN
        IR = IR + 1
        IPRN(I) = I
-       ISTR(IR+50)= I 
-!print*,'GLONASS PRN =', IR, IPRN(I), ISTR(IR+50)
    ELSE IF (I < 150 .AND. I > 100 .AND. EPHNEW(3,1,I) > 0.d0) THEN
        IE = IE + 1
        IPRN(I) = I
-       ISTR(IE+100)= I 
-!print*,'GALILEO PRN =', IE, IPRN(I), ISTR(IE+100)
    ELSE IF (I < 200 .AND. I > 150 .AND. EPHNEW(3,1,I) > 0.d0) THEN
        IC = IC + 1
        IPRN(I) = I
-       ISTR(IC+150)= I 
-!print*,'BDS PRN =', IC, IPRN(I), ISTR(IC+150)
    ELSE IF (I < 250 .AND. I > 200 .AND. EPHNEW(3,1,I) > 0.d0) THEN
        IJ = IJ + 1
        IPRN(I) = I
-       ISTR(IJ+200)= I
-!print*,'OZSS PRN =', IJ, IPRN(I), ISTR(IJ+200)
    END IF
 END DO
 
@@ -399,7 +403,7 @@ IBDS = 0
 IQZSS = 0
 KKK = 0
 IF (I < 50 .AND. EPHNEW(3,1,I) > 0.d0 ) THEN ! GPS/GNSS sampling rate: 2 hour
-IF(I == 4) CYCLE ! The PRN04 has been decommissioned. Once the new generation
+!IF(I == 4) CYCLE ! The PRN04 has been decommissioned. Once the new generation
                  ! statellite is activiated with this PRN number, then this
                  ! statement shall be switched off.
 CALL brdc_qc_gps(EPHNEW(3,1:15,I),  AVE(1), STD(1))
@@ -415,17 +419,19 @@ CALL brdc_qc_gps(EPHNEW(10,1:15,I), AVE(8), STD(8))
          IF (IBAD(K,I) /= 1 )THEN
             INEW = INEW + 1
             EPHNEW2(1:20,INEW,I) = EPHNEW(1:20,K,I)
-            CALL chkbrdc (EPHNEW2(1:20,INEW,I),AVE,STD)
+            CLKNEW2(1:3,INEW,I)  = CLKNEW(1:3,K,I)
+
+            CALL chkbrdc (I,EPHNEW2(1:20,INEW,I),AVE,STD)
 
             IF (INEW == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
             DO II=1,8 ! 15-minute resolution 
                JJ = JJ + 1
                DELT2 = SAMPLE*(II-1) + GPS_wsec
                NEWEPOCH2(JJ,I) = DELT2
-               CALL brdc2ecef(DELT2,EPHNEW2(1:20,INEW,I),ECEFPOS(JJ,1:3,I))
+               CALL brdc2ecef(DELT2,EPHNEW2(1:20,INEW,I),CLKNEW2(:,INEW,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
             END DO
            
@@ -444,19 +450,20 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
                  DELT2 = SAMPLE*(II-1) + NINT(KKK)+ GPS_wsec + 7200
                  NEWEPOCH2(JJ,I) = DELT2
                  ECEFPOS(JJ,1:3,I) = 0.d0
+                 SATCLK(JJ,1,I)    = 999999.999999d0 
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE= NO REFERENCE EPOCH        ', &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
                  END DO      
            
                  DO II=1,8
                  JJ = JJ + 1
                  DELT2 = SAMPLE*(II-1) + NINT(KKK)+ GPS_wsec + 7200*(NDT/8-1) 
                  NEWEPOCH2(JJ,I) = DELT2
-                 CALL brdc2ecef(DELT2,EPHNEW2(1:20,INEW,I),ECEFPOS(JJ,1:3,I))
+                 CALL brdc2ecef(DELT2,EPHNEW2(1:20,INEW,I),CLKNEW2(:,INEW,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
                  END DO
                  END IF
@@ -467,10 +474,10 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
                DELT2 = SAMPLE*(II-1) + NINT(DT)+ GPS_wsec
                IF (DELT2 > EPHNEW2(2,1,I)+86400-900 ) EXIT
                NEWEPOCH2(JJ,I) = DELT2
-               CALL brdc2ecef(DELT2,EPHNEW2(1:20,INEW,I),ECEFPOS(JJ,1:3,I))
+               CALL brdc2ecef(DELT2,EPHNEW2(1:20,INEW,I),CLKNEW2(:,INEW,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,INEW,I), &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
             END DO
          
@@ -491,16 +498,19 @@ ELSE IF(I > 50 .AND. I < 100 .AND. ABS(EPHNEW(5,1,I)) > 0.d0) THEN ! GLONASS sam
 !PRINT*,'GPS TIME =', EPHNEW2(1,IGLN,I)
    CALL time_GPSweek (mjd_GPS , GPS_week, GPS_wsec1, GPSweek_mod1024)
 !PRINT*,'t0 =',GPS_wsec1,'t =', GPS_wsec, 't - t0 =',GPS_wsec-GPS_wsec1
-
+!PRINT*,'A0, A1 =',EPHNEW2(2:3,IGLN,I)
 ! ICRF-ITRF transformation matrix (including derivatives) based on EOP data
 CALL crs_trs (mjd_TT, eop, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2CRS)
 
       IF (IGLN == 1) THEN
       DO II = 1,2
       JJ = JJ + 1
-      DELT2 = SAMPLE*(II-1) + GPS_wsec
+      DELT2 = SAMPLE*(II-1) + GPS_wsec ! satellite positions at the specific epoch
       NEWEPOCH2(JJ,I) = DELT2
-      CALL glnorbint(EPHNEW2(1:16,IGLN,I),DELT2,GPS_wsec1,ECEFPOS(JJ,1:3,I))
+!PRINT*,'IGLN=, TIME DIFF=', IGLN, DELT2-GPS_wsec1,'A0, A1 =',EPHNEW2(2:3,IGLN,I)
+!PRINT*,'SATCLK=', 1.d6*(EPHNEW2(2,IGLN,I)+EPHNEW2(3,IGLN,I)*(DELT2-GPS_wsec1))
+      CALL glnorbint(EPHNEW2(1:16,IGLN,I),DELT2,GPS_wsec1,ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
+
       IF (ANTOPT == 1) THEN
       r_TRS(1:3) = ECEFPOS(JJ,1:3,I)
       ! ITRF to ICRF
@@ -511,16 +521,19 @@ CALL crs_trs (mjd_TT, eop, iau_model, CRS2TRS, TRS2CRS, d_CRS2TRS, d_TRS2CRS)
       ECEFPOS(JJ,1:3,I) = r_TRS
       END IF
 IF (PRINTID == 1) &
-PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =', ECEFPOS(JJ,1:3,I)
+PRINT*,'NEW EPOCH =',JJ,'PRN SAT =',I,'DELT2 =',DELT2,'REF EPOCH =',GPS_wsec1,&
+       'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
       END DO
 
-      ELSE IF (K >= 2) THEN
+      ELSE IF (IGLN >= 2) THEN
       DO II = 1,2
       JJ = JJ + 1
       DELT2 = SAMPLE*(II-1) + GPS_wsec + 1800*(K-1)
       NEWEPOCH2(JJ,I) = DELT2
-      CALL glnorbint(EPHNEW2(1:16,IGLN,I),DELT2,GPS_wsec1,ECEFPOS(JJ,1:3,I))
+!PRINT*,'IGLN, TIME DIFF=', IGLN, DELT2-GPS_wsec1,'A0, A1 =',EPHNEW2(2:3,IGLN,I)
+!PRINT*,'SATCLK=', 1.d6*(EPHNEW2(2,IGLN,I)+EPHNEW2(3,IGLN,I)*(DELT2-GPS_wsec1))
+      CALL glnorbint(EPHNEW2(1:16,IGLN,I),DELT2,GPS_wsec1,ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
       IF (ANTOPT == 1) THEN
       r_TRS(1:3) = ECEFPOS(JJ,1:3,I)
       ! ITRF to ICRF
@@ -531,7 +544,8 @@ PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =', ECEFPO
       ECEFPOS(JJ,1:3,I) = r_TRS
       END IF
 IF (PRINTID == 1) &
-PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =', ECEFPOS(JJ,1:3,I)
+PRINT*,'NEW EPOCH =',JJ,'PRN SAT =',I,'DELT2 =',DELT2,'REF EPOCH =',GPS_wsec1,&
+       'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
       
       END DO
 
@@ -539,7 +553,9 @@ PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =', ECEFPO
       JJ = JJ + 1
       DELT2 = SAMPLE*(II-1) + GPS_wsec + 1800*(K-1)
       NEWEPOCH2(JJ,I) = DELT2
-      CALL glnorbint(EPHNEW2(1:16,IGLN,I),DELT2,GPS_wsec1,ECEFPOS(JJ,1:3,I))
+!PRINT*,'IGLN, TIME DIFF=', DELT2-GPS_wsec1,'A0, A1 =',EPHNEW2(2:3,IGLN,I)
+!PRINT*,'SATCLK=', 1.d6*(EPHNEW2(2,IGLN,I)+EPHNEW2(3,IGLN,I)*(DELT2-GPS_wsec1))
+      CALL glnorbint(EPHNEW2(1:16,IGLN,I),DELT2,GPS_wsec1,ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
       IF (ANTOPT == 1) THEN
       r_TRS(1:3) = ECEFPOS(JJ,1:3,I)
       ! ITRF to ICRF
@@ -550,7 +566,8 @@ PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =', ECEFPO
       ECEFPOS(JJ,1:3,I) = r_TRS
       END IF
 IF (PRINTID == 1) &
-PRINT*,'NEW EPOCH =', JJ, 'PRN SAT =', I, 'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+PRINT*,'NEW EPOCH =',JJ,'PRN SAT =',I,'DELT2 =',DELT2,'REF EPOCH =',GPS_wsec1,&
+       'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
       END IF
    END DO
@@ -570,16 +587,17 @@ CALL brdc_qc_gal(EPHNEW(10,1:150,I), AVE(8), STD(8))
          IF (IBAD(K,I) /= 1 )THEN
             IGAL = IGAL +1
             EPHNEW2(1:20,IGAL,I) = EPHNEW(1:20,K,I)
-            CALL chkbrdc (EPHNEW2(1:20,IGAL,I),AVE,STD)
+            CLKNEW2(1:3, IGAL,I) = CLKNEW(1:3, K,I)
+            CALL chkbrdc (I,EPHNEW2(1:20,IGAL,I),AVE,STD)
             IF (IGAL == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
                DO II=1,2
                   JJ = JJ + 1
                   DELT2 = SAMPLE*(II-1) + GPS_wsec
                   NEWEPOCH2(JJ,I) = DELT2
-                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),ECEFPOS(JJ,1:3,I))
+                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),CLKNEW2(:,IGAL,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
                END DO
             ELSE IF (IGAL > 1 .AND. EPHNEW2(2,IGAL,I)-EPHNEW2(2,IGAL-1,I) == 600.d0 &
@@ -596,11 +614,12 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
                        DELT2 = SAMPLE*(II-1) + NINT(KKK) + GPS_wsec + 1800 !7200  
                        NEWEPOCH2(JJ,I) = DELT2
                        ECEFPOS(JJ,1:3,I) = 0.d0
-
-                       CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),ECEFPOS(JJ,1:3,I))
+                       SATCLK(JJ,1,I)    = 999999.999999d0
+! Because the sampling rate of galileo reference epoch is only 10 minutes, this can be switched on to compensate the gap of the reference epoch.
+                       CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),CLKNEW2(:,IGAL,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
                       END DO
                END IF
@@ -609,10 +628,10 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
                   JJ = JJ + 1
                   DELT2 = SAMPLE*(II-1) +  NINT(DT) + GPS_wsec 
                   NEWEPOCH2(JJ,I) = DELT2
-                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),ECEFPOS(JJ,1:3,I))
+                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IGAL,I),CLKNEW2(:,IGAL,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IGAL,I), &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
                END DO
 
@@ -626,15 +645,16 @@ ELSE IF (I < 200 .AND. I > 150 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! BDS sampling r
          IF (IBAD(K,I) /= 1 )THEN
             IBDS = IBDS +1
             EPHNEW2(1:20,IBDS,I) = EPHNEW(1:20,K,I)
+            CLKNEW2(1:3, IBDS,I) = CLKNEW(1:3, K,I)
             IF (IBDS == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
                DO II=1,8
                   JJ = JJ + 1
                   DELT2 = SAMPLE*(II-1) + GPS_wsec
                   NEWEPOCH2(JJ,I) = DELT2
-                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IBDS,I),ECEFPOS(JJ,1:3,I))
+                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IBDS,I),CLKNEW2(:,IBDS,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IBDS,I), &
-       'DELT2 =', DELT2, 'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2, 'POSITIONS=',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
                END DO
             ELSE IF (IBDS > 1 .AND. EPHNEW2(2,IBDS,I)-EPHNEW2(2,IBDS-1,I) == 3600.d0 &
@@ -648,10 +668,10 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IBDS,I), &
                           JJ = JJ + 1
                        DELT2 = SAMPLE*(II-1) + NINT(KKK) + GPS_wsec + 7200
                        NEWEPOCH2(JJ,I) = DELT2
-                       CALL brdc2ecef(DELT2,EPHNEW2(1:20,IBDS,I),ECEFPOS(JJ,1:3,I))
+                       CALL brdc2ecef(DELT2,EPHNEW2(1:20,IBDS,I),CLKNEW2(:,IBDS,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IBDS,I), &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
                        END DO
 
                END IF
@@ -660,10 +680,10 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IBDS,I), &
                   JJ = JJ + 1
                   DELT2 = SAMPLE*(II-1) + NINT(DT) + GPS_wsec 
                   NEWEPOCH2(JJ,I) = DELT2
-                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IBDS,I),ECEFPOS(JJ,1:3,I))
+                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IBDS,I),CLKNEW2(:,IBDS,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IBDS,I), &
-       'DELT2 =', DELT2, 'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
                END DO
             END IF
@@ -676,16 +696,16 @@ ELSE IF (I > 200 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! QZSS sampling rate: 15 minut
          IF (IBAD(K,I) /= 1 )THEN
             IQZSS = IQZSS +1
             EPHNEW2(1:20,IQZSS,I) = EPHNEW(1:20,K,I)
-
+            CLKNEW2(1:3, IQZSS,I) = CLKNEW(1:3, K,I)
             IF (IQZSS == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec)  THEN
                DO II=1,8
                   JJ = JJ + 1
                   DELT2 = SAMPLE*(II-1) + GPS_wsec 
                   NEWEPOCH2(JJ,I) = DELT2
-                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IQZSS,I),ECEFPOS(JJ,1:3,I))
+                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IQZSS,I),CLKNEW2(:,IQZSS,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IQZSS,I), &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
                END DO
              
@@ -700,10 +720,10 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IQZSS,I), &
                           JJ = JJ + 1
                        DELT2 = SAMPLE*(II-1) +  NINT(KKK) + GPS_wsec + 7200
                        NEWEPOCH2(JJ,I) = DELT2
-                       CALL brdc2ecef(DELT2,EPHNEW2(1:20,IQZSS,I),ECEFPOS(JJ,1:3,I))
+                       CALL brdc2ecef(DELT2,EPHNEW2(1:20,IQZSS,I),CLKNEW2(:,IQZSS,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IQZSS,I), &
-       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2,'POSITIONS =',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
                        END DO
                END IF
@@ -713,10 +733,10 @@ print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IQZSS,I), &
                   JJ = JJ + 1
                   DELT2 = SAMPLE*(II-1) +  NINT(DT) + GPS_wsec 
                   NEWEPOCH2(JJ,I) = DELT2
-                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IQZSS,I),ECEFPOS(JJ,1:3,I))
+                  CALL brdc2ecef(DELT2,EPHNEW2(1:20,IQZSS,I),CLKNEW2(:,IQZSS,I),ECEFPOS(JJ,1:3,I),SATCLK(JJ,1,I))
 IF (PRINTID == 1) &
 print*,'NEW EPOCH =', JJ, 'PRN SAT =', I,'TOE=',EPHNEW2(2,IQZSS,I), &
-       'DELT2 =', DELT2, 'POSITIONS =',ECEFPOS(JJ,1:3,I)
+       'DELT2 =', DELT2, 'POSITIONS=',ECEFPOS(JJ,1:3,I),'SATCLK=',SATCLK(JJ,1,I)
 
                END DO
             END IF
@@ -730,13 +750,48 @@ JJ = 0
 END DO
 
 
+
+! Re-arrange the matrixes in preparation for the generation of SP3 file
+!----------------------------------------------------------------------
+Nepochs = SIZE(ECEFPOS,DIM=1)
+Nsat    = SIZE(ECEFPOS,DIM=3)
+ALLOCATE(CLKmatrix(Nepochs,3,TOTG), STAT = AllocateStatus)
+ALLOCATE(ORBmatrix(Nepochs,8,TOTG), STAT = AllocateStatus)
+ALLOCATE(PRNmatrix(TOTG), STAT = AllocateStatus)
+CLKmatrix = 999999.999999d0 
+ORBmatrix = 0.d0
+k_sat = 0
+DO  i_sat = 1 , Nsat
+IF(i_sat == IPRN(i_sat))THEN
+k_sat = k_sat +1
+CALL prn2str (i_sat, PRN_ti)
+PRNmatrix(k_sat) = PRN_ti
+
+    DO  i_write = 1 , Nepochs
+    Sec_00 = 900*(i_write-1)
+    IF(i_write == 1) THEN
+    ORBmatrix(i_write,1, k_sat) = MJD_ti
+    ORBmatrix(i_write,2, k_sat) = Sec_00
+    CLKmatrix(i_write,1, k_sat) = MJD_ti
+    CLKmatrix(i_write,2, k_sat) = Sec_00
+    ELSE
+    ORBmatrix(i_write,1, k_sat) = MJD_ti + Sec_00/86400.d0
+    ORBmatrix(i_write,2, k_sat) = Sec_00
+    CLKmatrix(i_write,1, k_sat) = MJD_ti + Sec_00/86400.d0
+    CLKmatrix(i_write,2, k_sat) = Sec_00
+    END IF
+    ORBmatrix(i_write,3:5, k_sat) = ECEFPOS(i_write,1:3,i_sat)
+    ORBmatrix(i_write,6:8, k_sat) = 0.d0
+    CLKmatrix(i_write,3,   k_sat) = SATCLK(i_write,1,i_sat)
+    END DO
+END IF
+END DO
+sat_vel = 0
+
 ! WRITE THE ECEF POSITIONS IN A SP3 FORMAT
 ! ----------------------------------------
-CALL write_brd2sp3 (ISTR,IPRN,TOTG,IG,IR,IE,IC,IJ,SATTYPE, SAMPLE,IYEAR4,MONTH,IDAY,NEWEPOCH2, ECEFPOS, OUTPUT, 0)
-
-
-! SATELLITE CLOCK CORRRECTION (TO BE PROCESSED)
-! ----------------------------------
+!CALL write_brd2sp3 (ISTR,IPRN,TOTG,IG,IR,IE,IC,IJ,SATTYPE, SAMPLE,IYEAR4,MONTH,IDAY,NEWEPOCH2, ECEFPOS, OUTPUT, 0)
+CALL write_orb2sp3(ORBmatrix, PRNmatrix, OUTPUT, sat_vel, CLKmatrix)
 
 
 CALL cpu_time (CPU_t1)
