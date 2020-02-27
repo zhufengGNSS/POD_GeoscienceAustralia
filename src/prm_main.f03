@@ -527,6 +527,7 @@ If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
 !print*,'ECOM_Bias_glb=',ECOM_Bias_glb, 'ECOM_CPR_glb=',ECOM_CPR_glb
 !print*,'NPARAM_glb=',NPARAM_glb
 ELSEIF (ECOM_param_glb == 3) THEN
+
         NPARAM_glb = 7
 
 ELSEIF (ECOM_param_glb < 0) THEN

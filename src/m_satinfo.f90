@@ -144,7 +144,7 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn, satblk)
 !print*,'nlin=',nlin
   ALLOCATE(satellite(nlin),stat=iac)
   if (iac .ne. 0) then
-          write(mesg, *) "not enough memory - failed to allocate satellites array, dimenion = ", nlin
+          write(mesg, *) "not enough memory - failed to allocate satellite array, dimenion = ", nlin
           call report('FATAL', pgrm_name, 'satinfo', mesg, 'src/m_satifno.f90', 1)
   end if
 
