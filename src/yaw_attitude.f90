@@ -1,5 +1,5 @@
 SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbdir, eclipsf, & 
-						 eBX_nom, eBX_ecl, Yangle, Mangle, Mangle_e, Mrate_e, Ynom_e)
+						 eBX_nom, eBX_ecl, Yangle, Mangle, Mangle_e, Mrate_e, Ynom_e, satbf)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: yaw_attitude.f90
@@ -17,6 +17,9 @@ SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbd
 ! - PRN:		SV PRN NUMBER (.LE.32 FOR GPS, .GT.32 FOR GLONASS)
 ! - satblk:		SV BLOCK  1=I, 2=II, 3=IIA, IIR=(4, 5) IIF=6
 ! - orbdir:		DIRECTION OF PROCESSING (1=FORWARD, -1=BACKWARD)
+! - satbf:		Body-frame definition type
+!				satbf=1 : Body-fixed frame according to the IGS Conventions (GPS Block IIA)  
+!				satbf=2 : Body-fixed frame X,Y axes reversal; Case of Galileo and GPS Block IIR 
 !
 ! Output arguments:
 ! - eclipsf:	Status of eclipse: 0=NO  |  1,2=YES (1=night, 2=noon)
@@ -56,6 +59,7 @@ SUBROUTINE yaw_attitude (mjd, r_sat, v_sat, r_sun, beta_angle, PRN, satblk, orbd
 !      INTEGER (KIND = prec_int8) :: PRN, orbdir
 !      INTEGER (KIND = prec_int4) :: satblk
       INTEGER (KIND = 4) :: PRN, orbdir, satblk
+      INTEGER (KIND = 4), INTENT(IN) :: satbf 
 	  
 ! OUT
       REAL (KIND = prec_d) :: Yangle(2)
@@ -263,6 +267,13 @@ MURATE = 0.d0
       !END DO
 	  !print *,"eBX_nom", eBX_nom
 !end if
+
+if (satblk == 4 .or. satblk==5) then
+if (satbf == 2) then
+! GPS Block IIR: Body-X unit vector reversal
+      eBX_nom = -1.0D0 * eBX_nom
+end if
+end if
 ! ----------------------------------------------------------------------
 
 
@@ -337,11 +348,20 @@ end if
       !eBX = santxyz
       eBX_ecl = santxyz
       !eBX = santxyz_0 ! eBX input
-	  
+
+  
 	  
 ! ----------------------------------------------------------------------
 ! Nominal Yaw angle and Orbital angle (M)
 ! ----------------------------------------------------------------------
+! Body-frame definition type
+if (satblk == 4 .or. satblk==5) then
+if (satbf == 1) then
+! IGS Conventions definition
+   satblk = 6 
+end if
+end if
+
       Call yaw_nom (eBX_nom, v_sat, beta_angle, satblk, SVBCOS, ANOON, ANIGHT, Mangle, Yangle_nom)  
       !CALL yaw_nom2 (r_sat, v_sat, r_sun, eBX_nom, beta_angle, satblk, SVBCOS, ANOON, ANIGHT, Mangle, Yangle_nom)	
 	  

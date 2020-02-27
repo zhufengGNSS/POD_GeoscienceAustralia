@@ -115,7 +115,6 @@ partials_velocity_cfg	  	  0
 leapsec_filename_cfg        leap.second
 ! ----------------------------------------------------------------------
 
-
 ! ----------------------------------------------------------------------
 %% Satellite metadata SINEX
 satsinex_filename_cfg        igs_metadata_2063.snx
@@ -129,6 +128,5 @@ satsinex_filename_cfg        igs_metadata_2063.snx
 ! 0 : no a priori model  
 
 SRP_MOD_arp        1
-
 ! ----------------------------------------------------------------------
 
