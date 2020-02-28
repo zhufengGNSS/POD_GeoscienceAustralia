@@ -154,5 +154,105 @@ This should output the following to `stdout`...
     CPU Time (sec)   350.88653299999999
     
 
+## Acknowledgements
+
+### JPL Planetary Ephemerides
+
+We are using the Jet Propulison (JPL) Planetary and Lunar Ephemerides processing program ((ftp://ssd.jpl.nasa.gov/pub/eph/planets/fortran/ ), in particular the routines:
+
+- CONST.f
+- FSIZER3.f
+- INTERP.f
+- PLEPH.f
+- SPLIT.f
+
+We have modified the following subroutines:
+
+- asc2eph.f90
+- STATE.f90
+
+so thate there is no longer a dependency on a binary file produced in the original JPL form.
+
+### Standards of Fundamental Astronomy (SOFA) routines
+
+We have used a number of routines obtained from SOFA, http://www.iausofa.org/ :
+
+- anp.for
+- bi00.for
+- bpn2xy.for
+- bpn2xy.for
+- c2ixys.for
+- c2tcio.for
+- cal2jd.for
+- cp.for
+- cr.for
+- era00.for
+- fad03.for
+- fae03.for
+- faf03.for
+- faju03.for
+- fal03.for
+- falp03.for
+- fama03.for
+- fame03.for
+- fane03.for
+- faom03.for
+- fapa03.for
+- fasa03.for
+- faur03.for
+- fave03.for
+- gmst00.for
+- gmst06.for
+- gmst_iers.f03
+- ir.for
+- jd2cal.for
+- jdcalf.for
+- numat.for
+- nut00a.for
+- obl80.for
+- pn00a.for
+- pn00.for
+- pnm00a.for
+- pnm06a.for
+- pom00.for
+- pr00.for
+- rx.for
+- rxr.for
+- ry.for
+- rz.for
+- s00.for
+- s06.for
+- sp00.for
+- taiutc.for
+- tide_pole_oc.f90
+- tide_pole_se.f90
+- time_GPS.f90
+- time_TAI.f90
+- time_TT.f90
+- time_TT_sec.f90
+- time_UTC.f90
+- tr.for
+- xy06.for
+- xys00a.for
+- xys06a.for
+
+### International Earth Rotation Service (IERS) routines 
+
+The following routines we originally sourced fromthe IERS:
+
+- interp_iers.f
+- CNMTX.F
+- FUNDARG.F
+- LAGINT.f
+- ORTHO_EOP.F
+- PMSDNUT2.F
+- RG_ZONT2.F
+- UTLIBR.F
+- IERS_CMP_2015.F
+
+
+
+
+
 
 
