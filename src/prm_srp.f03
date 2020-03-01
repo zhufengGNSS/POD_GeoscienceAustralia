@@ -127,83 +127,51 @@ END IF
 ! 1. ECOM_Bias_glb(i)=1 : Effect is considered
 ! 2. ECOM_Bias_glb(i)=0 : Effect is neglected 
 !
-! ECOM1 is applied
+! ECOM1 or ECOM2 is applied
 ! **********************************************************************
-IF (ECOM_param_glb == 1) THEN
+IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
 
 ! D direction
-IF (word1_ln == "bias_D") THEN
+   IF (word1_ln == "bias_D") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, bias_D 
 	ECOM_Bias_glb(1) = bias_D
-END IF
+   END IF
 ! Y direction
-IF (word1_ln == "bias_Y") THEN
+   IF (word1_ln == "bias_Y") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, bias_Y 
 	ECOM_Bias_glb(2) = bias_Y
-END IF
+   END IF
 ! B direction
-IF (word1_ln == "bias_B") THEN
+   IF (word1_ln == "bias_B") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, bias_B 
 	ECOM_Bias_glb(3) = bias_B
-END IF
-! ----------------------------------------------------------------------
-! ECOM_CPR_glb(1) : CPR acceleration in D direction
-! ECOM_CPR_glb(2) : CPR acceleration in Y direction
-! ECOM_CPR_glb(3) : CPR acceleration in B direction
-! 
-! 1. ECOM_CPR_glb(i)=1 : Effect is considered
-! 2. ECOM_CPR_glb(i)=0 : Effect is neglected 
-!
+   END IF
 ! D direction
-IF (word1_ln == "cpr_D") THEN
+   IF (word1_ln == "cpr_D") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, cpr_D 
 	ECOM_CPR_glb(1) = cpr_D
-END IF
+   END IF
 ! Y direction
-IF (word1_ln == "cpr_Y") THEN
+   IF (word1_ln == "cpr_Y") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, cpr_Y 
 	ECOM_CPR_glb(2) = cpr_Y
-END IF
+   END IF
 ! B direction
-IF (word1_ln == "cpr_B") THEN
+   IF (word1_ln == "cpr_B") THEN
    READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, cpr_B 
 	ECOM_CPR_glb(3) = cpr_B
-END IF
+   END IF
 ! ----------------------------------------------------------------------
-! ECOM2 is applied
+! SBOXW is applied
 ! **********************************************************************
-ELSE IF (ECOM_param_glb == 2) THEN
+ELSE IF (ECOM_param_glb == 3) THEN
 
-IF (word1_ln == "bias_D") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, bias_D
-        ECOM_Bias_glb(1) = bias_D
-END IF
-! Y direction
-IF (word1_ln == "bias_Y") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, bias_Y
-        ECOM_Bias_glb(2) = bias_Y
-END IF
-! B direction
-IF (word1_ln == "bias_B") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, bias_B
-        ECOM_Bias_glb(3) = bias_B
-END IF
-! CPR terms
-IF (word1_ln == "cpr_D") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, cpr_D
-        ECOM_CPR_glb(1) = cpr_D
-END IF
-! Y direction
-IF (word1_ln == "cpr_Y") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, cpr_Y
-        cpr_D4 = cpr_Y
-        ECOM_CPR_glb(2) = cpr_D4
-END IF
-! B direction
-IF (word1_ln == "cpr_B") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, cpr_B
-        ECOM_CPR_glb(3) = cpr_B
-END IF
+   ECOM_Bias_glb = 0.d0
+   ECOM_CPR_glb  = 0.d0
+
+ELSE IF(ECOM_param_glb == 0) THEN
+
+!PRINT*,'ECOM NOT ACTIVATED'
 
 END IF
 
@@ -228,112 +196,119 @@ filename = 'ECOM2_srp.in'
 ELSE IF (ECOM_param_glb == 3) THEN
 
 filename = 'SBOXW_srp.in'
-END IF
-! ----------------------------------------------------------------------
-! Open .in file
-OPEN (UNIT = UNIT_IN, FILE = TRIM (filename), IOSTAT = ios)
-IF (ios /= 0) THEN
-   PRINT *, "Error in opening file:", filename
-   PRINT *, "OPEN IOSTAT=", ios
+
 END IF
 
-! Read input file
-i = 0
-DO
-READ (UNIT=UNIT_IN,FMT=Format1,IOSTAT=ios_line) line_ith
-i = i + 1
-!PRINT *, "READ Line (i,ios):", i, ios_line
-
-! End of file
-IF (ios_line < 0) THEN
-	! PRINT *, "End of file, i=", i
-   EXIT		
-END IF
-
-PD_Param_ID = 0
-If (ECOM_Bias_glb(1) == 1) Then
+IF (ECOM_param_glb <= 2) THEN
+    PD_Param_ID = 0
+    If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-ELSE
+    ELSE
         PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(2) == 1) Then
+    End IF
+    If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-ELSE
+    ELSE
         PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(3) == 1) Then
+    End IF
+    If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-ELSE
+    ELSE
         PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(1) == 1) THEN
+    End IF
+    If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-ELSE
+    ELSE
         PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(2) == 1) THEN
+    End IF
+    If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-ELSE
+    ELSE
         PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(3) == 1) THEN
+    End IF
+    If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-ELSE
+    ELSE
         PD_Param_ID = PD_Param_ID
-End If
+    End IF
+END IF
 
-IF (ECOM_param_glb == 3) PD_Param_ID = 9
+IF (ECOM_param_glb == 3) PD_Param_ID = 7
 
 ALLOCATE (ECOM_accel_glb(PD_Param_ID), STAT = AllocateStatus)
 ALLOCATE (SRP_PARA(PD_Param_ID), STAT = AllocateStatus)
 SRP_PARA = 0.d0
 
-NPARAM_glb = PD_Param_ID
+! ----------------------------------------------------------------------
+! Open .in file if ECOM activated
+IF (ECOM_param_glb > 0 ) THEN
+
+  OPEN (UNIT = UNIT_IN, FILE = TRIM (filename), IOSTAT = ios)
+
+  IF (ios /= 0) THEN
+    PRINT *, "Error in opening file:", filename
+    PRINT *, "OPEN IOSTAT=", ios
+  END IF
+
+! Read input file
+  i = 0
+  DO
+    READ (UNIT=UNIT_IN,FMT=Format1,IOSTAT=ios_line) line_ith
+    i = i + 1
+!PRINT *, "READ Line (i,ios):", i, ios_line
+
+! End of file
+    IF (ios_line < 0) THEN
+	! PRINT *, "End of file, i=", i
+      EXIT		
+    END IF
+
+    NPARAM_glb = PD_Param_ID
 
 ! 1st Word of Line ith
-READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
+    READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 
 ! ECOM parameters :: Bias accelerations
-IF (word1_ln == "ECOM1") THEN
+    IF (word1_ln == "ECOM1") THEN
 
-PD_Param_ID = 0
+      PD_Param_ID = 0
 
-READ (line_ith, FMT = * , IOSTAT=ios_key) word_i, SRP_PARA(:)  
+      READ (line_ith, FMT = * , IOSTAT=ios_key) word_i, SRP_PARA(:)  
 !print*,"SRP_PARA=",SRP_PARA(:)
-If (ECOM_Bias_glb(1) == 1) Then
+      If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'D0=',PD_Param_ID
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
+      End IF
 
-If (ECOM_Bias_glb(2) == 1) Then
+      If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'Y0=',PD_Param_ID
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
+      End IF
 
-If (ECOM_Bias_glb(3) == 1) Then
+      If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'B0=',PD_Param_ID
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
+      End IF
 
-If (ECOM_CPR_glb(1) == 1) THEN
+      If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
@@ -342,11 +317,11 @@ If (ECOM_CPR_glb(1) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'DS=',PD_Param_ID
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
+      End IF
 
-If (ECOM_CPR_glb(2) == 1) THEN
+      If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
@@ -355,11 +330,11 @@ If (ECOM_CPR_glb(2) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'YS=',PD_Param_ID
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
+      End IF
 
-If (ECOM_CPR_glb(3) == 1) THEN
+      If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
@@ -368,43 +343,43 @@ If (ECOM_CPR_glb(3) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'BS=',PD_Param_ID
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End If
+      End If
 
 
 
-ELSE IF (word1_ln == "ECOM2") THEN
+    ELSE IF (word1_ln == "ECOM2") THEN
 
-PD_Param_ID = 0
+      PD_Param_ID = 0
 
-READ (line_ith, FMT = * , IOSTAT=ios_key) word_i, SRP_PARA(:)
+      READ (line_ith, FMT = * , IOSTAT=ios_key) word_i, SRP_PARA(:)
 !print*,"SRP_PARA=",SRP_PARA(:)
-If (ECOM_Bias_glb(1) == 1) Then
+      If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !        ECOM_accel_glb(PD_Param_ID) = D0
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
-
-If (ECOM_Bias_glb(2) == 1) Then
+      End IF
+ 
+      If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !        ECOM_accel_glb(PD_Param_ID) = Y0
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
+      End IF
 
-If (ECOM_Bias_glb(3) == 1) Then
+      If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !        ECOM_accel_glb(PD_Param_ID) = B0
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
+      End IF
 
-If (ECOM_CPR_glb(1) == 1) THEN
+      If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
@@ -413,11 +388,11 @@ If (ECOM_CPR_glb(1) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !        ECOM_accel_glb(PD_Param_ID) = D2S
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
+      End IF
 
-If (ECOM_CPR_glb(2) == 1) THEN
+      If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
@@ -426,11 +401,11 @@ If (ECOM_CPR_glb(2) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !        ECOM_accel_glb(PD_Param_ID) = D4S
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End IF
+      End IF
 
-If (ECOM_CPR_glb(3) == 1) THEN
+      If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
@@ -439,24 +414,23 @@ If (ECOM_CPR_glb(3) == 1) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !        ECOM_accel_glb(PD_Param_ID) = BS
-Else
+      Else
         PD_Param_ID = PD_Param_ID
-End If
+      End If
 
-ELSE IF (word1_ln == "SBOXW") THEN
-READ (line_ith, FMT = * , IOSTAT=ios_key) word_i, SRP_PARA(:)
+    ELSE IF (word1_ln == "SBOXW") THEN
+      READ (line_ith, FMT = * , IOSTAT=ios_key) word_i, SRP_PARA(:)
 !print*,"SRP_PARA=",SRP_PARA(:)
-        DO PD_Param_ID =1, 9 
+      DO PD_Param_ID =1, 7 
         ECOM_accel_glb(PD_Param_ID)= SRP_PARA(PD_Param_ID)
-        END DO
-END IF
+      END DO
+    END IF
 
-END DO
+  END DO
 
 CLOSE (UNIT=UNIT_IN)
 ! Close of input file
 ! ----------------------------------------------------------------------
-
-
+ENDIF
 
 END

@@ -302,19 +302,19 @@
           call rep_open( prog_name, '.status', rep_file, rep_unit)
  
 !         Now write the status message
-          if( len(srcfile).le.1 ) then
+          if( len(trim(srcfile)).le.1 ) then
               write(rep_unit, 120, iostat=jerr) rep_date, rep_sec, &
-                    prog,routine, message
+                    trim(prog),trim(routine), trim(message)
               write(*, 120, iostat=kerr) rep_date, rep_sec, &
-                    prog, routine, message
+                    trim(prog), trim(routine), trim(message)
  
  120  format('STATUS :',3(i2.2),':',2(i2.2),':',f4.1,1x,a,'/',a,': ',a)
            else
 !             if srcfile name passed print this as well)           
               write(rep_unit, 140, iostat=jerr) rep_date, rep_sec, &
-                    prog, routine, message, srcfile
+                    trim(prog), trim(routine), trim(message),trim(srcfile)
               write(*, 140, iostat=kerr) rep_date, rep_sec, &
-                    prog, routine, message, srcfile
+                    trim(prog), trim(routine), trim(message), trim(srcfile)
  
  140  format('STATUS :',3(i2.2),':',2(i2.2),':',f4.1,1x,a,'/',a,': ',a,' (Name ',a,')')
            end if
@@ -333,19 +333,19 @@
 !             If the file name is zero or 1 charcater long, just
 !             print the message, otherwize output the file name
 !             as well.
-              if( len(srcfile).le.1 ) then
+              if( len(trim(srcfile)).le.1 ) then
                   write(rep_unit, 220, iostat=jerr) rep_date, rep_sec, &
-                        prog, routine, message
+                        trim(prog), trim(routine), trim(message)
                   write(*, 220, iostat=kerr) rep_date, rep_sec, &
-                        prog, routine, message
+                        trim(prog), trim(routine), trim(message)
  
  220  format('WARNING:',3(i2.2),':',2(i2.2),':',f4.1,1x,a,'/',a,': ',a)
                else
 !                 Print the file name as well.
                   write(rep_unit, 230, iostat=jerr) rep_date, rep_sec, &
-                        prog, routine, message, srcfile
+                        trim(prog), trim(routine), trim(message), trim(srcfile)
                   write(*, 230, iostat=kerr) rep_date, rep_sec, &
-                        prog, routine, message, srcfile
+                        trim(prog), trim(routine), trim(message), trim(srcfile)
  
  230  format('WARNING:',3(i2.2),':',2(i2.2),':',f4.1,1x,a,'/',a,': ',a,' (Name ',a,')')
               end if
@@ -353,9 +353,9 @@
           else
 !             Report the messsage and the file name and the error number
               write(rep_unit, 240, iostat=jerr) rep_date, rep_sec, &
-                    prog, routine, message, srcfile, ierr
+                    trim(prog), trim(routine), trim(message), trim(srcfile), ierr
               write(*, 240, iostat=kerr) rep_date, rep_sec, &
-                    prog, routine, message, srcfile, ierr
+                    trim(prog), trim(routine), trim(message), trim(srcfile), ierr
  240  format('WARNING:',3(i2.2),':',2(i2.2),':',f4.1,1x,a,'/',a,': ',a,1x,a,' ERROR ',i5)
  
           end if
@@ -372,29 +372,29 @@
           if( ierr.eq. 0 ) then
 
 !             Again check to see if the file name has been passed
-              if(len(srcfile).le.1 ) then
+              if(len(trim(srcfile)).le.1 ) then
                   write(rep_unit, 320, iostat=jerr) rep_date, rep_sec, &
-                        prog, routine, message
+                        trim(prog), trim(routine), trim(message)
                   write(*, 320, iostat=kerr) rep_date, rep_sec, &
-                        prog, routine, message
+                        trim(prog), trim(routine), trim(message)
  
  320  format('FATAL  :',3(i2.2),':',2(i2.2),':',f4.1,1x,a,'/',a,': ',a)
               else
 
 !                 Print the file name as well
                   write(rep_unit, 330, iostat=jerr) rep_date, rep_sec, &
-                        prog, routine, message, srcfile
+                        trim(prog), trim(routine), trim(message), trim(srcfile)
                   write(*, 330, iostat=kerr) rep_date, rep_sec, &
-                        prog, routine, message, srcfile
+                        trim(prog), trim(routine), trim(message), trim(srcfile)
  
  330  format('FATAL  :',3(i2.2),':',2(i2.2),':',f4.1,1x,a,'/',a,': ',a,' (Name ',a,')')
               end if         
           else
 !             Report the messsage and the file name and the error number
               write(rep_unit, 340, iostat=jerr) rep_date, rep_sec, &
-                        prog, routine, message, srcfile, ierr
+                        trim(prog), trim(routine), trim(message), trim(srcfile), ierr
               write(*, 340, iostat=kerr) rep_date, rep_sec, &
-                        prog, routine, message, srcfile, ierr
+                        trim(prog), trim(routine), trim(message), trim(srcfile), ierr
  340  format('FATAL  :',3(i2.2),':',2(i2.2),':',f4.1,1x,a,'/',a,': ',a,1x,a,' ERROR ',i5)  
           end if
  
@@ -434,7 +434,7 @@
           if( ierr.eq. 0 ) then
 
 !             See if the file name has been passed.
-              if(len(srcfile).le.1 ) then
+              if(len(trim(srcfile)).le.1 ) then
                   write(rep_unit, 220, iostat=jerr) rep_date, rep_sec, &
                           prog, routine, message
                   write(*, 220, iostat=kerr) rep_date, rep_sec, &
