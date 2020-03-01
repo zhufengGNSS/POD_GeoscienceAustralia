@@ -73,7 +73,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  USE mdl_eop
 	  USE m_sp3_PRN
 	  USE m_write_orb2sp3
-          USE m_orbitIC
+      USE m_orbitIC
       USE mdl_config
       USE m_read_satsnx 
 	  
@@ -161,7 +161,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
       REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbdiff2
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: EQMfname_PRN, VEQfname_PRN				
-
+      CHARACTER (LEN=100) :: mesg
 
       INTEGER (KIND = prec_int4) :: J
       DOUBLE PRECISION MJDD0, MJDD, MJDref  
@@ -185,15 +185,14 @@ CLOSE (UNIT=7, STATUS="DELETE")
 ! Data reading: Gravitational Effects
 ! ----------------------------------------------------------------------
 ! General orbit parameterization											
-Call prm_main (EQMfname)
+!Call prm_main (EQMfname)
 ! Earth Gravity Field model
-CALL prm_gravity (EQMfname)												
+!CALL prm_gravity (EQMfname)												
 ! Planetary/Lunar ephemeris DE data 
-CALL prm_planets (EQMfname)												
+!CALL prm_planets (EQMfname)												
 ! Ocean Tides model
-CALL prm_ocean (EQMfname)												
+!CALL prm_ocean (EQMfname)												
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Satellites Orbits :: PRN numbers 
@@ -229,8 +228,6 @@ END IF
 ! ----------------------------------------------------------------------
 print *,"Satellites number: ", Nsat, "IC Eopch: ", Iyear, Imonth, Iday, Sec_00
 print *," "
-
-
 ! ----------------------------------------------------------------------
 ! Rewrite :: Initial Epoch
 ! ----------------------------------------------------------------------
@@ -266,8 +263,34 @@ DOY = IDNINT(MJDD-MJDref) + 1
 YR = Iyear
 !PRINT*,'Day Of Year =', Iyear,DOY
 
-
+! Last modified: 19/02/2020 Thomas Papanikolaou: Correct MJD epoch for the computation of the time-variable gravity coefficients					
 ! ----------------------------------------------------------------------
+! Satellite Orbits :: common configuration :: Forces model
+! ----------------------------------------------------------------------
+! Data reading: Gravitational Effects
+! ----------------------------------------------------------------------
+! General orbit parameterization											
+Call prm_main (EQMfname)
+! Earth Gravity Field model
+CALL prm_gravity (EQMfname)												
+! Planetary/Lunar ephemeris DE data 
+CALL prm_planets (EQMfname)												
+! Ocean Tides model
+CALL prm_ocean (EQMfname)												
+! ----------------------------------------------------------------------
+!PRINT*,'NUMBER OF FORCE PARAMETERS =', NPARAM_glb
+write(mesg, *) "A priori SRP model = ",SRP_MOD_arp
+call report ('STATUS',pgrm_name,'',trim(mesg), '', 0)
+if      (ECOM_param_glb /= 0 .and.  EMP_param_glb == 0) then
+  write(mesg, *) "SRP model = ",ECOM_param_glb
+else if (ECOM_param_glb == 0 .and.  EMP_param_glb /= 0) then
+  write(mesg, *) "Empirical force model = ",EMP_param_glb
+else
+  write(mesg, *) "Estimating EMP force model and ECOM SRP parameters not yet not supported: ",EMP_param_glb,ECOM_param_glb
+  call report ('FATAL',pgrm_name,'pod_gnss',mesg, '/src/m_pod_gnss.f03', 1)
+endif
+call report ('STATUS',pgrm_name,'',mesg, ' ', 0)
+print*,' '
 ! ----------------------------------------------------------------------
 ! Precise Orbit Determination :: Multi-GNSS multi-satellites POD loop
 ! ----------------------------------------------------------------------
@@ -363,14 +386,17 @@ sz1 = size(orb_icrf, DIM = 1)
 sz2 = size(orb_icrf, DIM = 2)
 Nepochs = sz1
 N2_orb = sz2
+!print *,"Nepochs: ", Nepochs
 
 sz1 = size(veqSmatrix, DIM = 1)
 sz2 = size(veqSmatrix, DIM = 2)
 N2_veqSmatrix = sz2
+!print *,"veqSmatrix n1: ", sz1
 
 sz1 = size(veqPmatrix, DIM = 1)
 sz2 = size(veqPmatrix, DIM = 2)
 N2_veqPmatrix = sz2
+!print *,"veqPmatrix n1: ", sz1
 
 N2sum = 2 + (N2_orb-2) + (N2_veqSmatrix-2) + (N2_veqPmatrix-2)
 !N2ics = 2 + (N2_veqSmatrix-2)/6 + (N2_veqPmatrix-2)/6
@@ -478,12 +504,23 @@ orbits_ics_icrf(3:8,isat) = SVEC_Zo
 !print *,"SVEC_Zo_ESTIM ", SVEC_Zo_ESTIM
 !print *,"SVEC_Zo       ", SVEC_Zo
 ! ----------------------------------------------------------------------
-
+  
 ! ----------------------------------------------------------------------
-! IC :: Orbital parameters being estimated e.g. force emprical parameters
+! IC :: Orbital parameters being estimated e.g. force emprical parameters or SRP parameters
 ! ----------------------------------------------------------------------
 !orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_aposteriori !*1.0D9
-orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_glb  ! Correction : Write the ECOM parameters in all POD cases including orbit propagation without estimation (POD MODE cases: 3 & 4)
+IF (NPARAM_glb /= 0) THEN
+! ECOM SRP parameters estimated
+  if ( ECOM_param_glb > 0 ) then
+    orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_glb  ! Correction : Write the ECOM parameters in all POD cases including orbit propagation without estimation (POD MODE cases: 3 & 4)
+! Empirical SRP parameters estimated
+  else if ( EMP_param_glb > 0 ) then
+    orbits_ics_icrf(9:11,isat)  = Bias_accel_glb  ! Write the EMP bias parameters
+    orbits_ics_icrf(12:13,isat) = CPR_CS_glb(1,:) ! Write the EMP Radial CS  parameters
+    orbits_ics_icrf(14:15,isat) = CPR_CS_glb(2,:) ! Write the EMP Transverse CS parameters
+    orbits_ics_icrf(16:17,isat) = CPR_CS_glb(3,:) ! Write the EMP Normal CS  parameters
+  end if
+END IF
 !write(*,fmt='(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))') PRN_isat,orbits_ics_icrf(:,isat)
 ! ----------------------------------------------------------------------
 
