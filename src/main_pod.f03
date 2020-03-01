@@ -38,6 +38,8 @@
       USE m_writeorbit
 	  USE m_write_orb2sp3
 	  USE m_clock_read
+	  USE m_attitude_orb
+	  USE m_write_orbex	  
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -113,8 +115,9 @@
       CHARACTER (LEN=300) :: CLKfname
       INTEGER (KIND = prec_int2) :: CLKformat
 ! ----------------------------------------------------------------------
-double precision , dimension(3,3) :: xmat
-double precision , dimension(4) :: quater, quater_0
+      REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: attitude_array  
+      CHARACTER (LEN=100) :: ORBEX_fname				
+! ----------------------------------------------------------------------
 
 
 NPARAM_glb = 0
@@ -368,10 +371,13 @@ PRINT*,'satsinex_filename =', satsinex_filename_cfg
 
 ! Flag of different models for A priori SRP value 
 ! ---------------------------------------------------------------------
-param_id = 'Flag_BW_cfg'
+param_id = 'SRP_MOD_arp'
 Call readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) Flag_BW_cfg
-PRINT*,'Flag_BW_cfg =', Flag_BW_cfg
+READ ( param_value, FMT = * , IOSTAT=ios_key ) SRP_MOD_arp
+IF (SRP_MOD_arp == 0) PRINT*,'no a priori SRP model'
+IF (SRP_MOD_arp == 1) PRINT*,'use cannonball f0 model as a priori SRP model'
+IF (SRP_MOD_arp == 2) PRINT*,'use simple box-wing model as a priori SRP model'
+IF (SRP_MOD_arp == 3) PRINT*,'use box-wing model from repro3 routines as a priori SRP model'
 ! ----------------------------------------------------------------------
 ! Reference System of Variational Equations' Partials & Parameter Estimation 
 ! ----------------------------------------------------------------------
@@ -637,22 +643,6 @@ sat_vel = sp3_velocity_cfg
 CALL write_orb2sp3 (orbits_partials_itrf, PRNmatrix, ORB2sp3_fname, sat_vel, CLKmatrix)
 ! ----------------------------------------------------------------------
 
-! ----------------------------------------------------------------------
-! Write satellite attitude to orbex format
-! ----------------------------------------------------------------------
-! Orbex filename
-!write (ORBEX_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.att'
-!CALL write_orbex (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, ORBEX_fname)
-
-!xmat(1,1:3) = (/  0.0000000000000000D0, -0.5000000000000001D0, -0.8660254037844386D0 /)
-!xmat(2,1:3) = (/  0.9238795325112867D0, -0.3314135740355917D0,  0.1913417161825449D0 /)
-!xmat(3,1:3) = (/ -0.3826834323650897D0, -0.8001031451912655D0,  0.4619397662556435D0 /)
-!quater_0(1:4) = (/ 0.5316310262343734D0, -0.4662278970042302D0,  -0.2272920256568435D0, 0.6695807158758448D0 /)
-!CALL mat2quater(xmat,quater)
-!print *,"xmat   ", xmat
-!print *,"quaternions ", quater
-!print *,"delta-quaternions ", quater - quater_0
-! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Extract residual filename tag from input .sp3 filename
@@ -677,6 +667,60 @@ Call writearray (orbit_resN, filename)
 ! Write combined orbit residuals file (RTN)
 write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbdiff_rtn.out'
 Call writearray2 (orbdiff2, filename)
+! ----------------------------------------------------------------------
+
+
+! ---------------------------------------------------------------------- 
+! Satellite Attitude
+! ---------------------------------------------------------------------- 
+! Satellite attitude matrix
+CALL attitude_orb (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, satsinex_filename_cfg, attitude_array)
+! ---------------------------------------------------------------------- 
+!print *, "attitude_array", attitude_array(1,:,1)
+
+! ----------------------------------------------------------------------
+! Write satellite attitude to orbex format
+! ----------------------------------------------------------------------
+! Orbex filename
+write (ORBEX_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.obx'
+! Write attitude matrix to orbex format
+CALL write_orbex (attitude_array, PRNmatrix, ORBEX_fname)
+! ----------------------------------------------------------------------
+! Write satellite attitude per epoch to out ascii file 
+write (filename, FMT='(A3,I4,I1,A13)') 'gag', (GPS_week), INT(GPS_day), '_attitude.out'
+Call writearray2 (attitude_array, filename)
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Attitude comparison via ORBEX files: 
+! ----------------------------------------------------------------------
+! Read ORBEX data file 1
+!CALL read_orbex (ORBEX_fname  , PRNmatrix_1, ATTmatrix_1)
+! Read ORBEX data file 2
+!CALL read_orbex (ORBEX_fname_2, PRNmatrix_2, ATTmatrix_2)
+! Attitude numerical comparison (quaternions numerical differences) between the two ORBEX data files over the common satellites (PRN) and epochs
+!CALL orbex_delta(Attitude_array1, Attitude_array2, PRN_common, att_delta, att_stat)
+
+! Write attitude quaternions' numerical differences into ascii file
+!write (filename, FMT='(A3,I4,I1,A14)') 'gag', (GPS_week), INT(GPS_day), '_att_delta.out'
+!Call writearray2 (att_delta, filename)
+
+! Write attitude quaternions comparison' statistics into ascii file
+!write (filename, FMT='(A3,I4,I1,A13)') 'gag', (GPS_week), INT(GPS_day), '_att_stat.out'
+!Call writearray (att_delta, filename)
+! ----------------------------------------------------------------------
+
+
+if (allocated(CLKmatrix)) Deallocate(CLKmatrix, stat=DeAllocateStatus)
+if (allocated(orbits_partials_icrf)) Deallocate(orbits_partials_icrf, stat=DeAllocateStatus)
+if (allocated(orbits_partials_itrf)) Deallocate(orbits_partials_itrf, stat=DeAllocateStatus)
+if (allocated(orbits_ics_icrf)) Deallocate(orbits_ics_icrf, stat=DeAllocateStatus)
+if (allocated(orbit_resN)) Deallocate(orbit_resN, stat=DeAllocateStatus)
+if (allocated(orbit_resR)) Deallocate(orbit_resR, stat=DeAllocateStatus)
+if (allocated(orbit_resT)) Deallocate(orbit_resT, stat=DeAllocateStatus)
+if (allocated(orbdiff2)) Deallocate(orbdiff2, stat=DeAllocateStatus)
+if (allocated(PRNmatrix)) Deallocate(PRNmatrix, stat=DeAllocateStatus)
+call globals_fini()
 
 if (allocated(CLKmatrix)) Deallocate(CLKmatrix, stat=DeAllocateStatus)
 if (allocated(orbits_partials_icrf)) Deallocate(orbits_partials_icrf, stat=DeAllocateStatus)

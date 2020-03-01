@@ -1,5 +1,5 @@
 #!/bin/bash
 
-rm -r EQM0* VEQ0* ECOM1_*.in emp*.in DE.430 
+rm -r EQM0* VEQ0* ECOM1_*.in ECOM2_*.in emp*.in DE.430 >& /dev/null
 
 exit 
