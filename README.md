@@ -62,6 +62,14 @@ To build the `POD` ...
 
 You should now have the executables in the bin directory: pod crs2trs brdc2ecef
 
+### Test 
+
+To test your build of the  `POD` ...
+
+    $ cd ../pod/test
+    $ sh_test_pod
+
+At the completion of the test run, the sh_test_pod script will return any differences to the standard test resuts
 
 ### Configuration File
 
