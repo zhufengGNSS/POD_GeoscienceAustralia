@@ -41,6 +41,14 @@ The `ACS` Version 0.0.1 beta release supports:
 
     pod/
     ├── README.md
+    ├── src/
+    ├── bin/ 
+    ├── lib/
+    ├── config/
+    ├── tables/
+    ├── scripts/
+    ├── LICENSE.md
+    ├── INSTALL.md
 
 ### Dependencies
 
@@ -64,10 +72,11 @@ You should now have the executables in the bin directory: pod crs2trs brdc2ecef
 
 ### Test 
 
-To test your build of the  `POD` ...
+To test your build of the  `POD` ... - You may not need the ulimit command but we found it necessary
 
     $ cd ../pod/test
-    $ sh_test_pod
+    $ ulimit -s unlimited
+    $ ./sh_test_pod
 
 At the completion of the test run, the sh_test_pod script will return any differences to the standard test resuts
 
