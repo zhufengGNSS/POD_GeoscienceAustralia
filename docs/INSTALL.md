@@ -8,21 +8,21 @@ The `ACS` Version 1.1.0 beta release supports:
 
     pod/
     ├── README.md			! General README information
-    ├── LICENSE.md		! Software License information
-    ├── aws			! Amazon Web Services config
-    ├── bin			! Binary executables directory
-    ├── build			! Cmake build directory
+    ├── LICENSE.md		    ! Software License information
+    ├── aws			        ! Amazon Web Services config
+    ├── bin			        ! Binary executables directory
+    ├── build			    ! Cmake build directory
     ├── CMakeLists.txt		! Cmake build file
-    ├── config			! Default/Master configuration files directoy 
-    ├── docs			! Documentation directory
-    ├── examples                  ! POD examples directory
-    ├── ├── EX1             ! POD example 1
-    ├── ├── EX2 		! POD example 2
-    ├── lib			! Compiled objectlibrary directory 
-    ├── scripts			! Auxillary Python and Shell scripts 
-    ├── src			! Source code directoy
-    ├── tables			! Metadata and auxillary tables directory
-    ├── test                      ! POD test directory
+    ├── config			    ! Default/Master configuration files directoy 
+    ├── docs			    ! Documentation directory
+    ├── examples ├          ! POD examples directory
+                 ├── EX1    ! POD example 1
+                 ├── EX2    ! POD example 2
+    ├── lib			        ! Compiled objectlibrary directory 
+    ├── scripts			    ! Auxillary Python and Shell scripts 
+    ├── src			        ! Source code directoy
+    ├── tables			    ! Metadata and auxillary tables directory
+    ├── test                ! POD test directory
 
 ### Supported Platforms
 The POD is supported on the following Platforms:
