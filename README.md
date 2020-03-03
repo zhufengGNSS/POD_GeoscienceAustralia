@@ -156,6 +156,10 @@ This should output the following to `stdout`...
 
 ## Acknowledgements
 
+### Eclipse Routine
+
+The routines to calculate the eclipsing times for GPS satellites were based off the original routines written by Jan Kouba, they have since been heavily modified.
+
 ### JPL Planetary Ephemerides
 
 We are using the Jet Propulison (JPL) Planetary and Lunar Ephemerides processing program ((ftp://ssd.jpl.nasa.gov/pub/eph/planets/fortran/ ), in particular the routines:
