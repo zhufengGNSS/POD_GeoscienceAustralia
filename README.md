@@ -156,6 +156,8 @@ This should output the following to `stdout`...
 
 ## Acknowledgements
 
+In this section we wish to acknowledge the use of and heritage of some of the source code that we have used to help develop the POD.
+
 ### Eclipse Routine
 
 The routines to calculate the eclipsing times for GPS satellites were based off the original routines written by Jan Kouba, they have since been heavily modified.
