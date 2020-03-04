@@ -40,15 +40,15 @@ The `ACS` Version 0.0.1 beta release supports:
 ## Directory Structure
 
     pod/
+    ├── LICENSE.md
+    ├── INSTALL.md
     ├── README.md
     ├── src/
-    ├── bin/ 
-    ├── lib/
+    ├── bin/  (created)
+    ├── lib/  (created)
     ├── config/
     ├── tables/
     ├── scripts/
-    ├── LICENSE.md
-    ├── INSTALL.md
 
 ### Dependencies
 
