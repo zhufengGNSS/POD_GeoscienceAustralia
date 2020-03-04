@@ -111,10 +111,10 @@ if (${ephem} != '') then
   ln -s ~/pod/tables/${ephem}        ${ephem}        >& /dev/null 
 endif
 if (${eop} != '') then
-  ln -s ~/pod/data/${eop}            ${eop}          >& /dev/null 
+  ln -s ~/pod/tables/${eop}            ${eop}          >& /dev/null 
 endif
 if (${leapsec} != '') then
-  ln -s ~/pod/data/${leapsec}        ${leapsec}      >& /dev/null 
+  ln -s ~/pod/tables/${leapsec}        ${leapsec}      >& /dev/null 
 endif
 
 if ( `find  . -type l -print | wc | awk '{print $1}'` > 0 ) ls -l `find  . -type l -print`
