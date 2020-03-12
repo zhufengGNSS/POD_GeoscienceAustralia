@@ -28,6 +28,7 @@ PROGRAM  main_brdcorbit
       USE m_antoffset
       USE m_eop_data
       USE m_eop_cor
+      USE mdl_config
       IMPLICIT NONE
 
 !--------------------------------------------------------------------
@@ -52,7 +53,7 @@ PROGRAM  main_brdcorbit
       REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::EPHNEW2
       REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::ECEFPOS
       REAL (KIND = prec_d),DIMENSION(:,:,:),ALLOCATABLE ::SATCLK
-      REAL (KIND = prec_d),DIMENSION(:,:),ALLOCATABLE ::NEWEPOCH
+!      REAL (KIND = prec_d),DIMENSION(:,:),ALLOCATABLE ::NEWEPOCH
       REAL (KIND = prec_d),DIMENSION(:,:),ALLOCATABLE ::NEWEPOCH2
       REAL (KIND = prec_d) :: A0UTC,A1UTC,ITUTC
       REAL (KIND = prec_d) :: CPU_t0, CPU_t1
@@ -106,7 +107,6 @@ PROGRAM  main_brdcorbit
 
 
 ! ----------------------------------------------------------------
-PI = 4*ATAN(1.D0)        
 
 ! If PRINTID = 1, print out the debugging.
 PRINTID = 0
@@ -116,7 +116,6 @@ PRINTID = 0
 ! ANTOPT = 1 : correct the antenna offset
 ! ANTOPT = 0 : no correction 
 ANTOPT = 1
-
 ! START CPU COUNTER
 ! -----------------
 CALL cpu_time (CPU_t0)
@@ -133,13 +132,13 @@ ALLOCATE(EPHNEW2(MAXNPAR,MAXEPO,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(IBAD(MAXEPO,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(ECEFPOS(86400/SAMPLE,3,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(SATCLK(86400/SAMPLE,1,MAXNSAT), STAT = AllocateStatus)
-ALLOCATE(NEWEPOCH(86400/SAMPLE,MAXNSAT), STAT = AllocateStatus)
+!ALLOCATE(NEWEPOCH(86400/SAMPLE,MAXNSAT), STAT = AllocateStatus)
 ALLOCATE(NEWEPOCH2(86400/SAMPLE,MAXNSAT), STAT = AllocateStatus)
 SATCLK = 999999.999999d0
 EPHNEW2 = 0.d0
 EPHNEW  = 0.d0
 ECEFPOS = 0.d0
-NEWEPOCH= 0.d0
+NEWEPOCH2= 0.d0
 IPRN= 0
 ISTR= 0
 CALL brdc_cmdline
@@ -220,7 +219,7 @@ JJ = 0
 KK = 0
 K = 0
 DO I=1, MAXNSAT
-! at the current stage the GLONASS is excluded in the broadcast-related processing.
+
 IF (I < 50 .OR. I < 150 .AND. I > 100 .OR. &
     I < 200 .AND. I > 150 .OR. I > 200) THEN
 
@@ -234,7 +233,7 @@ IF (I < 50 .OR. I < 150 .AND. I > 100 .OR. &
                DO II=1, 7
                JJ = JJ + 1
                DELT = SAMPLE*(II-1) + EPHNEW(2,K,I)
-               NEWEPOCH(JJ,I) = DELT 
+!               NEWEPOCH(JJ,I) = DELT 
 !print*,'PRN SAT', I, 'DELT =', DELT,  'JJ =', JJ
                END DO
             ELSE
@@ -279,8 +278,8 @@ IF (I < 50 .OR. I < 150 .AND. I > 100 .OR. &
                DO II=1, NINT(DT/SAMPLE+1)-1
                JJ = JJ + 1
                DELT = SAMPLE*(II-1) + EPHNEW(2,K,I)
-               NEWEPOCH(JJ,I) = DELT 
-!print*,'PRN SAT', I, 'DELT =', DELT,  'JJ =', JJ
+!               NEWEPOCH(JJ,I) = DELT 
+!print*,'PRN SAT', I, 'DELT =', DELT,  'JJ =', JJ, 'II =',II, 'DT =', DT
                END DO
             END IF
               
@@ -787,7 +786,7 @@ PRNmatrix(k_sat) = PRN_ti
 END IF
 END DO
 sat_vel = 0
-
+POD_MODE_cfg = 1
 ! WRITE THE ECEF POSITIONS IN A SP3 FORMAT
 ! ----------------------------------------
 !CALL write_brd2sp3 (ISTR,IPRN,TOTG,IG,IR,IE,IC,IJ,SATTYPE, SAMPLE,IYEAR4,MONTH,IDAY,NEWEPOCH2, ECEFPOS, OUTPUT, 0)
