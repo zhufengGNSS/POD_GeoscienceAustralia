@@ -187,8 +187,8 @@ src/time_TT_sec.f90
 add_library(boxwing
 src/BOXWINIT.f90
 src/ERPFBOXW.f90
-src/SURFBOXW.f
-src/PROPBOXW.f
+src/SURFBOXW.f90
+src/PROPBOXW.f90
 src/SRPFBOXW.f90
 )
 
