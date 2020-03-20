@@ -1,11 +1,25 @@
 # Analysis Centre Software - POD
 
-The `ACS` Version 1.1.0 beta release supports:
+`ACS POD Version 1.1.0 beta release`
 
-1. The `POD` 
+### Supported Platforms
+The POD is supported on the following Platforms
 
+* Linux
+* Mac OSX
+  
+### Dependencies
+The POD has several software dependencies
+
+* C/C++ and Fortran compiler. We use and recommend [gcc-g++ and gfortran](https://gcc.gnu.org/git.html)
+* BLAS and [LAPACK](https://github.com/Reference-LAPACK/lapack) linear algebra libraries. We use and recommend [OpenBlas](https://www.openblas.net/)
+* Cmake Version3 
+* Python Version3 (including Numpy and Matplotlib modules)
+
+### Download
+    $git clone git@bitbucket.org:geoscienceaustralia/pod.git
+    
 ## Directory Structure
-
     pod/
     ├── README.md			! General README information
     ├── LICENSE.md		    ! Software License information
@@ -24,21 +38,8 @@ The `ACS` Version 1.1.0 beta release supports:
     ├── tables			    ! Metadata and auxillary tables directory
     ├── test                ! POD test directory
 
-### Supported Platforms
-The POD is supported on the following Platforms:
-  Linux
-  Mac OSX
-  
-### Dependencies
-The POD has several software dependencies:
-
-  C/C++ and Fortran compiler. We use and recommend [gcc-g++ and gfortran](https://gcc.gnu.org/git.html)
-  BLAS and [LAPACK](https://github.com/Reference-LAPACK/lapack) linear algebra libraries. We use and recommend [OpenBlas](https://www.openblas.net/)
-  Cmake version3 
-  Python version3 (including Numpy and Matplotlib modules) 
 
 ### Build
-
 To build the `POD` ...
 
     $ cd pod
@@ -52,16 +53,16 @@ You should now have the executables in the bin directory: pod crs2trs brdc2ecef
 
 ### User Environment (Shell) setup
 
-In you home directory create a link to the pod installation directory
+In you home directory create a link to the pod installation directory ...
+
     $ cd ~
     $ ln -s /data/software/acs/pod/install/directory pod
     
-And/Or
-    Add the pod installation executable diretory (~/pod/bin) to your execuatble search path.
+Add the pod installation executable diretory (~/pod/bin) to your execuatble search path.
 
-    Bash shell example:
+Bash shell example:
     
-      export PATH=~/pod/bin:$PATH
+    export PATH=~/pod/bin:$PATH
 
 ### Test 
 
