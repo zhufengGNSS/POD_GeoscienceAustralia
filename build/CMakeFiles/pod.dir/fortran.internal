@@ -1,6 +1,0 @@
-# The fortran modules provided by this target.
-provides
- m_clock_read.mod
- m_pod_gnss.mod
- m_read_leapsec.mod
- m_write_orb2sp3.mod

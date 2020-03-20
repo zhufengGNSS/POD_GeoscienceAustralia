@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../lib/libga_tz.a  CMakeFiles/ga_tz.dir/src/time_TT.f90.o CMakeFiles/ga_tz.dir/src/time_GPS.f90.o CMakeFiles/ga_tz.dir/src/time_UTC.f90.o CMakeFiles/ga_tz.dir/src/time_TAI.f90.o CMakeFiles/ga_tz.dir/src/time_GPSweek.f90.o CMakeFiles/ga_tz.dir/src/time_GPSweek2.f90.o CMakeFiles/ga_tz.dir/src/time_GPSweek3.f90.o CMakeFiles/ga_tz.dir/src/time_TT_sec.f90.o
-/usr/bin/ranlib ../lib/libga_tz.a
