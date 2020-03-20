@@ -45,6 +45,7 @@ set(CMAKE_DEPENDS_CHECK_Fortran
   "/data/thomas3/pod/src/m_read_svsinex.f03" "/data/thomas3/pod/build/CMakeFiles/pod_lib.dir/src/m_read_svsinex.f03.o"
   "/data/thomas3/pod/src/m_rso.f03" "/data/thomas3/pod/build/CMakeFiles/pod_lib.dir/src/m_rso.f03.o"
   "/data/thomas3/pod/src/m_satinfo.f90" "/data/thomas3/pod/build/CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o"
+  "/data/thomas3/pod/src/m_satmetadata.f03" "/data/thomas3/pod/build/CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o"
   "/data/thomas3/pod/src/m_shadow.f90" "/data/thomas3/pod/build/CMakeFiles/pod_lib.dir/src/m_shadow.f90.o"
   "/data/thomas3/pod/src/m_sp3.f03" "/data/thomas3/pod/build/CMakeFiles/pod_lib.dir/src/m_sp3.f03.o"
   "/data/thomas3/pod/src/m_sp3_PRN.f03" "/data/thomas3/pod/build/CMakeFiles/pod_lib.dir/src/m_sp3_PRN.f03.o"

@@ -10,6 +10,7 @@ MODULE m_writeorbit_multi
 ! Author :	Dr. Thomas Papanikolaou
 !			Geoscience Australia, Frontier-SI
 ! Created:	21 March 2019
+! Modified:     26 Feb 2020 Simon McClusky
 ! ----------------------------------------------------------------------
 
 
@@ -100,13 +101,14 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf,orbits_ics_icrf,P
       DOUBLE PRECISION FD  
       REAL (KIND = prec_d) :: Sec_00, mjd, mjd_1, jd0
       !INTEGER (KIND = prec_int4) :: DOY
-      CHARACTER (LEN=10) :: srp_model
+      CHARACTER (LEN=10) :: srp_model, apr_srp_model
 ! ----------------------------------------------------------------------
     CHARACTER(LEN=8)  :: date_mach
     CHARACTER(LEN=10) :: time_mach
     CHARACTER(LEN=5)  :: zone_mach
     INTEGER :: time_values(8)
     REAL (KIND = prec_q) :: kepler_ic(9),r_ic(3),v_ic(3)
+    CHARACTER(LEN=100) :: ic_param_list
 ! ----------------------------------------------------------------------
 
 
@@ -254,7 +256,7 @@ WRITE (UNIT=UNIT_IN,FMT='(10A)'            ,IOSTAT=ios_ith) '#INFO    Earth Orie
 											& '[EOP solution: ',trim(EOP_sol),'] ', &
 											& '[EOP data file: ',trim(EOP_data),'] ', &
 											& '[Precession-Nutation model: IAU',TRIM(iau_pn_model),']'
-
+      
 WRITE (UNIT=UNIT_IN,FMT='(a,i3)'           ,IOSTAT=ios_ith) '#INFO    Number of Satellites:              ',Nsat
 WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of Parameters per satellite:',NPARAM_glb+6
 WRITE (UNIT=UNIT_IN,FMT='(a,i4)'           ,IOSTAT=ios_ith) '#INFO    Number of Partials:                ',Nparam-8
@@ -268,25 +270,57 @@ DO i_sat = 1 , Nsat
    jd0 = 2400000.5D0
    CALL iau_JD2CAL ( jd0, mjd, Iyear, Imonth, Iday, FD, J_flag )
    CALL iau_CAL2JD ( Iyear, 1, 1, jd0, mjd_1, J_flag )   
-   DOY = INT(mjd) - (mjd_1-1) 
+   !DOY = INT(mjd) - (mjd_1-1) 
+   DOY = IDNINT(mjd-mjd_1) + 1
+   YR = Iyear
    PRN_isat = PRN_array(i_sat)
    CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat) 
-   ! SRP model
-   IF (SRP_MOD_glb == 1) THEN
-      srp_model = 'Cannonball' 
-   ELSE IF (SRP_MOD_glb == 2) THEN
-      srp_model = 'Box-wing'   
-   ELSE IF (SRP_MOD_glb == 3) THEN
-	IF (ECOM_param_glb == 1) THEN
-      srp_model = 'ECOM1'   
-	ELSE IF (ECOM_param_glb == 2) THEN
-      srp_model = 'ECOM2'   
-	END IF
+
+! SRP model and SRP parameters
+!---------------------------------------------------------------------------------
+! A priori SRP model
+! MOD
+   apr_srp_model    = 'UNKNOWN'                                                                                        
+   IF      (SRP_MOD_arp == 0 ) then
+      apr_srp_model = 'NONE   '
+   ELSE IF (SRP_MOD_arp == 1 ) then
+      apr_srp_model = 'CBALL  '
+   ELSE IF (SRP_MOD_arp == 2 ) then
+      apr_srp_model = 'SBOXW  '
+   ELSE IF (SRP_MOD_arp == 3 ) then
+      apr_srp_model = 'FBOXW  '
    END IF
+
+! Estimated SRP (adjusted) parameters
+   srp_model = 'NONE'
+   ic_param_list =  ''
+   IF (ECOM_param_glb /= 0 ) THEN
+     IF      (ECOM_param_glb == 1) THEN
+       srp_model = 'ECOM1  '
+       ic_param_list =  'X Y Z XV YV ZV DR YR BR C1DR S1DR C1YR S1YR C1BR S1BR'
+       
+     ELSE IF (ECOM_param_glb == 2) THEN
+       srp_model = 'ECOM2  '   
+       ic_param_list =  'X Y Z XV YV ZV DR YR BR C2DR S2DR C4DR S4DR C1BR S1BR'
+       
+     ELSE IF (ECOM_param_glb == 3) THEN
+       srp_model = 'SBOXW  '
+       ic_param_list =  'X Y Z XV YV ZV DXR DZR DSPR YR BR C1BR S1BR'
+     END IF
+   END IF
+      
+   IF (EMP_param_glb /= 0 ) THEN
+     IF (EMP_param_glb == 1) THEN
+       srp_model = 'EMPRCL '
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N'
+     END IF
+   END IF
+!---------------------------------------------------------------------------------
+
 ! IC INFO   
-   WRITE (UNIT=UNIT_IN,FMT='(a,a,1x,a3,1x,a,1x,i3,1x,a,1x,a,1x,a,1x,F10.5,1x,a,1x,a,1x,a,1x,i3,1x,a)' ,IOSTAT=ios_ith) & 
+   WRITE (UNIT=UNIT_IN,FMT='(a,a,1x,a3,1x,a,1x,i3,1x,a,1x,a,1x,a,1x,F10.5,1x,a,1x,a,1x,a,1x,a,1x,i3,1x,a,1x,a)',IOSTAT=ios_ith) & 
           &'#IC_INFO ','PRN:',PRN_array(i_sat),'SVN:',SVNID,'BLK_TYP:',TRIM(BLKTYP),' MASS:',MASS, &
-          &'SRP:', TRIM(srp_model), 'Nparam:', NPARAM_glb+6, '[IC PARAM LIST - X Y Z XD YD ZD DRAD .....]'
+          &'SRP:', TRIM(apr_srp_model), TRIM(srp_model), 'Nparam:', NPARAM_glb+6, '-', trim(ic_param_list)
 ! IC 
    WRITE (UNIT=UNIT_IN,FMT='(a,a3,1x,I3,1x,a,1x,a,2x)',ADVANCE="no",IOSTAT=ios_ith) &
           &'#IC_XYZ  ',PRN_array(i_sat),SVNID,TRIM(BLKTYP),'ICRF'

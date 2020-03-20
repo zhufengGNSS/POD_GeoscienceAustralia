@@ -41,6 +41,7 @@ provides
  m_read_svsinex.mod
  m_rso.mod
  m_satinfo.mod
+ m_satmetadata.mod
  m_shadow.mod
  m_sp3.mod
  m_sp3_prn.mod

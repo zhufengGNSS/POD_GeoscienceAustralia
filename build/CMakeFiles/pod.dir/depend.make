@@ -120,6 +120,7 @@ CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod_lib.dir/m_attitude_orb.mod
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod.dir/m_clock_read.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod.dir/m_pod_gnss.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod.dir/m_read_leapsec.mod.stamp
+CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod_lib.dir/m_satmetadata.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod.dir/m_write_orb2sp3.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod_lib.dir/m_write_orbex.mod.stamp
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod_lib.dir/m_writearray.mod.stamp
@@ -139,6 +140,7 @@ CMakeFiles/pod.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/m_force_tides.mod
 CMakeFiles/pod.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/m_matrixrxr.mod.stamp
 CMakeFiles/pod.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/m_pd_geopotential.mod.stamp
 CMakeFiles/pod.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/m_tides_ocean.mod.stamp
+CMakeFiles/pod.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/mdl_eop.mod.stamp
 CMakeFiles/pod.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/mdl_param.mod.stamp
@@ -151,6 +153,8 @@ CMakeFiles/pod.dir/src/pd_gm.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.sta
 CMakeFiles/pod.dir/src/prn_shift.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod.dir/src/prn_shift.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
 
+
+CMakeFiles/pod.dir/src/scan0orb.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod.dir/src/scan0orb.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod.dir/src/scan0orb.f03.o: CMakeFiles/pod_lib.dir/mdl_param.mod.stamp
 CMakeFiles/pod.dir/src/scan0orb.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp

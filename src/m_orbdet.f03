@@ -169,9 +169,10 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       CHARACTER (LEN=100) :: EQMfname_back, VEQfname_back
       REAL (KIND = prec_d) :: orbarc_back
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_back, veqSmatrix_back, veqPmatrix_back
+      CHARACTER (LEN=100):: mesg
+
 ! ----------------------------------------------------------------------
-	  
-! FIXME: Variable initialisation
+! Variable initialisation
 CPR_corr = 0.d0
 Bias_corr = 0.d0
 	  
@@ -186,7 +187,7 @@ Call prm_main (EQMfname)
 SVEC_Zo_ESTIM = SVEC_Zo
 !Bias_accel_aposteriori = Bias_accel_glb
 !CPR_CS_aposteriori = CPR_CS_glb
-! ----------------------------------------------------------------------	! ----------------------------------------------------------------------
+! ----------------------------------------------------------------------	
 
 ! ----------------------------------------------------------------------
 ! Estimator settings :: Module mdl_param.f03 global parameters
@@ -243,53 +244,53 @@ CALL eclipse_integstep (EQMfname, VEQfname, mjd, r_sat, v_sat, integstep_flag, i
 ! ----------------------------------------------------------------------
 !print *,"integstep_flag,integstep_initial, integstep_reduced", integstep_flag,integstep_initial, integstep_reduced 
 
-
 ! ----------------------------------------------------------------------
 ! Initial conditions
 ! ----------------------------------------------------------------------
 ! Empirical parameters apriori values set to zero
-IF (EMP_param_glb >0) THEN
-i = 999
-Bias_0 = (/ 0.0D0, 0.0D0, 0.0D0/)
-CPR_CS_0(1,:) = (/ 0.0D0, 0.0D0/)
-CPR_CS_0(2,:) = (/ 0.0D0, 0.0D0/)
-CPR_CS_0(3,:) = (/ 0.0D0, 0.0D0/)
+IF (EMP_param_glb > 0) THEN
+   i = 999
+   Bias_0 = (/ 0.0D0, 0.0D0, 0.0D0/)
+   CPR_CS_0(1,:) = (/ 0.0D0, 0.0D0/)
+   CPR_CS_0(2,:) = (/ 0.0D0, 0.0D0/)
+   CPR_CS_0(3,:) = (/ 0.0D0, 0.0D0/)
 !Call empirical_init (i, Bias_0, CPR_CS_0)
-Call empirical_init_file (i, Bias_0, CPR_CS_0)
+   Call empirical_init_file (i, Bias_0, CPR_CS_0)
 END IF
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 ! Initial conditions for solar radiation pressure
 ! ----------------------------------------------------------------------
 IF (ECOM_param_glb /= 0) THEN
-IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
-IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
-IF (ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
-!ALLOCATE (ECOM_0_coef(NPARAM_glb), STAT = AllocateStatus)
-!if (AllocateStatus .ne. 0) then
-!        print *, "failed to allocate ECOM_0_coef"
-!        goto 100
-!end if
-ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
-if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate ECOM_coef"
-        goto 100
-end if
-ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
-if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate ECOM_accel_aposteroiri"
-        goto 100
-end if
+   IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
+   IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
+   IF (ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
+   IF (ECOM_param_glb > 3) PRINT*,'UNKNOWN SRP MODEL IS ACTIVATED :-('
+   ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
+   if (AllocateStatus .ne. 0) then
+        write(mesg, *) "Not enough memory - failed to allocate ECOM_coef, dimension = ", Nparam_glb
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
+   end if
+   ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
+   if (AllocateStatus .ne. 0) then
+        write(mesg, *) "Not enough memory - failed to allocate ECOM_accel_aposteroiri, ", &
+                "dimension = ", Nparam_glb
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
+   end if
 !srp_i = ECOM_param_glb
 !DO ii=1,NPARAM_glb
 !ECOM_0_coef(ii) = 0.0D0
 !END DO
 !ECOM_0_coef = 0.d0
 !print*,'ECOM_0_coef=',ECOM_0_coef
-CALL ecom_init (ECOM_0_coef)
+   CALL ecom_init (ECOM_0_coef)
+ELSE IF (EMP_param_glb /= 0 ) THEN
+!PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
+   PRINT*,'EMPIRICAL MODEL IS ACTIVATED '
 ELSE
-PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
+   PRINT*,'NEITHER ECOM SRP MODEL or EMPIRICAL MODEL ARE ACTIVATED'
 END IF
+
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -307,7 +308,6 @@ Do i = 0 , Niter
 !PRINT *,"Iteration:", i
 
 ! Orbit Numerical Integration: Equation of Motion and Variational Equations
-
 ! ----------------------------------------------------------------------
 ! Numerical Integration: Variational Equations
 ! ----------------------------------------------------------------------
@@ -412,69 +412,87 @@ CPR_CS_aposteriori = CPR_CS_glb + CPR_corr
 Bias_0 = Bias_accel_aposteriori
 CPR_CS_0 = CPR_CS_aposteriori
 Call empirical_init (i, Bias_0, CPR_CS_0)
-
 End If  ! End of empirical model
 ! **********************************************************************
 ! ----------------------------------------------------------------------
 ! ECOM-based SRP model
 ! **********************************************************************
 ! added by Dr. Tzupang Tseng 11-12-2018
-If ( ECOM_param_glb.eq.1 .or. ECOM_param_glb.eq.2) Then
+If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
 
       PD_Param_ID = 0
-If (ECOM_Bias_glb(1) == 1) Then
+   If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_Bias_glb(2) == 1) Then
+   End IF
+   If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_Bias_glb(3) == 1) Then
+   End IF
+   If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_CPR_glb(1) == 1) THEN
+   End IF
+   If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_CPR_glb(2) == 1) THEN
+   End IF
+   If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End IF
-If (ECOM_CPR_glb(3) == 1) THEN
+   End IF
+   If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
 ! S term
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-End If
+   End If
 
 
-IF (NPARAM_glb /= PD_Param_ID) THEN
-PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-PRINT*,           'NPARAM_glb  =', NPARAM_glb
-PRINT*,           'PD_Param_ID =', PD_Param_ID
-END IF
+   IF (NPARAM_glb /= PD_Param_ID) THEN
+   PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+   PRINT*,           'NPARAM_glb  =', NPARAM_glb
+   PRINT*,           'PD_Param_ID =', PD_Param_ID
+   PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+   STOP
+   END IF
 END IF
 
 IF (ECOM_param_glb == 3) THEN
-PD_Param_ID = NPARAM_glb
-DO PD_Param_ID = 1,9
-   ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-END DO
+   PD_Param_ID = 7   
+   DO k = 1,PD_Param_ID
+   ECOM_coef (k) = Xmatrix(6+k,1)
+   END DO
+
+   IF (NPARAM_glb /= PD_Param_ID) THEN
+   PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+   PRINT*,           'NPARAM_glb  =', NPARAM_glb
+   PRINT*,           'PD_Param_ID =', PD_Param_ID
+   PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+   STOP
+   END IF
+
 END IF
 
-ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
+!IF (ECOM_param_glb == 3) THEN
+!PD_Param_ID = NPARAM_glb
+!DO PD_Param_ID = 1,9
+!   ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+!END DO
+!END IF
+
+IF (ECOM_param_glb /= 0) THEN
+   ECOM_accel_aposteriori = ECOM_accel_glb + ECOM_coef
 
 !print*,'ECOM_coef=',ECOM_coef
 !print*,'ECOM_accel_glb=',ECOM_accel_glb
@@ -482,29 +500,31 @@ ECOM_accel_aposteriori = ECOM_accel_glb    + ECOM_coef
 
 ! ----------------------------------------------------------------------
 ! SRP parameters
-ECOM_0_coef = ECOM_accel_aposteriori
+   ECOM_0_coef = ECOM_accel_aposteriori
 !fname_id = PRN
-CALL doy2str(DOYSTR)
-fname_id = DOYSTR
-IF (ECOM_param_glb == 1) THEN
-fname = 'ECOM1_srp.in'
-param_id = 'ECOM1'
-write (param_value, *) ECOM_0_coef
-Call write_prmfile (fname, fname_id, param_id, param_value)
-END IF
+   CALL doy2str(DOYSTR)
+   fname_id = DOYSTR
+   IF (ECOM_param_glb == 1) THEN
+   fname = 'ECOM1_srp.in'
+   param_id = 'ECOM1'
+   write (param_value, *) ECOM_0_coef
+   Call write_prmfile (fname, fname_id, param_id, param_value)
+   END IF
 
-IF (ECOM_param_glb == 2) THEN
-fname = 'ECOM2_srp.in'
-param_id = 'ECOM2'
-write (param_value, *) ECOM_0_coef
-Call write_prmfile (fname, fname_id, param_id, param_value)
-END IF
+   IF (ECOM_param_glb == 2) THEN
+   fname = 'ECOM2_srp.in'
+   param_id = 'ECOM2'
+   write (param_value, *) ECOM_0_coef
+   Call write_prmfile (fname, fname_id, param_id, param_value)
+   END IF
 
-IF (ECOM_param_glb == 3) THEN
-fname = 'SBOXW_srp.in'
-param_id = 'SBOXW'
-write (param_value, *) ECOM_0_coef
-Call write_prmfile (fname, fname_id, param_id, param_value)
+   IF (ECOM_param_glb == 3) THEN
+   fname = 'SBOXW_srp.in'
+   param_id = 'SBOXW'
+   write (param_value, *) ECOM_0_coef
+   Call write_prmfile (fname, fname_id, param_id, param_value)
+   END IF
+
 END IF
 
 ! End of SRP model
@@ -596,8 +616,9 @@ Call orbinteg (EQMfname_pred, VEQmode, orb_icrf, veq0, veq1)
 ! Orbit estimated part without predicted part
 ALLOCATE (orb_icrf_estim(Nepochs_estim,sz2), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate orb_icrf_estim"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate orb_icrf_estim, dimension=(", &
+                Nepochs_estim, ",", sz2, ")"
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
 end if
 orb_icrf_estim = orb_icrf(1:Nepochs_estim,1:sz2)
 
@@ -607,8 +628,9 @@ sz1 = size(dorb_icrf, DIM = 1)
 sz2 = size(dorb_icrf, DIM = 2)
 ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate Vres"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate Vres, dimension=(", &
+                sz1, ",5)"
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
 end if
 Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3) 
@@ -634,8 +656,9 @@ sz1 = size(dorb_icrf, DIM = 1)
 sz2 = size(dorb_icrf, DIM = 2)
 ALLOCATE (Vres(sz1,5), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
-        print *, "failed to allocate Vres"
-        goto 100
+        write(mesg, *) "Not enough memory - failed to allocate Vres, dimension=(", &
+                sz1, ",5)"
+        call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
 end if
 Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3)

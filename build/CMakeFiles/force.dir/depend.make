@@ -28,6 +28,7 @@ CMakeFiles/force.dir/src/force_sum.f03.o: CMakeFiles/pod_lib.dir/m_pd_empirical.
 CMakeFiles/force.dir/src/force_sum.f03.o: CMakeFiles/pod_lib.dir/m_shadow.mod.stamp
 CMakeFiles/force.dir/src/force_sum.f03.o: CMakeFiles/pod_lib.dir/m_tides_ocean.mod.stamp
 CMakeFiles/force.dir/src/force_sum.f03.o: CMakeFiles/pod_lib.dir/m_writedata.mod.stamp
+CMakeFiles/force.dir/src/force_sum.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/force.dir/src/force_sum.f03.o: CMakeFiles/pod_lib.dir/mdl_eop.mod.stamp
 CMakeFiles/force.dir/src/force_sum.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/force.dir/src/force_sum.f03.o: CMakeFiles/pod_lib.dir/mdl_param.mod.stamp

@@ -42,6 +42,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/pod_lib.dir/src/m_read_svsinex.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_rso.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o"
+  "CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_shadow.f90.o"
   "CMakeFiles/pod_lib.dir/src/m_sp3.f03.o"
   "CMakeFiles/pod_lib.dir/src/m_sp3_PRN.f03.o"

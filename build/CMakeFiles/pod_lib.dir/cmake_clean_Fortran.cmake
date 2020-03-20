@@ -164,6 +164,10 @@ FILE(REMOVE
   "M_SATINFO.mod"
   "CMakeFiles/pod_lib.dir/m_satinfo.mod.stamp"
 
+  "m_satmetadata.mod"
+  "M_SATMETADATA.mod"
+  "CMakeFiles/pod_lib.dir/m_satmetadata.mod.stamp"
+
   "m_shadow.mod"
   "M_SHADOW.mod"
   "CMakeFiles/pod_lib.dir/m_shadow.mod.stamp"

@@ -7,7 +7,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/brdc2ecef.dir/src/brdc_cmdline.f03.o"
   "CMakeFiles/brdc2ecef.dir/src/brdc_qc_gal.f90.o"
   "CMakeFiles/brdc2ecef.dir/src/brdc_qc_gps.f90.o"
-  "CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.o"
   "CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.o"
   "CMakeFiles/brdc2ecef.dir/src/glnacc.f.o"
   "CMakeFiles/brdc2ecef.dir/src/glnorbint.f.o"

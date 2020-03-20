@@ -339,6 +339,7 @@ CMakeFiles/pod_lib.dir/src/m_orbitmain.f03.o.provides.build:
 	$(CMAKE_COMMAND) -E touch CMakeFiles/pod_lib.dir/src/m_orbitmain.f03.o.provides.build
 CMakeFiles/pod_lib.dir/build: CMakeFiles/pod_lib.dir/src/m_orbitmain.f03.o.provides.build
 
+CMakeFiles/pod_lib.dir/src/m_orbresize.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_orbresize.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_orbresize.f03.o.provides.build: CMakeFiles/pod_lib.dir/m_orbresize.mod.stamp
 CMakeFiles/pod_lib.dir/m_orbresize.mod.stamp: CMakeFiles/pod_lib.dir/src/m_orbresize.f03.o
@@ -376,6 +377,7 @@ CMakeFiles/pod_lib.dir/src/m_pd_force.f03.o: CMakeFiles/pod_lib.dir/m_pd_empiric
 CMakeFiles/pod_lib.dir/src/m_pd_force.f03.o: CMakeFiles/pod_lib.dir/m_pd_geopotential.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_pd_force.f03.o: CMakeFiles/pod_lib.dir/m_shadow.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_pd_force.f03.o: CMakeFiles/pod_lib.dir/m_tides_ocean.mod.stamp
+CMakeFiles/pod_lib.dir/src/m_pd_force.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_pd_force.f03.o: CMakeFiles/pod_lib.dir/mdl_eop.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_pd_force.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_pd_force.f03.o: CMakeFiles/pod_lib.dir/mdl_param.mod.stamp
@@ -433,6 +435,7 @@ CMakeFiles/pod_lib.dir/src/m_rso.f03.o.provides.build:
 	$(CMAKE_COMMAND) -E touch CMakeFiles/pod_lib.dir/src/m_rso.f03.o.provides.build
 CMakeFiles/pod_lib.dir/build: CMakeFiles/pod_lib.dir/src/m_rso.f03.o.provides.build
 
+CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o.provides.build: CMakeFiles/pod_lib.dir/m_satinfo.mod.stamp
 CMakeFiles/pod_lib.dir/m_satinfo.mod.stamp: CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o
@@ -440,6 +443,16 @@ CMakeFiles/pod_lib.dir/m_satinfo.mod.stamp: CMakeFiles/pod_lib.dir/src/m_satinfo
 CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o.provides.build:
 	$(CMAKE_COMMAND) -E touch CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o.provides.build
 CMakeFiles/pod_lib.dir/build: CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o.provides.build
+
+CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o: CMakeFiles/pod_lib.dir/m_read_satsnx.mod.stamp
+CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o: CMakeFiles/pod_lib.dir/mdl_param.mod.stamp
+CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
+CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o.provides.build: CMakeFiles/pod_lib.dir/m_satmetadata.mod.stamp
+CMakeFiles/pod_lib.dir/m_satmetadata.mod.stamp: CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o
+	$(CMAKE_COMMAND) -E cmake_copy_f90_mod m_satmetadata.mod CMakeFiles/pod_lib.dir/m_satmetadata.mod.stamp GNU
+CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o.provides.build:
+	$(CMAKE_COMMAND) -E touch CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o.provides.build
+CMakeFiles/pod_lib.dir/build: CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o.provides.build
 
 CMakeFiles/pod_lib.dir/src/m_shadow.f90.o: CMakeFiles/pod_lib.dir/m_get_lambda.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_shadow.f90.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
@@ -452,6 +465,7 @@ CMakeFiles/pod_lib.dir/src/m_shadow.f90.o.provides.build:
 	$(CMAKE_COMMAND) -E touch CMakeFiles/pod_lib.dir/src/m_shadow.f90.o.provides.build
 CMakeFiles/pod_lib.dir/build: CMakeFiles/pod_lib.dir/src/m_shadow.f90.o.provides.build
 
+CMakeFiles/pod_lib.dir/src/m_sp3.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_sp3.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_sp3.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_sp3.f03.o.provides.build: CMakeFiles/pod_lib.dir/m_sp3.mod.stamp
@@ -471,6 +485,7 @@ CMakeFiles/pod_lib.dir/src/m_sp3_PRN.f03.o.provides.build:
 CMakeFiles/pod_lib.dir/build: CMakeFiles/pod_lib.dir/src/m_sp3_PRN.f03.o.provides.build
 
 CMakeFiles/pod_lib.dir/src/m_statdelta.f03.o: CMakeFiles/pod_lib.dir/m_statist.mod.stamp
+CMakeFiles/pod_lib.dir/src/m_statdelta.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statdelta.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statdelta.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statdelta.f03.o.provides.build: CMakeFiles/pod_lib.dir/m_statdelta.mod.stamp
@@ -490,6 +505,7 @@ CMakeFiles/pod_lib.dir/src/m_statist.f03.o.provides.build:
 CMakeFiles/pod_lib.dir/build: CMakeFiles/pod_lib.dir/src/m_statist.f03.o.provides.build
 
 CMakeFiles/pod_lib.dir/src/m_statorbit.f03.o: CMakeFiles/pod_lib.dir/m_statist.mod.stamp
+CMakeFiles/pod_lib.dir/src/m_statorbit.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statorbit.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statorbit.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statorbit.f03.o.provides.build: CMakeFiles/pod_lib.dir/m_statorbit.mod.stamp
@@ -501,6 +517,7 @@ CMakeFiles/pod_lib.dir/build: CMakeFiles/pod_lib.dir/src/m_statorbit.f03.o.provi
 
 CMakeFiles/pod_lib.dir/src/m_statorbit2.f03.o: CMakeFiles/pod_lib.dir/m_orbinfo.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statorbit2.f03.o: CMakeFiles/pod_lib.dir/m_statist.mod.stamp
+CMakeFiles/pod_lib.dir/src/m_statorbit2.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statorbit2.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statorbit2.f03.o: CMakeFiles/pod_lib.dir/mdl_param.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_statorbit2.f03.o: CMakeFiles/pod_lib.dir/mdl_planets.mod.stamp
@@ -533,6 +550,7 @@ CMakeFiles/pod_lib.dir/build: CMakeFiles/pod_lib.dir/src/m_veqC2T.f03.o.provides
 
 CMakeFiles/pod_lib.dir/src/m_veq_rkn768.f03.o: CMakeFiles/pod_lib.dir/m_matrixrxr.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_veq_rkn768.f03.o: CMakeFiles/pod_lib.dir/m_pd_force.mod.stamp
+CMakeFiles/pod_lib.dir/src/m_veq_rkn768.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_veq_rkn768.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_veq_rkn768.f03.o: CMakeFiles/pod_lib.dir/mdl_precision.mod.stamp
 CMakeFiles/pod_lib.dir/src/m_veq_rkn768.f03.o.provides.build: CMakeFiles/pod_lib.dir/m_veq_rkn768.mod.stamp
@@ -676,6 +694,7 @@ CMakeFiles/pod_lib.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/m_force_tides
 CMakeFiles/pod_lib.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/m_matrixrxr.mod.stamp
 CMakeFiles/pod_lib.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/m_pd_geopotential.mod.stamp
 CMakeFiles/pod_lib.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/m_tides_ocean.mod.stamp
+CMakeFiles/pod_lib.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/mdl_config.mod.stamp
 CMakeFiles/pod_lib.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/mdl_eop.mod.stamp
 CMakeFiles/pod_lib.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/mdl_num.mod.stamp
 CMakeFiles/pod_lib.dir/src/pd_forceZ.f03.o: CMakeFiles/pod_lib.dir/mdl_param.mod.stamp
