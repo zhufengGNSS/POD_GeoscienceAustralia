@@ -1446,33 +1446,6 @@ src/cal2jd.for.s:
 	$(MAKE) -f CMakeFiles/iau_math.dir/build.make CMakeFiles/iau_math.dir/src/cal2jd.for.s
 .PHONY : src/cal2jd.for.s
 
-src/chkbrdc.o: src/chkbrdc.f.o
-
-.PHONY : src/chkbrdc.o
-
-# target to build an object file
-src/chkbrdc.f.o:
-	$(MAKE) -f CMakeFiles/brdc2ecef.dir/build.make CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.o
-.PHONY : src/chkbrdc.f.o
-
-src/chkbrdc.i: src/chkbrdc.f.i
-
-.PHONY : src/chkbrdc.i
-
-# target to preprocess a source file
-src/chkbrdc.f.i:
-	$(MAKE) -f CMakeFiles/brdc2ecef.dir/build.make CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.i
-.PHONY : src/chkbrdc.f.i
-
-src/chkbrdc.s: src/chkbrdc.f.s
-
-.PHONY : src/chkbrdc.s
-
-# target to generate assembly for a file
-src/chkbrdc.f.s:
-	$(MAKE) -f CMakeFiles/brdc2ecef.dir/build.make CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.s
-.PHONY : src/chkbrdc.f.s
-
 src/coord_r2sph.o: src/coord_r2sph.f90.o
 
 .PHONY : src/coord_r2sph.o
@@ -4362,6 +4335,33 @@ src/m_satinfo.f90.s:
 	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_satinfo.f90.s
 .PHONY : src/m_satinfo.f90.s
 
+src/m_satmetadata.o: src/m_satmetadata.f03.o
+
+.PHONY : src/m_satmetadata.o
+
+# target to build an object file
+src/m_satmetadata.f03.o:
+	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o
+.PHONY : src/m_satmetadata.f03.o
+
+src/m_satmetadata.i: src/m_satmetadata.f03.i
+
+.PHONY : src/m_satmetadata.i
+
+# target to preprocess a source file
+src/m_satmetadata.f03.i:
+	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.i
+.PHONY : src/m_satmetadata.f03.i
+
+src/m_satmetadata.s: src/m_satmetadata.f03.s
+
+.PHONY : src/m_satmetadata.s
+
+# target to generate assembly for a file
+src/m_satmetadata.f03.s:
+	$(MAKE) -f CMakeFiles/pod_lib.dir/build.make CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.s
+.PHONY : src/m_satmetadata.f03.s
+
 src/m_shadow.o: src/m_shadow.f90.o
 
 .PHONY : src/m_shadow.o
@@ -6228,6 +6228,33 @@ src/rel_schwarzschild.f90.s:
 	$(MAKE) -f CMakeFiles/rel.dir/build.make CMakeFiles/rel.dir/src/rel_schwarzschild.f90.s
 .PHONY : src/rel_schwarzschild.f90.s
 
+src/report.o: src/report.f90.o
+
+.PHONY : src/report.o
+
+# target to build an object file
+src/report.f90.o:
+	$(MAKE) -f CMakeFiles/pod.dir/build.make CMakeFiles/pod.dir/src/report.f90.o
+.PHONY : src/report.f90.o
+
+src/report.i: src/report.f90.i
+
+.PHONY : src/report.i
+
+# target to preprocess a source file
+src/report.f90.i:
+	$(MAKE) -f CMakeFiles/pod.dir/build.make CMakeFiles/pod.dir/src/report.f90.i
+.PHONY : src/report.f90.i
+
+src/report.s: src/report.f90.s
+
+.PHONY : src/report.s
+
+# target to generate assembly for a file
+src/report.f90.s:
+	$(MAKE) -f CMakeFiles/pod.dir/build.make CMakeFiles/pod.dir/src/report.f90.s
+.PHONY : src/report.f90.s
+
 src/rx.o: src/rx.for.o
 
 .PHONY : src/rx.o
@@ -7401,9 +7428,6 @@ help:
 	@echo "... src/cal2jd.o"
 	@echo "... src/cal2jd.i"
 	@echo "... src/cal2jd.s"
-	@echo "... src/chkbrdc.o"
-	@echo "... src/chkbrdc.i"
-	@echo "... src/chkbrdc.s"
 	@echo "... src/coord_r2sph.o"
 	@echo "... src/coord_r2sph.i"
 	@echo "... src/coord_r2sph.s"
@@ -7722,6 +7746,9 @@ help:
 	@echo "... src/m_satinfo.o"
 	@echo "... src/m_satinfo.i"
 	@echo "... src/m_satinfo.s"
+	@echo "... src/m_satmetadata.o"
+	@echo "... src/m_satmetadata.i"
+	@echo "... src/m_satmetadata.s"
 	@echo "... src/m_shadow.o"
 	@echo "... src/m_shadow.i"
 	@echo "... src/m_shadow.s"
@@ -7929,6 +7956,9 @@ help:
 	@echo "... src/rel_schwarzschild.o"
 	@echo "... src/rel_schwarzschild.i"
 	@echo "... src/rel_schwarzschild.s"
+	@echo "... src/report.o"
+	@echo "... src/report.i"
+	@echo "... src/report.s"
 	@echo "... src/rx.o"
 	@echo "... src/rx.i"
 	@echo "... src/rx.s"

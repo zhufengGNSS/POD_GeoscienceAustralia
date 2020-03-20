@@ -415,7 +415,7 @@ CALL brdc_qc_gps(EPHNEW(10,1:15,I), AVE(8), STD(8))
          IF (IBAD(K,I) /= 1 )THEN
             INEW = INEW + 1
             EPHNEW2(1:20,INEW,I) = EPHNEW(1:20,K,I)
-            CALL chkbrdc (EPHNEW2(1:20,INEW,I),AVE,STD)
+!            CALL chkbrdc (EPHNEW2(1:20,INEW,I),AVE,STD)
 
             IF (INEW == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
             DO II=1,8 ! 15-minute resolution 
@@ -570,7 +570,7 @@ CALL brdc_qc_gal(EPHNEW(10,1:150,I), AVE(8), STD(8))
          IF (IBAD(K,I) /= 1 )THEN
             IGAL = IGAL +1
             EPHNEW2(1:20,IGAL,I) = EPHNEW(1:20,K,I)
-            CALL chkbrdc (EPHNEW2(1:20,IGAL,I),AVE,STD)
+!            CALL chkbrdc (EPHNEW2(1:20,IGAL,I),AVE,STD)
             IF (IGAL == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
                DO II=1,2
                   JJ = JJ + 1

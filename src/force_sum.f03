@@ -46,6 +46,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       USE m_pd_empirical
       USE m_writedata
       USE m_shadow
+      USE mdl_config
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -627,7 +628,7 @@ if (FMOD_NONGRAV(1) > 0) Then
 
 
 ! SRP model
-srpid =  SRP_MOD_glb
+srpid =  SRP_MOD_arp
 
 
 CALL force_srp (lambda, eBX_ecl, eclipsf, GMearth, GNSSid, srpid, rsat_icrf, vsat_icrf, rSun, fx, fy, fz )

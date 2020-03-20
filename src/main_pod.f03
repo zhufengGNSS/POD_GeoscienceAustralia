@@ -40,6 +40,7 @@
 	  USE m_clock_read
 	  USE m_attitude_orb
 	  USE m_write_orbex	  
+	  USE m_satmetadata	  
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -118,6 +119,11 @@
       REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: attitude_array  
       CHARACTER (LEN=100) :: ORBEX_fname				
 ! ----------------------------------------------------------------------
+      INTEGER (KIND = prec_int4), ALLOCATABLE :: SVN_array(:)
+      CHARACTER (LEN=20), ALLOCATABLE :: BLOCK_array(:)
+      REAL (KIND = prec_d), ALLOCATABLE :: MASS_array(:)
+      INTEGER (KIND = prec_int4), ALLOCATABLE :: POWER_array(:)
+! ----------------------------------------------------------------------
 
 
 NPARAM_glb = 0
@@ -151,12 +157,16 @@ End If
 pod_config_exists = .true.
 INQUIRE(FILE=PODfname, EXIST=pod_config_exists)
 
+pgm_name = 'pod'
 If ( .not. pod_config_exists) then
 	call get_command_argument( 0, pgm_name )
     write(*,'(3a)') 'No Default config file found (POD.in)  - Type: ',trim(pgm_name),' --help'
     write(*,'(3a)') 'If using a non-default config.filename - Type: ',trim(pgm_name),' -c config.filename'
 	STOP
 End If
+
+pgrm_name = TRIM(pgm_name)
+call report ('CLEAR', pgrm_name, ' ', ' ', ' ', 0)
 
 ! ----------------------------------------------------------------------
 
@@ -367,10 +377,13 @@ PRINT*,'satsinex_filename =', satsinex_filename_cfg
 
 ! Flag of different models for A priori SRP value 
 ! ---------------------------------------------------------------------
-param_id = 'Flag_BW_cfg'
+param_id = 'SRP_MOD_arp'
 Call readparam (PODfname, param_id, param_value)
-READ ( param_value, FMT = * , IOSTAT=ios_key ) Flag_BW_cfg
-PRINT*,'Flag_BW_cfg =', Flag_BW_cfg
+READ ( param_value, FMT = * , IOSTAT=ios_key ) SRP_MOD_arp
+IF (SRP_MOD_arp == 0) PRINT*,'no a priori SRP model'
+IF (SRP_MOD_arp == 1) PRINT*,'use cannonball f0 model as a priori SRP model'
+IF (SRP_MOD_arp == 2) PRINT*,'use simple box-wing model as a priori SRP model'
+IF (SRP_MOD_arp == 3) PRINT*,'use box-wing model from repro3 routines as a priori SRP model'
 ! ----------------------------------------------------------------------
 ! Reference System of Variational Equations' Partials & Parameter Estimation 
 ! ----------------------------------------------------------------------
@@ -666,19 +679,19 @@ Call writearray2 (orbdiff2, filename)
 ! ---------------------------------------------------------------------- 
 ! Satellite Attitude
 ! ---------------------------------------------------------------------- 
-! Satellite attitude matrix
-CALL attitude_orb (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, satsinex_filename_cfg, attitude_array)
-! ---------------------------------------------------------------------- 
-!print *, "attitude_array", attitude_array(1,:,1)
+! Satellite metadata: Block type
+mjd = orbits_ics_icrf(1,1)
+CALL satmetadata (PRNmatrix, mjd, satsinex_filename_cfg, SVN_array, BLOCK_array, MASS_array, POWER_array)
 
-! ----------------------------------------------------------------------
+! Satellite attitude matrix
+CALL attitude_orb (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, BLOCK_array, attitude_array)
+
 ! Write satellite attitude to orbex format
-! ----------------------------------------------------------------------
 ! Orbex filename
 write (ORBEX_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.obx'
 ! Write attitude matrix to orbex format
 CALL write_orbex (attitude_array, PRNmatrix, ORBEX_fname)
-! ----------------------------------------------------------------------
+
 ! Write satellite attitude per epoch to out ascii file 
 write (filename, FMT='(A3,I4,I1,A13)') 'gag', (GPS_week), INT(GPS_day), '_attitude.out'
 Call writearray2 (attitude_array, filename)
@@ -715,6 +728,16 @@ if (allocated(orbdiff2)) Deallocate(orbdiff2, stat=DeAllocateStatus)
 if (allocated(PRNmatrix)) Deallocate(PRNmatrix, stat=DeAllocateStatus)
 call globals_fini()
 
+if (allocated(CLKmatrix)) Deallocate(CLKmatrix, stat=DeAllocateStatus)
+if (allocated(orbits_partials_icrf)) Deallocate(orbits_partials_icrf, stat=DeAllocateStatus)
+if (allocated(orbits_partials_itrf)) Deallocate(orbits_partials_itrf, stat=DeAllocateStatus)
+if (allocated(orbits_ics_icrf)) Deallocate(orbits_ics_icrf, stat=DeAllocateStatus)
+if (allocated(orbit_resN)) Deallocate(orbit_resN, stat=DeAllocateStatus)
+if (allocated(orbit_resR)) Deallocate(orbit_resR, stat=DeAllocateStatus)
+if (allocated(orbit_resT)) Deallocate(orbit_resT, stat=DeAllocateStatus)
+if (allocated(orbdiff2)) Deallocate(orbdiff2, stat=DeAllocateStatus)
+if (allocated(PRNmatrix)) Deallocate(PRNmatrix, stat=DeAllocateStatus)
+call globals_fini()
 CALL cpu_time (CPU_t1)
 PRINT *,"CPU Time (sec)", CPU_t1-CPU_t0
 

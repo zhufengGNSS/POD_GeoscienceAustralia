@@ -60,9 +60,22 @@ include CMakeFiles/pod.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/pod.dir/flags.make
 
+CMakeFiles/pod.dir/src/report.f90.o: CMakeFiles/pod.dir/flags.make
+CMakeFiles/pod.dir/src/report.f90.o: ../src/report.f90
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building Fortran object CMakeFiles/pod.dir/src/report.f90.o"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/report.f90 -o CMakeFiles/pod.dir/src/report.f90.o
+
+CMakeFiles/pod.dir/src/report.f90.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing Fortran source to CMakeFiles/pod.dir/src/report.f90.i"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -E /data/thomas3/pod/src/report.f90 > CMakeFiles/pod.dir/src/report.f90.i
+
+CMakeFiles/pod.dir/src/report.f90.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling Fortran source to assembly CMakeFiles/pod.dir/src/report.f90.s"
+	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -S /data/thomas3/pod/src/report.f90 -o CMakeFiles/pod.dir/src/report.f90.s
+
 CMakeFiles/pod.dir/src/gmst_iers.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/gmst_iers.f03.o: ../src/gmst_iers.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building Fortran object CMakeFiles/pod.dir/src/gmst_iers.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building Fortran object CMakeFiles/pod.dir/src/gmst_iers.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/gmst_iers.f03 -o CMakeFiles/pod.dir/src/gmst_iers.f03.o
 
 CMakeFiles/pod.dir/src/gmst_iers.f03.i: cmake_force
@@ -75,7 +88,7 @@ CMakeFiles/pod.dir/src/gmst_iers.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/interp_iers.f.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/interp_iers.f.o: ../src/interp_iers.f
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building Fortran object CMakeFiles/pod.dir/src/interp_iers.f.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building Fortran object CMakeFiles/pod.dir/src/interp_iers.f.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/interp_iers.f -o CMakeFiles/pod.dir/src/interp_iers.f.o
 
 CMakeFiles/pod.dir/src/interp_iers.f.i: cmake_force
@@ -88,7 +101,7 @@ CMakeFiles/pod.dir/src/interp_iers.f.s: cmake_force
 
 CMakeFiles/pod.dir/src/IERS_CMP_2015.F.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/IERS_CMP_2015.F.o: ../src/IERS_CMP_2015.F
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building Fortran object CMakeFiles/pod.dir/src/IERS_CMP_2015.F.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building Fortran object CMakeFiles/pod.dir/src/IERS_CMP_2015.F.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/IERS_CMP_2015.F -o CMakeFiles/pod.dir/src/IERS_CMP_2015.F.o
 
 CMakeFiles/pod.dir/src/IERS_CMP_2015.F.i: cmake_force
@@ -101,7 +114,7 @@ CMakeFiles/pod.dir/src/IERS_CMP_2015.F.s: cmake_force
 
 CMakeFiles/pod.dir/src/m_read_leapsec.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/m_read_leapsec.f03.o: ../src/m_read_leapsec.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building Fortran object CMakeFiles/pod.dir/src/m_read_leapsec.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building Fortran object CMakeFiles/pod.dir/src/m_read_leapsec.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/m_read_leapsec.f03 -o CMakeFiles/pod.dir/src/m_read_leapsec.f03.o
 
 CMakeFiles/pod.dir/src/m_read_leapsec.f03.i: cmake_force
@@ -114,7 +127,7 @@ CMakeFiles/pod.dir/src/m_read_leapsec.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/m_clock_read.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/m_clock_read.f03.o: ../src/m_clock_read.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building Fortran object CMakeFiles/pod.dir/src/m_clock_read.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building Fortran object CMakeFiles/pod.dir/src/m_clock_read.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/m_clock_read.f03 -o CMakeFiles/pod.dir/src/m_clock_read.f03.o
 
 CMakeFiles/pod.dir/src/m_clock_read.f03.i: cmake_force
@@ -127,7 +140,7 @@ CMakeFiles/pod.dir/src/m_clock_read.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.o: ../src/m_write_orb2sp3.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building Fortran object CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building Fortran object CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/m_write_orb2sp3.f03 -o CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.o
 
 CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.i: cmake_force
@@ -140,7 +153,7 @@ CMakeFiles/pod.dir/src/m_write_orb2sp3.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/m_pod_gnss.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/m_pod_gnss.f03.o: ../src/m_pod_gnss.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building Fortran object CMakeFiles/pod.dir/src/m_pod_gnss.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building Fortran object CMakeFiles/pod.dir/src/m_pod_gnss.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/m_pod_gnss.f03 -o CMakeFiles/pod.dir/src/m_pod_gnss.f03.o
 
 CMakeFiles/pod.dir/src/m_pod_gnss.f03.i: cmake_force
@@ -153,7 +166,7 @@ CMakeFiles/pod.dir/src/m_pod_gnss.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/gblinit.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/gblinit.f03.o: ../src/gblinit.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building Fortran object CMakeFiles/pod.dir/src/gblinit.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building Fortran object CMakeFiles/pod.dir/src/gblinit.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/gblinit.f03 -o CMakeFiles/pod.dir/src/gblinit.f03.o
 
 CMakeFiles/pod.dir/src/gblinit.f03.i: cmake_force
@@ -166,7 +179,7 @@ CMakeFiles/pod.dir/src/gblinit.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/coord_r2sph.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/coord_r2sph.f90.o: ../src/coord_r2sph.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building Fortran object CMakeFiles/pod.dir/src/coord_r2sph.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building Fortran object CMakeFiles/pod.dir/src/coord_r2sph.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/coord_r2sph.f90 -o CMakeFiles/pod.dir/src/coord_r2sph.f90.o
 
 CMakeFiles/pod.dir/src/coord_r2sph.f90.i: cmake_force
@@ -179,7 +192,7 @@ CMakeFiles/pod.dir/src/coord_r2sph.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/crs_trs.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/crs_trs.f90.o: ../src/crs_trs.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building Fortran object CMakeFiles/pod.dir/src/crs_trs.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building Fortran object CMakeFiles/pod.dir/src/crs_trs.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/crs_trs.f90 -o CMakeFiles/pod.dir/src/crs_trs.f90.o
 
 CMakeFiles/pod.dir/src/crs_trs.f90.i: cmake_force
@@ -192,7 +205,7 @@ CMakeFiles/pod.dir/src/crs_trs.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/erp_igu.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/erp_igu.f90.o: ../src/erp_igu.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building Fortran object CMakeFiles/pod.dir/src/erp_igu.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building Fortran object CMakeFiles/pod.dir/src/erp_igu.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/erp_igu.f90 -o CMakeFiles/pod.dir/src/erp_igu.f90.o
 
 CMakeFiles/pod.dir/src/erp_igu.f90.i: cmake_force
@@ -205,7 +218,7 @@ CMakeFiles/pod.dir/src/erp_igu.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/era_matrix.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/era_matrix.f90.o: ../src/era_matrix.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building Fortran object CMakeFiles/pod.dir/src/era_matrix.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building Fortran object CMakeFiles/pod.dir/src/era_matrix.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/era_matrix.f90 -o CMakeFiles/pod.dir/src/era_matrix.f90.o
 
 CMakeFiles/pod.dir/src/era_matrix.f90.i: cmake_force
@@ -218,7 +231,7 @@ CMakeFiles/pod.dir/src/era_matrix.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/orb_frame.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/orb_frame.f90.o: ../src/orb_frame.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building Fortran object CMakeFiles/pod.dir/src/orb_frame.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building Fortran object CMakeFiles/pod.dir/src/orb_frame.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/orb_frame.f90 -o CMakeFiles/pod.dir/src/orb_frame.f90.o
 
 CMakeFiles/pod.dir/src/orb_frame.f90.i: cmake_force
@@ -231,7 +244,7 @@ CMakeFiles/pod.dir/src/orb_frame.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/crf_bff.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/crf_bff.f90.o: ../src/crf_bff.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building Fortran object CMakeFiles/pod.dir/src/crf_bff.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building Fortran object CMakeFiles/pod.dir/src/crf_bff.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/crf_bff.f90 -o CMakeFiles/pod.dir/src/crf_bff.f90.o
 
 CMakeFiles/pod.dir/src/crf_bff.f90.i: cmake_force
@@ -244,7 +257,7 @@ CMakeFiles/pod.dir/src/crf_bff.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/GM_de.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/GM_de.f90.o: ../src/GM_de.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building Fortran object CMakeFiles/pod.dir/src/GM_de.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building Fortran object CMakeFiles/pod.dir/src/GM_de.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/GM_de.f90 -o CMakeFiles/pod.dir/src/GM_de.f90.o
 
 CMakeFiles/pod.dir/src/GM_de.f90.i: cmake_force
@@ -257,7 +270,7 @@ CMakeFiles/pod.dir/src/GM_de.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/CATfile.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/CATfile.f90.o: ../src/CATfile.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building Fortran object CMakeFiles/pod.dir/src/CATfile.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building Fortran object CMakeFiles/pod.dir/src/CATfile.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/CATfile.f90 -o CMakeFiles/pod.dir/src/CATfile.f90.o
 
 CMakeFiles/pod.dir/src/CATfile.f90.i: cmake_force
@@ -270,7 +283,7 @@ CMakeFiles/pod.dir/src/CATfile.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/asc2eph.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/asc2eph.f90.o: ../src/asc2eph.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building Fortran object CMakeFiles/pod.dir/src/asc2eph.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building Fortran object CMakeFiles/pod.dir/src/asc2eph.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/asc2eph.f90 -o CMakeFiles/pod.dir/src/asc2eph.f90.o
 
 CMakeFiles/pod.dir/src/asc2eph.f90.i: cmake_force
@@ -283,7 +296,7 @@ CMakeFiles/pod.dir/src/asc2eph.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/indirectJ2.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/indirectJ2.f90.o: ../src/indirectJ2.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building Fortran object CMakeFiles/pod.dir/src/indirectJ2.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building Fortran object CMakeFiles/pod.dir/src/indirectJ2.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/indirectJ2.f90 -o CMakeFiles/pod.dir/src/indirectJ2.f90.o
 
 CMakeFiles/pod.dir/src/indirectJ2.f90.i: cmake_force
@@ -296,7 +309,7 @@ CMakeFiles/pod.dir/src/indirectJ2.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/delaunay.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/delaunay.f90.o: ../src/delaunay.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building Fortran object CMakeFiles/pod.dir/src/delaunay.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building Fortran object CMakeFiles/pod.dir/src/delaunay.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/delaunay.f90 -o CMakeFiles/pod.dir/src/delaunay.f90.o
 
 CMakeFiles/pod.dir/src/delaunay.f90.i: cmake_force
@@ -309,7 +322,7 @@ CMakeFiles/pod.dir/src/delaunay.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/prn_shift.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/prn_shift.f03.o: ../src/prn_shift.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building Fortran object CMakeFiles/pod.dir/src/prn_shift.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building Fortran object CMakeFiles/pod.dir/src/prn_shift.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/prn_shift.f03 -o CMakeFiles/pod.dir/src/prn_shift.f03.o
 
 CMakeFiles/pod.dir/src/prn_shift.f03.i: cmake_force
@@ -322,7 +335,7 @@ CMakeFiles/pod.dir/src/prn_shift.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/surfprop.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/surfprop.f90.o: ../src/surfprop.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building Fortran object CMakeFiles/pod.dir/src/surfprop.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building Fortran object CMakeFiles/pod.dir/src/surfprop.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/surfprop.f90 -o CMakeFiles/pod.dir/src/surfprop.f90.o
 
 CMakeFiles/pod.dir/src/surfprop.f90.i: cmake_force
@@ -335,7 +348,7 @@ CMakeFiles/pod.dir/src/surfprop.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/scan0orb.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/scan0orb.f03.o: ../src/scan0orb.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building Fortran object CMakeFiles/pod.dir/src/scan0orb.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building Fortran object CMakeFiles/pod.dir/src/scan0orb.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/scan0orb.f03 -o CMakeFiles/pod.dir/src/scan0orb.f03.o
 
 CMakeFiles/pod.dir/src/scan0orb.f03.i: cmake_force
@@ -348,7 +361,7 @@ CMakeFiles/pod.dir/src/scan0orb.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/empirical_init_file.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/empirical_init_file.f03.o: ../src/empirical_init_file.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building Fortran object CMakeFiles/pod.dir/src/empirical_init_file.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building Fortran object CMakeFiles/pod.dir/src/empirical_init_file.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/empirical_init_file.f03 -o CMakeFiles/pod.dir/src/empirical_init_file.f03.o
 
 CMakeFiles/pod.dir/src/empirical_init_file.f03.i: cmake_force
@@ -361,7 +374,7 @@ CMakeFiles/pod.dir/src/empirical_init_file.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/empirical_init.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/empirical_init.f03.o: ../src/empirical_init.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building Fortran object CMakeFiles/pod.dir/src/empirical_init.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building Fortran object CMakeFiles/pod.dir/src/empirical_init.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/empirical_init.f03 -o CMakeFiles/pod.dir/src/empirical_init.f03.o
 
 CMakeFiles/pod.dir/src/empirical_init.f03.i: cmake_force
@@ -374,7 +387,7 @@ CMakeFiles/pod.dir/src/empirical_init.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/empirical_cor.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/empirical_cor.f03.o: ../src/empirical_cor.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building Fortran object CMakeFiles/pod.dir/src/empirical_cor.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building Fortran object CMakeFiles/pod.dir/src/empirical_cor.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/empirical_cor.f03 -o CMakeFiles/pod.dir/src/empirical_cor.f03.o
 
 CMakeFiles/pod.dir/src/empirical_cor.f03.i: cmake_force
@@ -387,7 +400,7 @@ CMakeFiles/pod.dir/src/empirical_cor.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/beta_angle.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/beta_angle.f90.o: ../src/beta_angle.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building Fortran object CMakeFiles/pod.dir/src/beta_angle.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building Fortran object CMakeFiles/pod.dir/src/beta_angle.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/beta_angle.f90 -o CMakeFiles/pod.dir/src/beta_angle.f90.o
 
 CMakeFiles/pod.dir/src/beta_angle.f90.i: cmake_force
@@ -400,7 +413,7 @@ CMakeFiles/pod.dir/src/beta_angle.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/beta_pred.f90.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/beta_pred.f90.o: ../src/beta_pred.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building Fortran object CMakeFiles/pod.dir/src/beta_pred.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building Fortran object CMakeFiles/pod.dir/src/beta_pred.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/beta_pred.f90 -o CMakeFiles/pod.dir/src/beta_pred.f90.o
 
 CMakeFiles/pod.dir/src/beta_pred.f90.i: cmake_force
@@ -413,7 +426,7 @@ CMakeFiles/pod.dir/src/beta_pred.f90.s: cmake_force
 
 CMakeFiles/pod.dir/src/attitude.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/attitude.f03.o: ../src/attitude.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building Fortran object CMakeFiles/pod.dir/src/attitude.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building Fortran object CMakeFiles/pod.dir/src/attitude.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/attitude.f03 -o CMakeFiles/pod.dir/src/attitude.f03.o
 
 CMakeFiles/pod.dir/src/attitude.f03.i: cmake_force
@@ -426,7 +439,7 @@ CMakeFiles/pod.dir/src/attitude.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/pd_gm.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/pd_gm.f03.o: ../src/pd_gm.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building Fortran object CMakeFiles/pod.dir/src/pd_gm.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building Fortran object CMakeFiles/pod.dir/src/pd_gm.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/pd_gm.f03 -o CMakeFiles/pod.dir/src/pd_gm.f03.o
 
 CMakeFiles/pod.dir/src/pd_gm.f03.i: cmake_force
@@ -439,7 +452,7 @@ CMakeFiles/pod.dir/src/pd_gm.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/pd_forceZ.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/pd_forceZ.f03.o: ../src/pd_forceZ.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building Fortran object CMakeFiles/pod.dir/src/pd_forceZ.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building Fortran object CMakeFiles/pod.dir/src/pd_forceZ.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/pd_forceZ.f03 -o CMakeFiles/pod.dir/src/pd_forceZ.f03.o
 
 CMakeFiles/pod.dir/src/pd_forceZ.f03.i: cmake_force
@@ -452,7 +465,7 @@ CMakeFiles/pod.dir/src/pd_forceZ.f03.s: cmake_force
 
 CMakeFiles/pod.dir/src/main_pod.f03.o: CMakeFiles/pod.dir/flags.make
 CMakeFiles/pod.dir/src/main_pod.f03.o: ../src/main_pod.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building Fortran object CMakeFiles/pod.dir/src/main_pod.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building Fortran object CMakeFiles/pod.dir/src/main_pod.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/main_pod.f03 -o CMakeFiles/pod.dir/src/main_pod.f03.o
 
 CMakeFiles/pod.dir/src/main_pod.f03.i: cmake_force
@@ -465,6 +478,7 @@ CMakeFiles/pod.dir/src/main_pod.f03.s: cmake_force
 
 # Object files for target pod
 pod_OBJECTS = \
+"CMakeFiles/pod.dir/src/report.f90.o" \
 "CMakeFiles/pod.dir/src/gmst_iers.f03.o" \
 "CMakeFiles/pod.dir/src/interp_iers.f.o" \
 "CMakeFiles/pod.dir/src/IERS_CMP_2015.F.o" \
@@ -500,6 +514,7 @@ pod_OBJECTS = \
 # External object files for target pod
 pod_EXTERNAL_OBJECTS =
 
+../bin/pod: CMakeFiles/pod.dir/src/report.f90.o
 ../bin/pod: CMakeFiles/pod.dir/src/gmst_iers.f03.o
 ../bin/pod: CMakeFiles/pod.dir/src/interp_iers.f.o
 ../bin/pod: CMakeFiles/pod.dir/src/IERS_CMP_2015.F.o
@@ -554,7 +569,7 @@ pod_EXTERNAL_OBJECTS =
 ../bin/pod: /usr/lib64/libblas.so
 ../bin/pod: ../lib/libpod_lib.a
 ../bin/pod: CMakeFiles/pod.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Linking Fortran executable ../bin/pod"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Linking Fortran executable ../bin/pod"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/pod.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

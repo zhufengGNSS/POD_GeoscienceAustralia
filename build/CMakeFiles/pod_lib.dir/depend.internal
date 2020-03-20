@@ -83,6 +83,8 @@ CMakeFiles/pod_lib.dir/src/m_rso.f03.o
  /data/thomas3/pod/src/m_rso.f03
 CMakeFiles/pod_lib.dir/src/m_satinfo.f90.o
  /data/thomas3/pod/src/m_satinfo.f90
+CMakeFiles/pod_lib.dir/src/m_satmetadata.f03.o
+ /data/thomas3/pod/src/m_satmetadata.f03
 CMakeFiles/pod_lib.dir/src/m_shadow.f90.o
  /data/thomas3/pod/src/m_shadow.f90
 CMakeFiles/pod_lib.dir/src/m_sp3.f03.o

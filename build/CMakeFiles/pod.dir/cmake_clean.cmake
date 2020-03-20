@@ -30,6 +30,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/pod.dir/src/pd_forceZ.f03.o"
   "CMakeFiles/pod.dir/src/pd_gm.f03.o"
   "CMakeFiles/pod.dir/src/prn_shift.f03.o"
+  "CMakeFiles/pod.dir/src/report.f90.o"
   "CMakeFiles/pod.dir/src/scan0orb.f03.o"
   "CMakeFiles/pod.dir/src/surfprop.f90.o"
 )

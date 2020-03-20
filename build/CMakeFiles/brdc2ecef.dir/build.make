@@ -151,22 +151,9 @@ CMakeFiles/brdc2ecef.dir/src/CATfile.f90.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling Fortran source to assembly CMakeFiles/brdc2ecef.dir/src/CATfile.f90.s"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -S /data/thomas3/pod/src/CATfile.f90 -o CMakeFiles/brdc2ecef.dir/src/CATfile.f90.s
 
-CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.o: CMakeFiles/brdc2ecef.dir/flags.make
-CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.o: ../src/chkbrdc.f
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.o"
-	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/chkbrdc.f -o CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.o
-
-CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing Fortran source to CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.i"
-	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -E /data/thomas3/pod/src/chkbrdc.f > CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.i
-
-CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling Fortran source to assembly CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.s"
-	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -S /data/thomas3/pod/src/chkbrdc.f -o CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.s
-
 CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.o: ../src/crs_trs.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/crs_trs.f90 -o CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.o
 
 CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.i: cmake_force
@@ -179,7 +166,7 @@ CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/reformbrdc.f.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/reformbrdc.f.o: ../src/reformbrdc.f
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/reformbrdc.f.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/reformbrdc.f.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/reformbrdc.f -o CMakeFiles/brdc2ecef.dir/src/reformbrdc.f.o
 
 CMakeFiles/brdc2ecef.dir/src/reformbrdc.f.i: cmake_force
@@ -192,7 +179,7 @@ CMakeFiles/brdc2ecef.dir/src/reformbrdc.f.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/glnacc.f.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/glnacc.f.o: ../src/glnacc.f
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/glnacc.f.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/glnacc.f.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/glnacc.f -o CMakeFiles/brdc2ecef.dir/src/glnacc.f.o
 
 CMakeFiles/brdc2ecef.dir/src/glnacc.f.i: cmake_force
@@ -205,7 +192,7 @@ CMakeFiles/brdc2ecef.dir/src/glnacc.f.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/glnorbint.f.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/glnorbint.f.o: ../src/glnorbint.f
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/glnorbint.f.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/glnorbint.f.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/glnorbint.f -o CMakeFiles/brdc2ecef.dir/src/glnorbint.f.o
 
 CMakeFiles/brdc2ecef.dir/src/glnorbint.f.i: cmake_force
@@ -218,7 +205,7 @@ CMakeFiles/brdc2ecef.dir/src/glnorbint.f.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/m_antoffset.f90.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/m_antoffset.f90.o: ../src/m_antoffset.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/m_antoffset.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/m_antoffset.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/m_antoffset.f90 -o CMakeFiles/brdc2ecef.dir/src/m_antoffset.f90.o
 
 CMakeFiles/brdc2ecef.dir/src/m_antoffset.f90.i: cmake_force
@@ -231,7 +218,7 @@ CMakeFiles/brdc2ecef.dir/src/m_antoffset.f90.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/mdl_brdconfig.f03.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/mdl_brdconfig.f03.o: ../src/mdl_brdconfig.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/mdl_brdconfig.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/mdl_brdconfig.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/mdl_brdconfig.f03 -o CMakeFiles/brdc2ecef.dir/src/mdl_brdconfig.f03.o
 
 CMakeFiles/brdc2ecef.dir/src/mdl_brdconfig.f03.i: cmake_force
@@ -244,7 +231,7 @@ CMakeFiles/brdc2ecef.dir/src/mdl_brdconfig.f03.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/m_meanstd.f90.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/m_meanstd.f90.o: ../src/m_meanstd.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/m_meanstd.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/m_meanstd.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/m_meanstd.f90 -o CMakeFiles/brdc2ecef.dir/src/m_meanstd.f90.o
 
 CMakeFiles/brdc2ecef.dir/src/m_meanstd.f90.i: cmake_force
@@ -257,7 +244,7 @@ CMakeFiles/brdc2ecef.dir/src/m_meanstd.f90.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/m_write_brd2sp3.f03.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/m_write_brd2sp3.f03.o: ../src/m_write_brd2sp3.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/m_write_brd2sp3.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/m_write_brd2sp3.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/m_write_brd2sp3.f03 -o CMakeFiles/brdc2ecef.dir/src/m_write_brd2sp3.f03.o
 
 CMakeFiles/brdc2ecef.dir/src/m_write_brd2sp3.f03.i: cmake_force
@@ -270,7 +257,7 @@ CMakeFiles/brdc2ecef.dir/src/m_write_brd2sp3.f03.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/prn2str.f03.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/prn2str.f03.o: ../src/prn2str.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/prn2str.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/prn2str.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/prn2str.f03 -o CMakeFiles/brdc2ecef.dir/src/prn2str.f03.o
 
 CMakeFiles/brdc2ecef.dir/src/prn2str.f03.i: cmake_force
@@ -283,7 +270,7 @@ CMakeFiles/brdc2ecef.dir/src/prn2str.f03.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/prn_shift_brdc.f03.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/prn_shift_brdc.f03.o: ../src/prn_shift_brdc.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/prn_shift_brdc.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/prn_shift_brdc.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/prn_shift_brdc.f03 -o CMakeFiles/brdc2ecef.dir/src/prn_shift_brdc.f03.o
 
 CMakeFiles/brdc2ecef.dir/src/prn_shift_brdc.f03.i: cmake_force
@@ -296,7 +283,7 @@ CMakeFiles/brdc2ecef.dir/src/prn_shift_brdc.f03.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/readbrdcheader.f03.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/readbrdcheader.f03.o: ../src/readbrdcheader.f03
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/readbrdcheader.f03.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/readbrdcheader.f03.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/readbrdcheader.f03 -o CMakeFiles/brdc2ecef.dir/src/readbrdcheader.f03.o
 
 CMakeFiles/brdc2ecef.dir/src/readbrdcheader.f03.i: cmake_force
@@ -309,7 +296,7 @@ CMakeFiles/brdc2ecef.dir/src/readbrdcheader.f03.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/readbrdcmessg.f90.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/readbrdcmessg.f90.o: ../src/readbrdcmessg.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/readbrdcmessg.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/readbrdcmessg.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/readbrdcmessg.f90 -o CMakeFiles/brdc2ecef.dir/src/readbrdcmessg.f90.o
 
 CMakeFiles/brdc2ecef.dir/src/readbrdcmessg.f90.i: cmake_force
@@ -322,7 +309,7 @@ CMakeFiles/brdc2ecef.dir/src/readbrdcmessg.f90.s: cmake_force
 
 CMakeFiles/brdc2ecef.dir/src/main_brdcorbit.f90.o: CMakeFiles/brdc2ecef.dir/flags.make
 CMakeFiles/brdc2ecef.dir/src/main_brdcorbit.f90.o: ../src/main_brdcorbit.f90
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/main_brdcorbit.f90.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building Fortran object CMakeFiles/brdc2ecef.dir/src/main_brdcorbit.f90.o"
 	/usr/bin/gfortran $(Fortran_DEFINES) $(Fortran_INCLUDES) $(Fortran_FLAGS) -c /data/thomas3/pod/src/main_brdcorbit.f90 -o CMakeFiles/brdc2ecef.dir/src/main_brdcorbit.f90.o
 
 CMakeFiles/brdc2ecef.dir/src/main_brdcorbit.f90.i: cmake_force
@@ -342,7 +329,6 @@ brdc2ecef_OBJECTS = \
 "CMakeFiles/brdc2ecef.dir/src/brdc_qc_gal.f90.o" \
 "CMakeFiles/brdc2ecef.dir/src/brdc_qc_gps.f90.o" \
 "CMakeFiles/brdc2ecef.dir/src/CATfile.f90.o" \
-"CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.o" \
 "CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.o" \
 "CMakeFiles/brdc2ecef.dir/src/reformbrdc.f.o" \
 "CMakeFiles/brdc2ecef.dir/src/glnacc.f.o" \
@@ -367,7 +353,6 @@ brdc2ecef_EXTERNAL_OBJECTS =
 ../bin/brdc2ecef: CMakeFiles/brdc2ecef.dir/src/brdc_qc_gal.f90.o
 ../bin/brdc2ecef: CMakeFiles/brdc2ecef.dir/src/brdc_qc_gps.f90.o
 ../bin/brdc2ecef: CMakeFiles/brdc2ecef.dir/src/CATfile.f90.o
-../bin/brdc2ecef: CMakeFiles/brdc2ecef.dir/src/chkbrdc.f.o
 ../bin/brdc2ecef: CMakeFiles/brdc2ecef.dir/src/crs_trs.f90.o
 ../bin/brdc2ecef: CMakeFiles/brdc2ecef.dir/src/reformbrdc.f.o
 ../bin/brdc2ecef: CMakeFiles/brdc2ecef.dir/src/glnacc.f.o
@@ -396,7 +381,7 @@ brdc2ecef_EXTERNAL_OBJECTS =
 ../bin/brdc2ecef: ../lib/libiau_math.a
 ../bin/brdc2ecef: ../lib/libpod_lib.a
 ../bin/brdc2ecef: CMakeFiles/brdc2ecef.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Linking Fortran executable ../bin/brdc2ecef"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/data/thomas3/pod/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Linking Fortran executable ../bin/brdc2ecef"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/brdc2ecef.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

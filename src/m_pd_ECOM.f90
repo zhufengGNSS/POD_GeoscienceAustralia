@@ -95,7 +95,6 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, eclipsf, GM, GNSSid, r, v, r_sun, Asrp)
       REAL (KIND = prec_q) :: F0,alpha
 ! ---------------------------------------------------------------------
       REAL (KIND = prec_q) :: R11(3,3),R33(3,3)
-      REAL (KIND = prec_q), DIMENSION(3) :: nz, nx, nd
       REAL (KIND = prec_q), DIMENSION(3) :: er,ed,ey,eb,ex,ez,ev,en
       REAL (KIND = prec_q), DIMENSION(3) :: yy,et
       REAL (KIND = prec_q), DIMENSION(3) :: FXX(3),FZZ(3),FSP(3)
@@ -257,7 +256,7 @@ END IF
         eb(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         eb(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         eb(3)=yy(3)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
-
+        
         CALL productcross (ey,eb,yy)
         ed(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
         ed(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
@@ -300,20 +299,6 @@ END IF
      cosang(3)=ed(1)*ez(1)+ed(2)*ez(2)+ed(3)*ez(3)
      cosang(4)=ed(1)*ed(1)+ed(2)*ed(2)+ed(3)*ed(3)
 
-nx = ex
-nz = ez
-nd = ed
-
-
-if(cosang(3)<0.d0) nz = ez*(-1.d0)
-
-
-do j = 1,3
-FXX(j) = Ps/MASS * X_SIDE * cosang(1) * nx(j)
-FZZ(j) = Ps/MASS * Z_SIDE * cosang(3) * nz(j)
-FSP(j) = Ps/MASS * A_SOLAR* nd(j)
-end do
-
 xmul = 0.02
 zmul = 0.02
 solarmul = 1.7
@@ -321,65 +306,75 @@ solarmul = 1.7
 ! A scaling factor is applied to ECOM model
 !******************************************************************
       sclfa=(AU/Ds)**2
-! SIMPLE BOX-WING model as the a priori SRP value
-      if (Flag_BW_cfg == 1) then
-         fxo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(1)+zmul*Z_SIDE*cosang(3)*nz(1)+solarmul*A_SOLAR*cosang(4)*nd(1))
-         fyo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(2)+zmul*Z_SIDE*cosang(3)*nz(2)+solarmul*A_SOLAR*cosang(4)*nd(2))
-         fzo=Ps/MASS*(xmul*X_SIDE*cosang(1)*nx(3)+zmul*Z_SIDE*cosang(3)*nz(3)+solarmul*A_SOLAR*cosang(4)*nd(3))
+! A priori SRP model
+      if (SRP_MOD_arp == 1) then
+         alpha = F0/MASS
+
+      else if (SRP_MOD_arp == 2) then
+         xmul = 0.02
+         zmul = 0.02
+         solarmul = 1.7
+
+         if(cosang(3)<0.d0) ez = ez*(-1.d0)
+         fxo=Ps/MASS*(xmul*X_SIDE*cosang(1)*ex(1)+zmul*Z_SIDE*cosang(3)*ez(1)+solarmul*A_SOLAR*cosang(4)*ed(1))
+         fyo=Ps/MASS*(xmul*X_SIDE*cosang(1)*ex(2)+zmul*Z_SIDE*cosang(3)*ez(2)+solarmul*A_SOLAR*cosang(4)*ed(2))
+         fzo=Ps/MASS*(xmul*X_SIDE*cosang(1)*ex(3)+zmul*Z_SIDE*cosang(3)*ez(3)+solarmul*A_SOLAR*cosang(4)*ed(3))
          alpha = sqrt(fxo**2+fyo**2+fzo**2)
 
-      else if (Flag_BW_cfg == 2) then
+      else if (SRP_MOD_arp == 3) then
          REFF = 0
          YSAT(1:3) = r
          YSAT(4:6) = v
-         CALL SRPFBOXW(REFF,YSAT,R_SUN,BLKID,SVNID,ACCEL)
-         alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)/MASS
+         CALL SRPFBOXW(REFF,YSAT,R_SUN,SVNID,ACCEL)
+         alpha = sqrt(ACCEL(1)**2+ACCEL(2)**2+ACCEL(3)**2)
 
-      else if (Flag_BW_cfg == 0) then
-         alpha = F0/MASS
-      else
+      else if (SRP_MOD_arp == 0) then
          alpha = 1.d0
       end if
 
 ! Partial derivatives w.r.t. unknown parameters
 
-IF (ECOM_param_glb <= 2) THEN
+IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
 ! Bias partial derivatives matrix allocation
-PD_Param_ID = 0
-If (ECOM_Bias_glb(1) == 1) Then
+    PD_Param_ID = 0
+    If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-End IF
-If (ECOM_Bias_glb(2) == 1) Then
+    End IF
+    If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-End IF
-If (ECOM_Bias_glb(3) == 1) Then
+    End IF
+    If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-End IF
+    End IF
 
 ! CPR partial derivatives matrix allocation
 
-If (ECOM_CPR_glb(1) == 1) THEN
+    If (ECOM_CPR_glb(1) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-End IF
-If (ECOM_CPR_glb(2) == 1) THEN
+    End IF
+    If (ECOM_CPR_glb(2) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-End IF
-If (ECOM_CPR_glb(3) == 1) THEN
+    End IF
+    If (ECOM_CPR_glb(3) == 1) THEN
         PD_Param_ID = PD_Param_ID + 2
-End If
+    End If
 
 
 ELSEIF (ECOM_param_glb == 3) THEN
-PD_Param_ID = 9
+    PD_Param_ID = 7
+
+END IF
 
 
 IF (NPARAM_glb /= PD_Param_ID) THEN
-PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-PRINT*,           'NPARAM_glb  =', NPARAM_glb
-PRINT*,           'PD_Param_ID =', PD_Param_ID
+    PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+    PRINT*,           'NPARAM_glb  =', NPARAM_glb
+    PRINT*,           'PD_Param_ID =', PD_Param_ID
+    PRINT*, 'PROGRAM STOP AT m_pd_ECOM.f90'
+    STOP
 END IF
 
-END IF
+
 
 ALLOCATE (Asrp(3,PD_Param_ID), STAT = AllocateStatus)
 
@@ -546,19 +541,18 @@ End If
 ! ****************
 
      ELSE IF (ECOM_param_glb == 3) THEN
-     PD_Param_ID = 9
-     DO PD_Param_ID = 1, 9
+     DO PD_Param_ID = 1, 7
         IF (PD_Param_ID == 1) THEN
            DO i = 1, 3
-           Asrp (i,PD_Param_ID) = -sclfa*FXX(i)*ed(i)
+           Asrp (i,PD_Param_ID) = -sclfa*ex(i)
            END DO
         ELSE IF (PD_Param_ID == 2) THEN
            DO i = 1, 3
-           Asrp (i,PD_Param_ID) = -sclfa*FZZ(i)*ed(i)
+           Asrp (i,PD_Param_ID) = -sclfa*ez(i)
            END DO
         ELSE IF (PD_Param_ID == 3) THEN
            DO i = 1, 3
-           Asrp (i,PD_Param_ID) = -sclfa*FSP(i)
+           Asrp (i,PD_Param_ID) = -sclfa*ed(i)
            END DO
         ELSE IF (PD_Param_ID == 4) THEN
            DO i = 1, 3
@@ -566,21 +560,13 @@ End If
            END DO
         ELSE IF (PD_Param_ID == 5) THEN
            DO i = 1, 3
-           Asrp (i,PD_Param_ID) = -sclfa*FXX(i)*eb(i)
+           Asrp (i,PD_Param_ID) = -sclfa*eb(i)
            END DO
         ELSE IF (PD_Param_ID == 6) THEN
            DO i = 1, 3
-           Asrp (i,PD_Param_ID) = -sclfa*FZZ(i)*eb(i)
-           END DO
-        ELSE IF (PD_Param_ID == 7) THEN
-           DO i = 1, 3
-           Asrp (i,PD_Param_ID) = -sclfa*eb(i)
-           END DO
-        ELSE IF (PD_Param_ID == 8) THEN
-           DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(i)
            END DO
-        ELSE IF (PD_Param_ID == 9) THEN
+        ELSE IF (PD_Param_ID == 7) THEN
            DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(i)
            END DO
@@ -591,8 +577,12 @@ End If
 ! use the shadow coefficient for scaling the SRP effect
 !-------------------------------------------------------
 IF (lambda .lt. 1) THEN
-IF(ECOM_param_glb <= 2) Asrp(1:3,1) = lambda*Asrp(1:3,1)*alpha
-IF(ECOM_param_glb == 3) Asrp(1:9,1) = lambda*Asrp(1:9,1)
+   IF(ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Asrp(1:3,1) = lambda*Asrp(1:3,1)
+   IF(ECOM_param_glb == 3) THEN
+   Asrp(1:3,1) = lambda*Asrp(1:3,1)
+   Asrp(1:3,2) = lambda*Asrp(1:3,2)
+   Asrp(1:3,3) = lambda*Asrp(1:3,3)
+   END IF
 END IF
 !-------------------------------------------------------
 END SUBROUTINE

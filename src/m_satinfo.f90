@@ -55,6 +55,7 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn, satblk)
 ! ------------------------------------------------------------------------------
 
   USE mdl_precision
+  use mdl_config
   !USE mdl_param, ONLY: satinfoplace ! Temporary deactivated
   IMPLICIT NONE
 
@@ -68,6 +69,7 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn, satblk)
 ! Local Variables
 ! ---------------
   CHARACTER(LEN=512)         :: line
+  CHARACTER(LEN=100)         :: mesg
 
   INTEGER(KIND=4)               :: nlin
   INTEGER(KIND=4)               :: icrx
@@ -142,8 +144,8 @@ SUBROUTINE satinfo(mjd,prnnum, satsvn, satblk)
 !print*,'nlin=',nlin
   ALLOCATE(satellite(nlin),stat=iac)
   if (iac .ne. 0) then
-          print *, "failed to allocate satellite"
-          goto 100
+          write(mesg, *) "not enough memory - failed to allocate satellite array, dimenion = ", nlin
+          call report('FATAL', pgrm_name, 'satinfo', mesg, 'src/m_satifno.f90', 1)
   end if
 
   REWIND(ifile)

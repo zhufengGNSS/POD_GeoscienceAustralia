@@ -89,6 +89,7 @@ src/m_orbitmain.f03
 src/m_orbitIC.f03
 src/m_attitude_orb.f03
 src/m_write_orbex.f03
+src/m_satmetadata.f03
 )
 
 add_library(iau_math
@@ -281,6 +282,7 @@ src/eclipse_integstep.f03
 )
 
 add_executable(pod
+src/report.f90
 src/gmst_iers.f03 
 src/interp_iers.f 
 src/IERS_CMP_2015.F 
@@ -329,7 +331,7 @@ src/brdc_cmdline.f03
 src/brdc_qc_gal.f90
 src/brdc_qc_gps.f90
 src/CATfile.f90
-src/chkbrdc.f
+#src/chkbrdc.f
 src/crs_trs.f90 
 src/reformbrdc.f
 src/glnacc.f
