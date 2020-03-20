@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../lib/librk.a  CMakeFiles/rk.dir/src/integr_rkn768.f03.o CMakeFiles/rk.dir/src/integr_rk87.f03.o CMakeFiles/rk.dir/src/integr_rk4.f03.o
-/usr/bin/ranlib ../lib/librk.a

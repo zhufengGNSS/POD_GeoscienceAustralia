@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../lib/libkepler.a  CMakeFiles/kepler.dir/src/kepler_eq.f90.o CMakeFiles/kepler.dir/src/kepler_k2z.f90.o CMakeFiles/kepler.dir/src/kepler_z2k.f90.o
-/usr/bin/ranlib ../lib/libkepler.a

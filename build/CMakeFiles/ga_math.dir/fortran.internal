@@ -1,6 +1,0 @@
-# The fortran modules provided by this target.
-provides
- m_matrixinv.mod
- m_matrixmerge.mod
- m_matrixreverse.mod
- m_matrixrxr.mod

@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../lib/librel.a  CMakeFiles/rel.dir/src/rel_schwarzschild.f90.o CMakeFiles/rel.dir/src/rel_LenseThirring.f90.o CMakeFiles/rel.dir/src/rel_deSitter.f90.o
-/usr/bin/ranlib ../lib/librel.a
