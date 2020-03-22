@@ -10,9 +10,11 @@ MODULE mdl_param
 ! Created:	November 2017
 ! Changes:      12-12-2018 Dr. Tzupang Tseng : added specific global parameters
 !                                              for ECOM-based SRP model
+!                5-03-2020 John Donovan: make sinex file a global array
 ! ----------------------------------------------------------------------
 
       USE mdl_precision
+      use iso_c_binding, only : c_int, c_long, c_double, c_short
       IMPLICIT NONE
       SAVE 			
 	  
@@ -205,5 +207,36 @@ INTEGER (KIND = prec_int8) :: NPARAM_glb
 
       integer (kind=4) known_blkids(max_blk)  ! Block numbers by the type
                   ! we known and have coded.  0 value unknown
+
+! ----------------------------------------------------------------------
+! Sinex data
+! IMPORTANT: put bigger members in front of smaller members. Otherwise
+! you may have access issues because 8-byte quantities must start on an 8-byte
+! boundary.  'Bus' errors may occur otherwise.
+! NB Satellites can have different PRNs for different time windows
+! ----------------------------------------------------------------------
+TYPE, bind(c) :: sinex
+        REAL (c_double)      :: MASS
+        REAL (c_double)      :: E_PX, E_PY, E_PZ ! P-eccentricity (not epoch bound)
+        REAL (c_double)      :: E_LX, E_LY, E_LZ ! L-eccentricity (not epoch bound)
+        REAL (c_double)      :: COM_X, COM_Y, COM_Z ! center-of-mass
+        REAL (c_double)      :: TSTART, TSTOP
+        INTEGER (c_int)      :: startyr, startdoy, startsod
+        INTEGER (c_int)      :: stopyr, stopdoy, stopsod
+        INTEGER (c_int)      :: POWER
+        INTEGER (c_int)      :: FRQCHN  ! only for GLONASS
+        INTEGER (c_short)    :: BLKID   ! see above
+        CHARACTER (len=20)   :: BLKTYP  ! character definition of above
+        CHARACTER (len=10)   :: COSPAR  ! ???
+        CHARACTER (len=5)    :: SVN
+        CHARACTER (len=4)    :: PRN
+END TYPE        
+
+        INTEGER (Kind=4)          MAX_SAT ! Maximum we can handle
+        parameter (MAX_SAT = 2048)
+
+TYPE (sinex) satellites(MAX_SAT)
+        INTEGER (Kind=8)          SAT_COUNT ! actual number of satellites
+
 
 END
