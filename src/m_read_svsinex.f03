@@ -302,7 +302,7 @@ SUBROUTINE read_sinex_file (UNIT_IN)
       CHARACTER(LEN=128):: record
       CHARACTER(LEN=256):: message
 
-      INTEGER(KIND = prec_int4):: isat,satid,frqchn,s_POWER,iyr,iday,ihr,imin,ioerr,i,j
+      INTEGER(KIND = prec_int4):: isat,satid,frqchn,s_POWER,iyr,iday,ihr,imin,ioerr,i,j,k
 
       REAL(KIND = prec_d) :: time_id, time1, time2, e_x, e_y, e_z
       REAL(KIND = prec_d) :: s_MASS
@@ -948,8 +948,9 @@ DO WHILE (.not.found)
    found = .true.
    END IF
 END DO
+k = 0
 ! if we didn't find the section skip to next optional segment
-if (ioerr /= 0) found = .false.
+if (ioerr == 0) found = .false.
 ioerr = 0
 DO WHILE (.not.found)
    READ(UNIT_IN,'(a)',IOSTAT=ioerr) record
@@ -958,7 +959,11 @@ DO WHILE (.not.found)
               'No termination of TX_POWER SINEX block', ' ',ioerr)
    found = .true.
    ELSE IF(record(1:1)==' '.and.record(11:11)== ':') THEN
+      k = k+1
       READ(record,'(1x,a4,2(1x,i4,1x,i3,1x,F5.0),1x,i4)',IOSTAT=ioerr) satsvn,yr1,doy1,sod1,yr2,doy2,sod2,s_POWER
+!      write (message, '("SVN :",a,", POWER:", i4)') satsvn, s_POWER
+!      call report('STATUS', pgrm_name, 'read_sinex_file', &
+!              message, ' ', 0)
       IF(yr2==0000) THEN
          yr2 = 2100
         doy2 = 365
@@ -970,7 +975,7 @@ DO WHILE (.not.found)
       time2 = yr2 + doy2/365.d0 + sod2/86400.d0/365.d0
       ioerr = 0
       do i = 1, SAT_COUNT
-        if (satellites(i)%SVN == satsvn .or. satellites(i)%TSTOP < time1 .or. satellites(i)%TSTART > time2) cycle ! Not in this window 
+        if (satellites(i)%SVN /= satsvn .or. satellites(i)%TSTOP < time1 .or. satellites(i)%TSTART > time2) cycle ! Not in this window 
         j = i
         exit
       enddo
@@ -1121,11 +1126,11 @@ DO WHILE (.not.found)
 ! If no power for a particular satellite we blindly set it to
 ! 185 (BDS-IGSO). If no PRN for a satellite set it to X99 (invalid)
 do i = 1, SAT_COUNT
-    if (satellites(i)%POWER == 0) satellites(i)%POWER = 185
+!    if (satellites(i)%POWER == 0) satellites(i)%POWER = 185
     if (satellites(i)%PRN == "") satellites(i)%PRN="X99"
 end do
 call report('STATUS', pgrm_name, 'read_sinex_file', &
-        'Finished reading Sinex POWER from file', ' ', 0)
+        'Finished reading Sinex POWER from file', ' ', k)
 
 ! sort array based on prn (first) then start time: since we always search by prn ...
 call Qsort_Sinex_Prn(satellites(1:SAT_COUNT))
