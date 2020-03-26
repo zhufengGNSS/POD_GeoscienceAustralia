@@ -1,5 +1,14 @@
-        MODULE m_get_lambda
+! ----------------------------------------------------------------------
+! MODULE: m_get_lambda
+! ----------------------------------------------------------------------
+! Purpose:
+!   calculate lambda values from radian values
+! ----------------------------------------------------------------------
+! Author :	John Donovan, Geoscience Australia
+! Created:	26 March 2020
+! ----------------------------------------------------------------------
 
+        MODULE m_get_lambda
       IMPLICIT NONE
 
         CONTAINS

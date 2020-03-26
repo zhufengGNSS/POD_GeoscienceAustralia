@@ -1,7 +1,6 @@
-subroutine mat2quater(xmat,quater)
-!
+! SUBROUTINE: mat2quater
 ! ----------------------------------------------------------------------
-!
+! PURPOSE:
 ! This subroutine is an example of a possible algorithm to avoid
 ! numerical instabilities when computing a quaternion of rotation
 ! from the elements of the corresponding matrix of rotation.
@@ -27,6 +26,10 @@ subroutine mat2quater(xmat,quater)
 ! 0.6695807158758448 ) ! q3
 !
 ! ----------------------------------------------------------------------
+! Author: Dr. Thomas Papanikolaou, Geoscience Australia
+! Date:   26 March 2020
+! ----------------------------------------------------------------------
+subroutine mat2quater(xmat,quater)
 implicit none
 double precision , dimension(3,3) :: xmat
 double precision , dimension(4) :: quater , qsquare

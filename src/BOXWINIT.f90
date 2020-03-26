@@ -1,5 +1,14 @@
-      SUBROUTINE BOXWINGINIT(ERM, GRD, MONTH)
+! ----------------------------------------------------------------------
+! SUBROUTINE: BOXWINGINIT
+! ----------------------------------------------------------------------
+! Purpose:
+!   Initialise global variables used in the BOXWING model
+! ----------------------------------------------------------------------
+! Author :	John Donovan, Geoscience Australia
+! Created:	26 March 2020
+! ----------------------------------------------------------------------
 
+      SUBROUTINE BOXWINGINIT(ERM, GRD, MONTH)
       use mdl_param
       use mdl_precision
       use mdl_num
