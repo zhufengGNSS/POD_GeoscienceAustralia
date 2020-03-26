@@ -5,10 +5,9 @@ project(pod)
 #project (add_vectors Fortran)
 enable_language(Fortran)
 
-set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
-#find_package(LAPACK REQUIRED)
-set (BLA_VENDOR OpenBLAS)
-find_package(BLAS)
+set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
+find_package(LAPACK REQUIRED)
+find_package(BLAS REQUIRED)
 #message("Fortran default extensions = ${CMake_Fortran_SOURCE_FILE_EXTENSIONS}")
 set (CMAKE_Fortran_SOURCE_FILE_EXTENSIONS "f03;F90;f90;for;f;F")
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
@@ -152,7 +151,7 @@ src/FUNDARG.F
 src/RG_ZONT2.F 
 )
 
-#ga_math library requires LAPACK or OpenBLAS as m_matrixinv uses it
+#ga_math library requires LAPACK as m_matrixinv uses it
 add_library(ga_math
 src/m_matrixRxR.f03 
 src/m_matrixinv.f03 
@@ -254,9 +253,9 @@ src/yaw_angle.f90
 src/yaw_attitude.f90 
 src/yaw_bds.f90 
 src/yaw_gal.f90 
-src/yawdyn.f90
+src/yawdyn.f90 
 src/att_matrix.f03
-src/mat2quater.f03 
+src/mat2quater.f03
 )
 
 add_library(eop
@@ -377,7 +376,7 @@ target_link_libraries(eclipse pod_lib)
 # must have pod_lib first to get all the modules. As rw_param requires pod_lib it must be listed again after that. 
 # rk and force depend on eop and boxwing and must precede them in the list, likewise yaw must precede eclipse
 
-target_link_libraries(pod pod_lib rw_param pod_lib rel kepler yaw eclipse tides ga_tz rk force eop boxwing ga_math ga_gen iers iau_math ${BLAS_LIBRARIES})
+target_link_libraries(pod pod_lib rw_param pod_lib rel kepler yaw eclipse tides ga_tz rk force eop boxwing ga_math ga_gen iers iau_math ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 target_link_libraries(crs2trs pod_lib rw_param pod_lib ga_tz rk force eop boxwing ga_math ga_gen iers iau_math)
 target_link_libraries(brdc2ecef pod_lib rw_param pod_lib ga_tz rk force eop boxwing ga_math ga_gen iers iau_math)
 
@@ -385,7 +384,7 @@ set_target_properties(pod PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties(crs2trs PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties(brdc2ecef PROPERTIES LINKER_LANGUAGE Fortran)
 
-target_compile_definitions(pod PRIVATE BLAS)
+target_compile_definitions(pod PRIVATE LAPACK BLAS)
 target_compile_definitions(crs2trs PRIVATE)
 target_compile_definitions(brdc2ecef PRIVATE)
 
