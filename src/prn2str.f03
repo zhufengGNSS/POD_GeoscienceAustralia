@@ -37,7 +37,7 @@ SUBROUTINE prn2str (PRN_no, STR)
       IMPLICIT NONE
 
       CHARACTER (LEN=3) :: STR
-      INTEGER (KIND = prec_int8) :: PRN_no
+      INTEGER (KIND = prec_int4) :: PRN_no
 
 ! ----------------------------------------------------------------------
 ! Shift PRN number for internally process
