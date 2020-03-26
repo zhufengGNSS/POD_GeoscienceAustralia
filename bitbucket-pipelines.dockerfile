@@ -18,13 +18,17 @@ RUN apt-get update
 #  && unzip awscli-bundle.zip \
 #  && ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 #==============================================================================
-# install the dependencies to compile the pea
+# install the dependencies to compile the pod
 #==============================================================================
 RUN apt-get install -y gcc 
 RUN apt-get install -y make
+#Add gfortran?
+#Add Cmake?
+#Add valgrind?
 #RUN apt-get install -y libboost-dev
 RUN apt-get install -y liblapack3
 RUN ln -s /usr/lib/x86_64-linux-gnu/liblapack.so.3 /usr/lib/x86_64-linux-gnu/liblapack.so
+#replace with OpenBLAS?
 RUN apt-get install -y libblas3
 RUN ln -s /usr/lib/x86_64-linux-gnu/libblas.so.3 /usr/lib/x86_64-linux-gnu/libblas.so
 #==============================================================================
@@ -34,9 +38,11 @@ RUN mkdir -p /data/acs/pod
 COPY ./ /data/acs/pod/
 WORKDIR /data/acs/pod/
 WORKDIR /data/acs/pod/src/
+#replace with cmake?
 RUN make
 #WORKDIR /data/acs/pde/
 #RUN ./TST01-download.sh
 #WORKDIR /data/acs/pde/src/test/
 #RUN make
 #RUN ./test_antenna
+#run valgrind test

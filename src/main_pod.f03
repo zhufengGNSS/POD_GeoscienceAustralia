@@ -40,6 +40,7 @@
 	  USE m_clock_read
 	  USE m_attitude_orb
 	  USE m_write_orbex	  
+	  USE m_satmetadata	  
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -117,6 +118,11 @@
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: attitude_array  
       CHARACTER (LEN=100) :: ORBEX_fname				
+! ----------------------------------------------------------------------
+      INTEGER (KIND = prec_int4), ALLOCATABLE :: SVN_array(:)
+      CHARACTER (LEN=20), ALLOCATABLE :: BLOCK_array(:)
+      REAL (KIND = prec_d), ALLOCATABLE :: MASS_array(:)
+      INTEGER (KIND = prec_int4), ALLOCATABLE :: POWER_array(:)
 ! ----------------------------------------------------------------------
 
 
@@ -673,19 +679,19 @@ Call writearray2 (orbdiff2, filename)
 ! ---------------------------------------------------------------------- 
 ! Satellite Attitude
 ! ---------------------------------------------------------------------- 
-! Satellite attitude matrix
-CALL attitude_orb (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, satsinex_filename_cfg, attitude_array)
-! ---------------------------------------------------------------------- 
-!print *, "attitude_array", attitude_array(1,:,1)
+! Satellite metadata: Block type
+mjd = orbits_ics_icrf(1,1)
+CALL satmetadata (PRNmatrix, mjd, satsinex_filename_cfg, SVN_array, BLOCK_array, MASS_array, POWER_array)
 
-! ----------------------------------------------------------------------
+! Satellite attitude matrix
+CALL attitude_orb (orbits_partials_itrf, orbits_partials_icrf, PRNmatrix, BLOCK_array, attitude_array)
+
 ! Write satellite attitude to orbex format
-! ----------------------------------------------------------------------
 ! Orbex filename
 write (ORBEX_fname, FMT='(A3,I4,I1,A4)') 'gag', (GPS_week), INT(GPS_day) ,'.obx'
 ! Write attitude matrix to orbex format
 CALL write_orbex (attitude_array, PRNmatrix, ORBEX_fname)
-! ----------------------------------------------------------------------
+
 ! Write satellite attitude per epoch to out ascii file 
 write (filename, FMT='(A3,I4,I1,A13)') 'gag', (GPS_week), INT(GPS_day), '_attitude.out'
 Call writearray2 (attitude_array, filename)
@@ -711,6 +717,7 @@ Call writearray2 (attitude_array, filename)
 ! ----------------------------------------------------------------------
 
 
+if (allocated(attitude_array)) Deallocate(attitude_array, stat=DeAllocateStatus)
 if (allocated(CLKmatrix)) Deallocate(CLKmatrix, stat=DeAllocateStatus)
 if (allocated(orbits_partials_icrf)) Deallocate(orbits_partials_icrf, stat=DeAllocateStatus)
 if (allocated(orbits_partials_itrf)) Deallocate(orbits_partials_itrf, stat=DeAllocateStatus)

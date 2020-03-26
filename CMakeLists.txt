@@ -89,6 +89,7 @@ src/m_orbitmain.f03
 src/m_orbitIC.f03
 src/m_attitude_orb.f03
 src/m_write_orbex.f03
+src/m_satmetadata.f03
 )
 
 add_library(iau_math
@@ -186,8 +187,8 @@ src/time_TT_sec.f90
 add_library(boxwing
 src/BOXWINIT.f90
 src/ERPFBOXW.f90
-src/SURFBOXW.f
-src/PROPBOXW.f
+src/SURFBOXW.f90
+src/PROPBOXW.f90
 src/SRPFBOXW.f90
 )
 
@@ -327,20 +328,21 @@ add_executable(brdc2ecef
 src/report.f90
 src/m_read_leapsec.f03
 src/asc2eph.f90
-src/brdc2ecef.f
+src/brdc2ecef.f90
 src/brdc_cmdline.f03
 src/brdc_qc_gal.f90
 src/brdc_qc_gps.f90
 src/CATfile.f90
-src/chkbrdc.f
+src/chkbrdc.f90
 src/crs_trs.f90 
-src/reformbrdc.f
-src/glnacc.f
-src/glnorbint.f
+src/reformbrdc.f90
+src/glnacc.f90
+src/glnorbint.f90
 src/m_antoffset.f90
 src/mdl_brdconfig.f03
 src/m_meanstd.f90
 src/m_write_brd2sp3.f03
+src/m_write_orb2sp3.f03
 src/prn2str.f03
 src/prn_shift_brdc.f03
 src/readbrdcheader.f03
