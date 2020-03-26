@@ -11,6 +11,12 @@ MODULE m_read_svsinex
 ! ----------------------------------------------------------------------
 ! Author :	Tzupang Tseng, Geoscience Australia, Australia
 ! Created:	27-09-2019
+!
+! Change list:
+!               John Donovan, Geoscience Australia
+!               Include sort routines
+!               Read file exactly once and put into stored array, sorted
+!               Lookup now just searching the array
 ! ----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -235,7 +241,7 @@ if (idir==-1) then
       ls_POWER = satellites(i)%POWER
       write(message, '(a, i4, a, i4, a, i4, 3(a1, i4))') &
               'Located satellite '//prn_in//' at index ', i, ' for day ', iyr, ';', iday, ':', ihr, ':', imin
-      call report('STATUS', pgrm_name, 'lookup_sinex', &
+      if (gbl_debug .ge. 2) call report('STATUS', pgrm_name, 'lookup_sinex', &
               message, ' ', 0)
       exit
     endif
@@ -252,7 +258,7 @@ else
       ls_POWER = satellites(i)%POWER
       write(message, '(a, i4, a, i4, a, i4, 3(a1, i4))') &
               'Located satellite '//svn_in//' at index ', i, ' for day ', iyr, ';', iday, ':', ihr, ':', imin
-      call report('STATUS', pgrm_name, 'lookup_sinex', &
+      if (gbl_debug .ge.2) call report('STATUS', pgrm_name, 'lookup_sinex', &
               message, ' ', 0)
       exit
     endif
@@ -407,7 +413,7 @@ READ(UNIT_IN,'(a)',iostat=ioerr) record
    END IF 
 END DO 
 
-call report('STATUS', pgrm_name, 'read_sinex_file', &
+if (gbl_debug .ge. 2) call report('STATUS', pgrm_name, 'read_sinex_file', &
         'Finished reading Sinex Identifiers from file', ' ', 0)
 
 ! We have read all the IDENTIFIERS now. SAT_COUNT is now fixed. But because the remaining data
@@ -460,7 +466,7 @@ ioerr = 0
 
 ! sort array based on svn (first) then start time
 call Qsort_Sinex_SVN(satellites(1:SAT_COUNT))
-call report('STATUS', pgrm_name, 'read_sinex_file', &
+if (gbl_debug .ge. 2) call report('STATUS', pgrm_name, 'read_sinex_file', &
         'Finished reading Sinex Eccentricities from file', ' ', 0)
 
 ! now look for '+SATELLITE/PRN'
@@ -550,7 +556,7 @@ END DO
 
 ! sort array based on svn (first) then start time
 call Qsort_Sinex_SVN(satellites(1:SAT_COUNT))
-call report('STATUS', pgrm_name, 'read_sinex_file', &
+if (gbl_debug .ge. 2) call report('STATUS', pgrm_name, 'read_sinex_file', &
         'Finished reading Sinex PRNs from file', ' ', 0)
 
 ioerr = 0
@@ -742,7 +748,7 @@ END DO
 ! sort array based on svn (first) then start time
 call Qsort_Sinex_Svn(satellites(1:SAT_COUNT))
 ioerr = 0
-call report('STATUS', pgrm_name, 'read_sinex_file', &
+if (gbl_debug .ge. 2) call report('STATUS', pgrm_name, 'read_sinex_file', &
         'Finished reading Sinex MASS from file', ' ', 0)
 
 ! This only needed for Glonass. We might not have Glonass satellites in the file. So this is 
@@ -932,7 +938,7 @@ ioerr = 0
 ! sort array based on svn (first) then start time
 call Qsort_Sinex_Svn(satellites(1:SAT_COUNT))
 ioerr = 0
-call report('STATUS', pgrm_name, 'read_sinex_file', &
+if (gbl_debug .ge. 2) call report('STATUS', pgrm_name, 'read_sinex_file', &
         'Finished reading Sinex FRQCHN from file', ' ', 0)
 
 ! Get the transmitter power ( SATELLITE/TX_POWER block)
@@ -1126,10 +1132,10 @@ DO WHILE (.not.found)
 ! If no power for a particular satellite we blindly set it to
 ! 185 (BDS-IGSO). If no PRN for a satellite set it to X99 (invalid)
 do i = 1, SAT_COUNT
-!    if (satellites(i)%POWER == 0) satellites(i)%POWER = 185
+    if (satellites(i)%POWER == 0) satellites(i)%POWER = 185
     if (satellites(i)%PRN == "") satellites(i)%PRN="X99"
 end do
-call report('STATUS', pgrm_name, 'read_sinex_file', &
+if (gbl_debug .ge. 2) call report('STATUS', pgrm_name, 'read_sinex_file', &
         'Finished reading Sinex POWER from file', ' ', k)
 
 ! sort array based on prn (first) then start time: since we always search by prn ...
@@ -1137,9 +1143,10 @@ call Qsort_Sinex_Prn(satellites(1:SAT_COUNT))
 ioerr = 0
 
 write(message, '(a, i4, a)') "Created satellite array with ", SAT_COUNT, " rows of data"
-call report('STATUS', pgrm_name, 'read_sinex_file', &
+if (gbl_debug .ge. 1) call report('STATUS', pgrm_name, 'read_sinex_file', &
         message, ' ', 0)
 
+if (gbl_debug .ge. 2) then
 Do i = 1, SAT_COUNT
    write(message, '(i4,";",a," BLKTYP: ", a, " MASS: ", f7.2, " PRN: ", a, " POWER: ", i4,' //&
            '" Start: ", i5, " ", i5, " ", i5, " Stop: ", i5, " ", i5, " ", i5)') &
@@ -1149,6 +1156,7 @@ Do i = 1, SAT_COUNT
    call report ('STATUS', pgrm_name, 'read_sinex_file', &
                 message, ' ', 0)
 enddo
+endif
 
                    
 ! repeat for com block (com_x, com_y, com_z)

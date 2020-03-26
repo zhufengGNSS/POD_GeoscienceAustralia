@@ -1,8 +1,16 @@
-subroutine read_cmdline
-
-! This subroutine reads commnad line options and returns variables defined in mdl_config
+! ----------------------------------------------------------------------
+! SUBROUTINE: read_cmdline
+! ----------------------------------------------------------------------
+! Purpose:
+! This subroutine reads command line options and returns variables defined in mdl_config
 ! Uses getopt command line parsing functions from f90getopt.F90
+! ----------------------------------------------------------------------
+! Author :	John Donovan, Geoscience Australia
+! Created:	26 March 2020
+! ----------------------------------------------------------------------
 
+
+subroutine read_cmdline
 USE f90getopt
 USE mdl_config
 
@@ -12,7 +20,7 @@ integer            :: len_optarg
 character (LEN=80) :: pgm_name
 
 ! Set number of long command line options available
-type(option_s) :: opts(15)
+type(option_s) :: opts(16)
 
 ! Current mdl_config varaible options
 ! ----------------------------------------------------------------------
@@ -32,6 +40,7 @@ type(option_s) :: opts(15)
 ! Estimator_Iterations_cfg     -i
 ! sp3_velocity_cfg             -u
 ! IC_MODE_cfg                  -q
+! gbl_debug (verbosity)        -d
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 ! Read the Command line
@@ -53,6 +62,7 @@ opts(12) = option_s( "estiter",  .true.,      'i' )
 opts(13) = option_s( "sp3vel",   .false.,     'u' )
 opts(14) = option_s( "icmodel",  .true.,      'q' )
 opts(15) = option_s( "help",     .false.,     'h' )
+opts(16) = option_s( "verbosity", .true.,     'd' )
 
 ! Get the program name
 call get_command_argument( 0, pgm_name )
@@ -71,7 +81,7 @@ POD_fname_cfg = 'DEFAULT'
 
 ! Process options given sequentially
 do
-   select case(getopt("c:m:s:o:e:v:a:p:r:t:n:i:u:q:h",opts))
+   select case(getopt("c:m:s:o:e:v:a:p:r:t:n:i:u:q:d:h",opts))
       case( char(0) )
          exit
       case( 'c' )
@@ -120,6 +130,10 @@ do
 !      print *, 'option sp3vel/u=', optarg
           len_optarg = len_trim(optarg)
           read(optarg(1:len_optarg),'(i4)') sp3_velocity_cfg
+      case( 'd' )
+!      print *, 'option verbosity/d=', optarg
+          len_optarg = len_trim(optarg)
+          read(optarg(1:len_optarg),'(i2)') gbl_debug
       case( 'q' )
 !      print *, 'option icmode/u=', optarg
           len_optarg = len_trim(optarg)
@@ -158,6 +172,7 @@ do
           print*,'      -q --icmode  = Initial condition from parameter estimation procedure'
 		  print*,'				0 - Do not write Velocity vector to sp3 orbit'
 		  print*,'				1 - Write Velocity vector to sp3 orbit'  
+          print*,'      -d --verbosity = output verbosity level [Default: 0]'
           print*,'      -h --help.   = Print program help'
           print*,''
           print*,'Examples:'
