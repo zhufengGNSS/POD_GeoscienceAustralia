@@ -4,16 +4,12 @@
 *.mod
 *.out
 *.dat
-*.out
-*.mod
 *.e
 *.a
 *.o
 *.rnx
 data/
 bin/
-pod
-crs2trs
 tp_test/
 fort.*
 gag*.sp3
@@ -25,6 +21,5 @@ test/VEQ01.in
 test/emp_bias.in
 test/emp_cpr.in
 test/ascp1950.430
-examples/pod_example.tar.gz
 build/
 lib/
