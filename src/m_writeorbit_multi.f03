@@ -270,7 +270,9 @@ DO i_sat = 1 , Nsat
    jd0 = 2400000.5D0
    CALL iau_JD2CAL ( jd0, mjd, Iyear, Imonth, Iday, FD, J_flag )
    CALL iau_CAL2JD ( Iyear, 1, 1, jd0, mjd_1, J_flag )   
-   DOY = INT(mjd) - (mjd_1-1) 
+   !DOY = INT(mjd) - (mjd_1-1) 
+   DOY = IDNINT(mjd-mjd_1) + 1
+   YR = Iyear
    PRN_isat = PRN_array(i_sat)
    CALL read_satsnx (satsinex_filename_cfg, Iyear, DOY, Sec_00, PRN_isat) 
 

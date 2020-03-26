@@ -2,7 +2,7 @@
 
 # Test script for POD install
 
-# Remove old test files
+# Remove old test output files
 \rm -r gag19424.sp3 pod.out >& /dev/null
 
 # Create necessary links
