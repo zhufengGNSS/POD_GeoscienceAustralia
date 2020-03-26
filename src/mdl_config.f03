@@ -166,4 +166,9 @@ MODULE mdl_config
 ! program name (for error reporting!)
       CHARACTER (LEN=100):: pgrm_name
 ! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! program debug (for more verbose output)
+      INTEGER (KIND = prec_int2) :: gbl_debug
+! ----------------------------------------------------------------------
 END
