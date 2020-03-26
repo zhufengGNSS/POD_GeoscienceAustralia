@@ -1,4 +1,13 @@
-      SUBROUTINE R3 ( PSI, R )
+! ----------------------------------------------------------------------
+! SUBROUTINE: R3
+! ----------------------------------------------------------------------
+! Purpose:
+!    Calculate rotation matrix about the z-axis (towards earth centre)
+!    for given radians PSI
+! ----------------------------------------------------------------------
+! Author :	John Donovan, Geoscience Australia
+! Created:	26 March 2020
+! ----------------------------------------------------------------------
 *
 *         (  + cos(PSI)   + sin(PSI)     0  )
 *         (                                 )
@@ -7,6 +16,7 @@
 *         (       0            0         1  )
 *
 
+      SUBROUTINE R3 ( PSI, R )
       IMPLICIT NONE
 
       DOUBLE PRECISION PSI, R(3,3)

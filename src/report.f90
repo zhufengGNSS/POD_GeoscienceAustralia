@@ -1,3 +1,7 @@
+! ----------------------------------------------------------------------
+! SUBROUTINE: report (output debug, etc)
+! ----------------------------------------------------------------------
+! Purpose:
 !     Routine to report on the process status
 !     The routine reports status messages which indicate where in the
 !     processing we are; warnings which are are not fatal to the processing
@@ -21,6 +25,10 @@
 !    .                   'Normal equations non-positive definite',' ',0)
 !     CLEAR:
 !     call report('CLEAR','POD',' ',' ',' ',0)
+! ----------------------------------------------------------------------
+! Author :	John Donovan, Geoscience Australia
+! Created:	26 March 2020
+! ----------------------------------------------------------------------
 
 !*************************************************************************************
 ! utility subroutines called within
@@ -110,7 +118,7 @@
       subroutine casefold( str )
 
       character*(*) str
-      character*(100) ucstr
+      character*(200) ucstr
       integer i, c
 
       ucstr = TRIM(str)
@@ -127,7 +135,7 @@
       subroutine caseunfold( str )
 
       character*(*) str
-      character*(100) lcstr
+      character*(200) lcstr
       integer i, c
 
       lcstr = TRIM(str)
