@@ -42,10 +42,11 @@ SUBROUTINE  readbrdcmessg(UNIT_IN,VERSION,MAXNSAT,MAXNPAR,MAXEPO, &
       INTEGER (KIND = prec_int4),INTENT(IN) :: MAXNSAT, MAXNPAR,MAXEPO
       INTEGER (KIND = prec_int4),INTENT(OUT) :: IYEAR4,MONTH,IDAY
       INTEGER (KIND = prec_int4),INTENT(OUT) :: ISAT
-      REAL (KIND = prec_q),INTENT(OUT) ::EPH(MAXNPAR,MAXEPO,MAXNSAT),CLK(MAXNPAR,MAXEPO,MAXNSAT)
+      !REAL (KIND = prec_q),INTENT(OUT) ::EPH(MAXNPAR,MAXEPO,MAXNSAT),CLK(MAXNPAR,MAXEPO,MAXNSAT)
+      REAL (KIND = prec_q),INTENT(OUT)::EPH(MAXNPAR,MAXEPO,MAXNSAT),CLK(3,MAXEPO,MAXNSAT)
       REAL (KIND = prec_q) :: EPHDAT(MAXNPAR)
-      REAL (KIND = prec_q) :: EPHV3(MAXNPAR),CLKV3(MAXNPAR)
-
+      !REAL (KIND = prec_q) :: EPHV3(MAXNPAR),CLKV3(MAXNPAR)
+      REAL (KIND = prec_q) :: EPHV3(MAXNPAR),CLKV3(3)
       INTEGER (KIND = prec_int4) :: ISVN
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int4) :: I,J,K,IEPO
@@ -184,15 +185,14 @@ IF (ISAT < 50 .OR.  ISAT > 100 .AND. ISAT < 150 .OR. &
 
      END DO
 
-     CALL reformbrdc (EPHDAT,EPHV3,CLKV3)
+     CALL reformbrdc (MAXNPAR,EPHDAT,EPHV3,CLKV3)
+     CLK(1:3,IEPO,ISAT)=CLKV3(1:3)
      DO I=1,20
      EPH(I,IEPO,ISAT)=EPHV3(I)
      !print*,'EPH(1:2,:,:), GPSWEEK, TOE', EPH(1,IEPO,ISAT), EPH(2,IEPO,ISAT)
-     CLK(I,IEPO,ISAT)=CLKV3(I)
      END DO
 
 ELSE IF (ISAT > 50 .AND. ISAT < 100 )THEN
-!     CALL time_GPSweek2 (TOC , GPS_week, EPHDAT(1), GPSweek_mod1024, GPS_day)
      EPHDAT(1) = TOC ! GLONASS time system is UTC time
                      ! Here the first element is setup to the MJD in convenience
                      ! to convert to GPS time later 
@@ -210,10 +210,7 @@ ELSE IF (ISAT > 50 .AND. ISAT < 100 )THEN
 
      DO I=1,16
      EPH(I,IEPO,ISAT)=EPHDAT(I)
-!PRINT*,'CHECK EPHDAT'
-!PRINT*,'EPH(I,IEPO,ISAT) =',EPH(I,IEPO,ISAT), 'I =', I
 !     print*,'ISAT =',ISAT,'UTC, SECONDS', EPH(I,IEPO,ISAT), EPHDAT(I)
-     !   CLK(I,IEPO,ISAT)
      END DO
 
 

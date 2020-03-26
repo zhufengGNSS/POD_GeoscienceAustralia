@@ -12,7 +12,7 @@ integer            :: len_optarg
 character (LEN=80) :: pgm_name
 
 ! Set number of long command line options available
-type(option_s) :: opts(14)
+type(option_s) :: opts(15)
 
 ! Current mdl_config varaible options
 ! ----------------------------------------------------------------------
@@ -31,6 +31,7 @@ type(option_s) :: opts(14)
 ! iau_model_cfg                -n
 ! Estimator_Iterations_cfg     -i
 ! sp3_velocity_cfg             -u
+! IC_MODE_cfg                  -q
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
 ! Read the Command line
@@ -50,7 +51,8 @@ opts(10) = option_s( "eopsol",   .true.,      't' )
 opts(11) = option_s( "nutpre",   .true.,      'n' )
 opts(12) = option_s( "estiter",  .true.,      'i' )
 opts(13) = option_s( "sp3vel",   .false.,     'u' )
-opts(14) = option_s( "help",     .false.,     'h' )
+opts(14) = option_s( "icmodel",  .true.,      'q' )
+opts(15) = option_s( "help",     .false.,     'h' )
 
 ! Get the program name
 call get_command_argument( 0, pgm_name )
@@ -69,7 +71,7 @@ POD_fname_cfg = 'DEFAULT'
 
 ! Process options given sequentially
 do
-   select case(getopt("c:m:s:o:e:v:a:p:r:t:n:i:uh",opts))
+   select case(getopt("c:m:s:o:e:v:a:p:r:t:n:i:u:q:h",opts))
       case( char(0) )
          exit
       case( 'c' )
@@ -118,6 +120,10 @@ do
 !      print *, 'option sp3vel/u=', optarg
           len_optarg = len_trim(optarg)
           read(optarg(1:len_optarg),'(i4)') sp3_velocity_cfg
+      case( 'q' )
+!      print *, 'option icmode/u=', optarg
+          len_optarg = len_trim(optarg)
+          read(optarg(1:len_optarg),'(i4)') IC_MODE_cfg
       case( 'h' )
           print*,'Default master POD config file = POD.in'
 		  print*,'To run from default config file: ',trim(pgm_name),' or ',trim(pgm_name),' -c POD.in'
@@ -149,6 +155,7 @@ do
           print*,'				2006 - IAU2006/2000A'
           print*,'      -i --estiter = Orbit Estimatimation Iterations (1 or greater)'
           print*,'      -u --sp3vel  = Output .sp3 file with velocities'
+          print*,'      -q --icmode  = Initial condition from parameter estimation procedure'
 		  print*,'				0 - Do not write Velocity vector to sp3 orbit'
 		  print*,'				1 - Write Velocity vector to sp3 orbit'  
           print*,'      -h --help.   = Print program help'
