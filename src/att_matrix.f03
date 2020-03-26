@@ -1,4 +1,4 @@
-SUBROUTINE att_matrix(mjd, rsat_icrf, vsat_icrf, PRNsat, satsinex_filename, & 
+SUBROUTINE att_matrix(mjd, rsat_icrf, vsat_icrf, PRNsat, BLKsat, & 
 				& 	  eclipse_status, Yangle_array, Rtrf2bff, Quaternions_trf2bff)
 
 
@@ -38,7 +38,7 @@ SUBROUTINE att_matrix(mjd, rsat_icrf, vsat_icrf, PRNsat, satsinex_filename, &
       USE mdl_num
       USE mdl_param
       USE m_matrixinv
-      USE m_read_satsnx
+      !USE m_read_satsnx
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -48,7 +48,8 @@ SUBROUTINE att_matrix(mjd, rsat_icrf, vsat_icrf, PRNsat, satsinex_filename, &
       REAL (KIND = prec_d) :: mjd
       REAL (KIND = prec_q), INTENT(IN) :: rsat_icrf(3), vsat_icrf(3)
       CHARACTER (LEN=3) , INTENT(IN) :: PRNsat
-      CHARACTER (LEN=100), INTENT(IN) :: satsinex_filename
+      !CHARACTER (LEN=100), INTENT(IN) :: satsinex_filename
+      CHARACTER (LEN=20), INTENT(IN) :: BLKsat
 ! OUT
       INTEGER (KIND = 4) :: eclipse_status
       REAL (KIND = prec_d) :: Yangle_array(2)	  
@@ -86,46 +87,29 @@ SUBROUTINE att_matrix(mjd, rsat_icrf, vsat_icrf, PRNsat, satsinex_filename, &
       REAL (KIND = prec_d) :: Yangle_rad
 
 
-
-!print *,"att_matrix SINEX entry"
-
-! ----------------------------------------------------------------------
-! Read SINEX file for satellite metadata (SVN number,Satellite Block type,..)  
-! ----------------------------------------------------------------------
-   Sec_00 = ( mjd - INT(mjd) ) * 86400.0D0
-   jd0 = 2400000.5D0
-   CALL iau_JD2CAL ( jd0, mjd, Iyear, Imonth, Iday, FD, J_flag )
-   CALL iau_CAL2JD ( Iyear, 1, 1, jd0, mjd_1, J_flag )   
-   DOY = INT(mjd) - (mjd_1-1) 
-   
-   ! Read Sinex dta flie
-   CALL read_satsnx (satsinex_filename, Iyear, DOY, Sec_00, PRNsat) 
-! ----------------------------------------------------------------------
-
-!print *,"att_matrix SINEX exit"
-
 ! ----------------------------------------------------------------------
 ! GNSS Satellite Block Type
 ! ----------------------------------------------------------------------
 ! BLK_TYP :: Global variable in mdl_param
-! ----------------------------------------------------------------------
 ! GPS case: Satellite Block ID:        1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
+!BLKTYP = BLKsat
+
 satblk = 6
-IF(BLKTYP=='GPS-I')			  THEN
+IF(BLKsat=='GPS-I')			  THEN
 	satblk = 1
-ELSE IF(BLKTYP=='GPS-II')	  THEN
+ELSE IF(BLKsat=='GPS-II')	  THEN
 	satblk = 2
-ELSE IF(BLKTYP=='GPS-IIA') 	  THEN
+ELSE IF(BLKsat=='GPS-IIA') 	  THEN
 	satblk = 3
-ELSE IF(BLKTYP=='GPS-IIR')	  THEN
+ELSE IF(BLKsat=='GPS-IIR')	  THEN
 	satblk = 4
-ELSE IF(BLKTYP=='GPS-IIR-A')  THEN
+ELSE IF(BLKsat=='GPS-IIR-A')  THEN
 	satblk = 5
-ELSE IF(BLKTYP=='GPS-IIR-B')  THEN
+ELSE IF(BLKsat=='GPS-IIR-B')  THEN
 	satblk = 5
-ELSE IF(BLKTYP=='GPS-IIR-M')  THEN
+ELSE IF(BLKsat=='GPS-IIR-M')  THEN
 	satblk = 5
-ELSE IF(BLKTYP=='GPS-IIF')    THEN
+ELSE IF(BLKsat=='GPS-IIF')    THEN
 	satblk = 6
 END IF
 ! ----------------------------------------------------------------------
@@ -133,11 +117,11 @@ END IF
 ! 1. BDSorbtype = 'IGSO'
 ! 2. BDSorbtype = 'MEO'
 ! 3. BDSorbtype = 'IGSO'
-IF(BLKTYP=='BDS-2G'.or.BLKTYP == 'BDS-3G')            BDSorbtype = 'GEO'  
-IF(BLKTYP=='BDS-2I'.or.BLKTYP == 'BDS-3I'.or.&
-   BLKTYP=='BDS-3SI-SECM'.or.BLKTYP =='BDS-3SI-CAST') BDSorbtype = 'IGSO' 
-IF(BLKTYP=='BDS-2M'.or.BLKTYP == 'BDS-3M'.or.&
-   BLKTYP=='BDS-3M-SECM'.or.BLKTYP =='BDS-3M-CAST')   BDSorbtype = 'MEO'
+IF(BLKsat=='BDS-2G'.or.BLKsat == 'BDS-3G')            BDSorbtype = 'GEO'  
+IF(BLKsat=='BDS-2I'.or.BLKsat == 'BDS-3I'.or.&
+   BLKsat=='BDS-3SI-SECM'.or.BLKsat =='BDS-3SI-CAST') BDSorbtype = 'IGSO' 
+IF(BLKsat=='BDS-2M'.or.BLKsat == 'BDS-3M'.or.&
+   BLKsat=='BDS-3M-SECM'.or.BLKsat =='BDS-3M-CAST')   BDSorbtype = 'MEO'
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------

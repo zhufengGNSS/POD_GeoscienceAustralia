@@ -40,14 +40,22 @@ The `ACS` Version 0.0.1 beta release supports:
 ## Directory Structure
 
     pod/
+    ├── LICENSE.md
+    ├── INSTALL.md
     ├── README.md
+    ├── src/
+    ├── bin/  (created)
+    ├── lib/  (created)
+    ├── config/
+    ├── tables/
+    ├── scripts/
 
 ### Dependencies
 
-1. The lapack numerical linear algebra library (lapack.x86_64) (You may need to run the command ln -s /usr/lib64/liblapack.so.3 /usr/lib64/liblapack.so)
-2. The basic linear algebra library (blas.x86_64,liblas-libs.x86_64) (You may need to run the command ln -s /usr/lib64/libblas.so.3 /usr/lib64/libblas.so)
-3. A working C compiler (gcc will do), a working C++ compiler (gcc-g++ will do) and a fortran compiler (we have used gfortran)
-4. If the flags set in CMakeLists.txt do not work with your compiler please remove the ones that don't
+1. The open basic linear algebra library (Openblas.x86_64,liblas-libs.x86_64) (You may need to run the command ln -s /usr/lib64/libopenblas.so.3 /usr/lib64/libopenblas.so)
+2. A working C compiler (gcc will do), a working C++ compiler (gcc-g++ will do) and a fortran compiler (we have used gfortran)
+3. Cmake (from cmake.org) at least version 2.8
+4. If the flags set in CMakeLists.txt do not work with your compiler please remove/replace the ones that don't
 
 ### Build
 
@@ -56,7 +64,7 @@ To build the `POD` ...
     $ cd pod
     $ mkdir build
     $ cd build
-    $ cmake3 .. >cmake.out 2>cmake.err
+    $ cmake3 .. 
     $ make >make.out 2>make.err
     $ less make.err (to verify everything was built correctly)
 
@@ -64,10 +72,11 @@ You should now have the executables in the bin directory: pod crs2trs brdc2ecef
 
 ### Test 
 
-To test your build of the  `POD` ...
+To test your build of the  `POD` ... - You may not need the ulimit command but we found it necessary
 
     $ cd ../pod/test
-    $ sh_test_pod
+    $ ulimit -s unlimited
+    $ ./sh_test_pod
 
 At the completion of the test run, the sh_test_pod script will return any differences to the standard test resuts
 
@@ -166,6 +175,112 @@ This should output the following to `stdout`...
     Write orbit matrices to output files
     CPU Time (sec)   350.88653299999999
     
+
+## Acknowledgements
+
+In this section we wish to acknowledge the use of and heritage of some of the source code that we have used to help develop the POD.
+
+### Eclipse Routine
+
+The routines to calculate the eclipsing times for GPS satellites were based off the original routines written by Jan Kouba, they have since been heavily modified.
+
+### JPL Planetary Ephemerides
+
+We are using the Jet Propulison (JPL) Planetary and Lunar Ephemerides processing program ((ftp://ssd.jpl.nasa.gov/pub/eph/planets/fortran/ ), in particular the routines:
+
+- CONST.f
+- FSIZER3.f
+- INTERP.f
+- PLEPH.f
+- SPLIT.f
+
+We have modified the following subroutines:
+
+- asc2eph.f90
+- STATE.f90
+
+so thate there is no longer a dependency on a binary file produced in the original JPL form.
+
+### Standards of Fundamental Astronomy (SOFA) routines
+
+We have used a number of routines obtained from SOFA, http://www.iausofa.org/ :
+
+- anp.for
+- bi00.for
+- bpn2xy.for
+- bpn2xy.for
+- c2ixys.for
+- c2tcio.for
+- cal2jd.for
+- cp.for
+- cr.for
+- era00.for
+- fad03.for
+- fae03.for
+- faf03.for
+- faju03.for
+- fal03.for
+- falp03.for
+- fama03.for
+- fame03.for
+- fane03.for
+- faom03.for
+- fapa03.for
+- fasa03.for
+- faur03.for
+- fave03.for
+- gmst00.for
+- gmst06.for
+- gmst_iers.f03
+- ir.for
+- jd2cal.for
+- jdcalf.for
+- numat.for
+- nut00a.for
+- obl80.for
+- pn00a.for
+- pn00.for
+- pnm00a.for
+- pnm06a.for
+- pom00.for
+- pr00.for
+- rx.for
+- rxr.for
+- ry.for
+- rz.for
+- s00.for
+- s06.for
+- sp00.for
+- taiutc.for
+- tide_pole_oc.f90
+- tide_pole_se.f90
+- time_GPS.f90
+- time_TAI.f90
+- time_TT.f90
+- time_TT_sec.f90
+- time_UTC.f90
+- tr.for
+- xy06.for
+- xys00a.for
+- xys06a.for
+
+### International Earth Rotation Service (IERS) routines 
+
+The following routines we originally sourced fromthe IERS:
+
+- interp_iers.f
+- CNMTX.F
+- FUNDARG.F
+- LAGINT.f
+- ORTHO_EOP.F
+- PMSDNUT2.F
+- RG_ZONT2.F
+- UTLIBR.F
+- IERS_CMP_2015.F
+
+
+
+
 
 
 

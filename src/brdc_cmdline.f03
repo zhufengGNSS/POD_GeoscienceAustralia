@@ -5,7 +5,7 @@ subroutine brdc_cmdline
 
 USE f90getopt
 USE mdl_brdconfig
-
+USE mdl_config
 ! ----------------------------------------------------------------------
 ! Command line local variables
 integer            :: len_optarg

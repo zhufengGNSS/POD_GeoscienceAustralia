@@ -145,7 +145,7 @@
       subroutine check_ascii( str )
 
       character*(*) str
-      character*(100) astr
+      character*(200) astr
       integer i, c
 
       astr = TRIM(str)
