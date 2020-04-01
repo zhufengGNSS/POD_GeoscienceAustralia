@@ -50,6 +50,7 @@ SUBROUTINE read_satsnx (satsinex_filename, Iyr, iday, Sec_00, PRN_isat)
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=100) :: satsinex_filename
       CHARACTER (LEN=3) :: PRN_isat
+      CHARACTER (LEN=50) :: mesg
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
@@ -94,9 +95,11 @@ SUBROUTINE read_satsnx (satsinex_filename, Iyr, iday, Sec_00, PRN_isat)
       CALL lookup_sinex (idir,found, iyr,iday,ihr,imin,gnss,isat, &
                          SVNID,BLKTYP,BLKID,MASS,POWER)
 
-      if (.not.found) &
+      if (.not.found) then
+              write (mesg, '(" yr = ", i4, ", doy = ", i4, ", hour = ", i2, ", minute = ", i2)') iyr, iday, ihr, imin
           call report('WARNING', pgrm_name, 'm_read_satsnx', &
-              'Could not find satellite metadata: '//PRN_Isat, ' ', 0)
+              'Could not find satellite metadata: '//PRN_Isat//mesg, ' ', 0)
+      endif
       
 END SUBROUTINE
 
