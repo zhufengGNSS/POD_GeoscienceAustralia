@@ -105,6 +105,7 @@ Input example:	0.000000000
 Description: 	Initial state vector' six coodinates values.  The parameter is being written here based on the configuration of the master configuration file POD.in
 
 Input Options:	
+
 				1. Position vector X,Y,Z in meters and Velcoity vector (Vx, Vy, Vz) in meter/seconds
 				2. Kepler elements values: 
 				
@@ -187,7 +188,7 @@ Input example:	RKN7
 
 
 # 
-** Parameter name:	`integrator_step`
+** Parameter name:	`integrator_step` **
 
 Description: 	Numerical Integrator' stepsize in seconds
 
