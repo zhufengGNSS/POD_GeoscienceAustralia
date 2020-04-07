@@ -187,7 +187,7 @@ Input example:	RKN7
 
 
 # 
-** Parameter name:	`integrator_step`
+** Parameter name:	`integrator_step` **
 
 Description: 	Numerical Integrator' stepsize in seconds
 
