@@ -17,8 +17,12 @@ The POD has several software dependencies
 * Python Version3 (including Numpy and Matplotlib modules)
 
 ### Download
+To downlaod ACS POD source from bitbucket, you need to first install [Git](https://www.atlassian.com/git) and [Git-LFS](https://git-lfs.github.com/)
+
+Then you can download the POD source code using git clone:
+
     $git clone git@bitbucket.org:geoscienceaustralia/pod.git
-    
+
 ## Directory Structure
     pod/
     ├── README.md			! General README information
