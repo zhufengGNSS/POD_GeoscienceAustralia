@@ -8,7 +8,7 @@ The `ACS` Version 1.1.0 beta release supports:
 
 ## Configuration Files
 
-The `POD` Precise Orbit Determination (`./bin/pod`) uses the configuration file:
+The `POD` Precise Orbit Determination (`./bin/pod`) uses the configuration files:
 
 ├── [POD.in](https://bitbucket.org/geoscienceaustralia/pod/src/thomas3/docs/POD.md) (Master POD configuration file
 
