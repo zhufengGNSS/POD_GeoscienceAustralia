@@ -8,12 +8,14 @@ The `ACS` Version 1.1.0 beta release supports:
 
 ## Configuration Files
 
-The `POD` Precise Orbit Determination (`./bin/pod`) uses the configuration file:
+The `POD` Precise Orbit Determination (`./bin/pod`) uses the configuration files:
 
-    ├── EQM.in (Full force model equation of motion)
+├── [POD.in](https://bitbucket.org/geoscienceaustralia/pod/src/thomas3/docs/POD.md) (Master POD configuration file
+
+├── [EQM.in](https://bitbucket.org/geoscienceaustralia/pod/src/thomas3/docs/EQM.md) (Full force model equation of motion configuration)
+
+├── [VEQ.in](https://bitbucket.org/geoscienceaustralia/pod/src/thomas3/docs/VEQ.md) (variational equations configuration)
     
-    ├── VEQ.in (For variational equations)
-    
-    ├── POD.in (For all other config)
+
     
 
