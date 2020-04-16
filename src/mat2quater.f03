@@ -26,9 +26,6 @@
 ! 0.6695807158758448 ) ! q3
 !
 ! ----------------------------------------------------------------------
-! Author: Dr. Thomas Papanikolaou, Geoscience Australia
-! Date:   26 March 2020
-! ----------------------------------------------------------------------
 subroutine mat2quater(xmat,quater)
 implicit none
 double precision , dimension(3,3) :: xmat
