@@ -405,14 +405,14 @@ IF (I < 50 .AND. EPHNEW(3,1,I) > 0.d0 ) THEN ! GPS/GNSS sampling rate: 2 hour
 !IF(I == 4) CYCLE ! The PRN04 has been decommissioned. Once the new generation
                  ! statellite is activiated with this PRN number, then this
                  ! statement shall be switched off.
-CALL brdc_qc_gps(EPHNEW(3,1:15,I),  AVE(1), STD(1))
-CALL brdc_qc_gps(EPHNEW(4,1:15,I),  AVE(2), STD(2))
-CALL brdc_qc_gps(EPHNEW(5,1:15,I),  AVE(3), STD(3))
-CALL brdc_qc_gps(EPHNEW(6,1:15,I),  AVE(4), STD(4))
-CALL brdc_qc_gps(EPHNEW(7,1:15,I),  AVE(5), STD(5))
-CALL brdc_qc_gps(EPHNEW(8,1:15,I),  AVE(6), STD(6))
-CALL brdc_qc_gps(EPHNEW(9,1:15,I),  AVE(7), STD(7))
-CALL brdc_qc_gps(EPHNEW(10,1:15,I), AVE(8), STD(8))
+!CALL brdc_qc_gps(EPHNEW(3,1:15,I),  AVE(1), STD(1))
+!CALL brdc_qc_gps(EPHNEW(4,1:15,I),  AVE(2), STD(2))
+!CALL brdc_qc_gps(EPHNEW(5,1:15,I),  AVE(3), STD(3))
+!CALL brdc_qc_gps(EPHNEW(6,1:15,I),  AVE(4), STD(4))
+!CALL brdc_qc_gps(EPHNEW(7,1:15,I),  AVE(5), STD(5))
+!CALL brdc_qc_gps(EPHNEW(8,1:15,I),  AVE(6), STD(6))
+!CALL brdc_qc_gps(EPHNEW(9,1:15,I),  AVE(7), STD(7))
+!CALL brdc_qc_gps(EPHNEW(10,1:15,I), AVE(8), STD(8))
 
    DO K = 1, 15
          IF (IBAD(K,I) /= 1 )THEN
@@ -420,7 +420,7 @@ CALL brdc_qc_gps(EPHNEW(10,1:15,I), AVE(8), STD(8))
             EPHNEW2(1:20,INEW,I) = EPHNEW(1:20,K,I)
             CLKNEW2(1:3,INEW,I)  = CLKNEW(1:3,K,I)
 
-            CALL chkbrdc (I,EPHNEW2(1:20,INEW,I),AVE,STD)
+!            CALL chkbrdc (I,EPHNEW2(1:20,INEW,I),AVE,STD)
 
             IF (INEW == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
             DO II=1,8 ! 15-minute resolution 
@@ -572,14 +572,14 @@ PRINT*,'NEW EPOCH =',JJ,'PRN SAT =',I,'DELT2 =',DELT2,'REF EPOCH =',GPS_wsec1,&
    END DO
 
 ELSE IF (I < 150 .AND. I > 100 .AND. EPHNEW(3,1,I) > 0.d0) THEN ! GALILEO sampling rate: 10 minutes
-CALL brdc_qc_gal(EPHNEW(3,1:150,I),  AVE(1), STD(1))
-CALL brdc_qc_gal(EPHNEW(4,1:150,I),  AVE(2), STD(2))
-CALL brdc_qc_gal(EPHNEW(5,1:150,I),  AVE(3), STD(3))
-CALL brdc_qc_gal(EPHNEW(6,1:150,I),  AVE(4), STD(4))
-CALL brdc_qc_gal(EPHNEW(7,1:150,I),  AVE(5), STD(5))
-CALL brdc_qc_gal(EPHNEW(8,1:150,I),  AVE(6), STD(6))
-CALL brdc_qc_gal(EPHNEW(9,1:150,I),  AVE(7), STD(7))
-CALL brdc_qc_gal(EPHNEW(10,1:150,I), AVE(8), STD(8))
+!CALL brdc_qc_gal(EPHNEW(3,1:150,I),  AVE(1), STD(1))
+!CALL brdc_qc_gal(EPHNEW(4,1:150,I),  AVE(2), STD(2))
+!CALL brdc_qc_gal(EPHNEW(5,1:150,I),  AVE(3), STD(3))
+!CALL brdc_qc_gal(EPHNEW(6,1:150,I),  AVE(4), STD(4))
+!CALL brdc_qc_gal(EPHNEW(7,1:150,I),  AVE(5), STD(5))
+!CALL brdc_qc_gal(EPHNEW(8,1:150,I),  AVE(6), STD(6))
+!CALL brdc_qc_gal(EPHNEW(9,1:150,I),  AVE(7), STD(7))
+!CALL brdc_qc_gal(EPHNEW(10,1:150,I), AVE(8), STD(8))
 !print*,'AVE =', AVE
 !print*,'STD =', STD
    DO K = 1, 150
@@ -587,7 +587,7 @@ CALL brdc_qc_gal(EPHNEW(10,1:150,I), AVE(8), STD(8))
             IGAL = IGAL +1
             EPHNEW2(1:20,IGAL,I) = EPHNEW(1:20,K,I)
             CLKNEW2(1:3, IGAL,I) = CLKNEW(1:3, K,I)
-            CALL chkbrdc (I,EPHNEW2(1:20,IGAL,I),AVE,STD)
+!            CALL chkbrdc (I,EPHNEW2(1:20,IGAL,I),AVE,STD)
             IF (IGAL == 1 .AND. EPHNEW2(2,1,I) >= GPS_wsec) THEN
                DO II=1,2
                   JJ = JJ + 1
