@@ -26,6 +26,7 @@ SUBROUTINE prm_main (PRMfname)
       USE mdl_eop
       USE mdl_arr
       USE m_eop_data
+      USE mdl_config
       IMPLICIT NONE
 
 

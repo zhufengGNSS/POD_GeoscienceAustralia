@@ -26,6 +26,7 @@ SUBROUTINE prm_srp (PRMfname)
       USE mdl_precision
       USE mdl_num
       USE mdl_param
+      USE mdl_config
       IMPLICIT NONE
 
 
@@ -114,9 +115,9 @@ READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 ! ----------------------------------------------------------------------
 ! ECOM parameters related to orbit force modelling
 ! ----------------------------------------------------------------------
-IF (word1_ln == "ECOM_param") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ECOM_param_glb 
-END IF
+!IF (word1_ln == "ECOM_param") THEN
+!   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, ECOM_param_glb 
+!END IF
 ! ----------------------------------------------------------------------
 ! Empirical parameters: Bias accelerations 
 ! 

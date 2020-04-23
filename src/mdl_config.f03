@@ -166,4 +166,9 @@ MODULE mdl_config
 ! program name (for error reporting!)
       CHARACTER (LEN=100):: pgrm_name
 ! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Estimable SRP model
+      INTEGER (KIND = prec_int2) :: ECOM_param_glb
+! ----------------------------------------------------------------------
 END
