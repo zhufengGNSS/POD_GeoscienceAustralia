@@ -82,7 +82,7 @@ SUBROUTINE prm_srp (PRMfname)
          PRINT *, "OPEN IOSTAT=", ios
       END IF
 ! ----------------------------------------------------------------------
-
+! Read SRP parameterizations
 ! ----------------------------------------------------------------------
 ! Read input file
 i = 0
