@@ -3,6 +3,7 @@ SUBROUTINE globals_init()
 use mdl_param
 use mdl_eop
 use mdl_num
+use mdl_config
 
         ! from module EOP
         EOP_MJD0_glb = 0.d0

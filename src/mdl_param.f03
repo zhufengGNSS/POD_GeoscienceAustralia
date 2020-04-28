@@ -146,7 +146,6 @@ REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_glb
 
 ! ----------------------------------------------------------------------
 ! Empirical forces
-INTEGER (KIND = prec_int2) :: EMP_param_glb
 INTEGER (KIND = prec_int2) :: EMP_Bias_glb(3)
 REAL (KIND = prec_q) :: Bias_accel_glb(3), Bias_accel_aposteriori(3)
 

@@ -16,6 +16,7 @@ SUBROUTINE prm_emp (PRMfname)
       USE mdl_precision
       USE mdl_num
       USE mdl_param
+      USE mdl_config
       IMPLICIT NONE
 
 
@@ -70,7 +71,7 @@ SUBROUTINE prm_emp (PRMfname)
          PRINT *, "OPEN IOSTAT=", ios
       END IF
 ! ----------------------------------------------------------------------
-
+! Read EMP parameterizations
 ! ----------------------------------------------------------------------
 ! Read input file
 i = 0
@@ -103,9 +104,9 @@ READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
 ! ----------------------------------------------------------------------
 ! Empirical parameters related to orbit force modelling
 ! ----------------------------------------------------------------------
-IF (word1_ln == "EMP_param") THEN
-   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, EMP_param_glb 
-END IF
+!IF (word1_ln == "EMP_param") THEN
+!   READ ( line_ith, FMT = * , IOSTAT=ios_key ) word_i, EMP_param_glb 
+!END IF
 ! ----------------------------------------------------------------------
 ! Empirical parameters: Bias accelerations 
 ! 

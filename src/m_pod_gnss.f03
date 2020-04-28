@@ -74,7 +74,6 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  USE m_sp3_PRN
 	  USE m_write_orb2sp3
       USE m_orbitIC
-      USE mdl_config
       USE m_read_satsnx 
 	  
       IMPLICIT NONE
@@ -285,6 +284,8 @@ if      (ECOM_param_glb /= 0 .and.  EMP_param_glb == 0) then
   write(mesg, *) "SRP model = ",ECOM_param_glb
 else if (ECOM_param_glb == 0 .and.  EMP_param_glb /= 0) then
   write(mesg, *) "Empirical force model = ",EMP_param_glb
+else if (ECOM_param_glb == 0 .and. EMP_param_glb == 0) then
+  write(mesg, *) "WARNING: No SRP or Empirical force model estimated",EMP_param_glb,ECOM_param_glb
 else
   write(mesg, *) "Estimating EMP force model and ECOM SRP parameters not yet not supported: ",EMP_param_glb,ECOM_param_glb
   call report ('FATAL',pgrm_name,'pod_gnss',mesg, '/src/m_pod_gnss.f03', 1)
