@@ -171,4 +171,10 @@ MODULE mdl_config
 ! Estimable SRP model
       INTEGER (KIND = prec_int2) :: ECOM_param_glb
 ! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Estimable EMP model
+      INTEGER (KIND = prec_int2) :: EMP_param_glb
+! ----------------------------------------------------------------------
+
 END
