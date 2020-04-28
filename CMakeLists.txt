@@ -254,9 +254,15 @@ src/yaw_angle.f90
 src/yaw_attitude.f90 
 src/yaw_bds.f90 
 src/yaw_gal.f90 
+src/yaw_gal_iov.f03
+src/yaw_gal_foc.f03
 src/yawdyn.f90
 src/att_matrix.f03
-src/mat2quater.f03 
+src/mat2quater.f03
+src/yaw_gal_foc_nom.f03
+src/yaw_pred.f03
+src/colinearity_angle.f03
+src/colinear_pred.f03
 )
 
 add_library(eop

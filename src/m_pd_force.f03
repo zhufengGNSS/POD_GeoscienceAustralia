@@ -148,7 +148,7 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       REAL (KIND = prec_d) :: Yawangle
       REAL (KIND = prec_q) :: lambda
       CHARACTER (KIND = 1) :: ECLTYP
-
+      CHARACTER (LEN=20) :: BLKsat
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -545,7 +545,10 @@ READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
 
 ! Yaw-attitude model
 PRN_GNSS = PRN
-CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
+!CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
+!                     eclipsf, beta, Mangle, Yangle, eBX_nom, eBX_ecl)
+BLKsat = BLKTYP					 
+CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, BLKsat, & 
                      eclipsf, beta, Mangle, Yangle, eBX_nom, eBX_ecl)
 ! ----------------------------------------------------------------------
 
