@@ -5,8 +5,13 @@ FC = gfortran
 
 # Compiler flags
 
+<<<<<<< HEAD:src/makefile.good
 #FCFLAGS = -O3 -llapack -lblas -frecursive  
 FCFLAGS = -O3 -frecursive -L/opt/OpenBLAS/lib -lopenblas
+=======
+FCFLAGS = -O3 -llapack -lblas -frecursive 
+FCFLAGS_BRDC = -O3 -llapack -lblas 
+>>>>>>> 146bd7d24b638e07d7df6e574862e8aab0acf443:src/makefile
 #-fcheck=all -std=legacy
 #-O3 -Wuninitialized -fno-f2c -ffast-math -fno-automatic -fno-backslash -m64 -mcmodel=large 
 # Linker flags
@@ -18,8 +23,13 @@ m_pd_geopotential.f03 m_force_gfm.f03 pd_forceZ.f03 m_get_lambda.f m_shadow.f90 
 m_satinfo.f90 m_pd_force.f03 m_veq_rkn768.f03 m_veqC2T.f03 m_integrVEQ.f03 m_betainfo.f90 m_orbinteg.f03 m_matrixinv.f03 m_orb_estimator.f03 \
 m_orbC2T.f03 m_orbT2C.f03 m_statist.f03 m_statdelta.f03 m_orbinfo.f90 m_statorbit.f03 m_statorbit2.f03 m_writearray.f03 m_writearray2.f03 m_orbresize.f03 \
 m_orbext.f03 m_orbext2.f03 m_gfc.f03 m_gfc3.f03 m_obsorbT2C.f03 m_write_prmfile_init.f03 m_writedata.f03 m_writeorbit.f03 m_writeorbit_multi.f03 \
+<<<<<<< HEAD:src/makefile.good
 m_clock_read.f03 m_write_orb2sp3.f03 m_rso.f03 m_sp3.f03 m_sp3_PRN.f03 m_lagrange.f03 m_interporb.f03 m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03 m_keplerorb.f03 \
 m_orbdet.f03 m_orbitmain.f03 m_orbitIC.f03 m_pod_gnss.f03 m_read_leapsec.f03\
+=======
+m_write_orb2sp3.f03 m_rso.f03 m_sp3.f03 m_sp3_PRN.f03 m_lagrange.f03 m_interporb.f03 m_eop_cor.f03 m_eop_igu.f03 m_eop_data.f03 m_keplerorb.f03 \
+m_clock_read.f03 m_orbdet.f03 m_orbitmain.f03 m_orbitIC.f03 m_pod_gnss.f03 m_read_leapsec.f03\
+>>>>>>> 146bd7d24b638e07d7df6e574862e8aab0acf443:src/makefile
 write_prmfile_init0.f03 writeparam.f03 writeparam1.f03 write_prmfile.f03 write_prmfile2.f03 readparam.f03  \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 matrix_inv3.f90 matrix_Rr.f90 matrix_RxR.f90 \
 jd2cal.for cal2jd.for taiutc.for fad03.for faf03.for fal03.for fama03.for fane03.for  fapa03.for faur03.for \
@@ -66,11 +76,11 @@ BRDC2ECEF = mdl_precision.f90 mdl_num.f90 mdl_param.f03 mdl_eop.f90 mdl_arr.f90 
 brdc_cmdline.f03 mdl_brdconfig.f03 f90getopt.F90 \
 arctan.f90 productdot.f90 productcross.f90 coord_r2sph.f90 \
 m_matrixinv.f03 matrix_Rr.f90 matrix_RxR.f90 m_matrixRxR.f03 \
-m_write_brd2sp3.f03 prn2str.f03 prn_shift_brdc.f03 chkbrdc.f \
-readbrdcheader.f03 readbrdcmessg.f90 reformbrdc.f brdc2ecef.f \
+time_GPSweek3.f90 mdl_config.f03 m_write_orb2sp3.f03  m_write_brd2sp3.f03 prn2str.f03 prn_shift_brdc.f03 chkbrdc.f90 \
+readbrdcheader.f03 readbrdcmessg.f90 reformbrdc.f90 brdc2ecef.f90 \
 m_read_leapsec.f03 taiutc.for time_UTC.f90 time_GPSweek.f90 jd2cal.for cal2jd.for time_GPSweek2.f90 \
 brdc_qc_gps.f90 brdc_qc_gal.f90 m_meanstd.f90 \
-m_antoffset.f90 glnorbint.f glnacc.f \
+m_antoffset.f90 glnorbint.f90 glnacc.f90 \
 \
 EOP.f90 \
 fad03.for  faf03.for   fal03.for   fama03.for  fane03.for  fapa03.for  faur03.for \
@@ -113,7 +123,7 @@ $(PROGRAM): $(SRCS)
 crs2trs: $(CRS2TRSSRCS) $(BIN)
 	$(FC) $(FCFLAGS) $(FLFLAGS) $(CRS2TRSSRCS) -o $(BIN)/crs2trs
 brd2ecef: $(BRDC2ECEF) $(BIN)
-	$(FC) $(FCFLAGS) $(FLFLAGS) $(BRDC2ECEF) -o $(BIN)/brd2ecef
+	$(FC) $(FCFLAGS_BRDC) $(FLFLAGS) $(BRDC2ECEF) -o $(BIN)/brd2ecef
 
 clean:
 	rm -f *.o *.mod $(BIN)/$(PROGRAM) $(BIN)/crs2trs

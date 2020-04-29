@@ -717,6 +717,7 @@ Call writearray2 (attitude_array, filename)
 ! ----------------------------------------------------------------------
 
 
+if (allocated(attitude_array)) Deallocate(attitude_array, stat=DeAllocateStatus)
 if (allocated(CLKmatrix)) Deallocate(CLKmatrix, stat=DeAllocateStatus)
 if (allocated(orbits_partials_icrf)) Deallocate(orbits_partials_icrf, stat=DeAllocateStatus)
 if (allocated(orbits_partials_itrf)) Deallocate(orbits_partials_itrf, stat=DeAllocateStatus)
