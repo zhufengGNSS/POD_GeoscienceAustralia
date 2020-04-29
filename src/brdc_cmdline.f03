@@ -1,11 +1,18 @@
+! ----------------------------------------------------------------------
+! SUBROUTINE : brdc_cmdline
+! ----------------------------------------------------------------------
+! Purpose:
+!  This subroutine reads commnad line options and returns variables defined in mdl_brdconfig
+!  Uses getopt command line parsing functions from f90getopt.F90
+! ----------------------------------------------------------------------
+! Author :	John Donovan, Geoscience Australia
+! Created:	26 March 2020
+! ----------------------------------------------------------------------
 subroutine brdc_cmdline
-
-! This subroutine reads commnad line options and returns variables defined in mdl_brdconfig
-! Uses getopt command line parsing functions from f90getopt.F90
 
 USE f90getopt
 USE mdl_brdconfig
-
+USE mdl_config
 ! ----------------------------------------------------------------------
 ! Command line local variables
 integer            :: len_optarg

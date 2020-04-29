@@ -1,0 +1,5 @@
+*.good filter=lfs diff=lfs merge=lfs -text
+igs*.sp3 filter=lfs diff=lfs merge=lfs -text
+EQM.in filter=lfs diff=lfs merge=lfs -text
+POD.in filter=lfs diff=lfs merge=lfs -text
+VEQ.in filter=lfs diff=lfs merge=lfs -text

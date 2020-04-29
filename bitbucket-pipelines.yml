@@ -3,7 +3,7 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: geoscienceaustralia/pod-pipelines
+image: gamichaelmoore/pod-pipelines
 
 options:
   docker: true
@@ -13,7 +13,7 @@ pipelines:
     - step:
         script:
           - ./build-pipelines-docker-image.sh
-          - aws/deploy.sh
+#          - aws/deploy.sh
 
 
   custom:
