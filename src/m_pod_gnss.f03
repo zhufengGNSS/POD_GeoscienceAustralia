@@ -281,12 +281,14 @@ CALL prm_ocean (EQMfname)
 !PRINT*,'NUMBER OF FORCE PARAMETERS =', NPARAM_glb
 write(mesg, *) "A priori SRP model = ",SRP_MOD_arp
 call report ('STATUS',pgrm_name,'',trim(mesg), '', 0)
-if      (ECOM_param_glb /= 0 .and.  EMP_param_glb == 0) then
-  write(mesg, *) "SRP model = ",ECOM_param_glb
-else if (ECOM_param_glb == 0 .and.  EMP_param_glb /= 0) then
+if      (ECOM_param_glb /= 0 .and. EMP_param_glb == 0) then
+  write(mesg, *) "SRP force model = ",ECOM_param_glb
+else if (ECOM_param_glb == 0 .and. EMP_param_glb /= 0) then
   write(mesg, *) "Empirical force model = ",EMP_param_glb
+else if (ECOM_param_glb == 0 .and. EMP_param_glb == 0) then
+  write(mesg, *) "WARNING: No SRP or Empirical force model estimated ",EMP_param_glb,ECOM_param_glb
 else
-  write(mesg, *) "Estimating EMP force model and ECOM SRP parameters not yet not supported: ",EMP_param_glb,ECOM_param_glb
+  write(mesg, *) "Estimating both EMP force model and ECOM SRP parameters not yet not supported: ",EMP_param_glb,ECOM_param_glb
   call report ('FATAL',pgrm_name,'pod_gnss',mesg, '/src/m_pod_gnss.f03', 1)
 endif
 call report ('STATUS',pgrm_name,'',mesg, ' ', 0)

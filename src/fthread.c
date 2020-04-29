@@ -3,6 +3,8 @@
  *
  * pthread library interface to Fortran, for OS's supporting pthreads
  *
+ * John Donovan, Geoscience Australia
+ * 26 March 2020
  */
 
 #include <stdio.h>

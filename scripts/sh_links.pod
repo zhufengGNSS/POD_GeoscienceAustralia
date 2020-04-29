@@ -13,12 +13,12 @@ if ($#argv == 0) then
    echo ' REQUIRES: A link named (pod) in home directory that point to the root pod directory' 
    echo ' '
    echo ' -default : Link default  set of files from ~/pod/tables directory to local directory'
-   echo '    ln -s ~/pod/tables/ascp1950.430         ./ascp1950.430        '
+   echo '    ln -s ~/pod/tables/ascp1950.430                ./ascp1950.430        '
    echo '    ln -s ~/pod/tables/fes2004_Cnm-Snm.dat  ./fes2004_Cnm-Snm.dat '
-   echo '    ln -s ~/pod/tables/goco05s.gfc          ./goco05s.gfc         '
-   echo '    ln -s ~/pod/tables/header.430_229       ./header.430_229      '
-   echo '    ln -s ~/pod/tables/satinfo.dat          ./satinfo.dat         '
-   echo '    ln -s ~/pod/tables/leap.second          ./leap.second         '
+   echo '    ln -s ~/pod/tables/goco05s.gfc                  ./goco05s.gfc         '
+   echo '    ln -s ~/pod/tables/header.430_229             ./header.430_229      '
+   echo '    ln -s ~/pod/tables/igs_metadata_2063.snx  ./igs_metadata_2063.snx   '
+   echo '    ln -s ~/pod/tables/leap.second                  ./leap.second         '
    echo ' '
    echo ' OPTIONAL'                                               
    echo ' '        
@@ -26,7 +26,7 @@ if ($#argv == 0) then
    echo '    -static = static gravity field file to link'
    echo '    -ocean  = ocean tide file to link'
    echo '    -ephem  = planetary ephemeris file to link'
-   echo '    -satinfo = satellite info file to link' 
+   echo '    -satinfo = satellite sinex file to link' 
    echo '    -leapsec = leap.second to link' 
    echo ' '
    echo ' EXAMPLES'                               
@@ -42,6 +42,7 @@ set grav    = ''
 set eop     = ''
 set ocean   = ''
 set satinfo = ''
+set leapsec   = ''
 set ephem   = ''
 set default = 'N'
 #
@@ -86,7 +87,7 @@ if ( ! -e ascp1950.430        )    \rm -r ascp1950.430        >& /dev/null
 if ( ! -e fes2004_Cnm-Snm.dat )    \rm -r fes2004_Cnm-Snm.dat >& /dev/null
 if ( ! -e goco05s.gfc         )    \rm -r goco05s.gfc         >& /dev/null
 if ( ! -e header.430_229      )    \rm -r header.430_229      >& /dev/null
-if ( ! -e satinfo.dat         )    \rm -r satinfo.dat         >& /dev/null       
+if ( ! -e igs_metadata_2063.snx  )    \rm -r igs_metadata_2063.snx    >& /dev/null       
 if ( ! -e leap.second         )    \rm -r leap.second         >& /dev/null       
 
 # Make new set of default links links if necessary
@@ -94,7 +95,7 @@ ln -s ~/pod/tables/ascp1950.430         ascp1950.430
 ln -s ~/pod/tables/fes2004_Cnm-Snm.dat  fes2004_Cnm-Snm.dat 
 ln -s ~/pod/tables/goco05s.gfc          goco05s.gfc         
 ln -s ~/pod/tables/header.430_229       header.430_229     
-ln -s ~/pod/tables/satinfo.dat          satinfo.dat            
+ln -s ~/pod/tables/igs_metadata_2063.snx  igs_metadata_2063.snx            
 ln -s ~/pod/tables/leap.second          leap.second            
 
 if (${grav} != '') then
@@ -110,10 +111,10 @@ if (${ephem} != '') then
   ln -s ~/pod/tables/${ephem}        ${ephem}        >& /dev/null 
 endif
 if (${eop} != '') then
-  ln -s ~/pod/data/${eop}            ${eop}          >& /dev/null 
+  ln -s ~/pod/tables/${eop}            ${eop}          >& /dev/null 
 endif
 if (${leapsec} != '') then
-  ln -s ~/pod/data/${leapsec}        ${leapsec}      >& /dev/null 
+  ln -s ~/pod/tables/${leapsec}        ${leapsec}      >& /dev/null 
 endif
 
 if ( `find  . -type l -print | wc | awk '{print $1}'` > 0 ) ls -l `find  . -type l -print`

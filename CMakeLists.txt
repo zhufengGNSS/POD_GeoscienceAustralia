@@ -5,9 +5,20 @@ project(pod)
 #project (add_vectors Fortran)
 enable_language(Fortran)
 
-set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
-find_package(LAPACK REQUIRED)
-find_package(BLAS REQUIRED)
+set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
+
+set (BLA_VENDOR OpenBLAS)
+find_package(BLAS)
+if(BLAS_FOUND)
+  set(LAPACK_LIBRARIES "")
+  message(STATUS "Found Vendor sprecific OpenBLAS")
+else()
+  set (BLA_VENDOR "")
+  find_package(LAPACK required)
+  find_package(BLAS required)  
+  message(STATUS "Found LAPACK and BLAS")
+endif()
+
 #message("Fortran default extensions = ${CMake_Fortran_SOURCE_FILE_EXTENSIONS}")
 set (CMAKE_Fortran_SOURCE_FILE_EXTENSIONS "f03;F90;f90;for;f;F")
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
@@ -187,8 +198,8 @@ src/time_TT_sec.f90
 add_library(boxwing
 src/BOXWINIT.f90
 src/ERPFBOXW.f90
-src/SURFBOXW.f
-src/PROPBOXW.f
+src/SURFBOXW.f90
+src/PROPBOXW.f90
 src/SRPFBOXW.f90
 )
 
@@ -254,6 +265,7 @@ src/yaw_angle.f90
 src/yaw_attitude.f90 
 src/yaw_bds.f90 
 src/yaw_gal.f90 
+<<<<<<< HEAD
 src/yaw_gal_iov.f03
 src/yaw_gal_foc.f03
 src/yawdyn.f90
@@ -323,6 +335,7 @@ src/main_pod.f03
 )
 
 add_executable(crs2trs
+src/report.f90
 src/coord_r2sph.f90 
 src/interp_iers.f 
 src/crs_trs.f90 
@@ -330,22 +343,24 @@ src/main_crs2trs.f03
 )
 
 add_executable(brdc2ecef
+src/report.f90
 src/m_read_leapsec.f03
 src/asc2eph.f90
-src/brdc2ecef.f
+src/brdc2ecef.f90
 src/brdc_cmdline.f03
 src/brdc_qc_gal.f90
 src/brdc_qc_gps.f90
 src/CATfile.f90
-#src/chkbrdc.f
+src/chkbrdc.f90
 src/crs_trs.f90 
-src/reformbrdc.f
-src/glnacc.f
-src/glnorbint.f
+src/reformbrdc.f90
+src/glnacc.f90
+src/glnorbint.f90
 src/m_antoffset.f90
 src/mdl_brdconfig.f03
 src/m_meanstd.f90
 src/m_write_brd2sp3.f03
+src/m_write_orb2sp3.f03
 src/prn2str.f03
 src/prn_shift_brdc.f03
 src/readbrdcheader.f03
