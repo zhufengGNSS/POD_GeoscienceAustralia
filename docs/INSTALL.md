@@ -3,27 +3,41 @@
 `ACS POD Version 1.1.0 beta release`
 
 ### Supported Platforms
+
 The POD is supported on the following Platforms
 
 * Linux
 * Mac OSX
   
 ### Dependencies
-The POD has several software dependencies
+
+The POD has several software dependencies:
 
 * C/C++ and Fortran compiler. We use and recommend [gcc-g++ and gfortran](https://gcc.gnu.org/git.html)
 * BLAS and [LAPACK](https://github.com/Reference-LAPACK/lapack) linear algebra libraries. We use and recommend [OpenBlas](https://www.openblas.net/)
 * Cmake Version3 
 * Python Version3 (including Numpy and Matplotlib modules)
 
+### Installing dependencies with Ubuntu
+
+    $ sudo apt -y install git gobjc gobjc++ gfortran openssl curl net-tools openssh-server cmake make gzip vim libssl1.0-dev
+    $ sudo apt -y install libopenblas-dev git-lfs
+    $ sudo apt -y install python3-matplotlib 
+
 ### Download
+
 To downlaod ACS POD source from bitbucket, you need to first install [Git](https://www.atlassian.com/git) and [Git-LFS](https://git-lfs.github.com/)
 
 Then you can download the POD source code using git clone:
 
-    $git clone git@bitbucket.org:geoscienceaustralia/pod.git
+    $ git clone git@bitbucket.org:geoscienceaustralia/pod.git
+    
+Then download all of the example data using git-lfs:
+
+    $ git-lfs pull 
 
 ## Directory Structure
+
     pod/
     ├── README.md			! General README information
     ├── LICENSE.md		    ! Software License information
@@ -44,16 +58,22 @@ Then you can download the POD source code using git clone:
 
 
 ### Build
+
 To build the `POD` ...
 
     $ cd pod
     $ mkdir build
     $ cd build
-    $ cmake3 .. >cmake.out 2>cmake.err
+    $ cmake .. >cmake.out 2>cmake.err
     $ make >make.out 2>make.err
     $ less make.err (to verify everything was built correctly)
 
-You should now have the executables in the bin directory: pod crs2trs brdc2ecef
+You should now have the executables in the bin directory: 
+    ├── bin			        
+
+    * pod 
+    * crs2trs 
+    * brdc2ecef
 
 ### User Environment (Shell) setup
 
@@ -76,3 +96,6 @@ To test your build of the  `POD` ...
     $ sh_test_pod
 
 At the completion of the test run, the sh_test_pod script will return any differences to the standard test resuts
+
+
+62 directories, 1135 files
