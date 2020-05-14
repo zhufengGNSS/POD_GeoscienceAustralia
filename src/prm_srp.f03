@@ -273,7 +273,7 @@ IF (ECOM_param_glb > 0 ) THEN
       EXIT		
     END IF
 
-    NPARAM_glb = PD_Param_ID
+!    NPARAM_glb = PD_Param_ID
 
 ! 1st Word of Line ith
     READ (line_ith, * , IOSTAT=ios_data) word1_ln  ! 1st word
