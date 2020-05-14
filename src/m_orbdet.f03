@@ -261,35 +261,27 @@ END IF
 ! ----------------------------------------------------------------------
 ! Initial conditions for solar radiation pressure
 ! ----------------------------------------------------------------------
-IF (ECOM_param_glb /= 0) THEN
-   IF (ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
-   IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
-   IF (ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
-   IF (ECOM_param_glb > 3) PRINT*,'UNKNOWN SRP MODEL IS ACTIVATED :-('
-   ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
+IF(ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
+IF(ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
+IF(ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
+IF(ECOM_param_glb > 3)  PRINT*,'UNKNOWN SRP MODEL IS ACTIVATED :-('
+!   ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
+   ALLOCATE (ECOM_coef(ECOMNUM), STAT = AllocateStatus)
    if (AllocateStatus .ne. 0) then
         write(mesg, *) "Not enough memory - failed to allocate ECOM_coef, dimension = ", Nparam_glb
         call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
    end if
-   ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
+!   ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
+   ALLOCATE (ECOM_accel_aposteriori(ECOMNUM), STAT = AllocateStatus)
    if (AllocateStatus .ne. 0) then
         write(mesg, *) "Not enough memory - failed to allocate ECOM_accel_aposteroiri, ", &
                 "dimension = ", Nparam_glb
         call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
    end if
-!srp_i = ECOM_param_glb
-!DO ii=1,NPARAM_glb
-!ECOM_0_coef(ii) = 0.0D0
-!END DO
-!ECOM_0_coef = 0.d0
-!print*,'ECOM_0_coef=',ECOM_0_coef
    CALL ecom_init (ECOM_0_coef)
-ELSE IF (EMP_param_glb /= 0 ) THEN
-!PRINT*,'ECOM SRP MODEL IS NOT ACTIVATED'
-   PRINT*,'EMPIRICAL MODEL IS ACTIVATED '
-ELSE
-   PRINT*,'NEITHER ECOM SRP MODEL or EMPIRICAL MODEL ARE ACTIVATED'
-END IF
+
+IF(EMP_param_glb /= 0) PRINT*,'EMPIRICAL MODEL IS ACTIVATED '
+IF(EMP_param_glb==0 .AND. ECOM_param_glb==0)PRINT*,'NEITHER ECOM SRP MODEL or EMPIRICAL MODEL ARE ACTIVATED'
 
 ! ----------------------------------------------------------------------
 
@@ -372,28 +364,28 @@ SVEC_Zo_ESTIM = SVEC_Zo + Xo_estim
 ! Empirical model
 ! **********************************************************************
 !If (NPARAM_glb /=0) Then !(remarked by Dr. Tzupang Tseng 11-12-2018)
-  If (EMP_param_glb == 1) Then
-If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 1) Then
-! Bias & CPR
-Bias_corr = Xmatrix(7:9,1)
-CPR_corr(1,1) = Xmatrix(10,1)
-CPR_corr(1,2) = Xmatrix(11,1)
-CPR_corr(2,1) = Xmatrix(12,1)
-CPR_corr(2,2) = Xmatrix(13,1)
-CPR_corr(3,1) = Xmatrix(14,1)
-CPR_corr(3,2) = Xmatrix(15,1)
-Else If (EMP_Bias_glb(1) == 0 .and. EMP_CPR_glb(1) == 1) Then
-! CPR
-CPR_corr(1,1) = Xmatrix(7,1)
-CPR_corr(1,2) = Xmatrix(8,1)
-CPR_corr(2,1) = Xmatrix(9,1)
-CPR_corr(2,2) = Xmatrix(10,1)
-CPR_corr(3,1) = Xmatrix(11,1)
-CPR_corr(3,2) = Xmatrix(12,1)
-Else If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 0) Then
-! Bias 
-Bias_corr = Xmatrix(7:9,1)
-End If
+If (EMP_param_glb == 1 .and. ECOM_param_glb == 0) Then
+        If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 1) Then
+        ! Bias & CPR
+        Bias_corr = Xmatrix(7:9,1)
+        CPR_corr(1,1) = Xmatrix(10,1)
+        CPR_corr(1,2) = Xmatrix(11,1)
+        CPR_corr(2,1) = Xmatrix(12,1)
+        CPR_corr(2,2) = Xmatrix(13,1)
+        CPR_corr(3,1) = Xmatrix(14,1)
+        CPR_corr(3,2) = Xmatrix(15,1)
+        Else If (EMP_Bias_glb(1) == 0 .and. EMP_CPR_glb(1) == 1) Then
+        ! CPR
+        CPR_corr(1,1) = Xmatrix(7,1)
+        CPR_corr(1,2) = Xmatrix(8,1)
+        CPR_corr(2,1) = Xmatrix(9,1)
+        CPR_corr(2,2) = Xmatrix(10,1)
+        CPR_corr(3,1) = Xmatrix(11,1)
+        CPR_corr(3,2) = Xmatrix(12,1)
+        Else If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 0) Then
+        ! Bias 
+        Bias_corr = Xmatrix(7:9,1)
+        End If
 
 Bias_accel_aposteriori = Bias_accel_glb + Bias_corr
 
@@ -418,78 +410,288 @@ End If  ! End of empirical model
 ! ECOM-based SRP model
 ! **********************************************************************
 ! added by Dr. Tzupang Tseng 11-12-2018
-If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
+If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2 .and. EMP_param_glb == 0) Then
+        PD_Param_ID = 0
+        If (ECOM_Bias_glb(1) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        End IF
+        If (ECOM_Bias_glb(2) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        End IF
+        If (ECOM_Bias_glb(3) == 1) Then
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        End IF
+        If (ECOM_CPR_glb(1) == 1) THEN
+        ! C term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        ! S term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        End IF
+        If (ECOM_CPR_glb(2) == 1) THEN
+        ! C term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        ! S term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        End IF
+        If (ECOM_CPR_glb(3) == 1) THEN
+        ! C term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        ! S term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        End If
 
-      PD_Param_ID = 0
-   If (ECOM_Bias_glb(1) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-   End IF
-   If (ECOM_Bias_glb(2) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-   End IF
-   If (ECOM_Bias_glb(3) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-   End IF
-   If (ECOM_CPR_glb(1) == 1) THEN
-! C term
-        PD_Param_ID = PD_Param_ID + 1
-        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-! S term
-        PD_Param_ID = PD_Param_ID + 1
-        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-   End IF
-   If (ECOM_CPR_glb(2) == 1) THEN
-! C term
-        PD_Param_ID = PD_Param_ID + 1
-        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-! S term
-        PD_Param_ID = PD_Param_ID + 1
-        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-   End IF
-   If (ECOM_CPR_glb(3) == 1) THEN
-! C term
-        PD_Param_ID = PD_Param_ID + 1
-        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-! S term
-        PD_Param_ID = PD_Param_ID + 1
-        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-   End If
-
-
-   IF (NPARAM_glb /= PD_Param_ID) THEN
-   PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-   PRINT*,           'NPARAM_glb  =', NPARAM_glb
-   PRINT*,           'PD_Param_ID =', PD_Param_ID
-   PRINT*,'PROGRAM STOP AT m_orbdet.f03'
-   STOP
-   END IF
+        IF (ECOMNUM /= PD_Param_ID) THEN
+        PRINT*, 'THE NUMBER OF ECOM PARAMETERS IS NOT CONSISTENT'
+        PRINT*,           'ECOMNUM  =', ECOMNUM
+        PRINT*,           'PD_Param_ID =', PD_Param_ID
+        PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+        STOP
+        END IF
 END IF
 
-IF (ECOM_param_glb == 3) THEN
-   PD_Param_ID = 7   
-   DO k = 1,PD_Param_ID
-   ECOM_coef (k) = Xmatrix(6+k,1)
-   END DO
+IF (ECOM_param_glb == 3 .and. EMP_param_glb == 0) THEN
+        PD_Param_ID = 7   
+        DO k = 1,PD_Param_ID
+        ECOM_coef (k) = Xmatrix(6+k,1)
+        END DO
 
-   IF (NPARAM_glb /= PD_Param_ID) THEN
-   PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-   PRINT*,           'NPARAM_glb  =', NPARAM_glb
-   PRINT*,           'PD_Param_ID =', PD_Param_ID
-   PRINT*,'PROGRAM STOP AT m_orbdet.f03'
-   STOP
-   END IF
-
+        IF (ECOMNUM /= PD_Param_ID) THEN
+        PRINT*, 'THE NUMBER OF ECOM PARAMETERS IS NOT CONSISTENT'
+        PRINT*,           'ECOMNUM  =', ECOMNUM
+        PRINT*,           'PD_Param_ID =', PD_Param_ID
+        PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+        STOP
+        END IF
 END IF
 
-!IF (ECOM_param_glb == 3) THEN
-!PD_Param_ID = NPARAM_glb
-!DO PD_Param_ID = 1,9
-!   ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
-!END DO
-!END IF
+! Switch on both ECOM and empirical models
+! -------------------------------------------------------------------
+IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 1) THEN
+        If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 1) Then
+        ! Bias & CPR
+        Bias_corr = Xmatrix(7:9,1)
+        CPR_corr(1,1) = Xmatrix(10,1)
+        CPR_corr(1,2) = Xmatrix(11,1)
+        CPR_corr(2,1) = Xmatrix(12,1)
+        CPR_corr(2,2) = Xmatrix(13,1)
+        CPR_corr(3,1) = Xmatrix(14,1)
+        CPR_corr(3,2) = Xmatrix(15,1)
+        Else If (EMP_Bias_glb(1) == 0 .and. EMP_CPR_glb(1) == 1) Then
+        ! CPR
+        CPR_corr(1,1) = Xmatrix(7,1)
+        CPR_corr(1,2) = Xmatrix(8,1)
+        CPR_corr(2,1) = Xmatrix(9,1)
+        CPR_corr(2,2) = Xmatrix(10,1)
+        CPR_corr(3,1) = Xmatrix(11,1)
+        CPR_corr(3,2) = Xmatrix(12,1)
+        Else If (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 0) Then
+        ! Bias
+        Bias_corr = Xmatrix(7:9,1)
+        End If
+        Bias_accel_aposteriori = Bias_accel_glb + Bias_corr
+        CPR_CS_aposteriori = CPR_CS_glb + CPR_corr
+        Bias_0 = Bias_accel_aposteriori
+        CPR_CS_0 = CPR_CS_aposteriori
+        Call empirical_init (i, Bias_0, CPR_CS_0)
+
+        If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
+        PD_Param_ID = 0
+                IF (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 1) THEN
+                        If (ECOM_Bias_glb(1) == 1) Then
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_Bias_glb(2) == 1) Then
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_Bias_glb(3) == 1) Then
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(1) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(2) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(3) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        End If
+
+                        IF (NPARAM_glb /= PD_Param_ID + 9) THEN
+                        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+                        PRINT*,           'NPARAM_glb  =', NPARAM_glb
+                        PRINT*,           'PD_Param_ID =', PD_Param_ID+9
+                        PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+                        STOP
+                        END IF
+
+                ELSE IF (EMP_Bias_glb(1) == 0 .and. EMP_CPR_glb(1) == 1) THEN
+                        If (ECOM_Bias_glb(1) == 1) Then
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_Bias_glb(2) == 1) Then
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_Bias_glb(3) == 1) Then
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(1) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(2) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(3) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        End If
+
+                        IF (NPARAM_glb /= PD_Param_ID + 6) THEN
+                        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+                        PRINT*,           'NPARAM_glb  =', NPARAM_glb
+                        PRINT*,           'PD_Param_ID =', PD_Param_ID+6
+                        PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+                        STOP
+                        END IF
+
+                ELSE IF (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 0) THEN
+                        If (ECOM_Bias_glb(1) == 1) Then
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_Bias_glb(2) == 1) Then
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_Bias_glb(3) == 1) Then
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(1) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(2) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(3) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        End If
+
+                        IF (NPARAM_glb /= PD_Param_ID + 3) THEN
+                        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+                        PRINT*,           'NPARAM_glb  =', NPARAM_glb
+                        PRINT*,           'PD_Param_ID =', PD_Param_ID+3
+                        PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+                        STOP
+                        END IF
+
+                END IF
+        END IF
+
+        IF (ECOM_param_glb == 3) THEN
+        PD_Param_ID = 7
+                IF (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 1) THEN
+                        DO k = 1,PD_Param_ID
+                        ECOM_coef (k) = Xmatrix(15+k,1)
+                        END DO
+
+                        IF (NPARAM_glb /= PD_Param_ID + 9) THEN
+                        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+                        PRINT*,           'NPARAM_glb  =', NPARAM_glb
+                        PRINT*,           'PD_Param_ID =', PD_Param_ID+9
+                        PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+                        STOP
+                        END IF
+
+                ELSE IF (EMP_Bias_glb(1) == 0 .and. EMP_CPR_glb(1) == 1) THEN
+                        DO k = 1,PD_Param_ID
+                        ECOM_coef (k) = Xmatrix(12+k,1)
+                        END DO
+
+                        IF (NPARAM_glb /= PD_Param_ID + 6) THEN
+                        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+                        PRINT*,           'NPARAM_glb  =', NPARAM_glb
+                        PRINT*,           'PD_Param_ID =', PD_Param_ID+6
+                        PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+                        STOP
+                        END IF
+
+                ELSE IF (EMP_Bias_glb(1) == 1 .and. EMP_CPR_glb(1) == 0) THEN
+                        DO k = 1,PD_Param_ID
+                        ECOM_coef (k) = Xmatrix(9+k,1)
+                        END DO
+
+                        IF (NPARAM_glb /= PD_Param_ID + 3) THEN
+                        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+                        PRINT*,           'NPARAM_glb  =', NPARAM_glb
+                        PRINT*,           'PD_Param_ID =', PD_Param_ID+3
+                        PRINT*,'PROGRAM STOP AT m_orbdet.f03'
+                        STOP
+                        END IF
+
+                END IF
+        END IF
+
+
+END IF
 
 IF (ECOM_param_glb /= 0) THEN
    ECOM_accel_aposteriori = ECOM_accel_glb + ECOM_coef

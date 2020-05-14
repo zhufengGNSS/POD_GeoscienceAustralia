@@ -294,7 +294,7 @@ DO i_sat = 1 , Nsat
 ! Estimated SRP (adjusted) parameters
    srp_model = 'NONE'
    ic_param_list =  ''
-   IF (ECOM_param_glb /= 0 ) THEN
+   IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 0) THEN
      IF      (ECOM_param_glb == 1) THEN
        srp_model = 'ECOM1  '
        ic_param_list =  'X Y Z XV YV ZV DR YR BR C1DR S1DR C1YR S1YR C1BR S1BR'
@@ -309,12 +309,27 @@ DO i_sat = 1 , Nsat
      END IF
    END IF
       
-   IF (EMP_param_glb /= 0 ) THEN
+   IF (EMP_param_glb /= 0 .AND. ECOM_param_glb == 0) THEN
      IF (EMP_param_glb == 1) THEN
        srp_model = 'EMPRCL '
        ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N'
      END IF
    END IF
+
+   IF (ECOM_param_glb /= 0 .AND. EMP_param_glb /= 0) THEN
+      srp_model = 'ECOM + EMPRCL'
+      IF      (ECOM_param_glb == 1) THEN
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DR YR BR C1DR S1DR C1YR S1YR C1BR S1BR'
+
+     ELSE IF (ECOM_param_glb == 2) THEN
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DR YR BR C2DR S2DR C4DR S4DR C1BR S1BR'
+
+     ELSE IF (ECOM_param_glb == 3) THEN
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DXR DZR DSPR YR BR C1BR S1BR'
+     END IF
+
+   END IF
+
 !---------------------------------------------------------------------------------
 
 ! IC INFO   
