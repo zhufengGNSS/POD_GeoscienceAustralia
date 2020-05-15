@@ -1,4 +1,13 @@
-      SUBROUTINE R1 ( PHI, R )
+! ----------------------------------------------------------------------
+! SUBROUTINE: R1
+! ----------------------------------------------------------------------
+! Purpose:
+!    calculate rotation matrix about the x-axis (along the track) for
+!    given radians PHI
+! ----------------------------------------------------------------------
+! Author :	John Donovan, Geoscience Australia
+! Created:	26 March 2020
+! ----------------------------------------------------------------------
 *
 *         (  1        0            0      )
 *         (                               )
@@ -9,6 +18,7 @@
 *
 *-----------------------------------------------------------------------
 
+      SUBROUTINE R1 ( PHI, R )
       IMPLICIT NONE
 
       DOUBLE PRECISION PHI, R(3,3)

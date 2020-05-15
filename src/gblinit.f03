@@ -1,9 +1,20 @@
-! initialise & finalise global variables
+! ----------------------------------------------------------------------
+! SUBROUTINE: globals_init
+! ----------------------------------------------------------------------
+! Purpose:
+!  initialise global variables
+! ----------------------------------------------------------------------
+! Author :	John Donovan, Geoscience Australia
+! Created:	26 March 2020
+! ----------------------------------------------------------------------
 SUBROUTINE globals_init()
 use mdl_param
 use mdl_eop
 use mdl_num
 use mdl_config
+
+        ! from module config
+        gbl_debug = 0
 
         ! from module EOP
         EOP_MJD0_glb = 0.d0
@@ -38,6 +49,15 @@ use mdl_config
         return
 end
 
+! ----------------------------------------------------------------------
+! SUBROUTINE: globals_fini
+! ----------------------------------------------------------------------
+! Purpose:
+!  finalise (release memory) global variables
+! ----------------------------------------------------------------------
+! Author :	John Donovan, Geoscience Australia
+! Created:	26 March 2020
+! ----------------------------------------------------------------------
 subroutine globals_fini()
 use mdl_param
 use mdl_tides
