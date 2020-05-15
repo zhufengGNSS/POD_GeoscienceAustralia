@@ -177,4 +177,7 @@ MODULE mdl_config
       INTEGER (KIND = prec_int2) :: EMP_param_glb
 ! ----------------------------------------------------------------------
 
+! program debug (for more verbose output)
+      INTEGER (KIND = prec_int2) :: gbl_debug
+! ----------------------------------------------------------------------
 END
