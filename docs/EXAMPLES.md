@@ -14,11 +14,16 @@ In the pod/examples directory, there are four POD user exmples:
 
 Here is a screen grab of running Example #1
 
-[![asciicast](https://asciinema.org/a/DvKwOYJFDykl1pwI4mlaWgTQI.png)](https://asciinema.org/a/DvKwOYJFDykl1pwI4mlaWgTQI)
+[![asciicast](https://asciinema.org/a/DvKwOYJFDykl1pwI4mlaWgTQI.png)](https://asciinema.org/a/DvKwOYJFDykl1pwI4mlaWgTQI?speed=3)
+
  
 ## Example 2 - (pod/examples/ex2):
 
-* Multi GNSS CODE MGEX SP3 file orbit fitting
+* Multi GNSS CODE MGEX SP3 file orbit fitting. In this example we start with at CODE MGEX SP3 file COD0MGXFIN_20191990000_01D_05M_ORB.SP3 as a pseuodo-observation. 
+  We then fit each satellite with an ECOM-2 solar radiation pressure model.
+
+
+![Gif fo Screen cast](https://peanpod.s3-ap-southeast-2.amazonaws.com/casts/pod/ex2/pod_example_2.gif)
 
 ## Example 3 - (pod/examples/ex3):
 
