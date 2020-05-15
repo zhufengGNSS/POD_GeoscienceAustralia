@@ -9,7 +9,12 @@ In the pod/examples directory, there are four POD user exmples:
 
 ## Example 1 - (pod/examples/ex1):
 
-* Simple GPS IGS final SP3 file orbit fitting (same as pod/test example)
+* In this example we start with the IGS final SP3 file igs19424.sp3 as a pseuodo-observation. 
+  We then fit each satellite with an ECOM-1 solar radiation pressure model.
+
+Here is a screen grab of running Example #1
+
+[![asciicast](https://asciinema.org/a/DvKwOYJFDykl1pwI4mlaWgTQI.png)](https://asciinema.org/a/DvKwOYJFDykl1pwI4mlaWgTQI)
  
 ## Example 2 - (pod/examples/ex2):
 
