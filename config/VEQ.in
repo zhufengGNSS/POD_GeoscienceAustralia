@@ -107,7 +107,6 @@
  
  ---------------------------------------------------------------------------
  %% Empirical parameters
- EMP_param				  0
  ! Bias accelerations per radial, along-track and cross-track directions
  bias_r				  	  1
  bias_t				  	  1
