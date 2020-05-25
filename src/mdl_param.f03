@@ -136,7 +136,7 @@ INTEGER (KIND = prec_int2) :: FMOD_NONGRAV(3)
 
 ! ECOM-based solar radiation pressure model
 ! ----------------------------------------------------------------------
-INTEGER (KIND = prec_int2) :: ECOM_param_glb
+INTEGER (KIND = prec_int8) :: ECOMNUM
 INTEGER (KIND = prec_int2) :: ECOM_Bias_glb(3)
 INTEGER (KIND = prec_int2) :: ECOM_CPR_glb(3)
 !REAL (KIND = prec_q) :: ECOM_accel_glb(9)
@@ -147,7 +147,7 @@ REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_glb
 
 ! ----------------------------------------------------------------------
 ! Empirical forces
-INTEGER (KIND = prec_int2) :: EMP_param_glb
+INTEGER (KIND = prec_int8) :: EMPNUM
 INTEGER (KIND = prec_int2) :: EMP_Bias_glb(3)
 REAL (KIND = prec_q) :: Bias_accel_glb(3), Bias_accel_aposteriori(3)
 

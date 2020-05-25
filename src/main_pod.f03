@@ -384,6 +384,28 @@ IF (SRP_MOD_arp == 0) PRINT*,'no a priori SRP model'
 IF (SRP_MOD_arp == 1) PRINT*,'use cannonball f0 model as a priori SRP model'
 IF (SRP_MOD_arp == 2) PRINT*,'use simple box-wing model as a priori SRP model'
 IF (SRP_MOD_arp == 3) PRINT*,'use box-wing model from repro3 routines as a priori SRP model'
+
+! Estimable SRP models
+! ---------------------------------------------------------------------
+! ECOM_param = 1 (ECOM1), forces estimated in D,Y,B directions
+! ECOM_param = 2 (ECOM2), forces estimated in D,Y,B directions
+! ECOM_param = 3 (SBOXW), forces estimated in D,Y,B,X,Z directions
+! ECOM_param = 0, no parameters are estimated
+
+param_id = 'ECOM_param'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) ECOM_param_glb
+
+! Estimable EMP model
+! ---------------------------------------------------------------------
+! EMP_param = 1, forces estimated in radial,along-track and cross-track directions
+! EMP_param = 0, no parameters are estimated
+
+param_id = 'EMP_param'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) EMP_param_glb
+
+
 ! ----------------------------------------------------------------------
 ! Reference System of Variational Equations' Partials & Parameter Estimation 
 ! ----------------------------------------------------------------------
