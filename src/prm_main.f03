@@ -26,6 +26,7 @@ SUBROUTINE prm_main (PRMfname)
       USE mdl_eop
       USE mdl_arr
       USE m_eop_data
+      USE mdl_config
       IMPLICIT NONE
 
 
@@ -68,6 +69,7 @@ SUBROUTINE prm_main (PRMfname)
       REAL (KIND = prec_d) :: GM
 
       CHARACTER (LEN=100) :: fmt_line
+      INTEGER (KIND = prec_int8) :: IEMP, IECOM
 ! ----------------------------------------------------------------------
       INTEGER (KIND = prec_int8) :: i, read_i
       INTEGER (KIND = prec_int2) :: UNIT_IN, ios
@@ -464,28 +466,32 @@ Call prm_srp (PRMfname)
 ! ----------------------------------------------------------------------
 ! Number of parameters to be estimated
 NPARAM_glb = 0
+IEMP = 0
+IECOM = 0
 ! Empirical parameters
 If (EMP_param_glb == 1) Then
 ! Bias parameters
 	If (EMP_Bias_glb(1) == 1) Then
-		NPARAM_glb = NPARAM_glb + 1
+		IEMP = IEMP + 1
 	End If
 	If (EMP_Bias_glb(2) == 1) Then
-		NPARAM_glb = NPARAM_glb + 1
+		IEMP = IEMP + 1
 	End If
 	If (EMP_Bias_glb(3) == 1) Then
-		NPARAM_glb = NPARAM_glb + 1
+		IEMP = IEMP + 1
 	End If
 ! Cycle-per-revolution parameters
 	IF (EMP_CPR_glb(1) == 1) Then
-		NPARAM_glb = NPARAM_glb + 2
+		IEMP = IEMP + 2
 	End If
 	IF (EMP_CPR_glb(2) == 1) Then
-		NPARAM_glb = NPARAM_glb + 2
+		IEMP = IEMP + 2
 	End If
 	IF (EMP_CPR_glb(3) == 1) Then
-		NPARAM_glb = NPARAM_glb + 2
+		IEMP = IEMP + 2
 	End If
+EMPNUM = IEMP
+NPARAM_glb = IEMP
 End	If
 
 ! --------------------------------------------------------------------
@@ -494,40 +500,43 @@ End	If
 If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
 ! Bias parameters
         If (ECOM_Bias_glb(1) == 1) Then
-                NPARAM_glb = NPARAM_glb + 1
+                IECOM = IECOM + 1
         ELSE
-                NPARAM_glb = NPARAM_glb
+                IECOM = IECOM
         End If
         If (ECOM_Bias_glb(2) == 1) Then
-                NPARAM_glb = NPARAM_glb + 1
+                IECOM = IECOM + 1
         ELSE
-                NPARAM_glb = NPARAM_glb
+                IECOM = IECOM
         End If
         If (ECOM_Bias_glb(3) == 1) Then
-                NPARAM_glb = NPARAM_glb + 1
+                IECOM = IECOM + 1
         ELSE
-                NPARAM_glb = NPARAM_glb
+                IECOM = IECOM
         End If
 ! Cycle-per-revolution parameters
         IF (ECOM_CPR_glb(1) == 1) Then
-                NPARAM_glb = NPARAM_glb + 2
+                IECOM = IECOM + 2
         ELSE
-                NPARAM_glb = NPARAM_glb
+                IECOM = IECOM
         End If
         IF (ECOM_CPR_glb(2) == 1) Then
-                NPARAM_glb = NPARAM_glb + 2
+                IECOM = IECOM + 2
         ELSE
-                NPARAM_glb = NPARAM_glb
+                IECOM = IECOM
         End If
         IF (ECOM_CPR_glb(3) == 1) Then
-                NPARAM_glb = NPARAM_glb + 2
+                IECOM = IECOM + 2
         ELSE
-                NPARAM_glb = NPARAM_glb
+                IECOM = IECOM
         End If
+ECOMNUM = IECOM
+NPARAM_glb = IECOM
 !print*,'ECOM_Bias_glb=',ECOM_Bias_glb, 'ECOM_CPR_glb=',ECOM_CPR_glb
 !print*,'NPARAM_glb=',NPARAM_glb
 ELSEIF (ECOM_param_glb == 3) THEN
 
+        ECOMNUM = 7
         NPARAM_glb = 7
 
 ELSEIF (ECOM_param_glb < 0) THEN
@@ -536,6 +545,14 @@ ELSEIF (ECOM_param_glb < 0) THEN
         STOP
 End If
 
+IF (ECOM_param_glb /= 0 .AND. EMP_param_glb /= 0) THEN
+NPARAM_glb = ECOMNUM + EMPNUM
+!print*,'ECOM and EMP models are used together'
+!print*,'Number of empirical parameters =', EMPNUM
+!print*,'Number of ECOM parameters =', ECOMNUM
+!print*,'The total number (NPARAM_glb) of force-related parameters =',NPARAM_glb
+
+END IF
 ! ----------------------------------------------------------------------
 
 if (1<0) then

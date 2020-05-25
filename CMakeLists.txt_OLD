@@ -5,20 +5,9 @@ project(pod)
 #project (add_vectors Fortran)
 enable_language(Fortran)
 
-set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
-
-set (BLA_VENDOR OpenBLAS)
-find_package(BLAS)
-if(BLAS_FOUND)
-  set(LAPACK_LIBRARIES "")
-  message(STATUS "Found Vendor sprecific OpenBLAS")
-else()
-  set (BLA_VENDOR "")
-  find_package(LAPACK required)
-  find_package(BLAS required)  
-  message(STATUS "Found LAPACK and BLAS")
-endif()
-
+set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
+find_package(LAPACK REQUIRED)
+find_package(BLAS REQUIRED)
 #message("Fortran default extensions = ${CMake_Fortran_SOURCE_FILE_EXTENSIONS}")
 set (CMAKE_Fortran_SOURCE_FILE_EXTENSIONS "f03;F90;f90;for;f;F")
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
@@ -361,12 +350,6 @@ src/readbrdcmessg.f90
 src/main_brdcorbit.f90
 )
 
-add_executable(timesystem
-src/mdl_timeconfig.f03
-src/time_cmdline.f03
-src/main_time.f03
-)
-
 link_directories(/usr/lib64 ${CMAKE_BINARY_DIR}/lib)
 
 target_include_directories(pod PUBLIC
@@ -398,16 +381,13 @@ target_link_libraries(eclipse pod_lib)
 target_link_libraries(pod pod_lib rw_param pod_lib rel kepler yaw eclipse tides ga_tz rk force eop boxwing ga_math ga_gen iers iau_math ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 target_link_libraries(crs2trs pod_lib rw_param pod_lib ga_tz rk force eop boxwing ga_math ga_gen iers iau_math)
 target_link_libraries(brdc2ecef pod_lib rw_param pod_lib ga_tz rk force eop boxwing ga_math ga_gen iers iau_math)
-target_link_libraries(timesystem pod_lib rw_param pod_lib ga_tz rk force eop boxwing ga_math ga_gen iers iau_math)
 
 set_target_properties(pod PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties(crs2trs PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties(brdc2ecef PROPERTIES LINKER_LANGUAGE Fortran)
-set_target_properties(timesystem PROPERTIES LINKER_LANGUAGE Fortran)
 
 target_compile_definitions(pod PRIVATE LAPACK BLAS)
 target_compile_definitions(crs2trs PRIVATE)
 target_compile_definitions(brdc2ecef PRIVATE)
-target_compile_definitions(timesystem PRIVATE)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)

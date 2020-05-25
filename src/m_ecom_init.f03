@@ -48,13 +48,15 @@ SUBROUTINE ecom_init (ECOM_0_coef)
 ! ----------------------------------------------------------------------
 ! Initial conditions for solar radiation pressure
 ! ----------------------------------------------------------------------
-ALLOCATE (ECOM_0_coef(NPARAM_glb))
+!ALLOCATE (ECOM_0_coef(NPARAM_glb))
+ALLOCATE (ECOM_0_coef(ECOMNUM))
 srp_i = ECOM_param_glb
 !i = Niteration
 !write (fname_id, *) i
 ECOM_0_coef = 0.d0
 IF (IC_MODE_cfg == 2) THEN
-	ECOM_0_coef = IC_sat_glb (9:8+NPARAM_glb)
+!	ECOM_0_coef = IC_sat_glb (9:8+NPARAM_glb)
+        ECOM_0_coef = IC_sat_glb (9:8+ECOMNUM)
 END IF
 !print*,'ECOM_0_coef=',ECOM_0_coef
 
