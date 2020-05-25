@@ -41,4 +41,4 @@ client  = session.client('s3')
 print("Outdir:",args.outdir)
 download_dir(client, s3, 'pod/examples', args.outdir, bucket='peanpod')
 
-
+download_dir(client, s3, 'pod/tables', args.outdir, bucket='peanpod')

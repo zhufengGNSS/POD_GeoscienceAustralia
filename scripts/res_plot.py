@@ -18,7 +18,7 @@ from argparse import ArgumentParser
 import time
 import numpy as np
 import matplotlib as mpl
-#mpl.use('Agg')
+mpl.use('Agg')
 #mpl.use('Gtk')
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
