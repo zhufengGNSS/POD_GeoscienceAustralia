@@ -151,7 +151,9 @@ NTARG = 11
 ! Satellite Attitude computation 
 ! ----------------------------------------------------------------------
 ! Yaw-attitude model
-CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRNsat, satblk, BDSorbtype, &
+!CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRNsat, satblk, BDSorbtype, &
+!                     eclipse_status, beta, Mangle, Yangle_array, eBX_nom, eBX_ecl)					 
+CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRNsat, BLKsat, & 
                      eclipse_status, beta, Mangle, Yangle_array, eBX_nom, eBX_ecl)
 ! ----------------------------------------------------------------------
 
