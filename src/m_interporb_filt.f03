@@ -174,45 +174,25 @@ END DO
 ! ----------------------------------------------------------------------
 ! Form arrays with data points to be used in the interpolation		
 		!if ( i < NPint_1 ) then
-		if ( ORB_filt_epoch < NPint_1 ) then
-			!i1 = i
-			!i2 = i + (NPint - 1)
+		if (Nepochs_filt == NPint) then
+		! Case: Available data points are equal to the interpolation order	
+			i1 = 1
+			i2 = Nepochs_filt		
+		else if ( ORB_filt_epoch < NPint_1 ) then
 			i1 = ORB_filt_epoch
 			i2 = ORB_filt_epoch + (NPint - 1)
-			!print *,"Nepochs_0, i, epoch_i, i1, i2", Nepochs_0, i, epoch_i, i1, i2 
-		!else if ( Nepochs_0 - i < NPint_2 ) then
 		else if ( Nepochs_filt - ORB_filt_epoch < NPint_2 ) then
-			!i2 = Nepochs_0
-			!i1 = i2 - (NPint-1)
 			i2 = Nepochs_filt
 			i1 = i2 - (NPint-1)
-			!print *,"Nepochs_0, i, epoch_i, i1, i2", Nepochs_0, i, epoch_i, i1, i2
 		else 
-			!i1 = i - (NPint_1 - 1)
-			!i2 = i + NPint_2
 			i1 = ORB_filt_epoch - (NPint_1 - 1)
 			i2 = ORB_filt_epoch + NPint_2
-			!print *,"i,epoch_i,i1,i2", i, epoch_i, i1, i2
 		end if
 		!print *,"NPint_1, NPint_2, NPint", NPint_1, NPint_2, NPint
 		!print *,"i, epoch_i             ", i, epoch_i
 		!print *,"ORB_filt_epoch, i1, i2 ", ORB_filt_epoch, i1, i2
 ! ----------------------------------------------------------------------
 ! Time array of the data points used for the interpolation: X_interp
-
-!		ti = 1
-!		X_interp(1) = orbsp3(i1, 2)
-!		Do ti = 2 , NPint 
-!			X_interp(ti) = X_interp(1) + (ti - 1) * data_rate * 1.D0			
-!		End Do
-
-!		ti = 0		
-!		Do j = i1 , i2
-!		ti = ti + 1		
-!			X_interp(ti) = SecDay_i + (j-i) * data_rate * 1.D0  !(ti - 1) * data_rate * 1.D0			
-!		End Do
-!	    j = 0		
-
 		ti = 0		
 		Do j = i1 , i2
 		ti = ti + 1		
@@ -227,37 +207,6 @@ END DO
 ! ----------------------------------------------------------------------
 ! Lagrange interpolation
 ! ----------------------------------------------------------------------
-		! ! Position Vector
-		! orbint(epoch_i, 1:5) = orbsp3(i, 1:5)   							
-        ! X = orbsp3(i,3)
-		! Y = orbsp3(i,4)
-		! Z = orbsp3(i,5)
-		
-		! ! Velocity Vector: computation via Lagrange interpolation
-		! tint = SecDay_i
-		
-		! ! Vx
-		! Y_interp = orbsp3(i1:i2, 3)		
-		! !Call interp_lag(tint-1, Xint_1) 
-		! Call interp_lag(tint-1, X_interp, Y_interp, Xint_1) 
-        ! Vx = X - Xint_1 
-		! ! Vy
-		! Y_interp = orbsp3(i1:i2, 4)
-		! !Call interp_lag(tint-1, Yint_1) 
-		! Call interp_lag(tint-1, X_interp, Y_interp, Yint_1) 
-        ! Vy = Y - Yint_1
-		! ! Vz
-		! Y_interp = orbsp3(i1:i2, 5)
-		! !Call interp_lag(tint-1, Zint_1) 
-		! Call interp_lag(tint-1, X_interp, Y_interp, Zint_1) 
-        ! Vz = Z - Zint_1
-
-		! ! Write Velocity to array orbint
-		! orbint(epoch_i, 6) = Vx
-		! orbint(epoch_i, 7) = Vy
-		! orbint(epoch_i, 8) = Vz
-
-
 		! Lagrange interpolation at interpolation epoch
 		tint = SecDay_i
 
@@ -270,8 +219,6 @@ END DO
         !Vx = Xint_1 - Xint 
         Vx = Xint - Xint_1 
 
-!print *,"Y_interp", Y_interp
-
 		! Y
 		Y_interp = ORB_filt(i1:i2, 4)
 		Call interp_lag(tint, X_interp, Y_interp, Yint) 
@@ -280,8 +227,6 @@ END DO
         !Vy = Yint_1 - Yint
         Vy = Yint - Yint_1
 			
-!print *,"Y_interp", Y_interp
-
 		! Z
 		Y_interp = ORB_filt(i1:i2, 5)
 		Call interp_lag(tint, X_interp, Y_interp, Zint) 
@@ -290,8 +235,6 @@ END DO
         !Vz = Zint_1 - Zint
         Vz = Zint - Zint_1
 		
-!print *,"Y_interp", Y_interp
-
 ! Write interpolated state vector to the matrix 
 		! Time arguments
 		orbint(epoch_i, 1) = ORB_matrix(i,1)   							

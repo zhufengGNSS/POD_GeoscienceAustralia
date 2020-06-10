@@ -131,9 +131,8 @@ ELSE
 ! Orbit Lagrange interpolation after removing outliers of the input orbit matrix
 CALL interp_orb_filt (orbsp3, orbsp3_filt, interv_in, NPint, orbint)
 
-filename = "orbint.out"
-Call writearray (orbint, filename)
-
+!write (filename, FMT='(A7,A3,A4)') 'orbint_', (PRN), '.out'
+!Call writearray (orbint, filename)
 END IF
 ! ----------------------------------------------------------------------
   
