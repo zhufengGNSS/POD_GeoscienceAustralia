@@ -137,6 +137,8 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
       REAL (KIND = prec_d) :: Yawangle
 ! ----------------------------------------------------------------------
+      CHARACTER (LEN=20) :: BLKsat
+
 
 ! ----------------------------------------------------------------------
 ! Global variables used
@@ -603,7 +605,10 @@ READ (PRN, fmt_line , IOSTAT=ios) GNSSid, PRN_no
 
 ! Yaw-attitude model
 PRN_GNSS = PRN
-CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
+!CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, satblk, BDSorbtype, &
+!                     eclipsf, beta, Mangle, Yangle, eBX_nom, eBX_ecl)
+BLKsat = BLKTYP					 
+CALL attitude (mjd, rsat_icrf, vsat_icrf, rSun, PRN_GNSS, BLKsat, & 
                      eclipsf, beta, Mangle, Yangle, eBX_nom, eBX_ecl)
 ! ----------------------------------------------------------------------
 
