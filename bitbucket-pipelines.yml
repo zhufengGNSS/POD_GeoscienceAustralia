@@ -3,23 +3,79 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: gamichaelmoore/pod-pipelines
+image: cmorgan2019/pod-test:0.2
 
-options:
-  docker: true
+clone:
+  lfs: true
 
 pipelines:
   default:
-    - step:
-        script:
-          - ./build-pipelines-docker-image.sh
-#          - aws/deploy.sh
-
-
-  custom:
-    build-pipelines-docker-image:
-      - step:
-          name: Build and deploy pipelines docker image
-          script:
-            - ./build-pipelines-docker-image.sh
-
+    - parallel:
+        - step:
+            name: Run Example 1
+            script:
+              - mkdir /root/pod
+              - cp -r * /root/pod
+              - cd /root/pod
+              - mkdir build
+              - cd build
+              - cmake ..
+              - make >make.out 2>make.err
+              - less make.err
+              - cd ../examples/ex1
+              - find -type l -delete
+              - ./sh_ex1
+              - cat pod.out
+              - cat pod.rms
+              - python3 test.py
+        - step:
+            name: Run Example 2
+            script:
+              - mkdir /root/pod
+              - cp -r * /root/pod
+              - cd /root/pod
+              - mkdir build
+              - cd build
+              - cmake ..
+              - make >make.out 2>make.err
+              - less make.err
+              - cd ../examples/ex2
+              - find -type l -delete
+              - ./sh_ex2
+              - cat pod.out
+              - cat pod.rms
+              - python3 test.py
+        - step:
+            name: Run Example 3
+            script:
+              - mkdir /root/pod
+              - cp -r * /root/pod
+              - cd /root/pod
+              - mkdir build
+              - cd build
+              - cmake ..
+              - make >make.out 2>make.err
+              - less make.err
+              - cd ../examples/ex3
+              - find -type l -delete
+              - ./sh_ex3
+              - cat pod.out
+              - cat pod.rms
+              - python3 test.py
+        - step:
+            name: Run Example 4
+            script:
+              - mkdir /root/pod
+              - cp -r * /root/pod
+              - cd /root/pod
+              - mkdir build
+              - cd build
+              - cmake ..
+              - make >make.out 2>make.err
+              - less make.err
+              - cd ../examples/ex4
+              - find -type l -delete
+              - ./sh_ex4
+              - cat pod.out
+              - cat pod.rms
+              - python3 test.py
