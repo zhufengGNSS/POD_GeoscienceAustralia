@@ -28,7 +28,9 @@ pipelines:
               - cd /data/acs/pod/examples/ex1
               - find -type l -delete
               - chmod +x sh_ex1
-              - ./sh_ex1
+              - ./sh_ex1 >make.out 2>make.err
+              - cat make.out
+              - cat make.err
               - cat pod.out
               - cat pod.rms
               - python3 test.py
