@@ -40,7 +40,7 @@ pipelines:
             name: Run Example 2
             script:
               - mkdir -p /data/acs/pod
-              - ln -s /opt/atlassian/pipelines/agent/build /data/acs/pod
+              - ln -s /opt/atlassian/pipelines/agent/build/ /data/acs/pod
               - mkdir -p /data
               - mkdir -p /data/acs
               - cd /data/acs/pod
