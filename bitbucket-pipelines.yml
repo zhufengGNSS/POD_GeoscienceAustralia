@@ -14,9 +14,13 @@ pipelines:
         - step:
             name: Run Example 1
             script:
-              - mkdir /root/pod
-              - cp -r * /root/pod
-              - cd /root/pod
+              - pwd
+              - ls
+              - mkdir -p /data
+              - mkdir -p /data/acs
+              - mkdir -p /data/acs/pod
+              - cp -R /opt/atlassian/pipelines/agent/build/* /data/acs/pod/
+              - cd /data/acs/pod
               - mkdir build
               - cd build
               - cmake ..
