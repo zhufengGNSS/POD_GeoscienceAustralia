@@ -22,6 +22,7 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
+              - python3 ../scripts/install_examples.py
               - cd ../examples/ex1
               - find -type l -delete
               - ./sh_ex1
@@ -39,6 +40,7 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
+              - python3 ../scripts/install_examples.py
               - cd ../examples/ex2
               - find -type l -delete
               - ./sh_ex2
@@ -56,6 +58,7 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
+              - python3 ../scripts/install_examples.py
               - cd ../examples/ex3
               - find -type l -delete
               - ./sh_ex3
@@ -73,6 +76,7 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
+              - python3 ../scripts/install_examples.py
               - cd ../examples/ex4
               - find -type l -delete
               - ./sh_ex4
