@@ -20,6 +20,7 @@ pipelines:
               - mkdir -p /data/acs
               - mkdir -p /data/acs/pod
               - cp -R /opt/atlassian/pipelines/agent/build/* /data/acs/pod/
+              - ln -s /data/acs/pod/ /root/home/pod
               - cd /data/acs/pod
               - mkdir build
               - cd build
