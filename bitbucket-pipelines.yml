@@ -3,7 +3,7 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: cmorgan2019/pod-test:0.2
+image: cmorgan2019/pod-test:0.4
 
 clone:
   lfs: true
