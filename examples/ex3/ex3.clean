@@ -1,0 +1,21 @@
+#!/bin/bash
+
+rm -r EQM0* VEQ0* ECOM1_*.in emp*.in DE.430 >& /dev/null
+ 
+# Remove old solution files
+\rm -r gag20010_igs20010_orbdiff_rtn.out    >& /dev/null
+\rm -r gag20010_igs20010_orbitstat_N.out    >& /dev/null
+\rm -r gag20010_igs20010_orbitstat_R.out    >& /dev/null
+\rm -r gag20010_igs20010_orbitstat_T.out    >& /dev/null
+\rm -r gag20010_orbits_partials.out         >& /dev/null
+\rm -r gag20010.sp3                         >& /dev/null
+\rm -r orb_icrf.out                         >& /dev/null
+\rm -r orb_itrf.out                         >& /dev/null
+\rm -r orbres_gag20010_igs20010.out_G.png   >& /dev/null
+\rm -r orbrms_gag20010_igs20010G.png        >& /dev/null
+\rm -r pod.out                              >& /dev/null
+\rm -r pod.rms                              >& /dev/null
+\rm -r pseudobs_ICRF.out                    >& /dev/null
+\rm -r pseudobs_ITRF.out                    >& /dev/null
+
+exit 
