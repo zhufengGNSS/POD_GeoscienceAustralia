@@ -1,0 +1,18 @@
+Output file: /data/software/pod/pod/examples/ex2/orbrms_gag20624_C.png
+GNSS:  C PRNs:  [ 306.  307.  308.  309.  310.  311.  312.  313.  314.  316.]
+PRN: RMS      R/T/N/3D: 306 :  1.217  0.897  1.648  2.237
+PRN: RMS      R/T/N/3D: 307 :  3.114  1.801  0.760  3.677
+PRN: RMS      R/T/N/3D: 308 :  3.211  2.005  1.242  3.984
+PRN: RMS      R/T/N/3D: 309 :  0.944  0.717  1.438  1.863
+PRN: RMS      R/T/N/3D: 310 :  3.487  2.063  0.571  4.091
+PRN: RMS      R/T/N/3D: 311 :  3.724  1.505  0.797  4.095
+PRN: RMS      R/T/N/3D: 312 :  3.527  1.168  1.177  3.898
+PRN: RMS      R/T/N/3D: 313 :  3.408  2.204  1.099  4.204
+PRN: RMS      R/T/N/3D: 314 :  3.745  1.574  0.797  4.140
+PRN: RMS      R/T/N/3D: 316 :  1.179  0.825  1.638  2.180
+ 
+Combined statistics
+PRN: Mean     R/T/N/3D:  ALL: -2.313  0.014 -0.018  2.313
+PRN: Std Dev  R/T/N/3D:  ALL:  1.854  1.565  1.174  2.695
+PRN: RMS      R/T/N/3D:  ALL:  2.964  1.565  1.174  3.552
+PRN: Mean STD R/T/N/3D:  ALL:  1.397  1.476  1.105  2.313
