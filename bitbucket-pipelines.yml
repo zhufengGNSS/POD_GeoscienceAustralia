@@ -20,6 +20,7 @@ pipelines:
               - mkdir -p /data/acs
               - mkdir -p /data/acs/pod
               - cp -R /opt/atlassian/pipelines/agent/build/* /data/acs/pod/
+              - mkdir -p /root/home/pod
               - ln -s /data/acs/pod/ /root/home/pod
               - cd /data/acs/pod
               - mkdir build
@@ -38,6 +39,7 @@ pipelines:
         - step:
             name: Run Example 2
             script:
+              - mkdir -p /data/acs/pod
               - ln -s /opt/atlassian/pipelines/agent/build /data/acs/pod
               - mkdir -p /data
               - mkdir -p /data/acs
