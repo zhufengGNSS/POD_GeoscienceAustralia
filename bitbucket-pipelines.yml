@@ -29,6 +29,7 @@ pipelines:
               - python3 ../scripts/install_examples.py
               - cd ../examples/ex1
               - find -type l -delete
+              - chmod +e sh_ex1
               - ./sh_ex1
               - cat pod.out
               - cat pod.rms
@@ -36,9 +37,9 @@ pipelines:
         - step:
             name: Run Example 2
             script:
-              - mkdir /root/pod
-              - cp -r * /root/pod
-              - cd /root/pod
+              - ln -s /opt/atlassian/pipelines/agent/build /data/acs/pod
+              - cd /data/acs/pod
+              - ls
               - mkdir build
               - cd build
               - cmake ..
