@@ -14,22 +14,18 @@ pipelines:
         - step:
             name: Run Example 1
             script:
-              - pwd
+              - mkdir /root/pod
+              - cp -r * /root/pod
+              - cd /root/pod
               - ls
-              - mkdir -p /data
-              - mkdir -p /data/acs
-              - mkdir -p /data/acs/pod
-              - cp -R /opt/atlassian/pipelines/agent/build/* /data/acs/pod/
-              - mkdir -p /root/home/pod
-              - ln -s /data/acs/pod/ /root/home/pod
-              - cd /data/acs/pod
+              - mkdir -p /data/acs/pod/examples
               - mkdir build
               - cd build
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
               - python3 ../scripts/install_examples.py
-              - cd ../examples/ex1
+              - cd /data/acs/pod/examples/ex1
               - find -type l -delete
               - chmod +x sh_ex1
               - ./sh_ex1
