@@ -28,24 +28,31 @@ pipelines:
               - cd /data/acs/pod/examples/ex1
               - find -type l -delete
               - chmod +x sh_ex1
-              - ./sh_ex1 >make.out 2>make.err
-              - cat make.out
-              - cat make.err
+              - ./sh_ex1 >ex1.out 2>ex1.err
+              - cat ex1.out
+              - cat ex1.err
               - cat pod.out
               - cat pod.rms
               - ls
               - cd solution
               - ls
               - cd ..
-              - cp ../../scripts/test.py .
+              - cp /root/pod/scripts/test.py .
               - ls -la
               - python3 test.py
         - step:
             name: Run Example 2
             script:
-              - mkdir -p /data/acs
-              - ln -s /opt/atlassian/pipelines/agent/build/ /root/home/pod
-              - cd /data/acs/pod
+              - cd /root
+              - ls
+              - cd home
+              - ls
+              - ln -s /opt/atlassian/pipelines/agent/build /root/home/pod
+              - ls
+              - cd pod
+              - ls
+              - pwd
+              - cd /root/home/pod
               - ls
               - mkdir build
               - cd build
