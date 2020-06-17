@@ -1,4 +1,3 @@
-from boto3.session import Session
 import boto3
 import os
 import argparse
@@ -29,9 +28,10 @@ def download_dir(client, resource, dist, local='/tmp', bucket='peanpod'):
 #==============================================================================
 args = parser.parse_args()
 
-client  = boto3.client('s3', region_name='ap-southeast-2' )
+resource = boto3.resource('s3')
+client  = boto3.client('s3', region_name='ap-southeast-2')
 
 print("Outdir:",args.outdir)
-download_dir(client, s3, 'pod/examples', args.outdir, bucket='peanpod')
+download_dir(client, resource, 'pod/examples', args.outdir, bucket='peanpod')
 
-download_dir(client, s3, 'pod/tables', args.outdir, bucket='peanpod')
+download_dir(client, resource, 'pod/tables', args.outdir, bucket='peanpod')
