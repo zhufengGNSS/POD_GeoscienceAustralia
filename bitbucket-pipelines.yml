@@ -33,12 +33,18 @@ pipelines:
               - cat make.err
               - cat pod.out
               - cat pod.rms
+              - ls
+              - cd solution
+              - ls
+              - cd ..
+              - cp ../../scripts/test.py .
+              - ls -la
               - python3 test.py
         - step:
             name: Run Example 2
             script:
               - mkdir -p /data/acs
-              - ln -s /opt/atlassian/pipelines/agent/build/ /data/acs/pod
+              - ln -s /opt/atlassian/pipelines/agent/build/ /root/home/pod
               - cd /data/acs/pod
               - ls
               - mkdir build
@@ -46,10 +52,12 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
+              - mkdir /data/acs/pod/examples
               - python3 ../scripts/install_examples.py
-              - cd ../examples/ex2
+              - cd /data/acs/pod/examples/ex2
               - find -type l -delete
-              - ./sh_ex2
+              - chmod +x sh_ex2
+              - ./sh_ex1 >make.out 2>make.err
               - cat pod.out
               - cat pod.rms
               - python3 test.py

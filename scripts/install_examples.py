@@ -3,11 +3,6 @@ import boto3
 import os
 import argparse
 
-# Key is for PEANPODPUBLIC user
-# Will only allow download from the peanpod  S3 bucket
-ACCESS_KEY = 'AKIAYZV65R4UQHCAKYWT'
-SECRET_KEY = 'lyFk1VgveMsR4uGZ08sUUkPjPWm9VNTrfa7BubcV'
-
 
 # Command line argument
 parser = argparse.ArgumentParser(description="Download POD examples")
@@ -34,9 +29,7 @@ def download_dir(client, resource, dist, local='/tmp', bucket='peanpod'):
 #==============================================================================
 args = parser.parse_args()
 
-session = Session(aws_access_key_id=ACCESS_KEY,aws_secret_access_key=SECRET_KEY)
-s3      = session.resource('s3')
-client  = session.client('s3')
+client  = boto3.client('s3', region_name='ap-southeast-2' )
 
 print("Outdir:",args.outdir)
 download_dir(client, s3, 'pod/examples', args.outdir, bucket='peanpod')
