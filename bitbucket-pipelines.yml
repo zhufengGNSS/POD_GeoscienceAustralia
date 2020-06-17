@@ -63,7 +63,7 @@ pipelines:
               - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c E >& /dev/null
               - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c G >& /dev/null
               - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c R >& /dev/null
-              - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c C >& pod_C.rms
+              - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c C >& pod.rms
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c E >& pod_E.rms
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c G >& pod_G.rms
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c R >& pod_R.rms
