@@ -25,6 +25,7 @@ pipelines:
               - cd /data/acs/pod/examples/ex1
               - find -type l -delete
               - chmod +x sh_ex1
+              - chmod +x ex1.clean
               - ./sh_ex1
               - cat pod.out
               - cat solution/pod.out
