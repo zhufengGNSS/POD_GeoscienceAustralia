@@ -23,3 +23,5 @@ test/emp_cpr.in
 test/ascp1950.430
 build/
 lib/
+tables/
+examples/
