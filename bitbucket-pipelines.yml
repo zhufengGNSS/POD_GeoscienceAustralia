@@ -34,8 +34,6 @@ pipelines:
               - ~/pod/bin/pod | tee pod.out
               - python3 ~/pod/scripts/res_plot.py     -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& /dev/null
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& pod.rms
-              - cat pod.out
-              - cat solution/pod.out
               - cp /root/pod/scripts/compare_pod_rms.py .
               - python3 compare_pod_rms.py
         - step:
@@ -67,8 +65,6 @@ pipelines:
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c E >& pod_E.rms
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c G >& pod_G.rms
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c R >& pod_R.rms
-              - cat pod.out
-              - cat pod.rms
               - cp /root/pod/scripts/compare_pod_rms.py .
               - python3 compare_pod_rms.py
         - step:
@@ -94,8 +90,6 @@ pipelines:
               - ~/pod/bin/pod | tee pod.out
               - python3 ~/pod/scripts/res_plot.py     -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& /dev/null
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& pod.rms
-              - cat pod.out
-              - cat pod.rms
               - cp /root/pod/scripts/compare_pod_rms.py .
               - python3 compare_pod_rms.py
         - step:
