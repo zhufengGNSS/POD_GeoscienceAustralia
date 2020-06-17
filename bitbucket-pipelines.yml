@@ -14,10 +14,7 @@ pipelines:
         - step:
             name: Run Example 1
             script:
-              - mkdir /root/pod
-              - cp -r * /root/pod
-              - cd /root/pod
-              - ls
+              - ln -s /opt/atlassian/pipelines/agent/build /root/pod
               - mkdir -p /data/acs/pod/examples
               - mkdir build
               - cd build
@@ -28,38 +25,22 @@ pipelines:
               - cd /data/acs/pod/examples/ex1
               - find -type l -delete
               - chmod +x sh_ex1
-              - ./sh_ex1 >ex1.out 2>ex1.err
-              - cat ex1.out
-              - cat ex1.err
+              - ./sh_ex1
               - cat pod.out
-              - cat pod.rms
-              - ls
-              - cd solution
-              - ls
-              - cd ..
+              - cat solution/pod.out
               - cp /root/pod/scripts/test.py .
               - ls -la
               - python3 test.py
         - step:
             name: Run Example 2
             script:
-              - cd /root
-              - ls
-              - cd home
-              - ls
-              - ln -s /opt/atlassian/pipelines/agent/build /root/home/pod
-              - ls
-              - cd pod
-              - ls
-              - pwd
-              - cd /root/home/pod
-              - ls
+              - ln -s /opt/atlassian/pipelines/agent/build /root/pod
               - mkdir build
               - cd build
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
-              - mkdir /data/acs/pod/examples
+              - mkdir -p /data/acs/pod/examples
               - python3 ../scripts/install_examples.py
               - cd /data/acs/pod/examples/ex2
               - find -type l -delete
