@@ -119,7 +119,7 @@ pipelines:
               - ln -s /data/acs/pod/tables/header.430_229 .           >& /dev/null
               - ln -s /data/acs/pod/tables/igs_metadata_2063.snx .    >& /dev/null
               - ln -s /data/acs/pod/tables/leap.second .              >& /dev/null
-              - ln -s /data/acs/pod/tables/eopc04_14_IAU2000.62-now . >& /dev/null
+              - ln -s /data/acs/pod/tables/eopc04_IAU2000.62-now . >& /dev/null
               - ~/pod/bin/pod -m 4 -q 2 -k 1 -w 0 -o igs20624.sp3 | tee pod.out
               - ls
               - df -h
