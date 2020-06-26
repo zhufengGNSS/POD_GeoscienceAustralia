@@ -83,7 +83,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
     
     print(test_rms_out)
     
-     for test, solution in zip(test_pod_out, solution_pod_out):
+    for test, solution in zip(test_pod_out, solution_pod_out):
         mag_diff = math.sqrt((test[1] - solution[1])**2 + (test[2] - solution[2])**2 + (test[3] - solution[3])**2)
         assert mag_diff < errormargin
 
