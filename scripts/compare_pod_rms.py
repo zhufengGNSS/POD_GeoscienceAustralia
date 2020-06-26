@@ -28,7 +28,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
                 sat_y = float(match.group(3))
                 sat_z = float(match.group(4))
                 solution_pod_out.append([sat_number,sat_x,sat_y,sat_z])
-    
+    print("Solution pod.out results to compare against") 
     print(solution_pod_out)
 
     test_pod_out_log_location = runout
@@ -44,7 +44,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
                 sat_z = float(match.group(4))
                 test_pod_out.append([sat_number,sat_x,sat_y,sat_z])
     
-    
+    print("Current run pod.out results")
     print(test_pod_out)
 
     # Get summart stats from pod.rms and solution/pod.rms
@@ -63,7 +63,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
                 d = float(match.group(5))
                 #print("Name = {}, R = {}, T = {}, N = {}, 3D = {}".format(name,r,t,n,d))
                 solution_rms_out.append([name,r,t,n,d])
-    
+    print("Solution pod.rms results to compare against")
     print(solution_rms_out)
     
     test_pod_rms_log_location = runrms
@@ -80,30 +80,30 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
                 d = float(match.group(5))
                 #print("Name = {}, R = {}, T = {}, N = {}, 3D = {}".format(name,r,t,n,d))
                 test_rms_out.append([name,r,t,n,d])
-    
+    print("Currnet run pod.rms results")
     print(test_rms_out)
     
+    print("Compare magnitude different for pod.out results against solution benchmark")
     for test, solution in zip(test_pod_out, solution_pod_out):
         mag_diff = math.sqrt((test[1] - solution[1])**2 + (test[2] - solution[2])**2 + (test[3] - solution[3])**2)
-        assert mag_diff < errormargin
-
         if(mag_diff > errormargin):
             print("Difference of {} found for satellite {}".format(test[0],mag_diff))
+        assert mag_diff < errormargin
 
-
+    print("Compare difference for pod.rms results against solution benchmark")
     for test_rms, solution_rms in zip(test_rms_out, solution_rms_out):
         r_diff = test_rms[1] - solution_rms[1]
         t_diff = test_rms[2] - solution_rms[2]
         n_diff = test_rms[3] - solution_rms[3]
         d_diff = test_rms[4] - solution_rms[4]
         
+        if((r_diff > errormargin) or (t_diff > errormargin) or (n_diff > errormargin) or (d_diff > errormargin)):
+            print("Difference of found in {} for  R = {}, T = {}, N = {}, 3D = {}".format(test_rms[0],r_diff,t_diff,n_diff,d_diff))
+
         assert r_diff < errormargin
         assert t_diff < errormargin
         assert n_diff < errormargin
         assert d_diff < errormargin
-
-        if((r_diff > errormargin) or (t_diff > errormargin) or (n_diff > errormargin) or (d_diff > errormargin)):
-            print("Difference of found in {} for  R = {}, T = {}, N = {}, 3D = {}".format(test_rms[0],r_diff,t_diff,n_diff,d_diff))
 
 
 if __name__ == "__main__":
