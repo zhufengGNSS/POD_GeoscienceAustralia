@@ -66,7 +66,7 @@ pipelines:
               - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c G >& pod_G.rms
               - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c R >& pod_R.rms
               - cp /root/pod/scripts/compare_pod_rms.py .
-              - python3 compare_pod_rms.py -sr pod_C.rms -rr pod_C.rms -so pod.out -ro pod.out
+              - python3 compare_pod_rms.py -sr pod_C.rms -rr pod_C.rms -so pod.out -ro pod.out -em 0.5
         - step:
             name: Run Example 3
             script:
@@ -98,7 +98,7 @@ pipelines:
               - ls
               - cd ..
               - cp /root/pod/scripts/compare_pod_rms.py .
-              - python3 compare_pod_rms.py
+              - python3 compare_pod_rms.py -em 0.5
               - echo "complete"
         - step:
             name: Run Example 4
@@ -132,5 +132,5 @@ pipelines:
               - cd solution
               - ls
               - cd ..
-              - python3 compare_pod_rms.py
+              - python3 compare_pod_rms.py -em 0.5
               - echo "complete"
