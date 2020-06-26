@@ -88,6 +88,8 @@ pipelines:
               - ln -s /data/acs/pod/tables/leap.second .              >& /dev/null
               - ln -s /data/acs/pod/tables/eopc04_14_IAU2000.62-now . >& /dev/null
               - ~/pod/bin/pod | tee pod.out
+              - ls
+              - df -h
               - python3 ~/pod/scripts/res_plot.py     -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& /dev/null
               - ls
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& pod.rms
@@ -119,6 +121,8 @@ pipelines:
               - ln -s /data/acs/pod/tables/leap.second .              >& /dev/null
               - ln -s /data/acs/pod/tables/eopc04_14_IAU2000.62-now . >& /dev/null
               - ~/pod/bin/pod | tee pod.out
+              - ls
+              - df -h
               - python3 ~/pod/scripts/res_plot.py     -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& /dev/null
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& pod.rms
               - echo "complete"
