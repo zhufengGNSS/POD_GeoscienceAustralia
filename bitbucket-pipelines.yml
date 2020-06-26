@@ -61,12 +61,12 @@ pipelines:
               - #python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c E >& /dev/null
               - #python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c G >& /dev/null
               - #python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c R >& /dev/null
-              - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c C >& pod.rms
+              - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c C >& pod_C.rms
               - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c E >& pod_E.rms
               - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c G >& pod_G.rms
               - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c R >& pod_R.rms
               - cp /root/pod/scripts/compare_pod_rms.py .
-              - python3 compare_pod_rms.py
+              - python3 compare_pod_rms.py -sr pod_C.rms -rr pod_C.rms -so pod.out -ro pod.out
         - step:
             name: Run Example 3
             script:
@@ -89,7 +89,12 @@ pipelines:
               - ln -s /data/acs/pod/tables/eopc04_14_IAU2000.62-now . >& /dev/null
               - ~/pod/bin/pod | tee pod.out
               - python3 ~/pod/scripts/res_plot.py     -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& /dev/null
+              - ls
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& pod.rms
+              - ls
+              - cd solution
+              - ls
+              - cd ..
               - cp /root/pod/scripts/compare_pod_rms.py .
               - python3 compare_pod_rms.py
               - echo "complete"
@@ -119,5 +124,9 @@ pipelines:
               - echo "complete"
               - cp /root/pod/scripts/compare_pod_rms.py .
               - echo "complete"
+              - ls
+              - cd solution
+              - ls
+              - cd ..
               - python3 compare_pod_rms.py
               - echo "complete"

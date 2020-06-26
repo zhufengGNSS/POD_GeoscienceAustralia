@@ -2,12 +2,21 @@ import re
 from array import *
 import numpy as np
 import math
+import argparse
+
+# Initiate the parser
+parser = argparse.ArgumentParser(description="Compare pod output rms and out files")
+
+parser.add_argument("-so", "--solutionout", dest='solutionout', type=str, required=False, default='pod.out', help="solution pod.out file location name")
+parser.add_argument("-sr", "--solutionrms", dest='solutionrms', type=str, required=False, default='pod.rms', help="solution pod.rms file location name")
+parser.add_argument("-ro", "--runout", dest='runout', type=str, required=False, default='pod.out', help="New pod run pod.out file location name")
+parser.add_argument("-rr", "--runrms", dest='runrms', type=str, required=False, default='pod.rms', help="New pod run pod.rms file location name")
 
 
-def test():
+def test(solutionrms, solutionout, runout, runrms):
     # Get summary stats for each satellite from pod.out and solution/pod.out and save to a list 
     
-    solution_pod_out_log_location = r"solution/pod.out"
+    solution_pod_out_log_location = r"solution/" + solutionout
     regex = 'RMS-XYZ ITRF CMP (G\d\d)        ([0-9.0-9?]+)        ([0-9.0-9?]+)        ([0-9.0-9?]+)'
     
     solution_pod_out = []
@@ -22,7 +31,7 @@ def test():
     
     print(solution_pod_out)
 
-    test_pod_out_log_location = r"pod.out"
+    test_pod_out_log_location = runout
     regex = 'RMS-XYZ ITRF CMP (G\d\d)        ([0-9.0-9?]+)        ([0-9.0-9?]+)        ([0-9.0-9?]+)'
     
     test_pod_out = []
@@ -49,7 +58,7 @@ def test():
     
     # Get summart stats from pod.rms and solution/pod.rms
     
-    solution_pod_rms_log_location = r"solution/pod.rms"
+    solution_pod_rms_log_location = r"solution/" + solutionrms
     regex = 'PRN:.(.........)...........ALL:.(.[0-9.0-9?]+).(.[0-9.0-9?]+).(.[0-9.0-9?]+).(.[0-9.0-9?]+)'
     
     solution_rms_out = []
@@ -66,7 +75,7 @@ def test():
     
     print(solution_rms_out)
     
-    test_pod_rms_log_location = r"pod.rms"
+    test_pod_rms_log_location = runrms
     regex = 'PRN:.(.........)...........ALL:.(.[0-9.0-9?]+).(.[0-9.0-9?]+).(.[0-9.0-9?]+).(.[0-9.0-9?]+)'
     
     test_rms_out = []
@@ -99,5 +108,7 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
+    
+    args = parser.parse_args()
+    test(args.solutionrms, args.solutionout, args.runout, args.runrms)
     print("Everything passed")
