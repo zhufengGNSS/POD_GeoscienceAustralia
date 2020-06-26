@@ -120,7 +120,7 @@ pipelines:
               - ln -s /data/acs/pod/tables/igs_metadata_2063.snx .    >& /dev/null
               - ln -s /data/acs/pod/tables/leap.second .              >& /dev/null
               - ln -s /data/acs/pod/tables/eopc04_14_IAU2000.62-now . >& /dev/null
-              - ~/pod/bin/pod | tee pod.out
+              - ~/pod/bin/pod -m 4 -q 2 -k 1 -w 0 -o igs20624.sp3 | tee pod.out
               - ls
               - df -h
               - python3 ~/pod/scripts/res_plot.py     -i gag20624_igs20624_orbdiff_rtn.out -d . -c G >& /dev/null
