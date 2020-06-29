@@ -28,7 +28,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
                 sat_y = float(match.group(3))
                 sat_z = float(match.group(4))
                 solution_pod_out.append([sat_number,sat_x,sat_y,sat_z])
-    print("Solution pod.out results to compare against") 
+    print("Solution pod.out results to compare against [Sat_Number,x,y,z]") 
     print(solution_pod_out)
 
     test_pod_out_log_location = runout
@@ -44,7 +44,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
                 sat_z = float(match.group(4))
                 test_pod_out.append([sat_number,sat_x,sat_y,sat_z])
     
-    print("Current run pod.out results")
+    print("Current run pod.out results [Sat_Number,x,y,z]")
     print(test_pod_out)
 
     # Get summart stats from pod.rms and solution/pod.rms
@@ -63,7 +63,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
                 d = float(match.group(5))
                 #print("Name = {}, R = {}, T = {}, N = {}, 3D = {}".format(name,r,t,n,d))
                 solution_rms_out.append([name,r,t,n,d])
-    print("Solution pod.rms results to compare against")
+    print("Solution pod.rms results to compare against [Name,R,T,N,3D]")
     print(solution_rms_out)
     
     test_pod_rms_log_location = runrms
@@ -80,7 +80,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
                 d = float(match.group(5))
                 #print("Name = {}, R = {}, T = {}, N = {}, 3D = {}".format(name,r,t,n,d))
                 test_rms_out.append([name,r,t,n,d])
-    print("Currnet run pod.rms results")
+    print("Currnet run pod.rms results [Name,R,T,N,3D]")
     print(test_rms_out)
     
     print("Compare magnitude different for pod.out results against solution benchmark")
@@ -88,6 +88,9 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
         mag_diff = math.sqrt((test[1] - solution[1])**2 + (test[2] - solution[2])**2 + (test[3] - solution[3])**2)
         if(mag_diff > errormargin):
             print("Difference of {} found for satellite {}".format(test[0],mag_diff))
+        else:
+            print("Within Error Margin, test passed")
+
         assert mag_diff < errormargin
 
     print("Compare difference for pod.rms results against solution benchmark")
@@ -99,6 +102,8 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
         
         if((r_diff > errormargin) or (t_diff > errormargin) or (n_diff > errormargin) or (d_diff > errormargin)):
             print("Difference of found in {} for  R = {}, T = {}, N = {}, 3D = {}".format(test_rms[0],r_diff,t_diff,n_diff,d_diff))
+        else:
+            print("Within Error Margin, test passed")
 
         assert r_diff < errormargin
         assert t_diff < errormargin
