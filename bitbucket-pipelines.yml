@@ -66,7 +66,7 @@ pipelines:
               - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c G >& pod_G.rms
               - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c R >& pod_R.rms
               - cp /root/pod/scripts/compare_pod_rms.py .
-              - python3 compare_pod_rms.py -sr pod_C.rms -rr pod_C.rms -so pod.out -ro pod.out -em 0.5
+              - python3 compare_pod_rms.py -sr pod_C.rms -rr pod_C.rms -so pod.out -ro pod.out --errormargin 0.5
         - step:
             name: Run Example 3
             script:
@@ -88,18 +88,10 @@ pipelines:
               - ln -s /data/acs/pod/tables/leap.second .              >& /dev/null
               - ln -s /data/acs/pod/tables/eopc04_14_IAU2000.62-now . >& /dev/null
               - ~/pod/bin/pod | tee pod.out
-              - ls
-              - df -h
               - python3 ~/pod/scripts/res_plot.py     -i gag20010_igs20010_orbdiff_rtn.out -d . -c G >& /dev/null
-              - ls
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20010_igs20010_orbdiff_rtn.out -d . -c G >& pod.rms
-              - ls
-              - cd solution
-              - ls
-              - cd ..
               - cp /root/pod/scripts/compare_pod_rms.py .
-              - python3 compare_pod_rms.py -em 0.5
-              - echo "complete"
+              - python3 compare_pod_rms.py --errormargin 0.5
         - step:
             name: Run Example 4
             script:
@@ -120,17 +112,8 @@ pipelines:
               - ln -s /data/acs/pod/tables/igs_metadata_2063.snx .    >& /dev/null
               - ln -s /data/acs/pod/tables/leap.second .              >& /dev/null
               - ln -s /data/acs/pod/tables/eopc04_IAU2000.62-now . >& /dev/null
-              - ~/pod/bin/pod -m 4 -q 2 -k 1 -w 0 -o igs20624.sp3 | tee pod.out
-              - ls
-              - df -h
+              - ~/pod/bin/pod -r eopc04_IAU2000.62-now | tee pod.out
               - python3 ~/pod/scripts/res_plot.py     -i gag20624_igs20624_orbdiff_rtn.out -d . -c G >& /dev/null
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624_igs20624_orbdiff_rtn.out -d . -c G >& pod.rms
-              - echo "complete"
               - cp /root/pod/scripts/compare_pod_rms.py .
-              - echo "complete"
-              - ls
-              - cd solution
-              - ls
-              - cd ..
-              - python3 compare_pod_rms.py -em 0.5
-              - echo "complete"
+              - python3 compare_pod_rms.py --errormargin 0.5
