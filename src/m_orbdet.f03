@@ -170,6 +170,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       REAL (KIND = prec_d) :: orbarc_back
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_back, veqSmatrix_back, veqPmatrix_back
       CHARACTER (LEN=100):: mesg
+      INTEGER (KIND = prec_int2) :: pseudobs_opt
 
 ! ----------------------------------------------------------------------
 ! Variable initialisation
@@ -214,13 +215,14 @@ End IF
 !CALL prm_ocean (EQMfname)												
 ! ----------------------------------------------------------------------
 ! Pseudo-Observations: Precise Orbit (sp3) 
-CALL prm_pseudobs (EQMfname)
+pseudobs_opt = 1
+CALL prm_pseudobs (EQMfname, pseudobs_opt)
 ! ----------------------------------------------------------------------
 ! External Orbit comparison: Precise Orbit (sp3)
 !CALL prm_orbext (EQMfname)												
 ! ----------------------------------------------------------------------
 ! Skip bad orbits with zero value in SP3 file
-CALL scan0orb
+!CALL scan0orb
 ! ----------------------------------------------------------------------
 ! Reference system of Variational Equations solution' matrices (Smatrix, Pmatrix)
 ! and orbit parameter estimation 
@@ -635,12 +637,13 @@ end if
 Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3) 
 !print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
+!print *,"Orbit residuals: ICRF in XYZ" 
+!WRITE (*,FMT='(A17, A4, 3F14.4)') "RMS-XYZ ICRF FIT", PRN, RMSdsr(1:3)
 
 ! Orbit residuals in orbital frame; statistics ! ICRF
-CALL statorbit (pseudobs_ICRF, orb_icrf_estim, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
-print *,"Orbit residuals: ICRF in orbital frame" 
-WRITE (*,FMT='(A17, A4, 3F14.4)') "RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
-
+!CALL statorbit (pseudobs_ICRF, orb_icrf_estim, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
+!print *,"Orbit residuals: ICRF in orbital frame" 
+!WRITE (*,FMT='(A17, A4, 3F14.4)') "RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
 ELSE 
 
 ! ----------------------------------------------------------------------
@@ -663,11 +666,13 @@ end if
 Vres = dorb_icrf(1:sz1,1:5)
 Vrms  = RMSdsr(1:3)
 !print *,"Orbit residuals opt (ICRF) RMS(XYZ)", RMSdsr(1:3)
+!print *,"Orbit residuals: ICRF in XYZ" 
+!WRITE (*,FMT='(A17, A4, 3F14.4)') "RMS-XYZ ICRF FIT", PRN, RMSdsr(1:3)
 
 ! Orbit residuals in orbital frame; statistics ! ICRF
-CALL statorbit (pseudobs_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
-print *,"Orbit residuals: ICRF in orbital frame" 
-WRITE (*,FMT='(A17, A4, 3F14.4)') "RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
+!CALL statorbit (pseudobs_ICRF, orb_icrf, dorb_icrf, dorb_RTN, dorb_Kepler, stat_XYZ, stat_RTN, stat_Kepler)
+!print *,"Orbit residuals: ICRF in orbital frame" 
+!WRITE (*,FMT='(A17, A4, 3F14.4)') "RMS-RTN ICRF FIT", PRN, stat_RTN(1, 1:3)
 ! ----------------------------------------------------------------------
 
 END IF
