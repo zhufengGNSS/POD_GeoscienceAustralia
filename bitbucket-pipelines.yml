@@ -59,15 +59,18 @@ pipelines:
               - python3 /root/pod/scripts/update_tables.py
               - ~/pod/bin/pod | tee pod.out
               - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c C >& /dev/null
-              - #python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c E >& /dev/null
-              - #python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c G >& /dev/null
-              - #python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c R >& /dev/null
+              - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c E >& /dev/null
+              - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c G >& /dev/null
+              - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c R >& /dev/null
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c C >& pod_C.rms
-              - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c E >& pod_E.rms
-              - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c G >& pod_G.rms
-              - #python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c R >& pod_R.rms
+              - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c E >& pod_E.rms
+              - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c G >& pod_G.rms
+              - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624__orbdiff_rtn.out -d . -c R >& pod_R.rms
               - cp /root/pod/scripts/compare_pod_rms.py .
               - python3 compare_pod_rms.py -sr pod_C.rms -rr pod_C.rms -so pod.out -ro pod.out --errormargin 0.5
+              - python3 compare_pod_rms.py -sr pod_E.rms -rr pod_E.rms -so pod.out -ro pod.out --errormargin 0.5
+              - python3 compare_pod_rms.py -sr pod_G.rms -rr pod_G.rms -so pod.out -ro pod.out --errormargin 0.5
+              - python3 compare_pod_rms.py -sr pod_R.rms -rr pod_R.rms -so pod.out -ro pod.out --errormargin 0.5
         - step:
             name: Run Example 3
             script:
