@@ -107,6 +107,11 @@ ALLOCATE (orb_out(Noutliers, Nelements), STAT = AllocateStatus)
 
 !print *,"Noutliers, Nepochs_1, Nepochs_0", Noutliers, Nepochs_1, Nepochs_0
 
+! Special case with no outliers
+IF (Noutliers == 0) THEN
+orb_1 = orb_0
+END IF
+
 ! ----------------------------------------------------------------------
 ! Orbit array after removing outliers
 ! ----------------------------------------------------------------------
