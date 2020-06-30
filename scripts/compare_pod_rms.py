@@ -17,7 +17,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
     # Get summary stats for each satellite from pod.out and solution/pod.out and save to a list 
     
     solution_pod_out_log_location = r"solution/" + solutionout
-    regex = 'RMS-XYZ ITRF CMP (G\d\d) +([0-9.0-9?]+) +([0-9.0-9?]+) +([0-9.0-9?]+)'
+    regex = 'RMS-XYZ ITRF CMP (\d\d\d) +([0-9.0-9?]+) +([0-9.0-9?]+) +([0-9.0-9?]+)'
     
     solution_pod_out = []
     with open(solution_pod_out_log_location, "r") as file:
@@ -32,7 +32,7 @@ def test(solutionrms, solutionout, runout, runrms, errormargin):
     print(solution_pod_out)
 
     test_pod_out_log_location = runout
-    regex = 'RMS-XYZ ITRF CMP (G\d\d) +([0-9.0-9?]+) +([0-9.0-9?]+) +([0-9.0-9?]+)'
+    regex = 'RMS-XYZ ITRF CMP (\d\d\d) +([0-9.0-9?]+) +([0-9.0-9?]+) +([0-9.0-9?]+)'
     
     test_pod_out = []
     with open(test_pod_out_log_location, "r") as file:
