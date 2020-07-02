@@ -168,10 +168,10 @@ End If
 ! Estimated Orbit or Predicted Orbit
 filename = "orb_icrf.out"
 !Call writearray (orb_icrf, filename)
-Call writeorbit (orb_icrf, filename)
+!Call writeorbit (orb_icrf, filename)
 filename = "orb_itrf.out"
 !Call writearray (orb_itrf, filename)
-Call writeorbit (orb_itrf, filename)
+!Call writeorbit (orb_itrf, filename)
 
 ! Variational Equations matrices
 If (ESTIM_mode_glb > 0) then
