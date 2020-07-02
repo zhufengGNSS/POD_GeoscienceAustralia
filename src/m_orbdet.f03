@@ -341,14 +341,14 @@ ELSE IF (VEQ_refsys == 2) THEN
 	Call orb_estimator(orb_itrf, veqSmatrix, veqPmatrix, pseudobs_ITRF, Xmatrix, Wmatrix, Amatrix)		
 END IF
 
-filename = "Amatrix.out"
+!filename = "Amatrix.out"
 !Call writearray (Amatrix, filename)
-filename = "Wmatrix.out"
+!filename = "Wmatrix.out"
 !Call writearray (Wmatrix, filename)
-filename = "pseudobs_ITRF.out"
-Call writearray (pseudobs_ITRF, filename)
-filename = "pseudobs_ICRF.out"
-Call writearray (pseudobs_ICRF, filename)
+!filename = "pseudobs_ITRF.out"
+!Call writearray (pseudobs_ITRF, filename)
+!filename = "pseudobs_ICRF.out"
+!Call writearray (pseudobs_ICRF, filename)
 ! ----------------------------------------------------------------------
   
 ! ----------------------------------------------------------------------
