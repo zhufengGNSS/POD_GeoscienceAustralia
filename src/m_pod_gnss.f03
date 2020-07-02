@@ -338,6 +338,8 @@ pseudobs_opt = 2
 CALL prm_pseudobs (EQMfname_PRN, pseudobs_opt)
 Zo = pseudobs_ITRF(1,3:8)
 print *,"IC: ", pseudobs_ITRF(1,:)
+Deallocate(pseudobs_ITRF, STAT = DeAllocateStatus)
+Deallocate(pseudobs_ICRF, STAT = DeAllocateStatus)
 
 ELSE IF (IC_MODE_cfg == 2) THEN
 ! Initial Conditions file option
