@@ -42,70 +42,70 @@ CALL time_cmdline
 IF (MJD_IN /= 0.D0) THEN
 ! Print MJD
         PRINT*,'MJD  ', MJD_IN
-        PRINT*,
+        PRINT*,''
 
 ! Compute calendar year
         jd0 = 2400000.5D0
         CALL iau_JD2CAL ( jd0, MJD_IN, YEAR_IN, MONTH_IN, DAY_IN, FD, J_flag )
         PRINT*,'YEAR-MONTH-DAY  ', YEAR_IN, MONTH_IN, DAY_IN
-        PRINT*,
+        PRINT*,''
 
 ! Compute day of year
         CALL iau_CAL2JD ( YEAR_IN, 1, 1, MJDD0, MJDref, J )
         DOY_IN = IDNINT(MJD_IN-MJDref) + 1
         PRINT*,'DOY  ', YEAR_IN, DOY_IN
-        PRINT*,
+        PRINT*,''
 
 ! Compute GPS week
         CALL time_GPSweek (MJD_IN , WEEK_IN, GPS_wsec, GPSweek_mod1024)
         WEEKDAY_IN = IDNINT(GPS_wsec/86400.D0)
         PRINT*,'GPSWEEKDAY  ', WEEK_IN, WEEKDAY_IN
-        PRINT*,
+        PRINT*,''
 
 ELSE IF (DOY_IN /= 0) THEN
 ! Compte MJD
         CALL iau_CAL2JD ( YEAR_IN, 1, 1, MJDD0, MJDref, J )
         MJD_IN = DOY_IN -1 + MJDref
         PRINT*,'MJD  ', MJD_IN
-        PRINT*,
+        PRINT*,''
 
 ! Compute calendar year
         jd0 = 2400000.5D0
         CALL iau_JD2CAL ( jd0, MJD_IN, YEAR_IN, MONTH_IN, DAY_IN, FD, J_flag )
         PRINT*,'YEAR-MONTH-DAY  ', YEAR_IN, MONTH_IN, DAY_IN
-        PRINT*,
+        PRINT*,''
 
 ! Print DOY
         PRINT*,'DOY  ', YEAR_IN, DOY_IN
-        PRINT*,
+        PRINT*,''
 
 ! Compute GPS week
         CALL time_GPSweek (MJD_IN , WEEK_IN, GPS_wsec, GPSweek_mod1024)
         WEEKDAY_IN = IDNINT(GPS_wsec/86400.D0)
         PRINT*,'GPSWEEKDAY  ', WEEK_IN, WEEKDAY_IN
-        PRINT*,
+        PRINT*,''
 
 ELSE IF (MONTH_IN /= 0) THEN
 ! Compute MJD
         CALL iau_CAL2JD ( YEAR_IN, MONTH_IN, DAY_IN, MJDD0, MJD_IN, J )
         PRINT*,'MJD  ', MJD_IN
-        PRINT*,
+        PRINT*,''
 
 ! Print canlendar year
         PRINT*,'YEAR-MONTH-DAY  ', YEAR_IN, MONTH_IN, DAY_IN
-        PRINT*,
+        PRINT*,''
  
 ! Compute day of year
         CALL iau_CAL2JD ( YEAR_IN, 1, 1, MJDD0, MJDref, J )
         DOY_IN = IDNINT(MJD_IN-MJDref) + 1
         PRINT*,'DOY  ', YEAR_IN, DOY_IN
-        PRINT*,
+        PRINT*,''
         
 ! Compute GPS week
         CALL time_GPSweek (MJD_IN , WEEK_IN, GPS_wsec, GPSweek_mod1024)
         WEEKDAY_IN = IDNINT(GPS_wsec/86400.D0)
         PRINT*,'GPSWEEKDAY  ', WEEK_IN, WEEKDAY_IN
-        PRINT*,
+        PRINT*,''
 
 ELSE IF (WEEK_IN /= 0) THEN
         delta_days = WEEKDAY_IN + WEEK_IN*7 
@@ -114,23 +114,23 @@ ELSE IF (WEEK_IN /= 0) THEN
 ! Compute MJD
         MJD_IN = delta_days + mjd_1980
         PRINT*,'MJD  ', MJD_IN
-        PRINT*,
+        PRINT*,''
 
 ! Compute calendar year
         jd0 = 2400000.5D0
         CALL iau_JD2CAL ( jd0, MJD_IN, YEAR_IN, MONTH_IN, DAY_IN, FD, J_flag )
         PRINT*,'YEAR-MONTH-DAY  ', YEAR_IN, MONTH_IN, DAY_IN
-        PRINT*,
+        PRINT*,''
 
 ! Compute day of year
         CALL iau_CAL2JD ( YEAR_IN, 1, 1, MJDD0, MJDref, J )
         DOY_IN = IDNINT(MJD_IN-MJDref) + 1
         PRINT*,'DOY  ', YEAR_IN, DOY_IN
-        PRINT*,
+        PRINT*,''
 
 ! Print GPSWEEK DAY
         PRINT*,'GPSWEEKDAY  ', WEEK_IN, WEEKDAY_IN
-        PRINT*,
+        PRINT*,''
 
 END IF
 
