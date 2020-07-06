@@ -169,6 +169,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  REAL (KIND = prec_d) :: dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS
       REAL (KIND = prec_d) :: t_sec     
 ! ----------------------------------------------------------------------
+      INTEGER (KIND = prec_int2) :: pseudobs_opt
 
 ! ----------------------------------------------------------------------
 ! Delete Planetary ephemeris written file DE.430
@@ -176,7 +177,6 @@ fname_write = 'DE.430'
 OPEN  (UNIT=7, FILE=fname_write)
 CLOSE (UNIT=7, STATUS="DELETE")
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Satellite Orbits :: common configuration :: Forces model
@@ -335,9 +335,12 @@ Call write_prmfile (VEQfname_PRN, fname_id, param_id, param_value)
 IF (IC_MODE_cfg == 1) THEN
 ! Interpolated Orbit: Read sp3 orbit data and apply Lagrange interpolation
 Call prm_main     (EQMfname_PRN)
-CALL prm_pseudobs (EQMfname_PRN)
+pseudobs_opt = 2
+CALL prm_pseudobs (EQMfname_PRN, pseudobs_opt)
 Zo = pseudobs_ITRF(1,3:8)
 print *,"IC: ", pseudobs_ITRF(1,:)
+Deallocate(pseudobs_ITRF, STAT = DeAllocateStatus)
+Deallocate(pseudobs_ICRF, STAT = DeAllocateStatus)
 
 ELSE IF (IC_MODE_cfg == 2) THEN
 ! Initial Conditions file option

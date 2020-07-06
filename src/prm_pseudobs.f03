@@ -1,4 +1,4 @@
-SUBROUTINE prm_pseudobs (PRMfname)
+SUBROUTINE prm_pseudobs (PRMfname, pseudobs_opt)
 
 
 ! ----------------------------------------------------------------------
@@ -27,7 +27,11 @@ SUBROUTINE prm_pseudobs (PRMfname)
 ! Author :	Dr. Thomas Papanikolaou, Cooperative Research Centre for Spatial Information, Australia
 ! Created:	11 April 2018
 ! ----------------------------------------------------------------------
-	  
+! Last modified:
+! 25 June 2020,	Dr. Thomas Papanikolaou
+!				1. Outliers detection for removing epochs with zero values of the pseudo-observations has been added 
+! 				2. Option has been added to the input arguments for applying or not the numerical interpolation to the pseudo-observations (a-priori orbit)
+! ----------------------------------------------------------------------	  
 	  
       USE mdl_precision
       USE mdl_num
@@ -39,6 +43,7 @@ SUBROUTINE prm_pseudobs (PRMfname)
       USE m_interporb
       USE m_orbT2C
       USE m_obsorbT2C
+      USE m_orb_outlier
       IMPLICIT NONE
 
 	  
@@ -47,6 +52,7 @@ SUBROUTINE prm_pseudobs (PRMfname)
 ! ----------------------------------------------------------------------
 ! IN
       CHARACTER (LEN=100), INTENT(IN) :: PRMfname				
+      INTEGER (KIND = prec_int2), INTENT(IN) :: pseudobs_opt
 ! OUT
 ! 
 ! ----------------------------------------------------------------------
@@ -88,6 +94,10 @@ SUBROUTINE prm_pseudobs (PRMfname)
 	  REAL (KIND = prec_d) :: mjd , mjd_TT, mjd_GPS, mjd_TAI, mjd_UTC
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: clock_matrix
+      INTEGER (KIND = prec_int8) :: Noutliers, Nobs, Nobs_all
+	  REAL (KIND = prec_d) :: outlier_value 
+      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: orbsp3
+      REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: orbsp3_filt, orb_out
 
   
 ! ----------------------------------------------------------------------
@@ -171,7 +181,8 @@ CLOSE (UNIT=UNIT_IN)
 ! ----------------------------------------------------------------------
 
 
-data_opt = 2
+!data_opt = 1
+data_opt = pseudobs_opt
 
 ! ----------------------------------------------------------------------
 ! Orbit (Position vector) obtained from from IGS sp3 data 
@@ -179,7 +190,30 @@ data_opt = 2
 if (data_opt == 1) Then
 
 ! Read IGS sp3 orbit data file 
-Call sp3 (fname_orb, PRN, pseudobs_ITRF, clock_matrix)
+!Call sp3 (fname_orb, PRN, pseudobs_ITRF, clock_matrix)
+Call sp3 (fname_orb, PRN, orbsp3, clock_matrix)
+
+! ----------------------------------------------------------------------
+! Pseudo-observations scanning : Outliers detection
+! Remove Epochs that include ccordinates with zero values
+! ----------------------------------------------------------------------
+Noutliers = 0
+outlier_value = 0.0D0
+CALL orb_outlier (orbsp3, outlier_value, Noutliers, orbsp3_filt, orb_out)
+
+sz1 = size(orbsp3, DIM = 1)
+sz2 = size(orbsp3, DIM = 2)
+Nobs_all = sz1
+Nobs = Nobs_all - Noutliers
+ALLOCATE (pseudobs_ITRF(Nobs,sz2), STAT = AllocateStatus)
+
+IF (Noutliers == 0) THEN
+! Case without outliers
+pseudobs_ITRF = orbsp3
+ELSE
+! Case with outliers
+pseudobs_ITRF = orbsp3_filt
+END IF
 
 ! Orbit transformation ITRF to ICRF
 time_sys = 'GPS'
