@@ -92,6 +92,9 @@ src/m_sp3.f03
 src/m_sp3_PRN.f03 
 src/m_lagrange.f03 
 src/m_interporb.f03 
+src/m_interporb_nom.f03
+src/m_interporb_filt.f03
+src/m_orb_outlier.f03
 src/m_eop_data.f03 
 src/m_keplerorb.f03 
 src/m_ecom_init.f03
@@ -265,9 +268,15 @@ src/yaw_angle.f90
 src/yaw_attitude.f90 
 src/yaw_bds.f90 
 src/yaw_gal.f90 
-src/yawdyn.f90 
+src/yaw_gal_iov.f03
+src/yaw_gal_foc.f03
+src/yawdyn.f90
 src/att_matrix.f03
 src/mat2quater.f03
+src/yaw_gal_foc_nom.f03
+src/yaw_pred.f03
+src/colinearity_angle.f03
+src/colinear_pred.f03
 )
 
 add_library(eop
