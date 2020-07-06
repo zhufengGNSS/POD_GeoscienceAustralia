@@ -1,4 +1,4 @@
-SUBROUTINE attitude (mjd, rsat, vsat, rSun, PRN_gnss, satblk, BDSorbtype, & 
+SUBROUTINE attitude (mjd, rsat, vsat, rSun, PRNsat, BLKsat, & 
                      eclipsf, beta, Mangle, Yangle, eBX_nom, eBX_ecl)
 
 ! ----------------------------------------------------------------------
@@ -15,7 +15,8 @@ SUBROUTINE attitude (mjd, rsat, vsat, rSun, PRN_gnss, satblk, BDSorbtype, &
 ! - rsat:			Satellite Position vector (m)   in inertial frame (ICRF)
 ! - vsat:			Satellite Velocity vector (m/s) in inertial frame (ICRF)
 ! - rSun:			Sun Position vector (m)   in inertial frame (ICRF)
-! - PRN_gnss:		GNSS PRN number (Constellation ID + Number) e.g. G03
+! - PRNsat:		GNSS PRN number (Constellation ID + Number) e.g. G03
+! - BLKsat:			GNSS satellites block type
 ! - satblk:			GPS (only) Satellite Block ID according to the numbering adopted 
 !					in eclips.f:     1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
 ! - BDSorbtype:		Beidou (only) satellite orbit type:  MEO, IGSO, GEO
@@ -75,9 +76,10 @@ SUBROUTINE attitude (mjd, rsat, vsat, rSun, PRN_gnss, satblk, BDSorbtype, &
       REAL (KIND = prec_d), INTENT(IN) :: mjd
       REAL (KIND = prec_d), INTENT(IN), DIMENSION(3) :: rsat, vsat
       REAL (KIND = prec_d), INTENT(IN), DIMENSION(3) :: rSun
-      CHARACTER (LEN=3) , INTENT(IN) :: PRN_gnss
-      INTEGER (KIND = 4), INTENT(IN) :: satblk
-      CHARACTER (LEN=5), INTENT(IN) :: BDSorbtype
+      CHARACTER (LEN=3) , INTENT(IN) :: PRNsat
+      CHARACTER (LEN=20), INTENT(IN) :: BLKsat
+!      INTEGER (KIND = 4) , INTENT(IN) :: satblk
+!      CHARACTER (LEN=5), INTENT(IN) :: BDSorbtype
 	  
 ! OUT
       INTEGER (KIND = 4), INTENT(OUT) :: eclipsf
@@ -119,6 +121,47 @@ SUBROUTINE attitude (mjd, rsat, vsat, rSun, PRN_gnss, satblk, BDSorbtype, &
 	  !REAL (KIND = prec_d) :: dphi_wup_nom, dphi_wup_ecl
 	  !REAL (KIND = prec_d) :: deg2rad_mult, rad2cycles_mult
 ! ----------------------------------------------------------------------
+      INTEGER (KIND = 4) :: satblk
+      CHARACTER (LEN=5)  :: BDSorbtype
+
+
+! ----------------------------------------------------------------------
+! GNSS Satellite Block Type
+! ----------------------------------------------------------------------
+! BLK_TYP :: Global variable in mdl_param
+! GPS case: Satellite Block ID:        1=I, 2=II, 3=IIA, IIR=(4, 5), IIF=6
+!BLKTYP = BLKsat
+
+satblk = 6
+IF(BLKsat=='GPS-I')			  THEN
+	satblk = 1
+ELSE IF(BLKsat=='GPS-II')	  THEN
+	satblk = 2
+ELSE IF(BLKsat=='GPS-IIA') 	  THEN
+	satblk = 3
+ELSE IF(BLKsat=='GPS-IIR')	  THEN
+	satblk = 4
+ELSE IF(BLKsat=='GPS-IIR-A')  THEN
+	satblk = 5
+ELSE IF(BLKsat=='GPS-IIR-B')  THEN
+	satblk = 5
+ELSE IF(BLKsat=='GPS-IIR-M')  THEN
+	satblk = 5
+ELSE IF(BLKsat=='GPS-IIF')    THEN
+	satblk = 6
+END IF
+! ----------------------------------------------------------------------
+! Beidou case: 'IGSO', 'MEO'
+! 1. BDSorbtype = 'IGSO'
+! 2. BDSorbtype = 'MEO'
+! 3. BDSorbtype = 'IGSO'
+BDSorbtype = 'MEO'
+IF(BLKsat=='BDS-2G'.or.BLKsat == 'BDS-3G')            BDSorbtype = 'GEO'  
+IF(BLKsat=='BDS-2I'.or.BLKsat == 'BDS-3I'.or.&
+   BLKsat=='BDS-3SI-SECM'.or.BLKsat =='BDS-3SI-CAST') BDSorbtype = 'IGSO' 
+IF(BLKsat=='BDS-2M'.or.BLKsat == 'BDS-3M'.or.&
+   BLKsat=='BDS-3M-SECM'.or.BLKsat =='BDS-3M-CAST')   BDSorbtype = 'MEO'
+! ----------------------------------------------------------------------
 
 
 ! ----------------------------------------------------------------------
@@ -157,7 +200,7 @@ r_sun_crs = rSun
 !yaw_mod = 'C'
 !yaw_mod = 'D'
 
-READ (PRN_gnss, FMT='(A1)' , IOSTAT=ios) GNSSid
+READ (PRNsat, FMT='(A1)' , IOSTAT=ios) GNSSid
 yaw_mod = GNSSid
 !print *,"yaw_mod", yaw_mod
 ! ----------------------------------------------------------------------
@@ -217,8 +260,8 @@ dparam = 258
 ! PRN_num:		PRN numbering as adopted in the sp3 format (Numerical value after the GNSS constellation id letter)
 ! ----------------------------------------------------------------------
 !fmt_line = '(A1,I2.2)'
-READ (PRN_gnss, FMT='(A1,I2.2)' , IOSTAT=ios) GNSSid, PRN_num
-!print *, "PRN_gnss", PRN_gnss
+READ (PRNsat, FMT='(A1,I2.2)' , IOSTAT=ios) GNSSid, PRN_num
+!print *, "PRNsat", PRNsat
 !print *, "GNSSid  ", GNSSid
 !print *, "PRN_num ", PRN_num
 
@@ -303,7 +346,8 @@ end if
 Else if (yaw_mod == 'E') Then
 
 ! Yaw-steering as provided by the European GNSS Service Centre 
-CALL yaw_gal (mjd_GPS, r_CRS, v_CRS, r_sun_crs, beta, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle, satbf)
+!CALL yaw_gal (mjd_GPS, r_CRS, v_CRS, r_sun_crs, beta, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle, satbf)
+CALL yaw_gal (mjd_GPS, r_CRS, v_CRS, r_sun_crs, beta, PRNsat, BLKsat, satbf, eclipsf, eBX_nom, eBX_ecl, Yangle, Mangle)
 !PRINT *,"Yangle", Yangle(1), Yangle(2)
 
 ! ----------------------------------------------------------------------	    
