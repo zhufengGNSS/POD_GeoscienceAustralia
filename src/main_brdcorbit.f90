@@ -169,7 +169,7 @@ CALL readbrdcmessg (UNIT_IN1,VERSION,MAXNSAT,MAXNPAR,MAXEPO,IYEAR4,MONTH,IDAY,IS
 
 CLOSE (UNIT=UNIT_IN1)
 PRINT*,'ALL SATELLITES HAVE BEEN RECORD !'
-PRINT*,
+PRINT*,''
 
 
 ! Create the reference epoch of the broadcast file
