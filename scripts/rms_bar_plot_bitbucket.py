@@ -43,7 +43,7 @@ outputdir = os.path.abspath(outputdir)
 # End of command line argument
 
 infile = open(inputfile, 'r')
-mat_1 = np.loadtxt(infile)
+mat_1 = np.loadtxt(infile,skiprows=1)
 year = time.strftime("%Y")
 doy  = time.strftime("%j")
 hr   = time.strftime("%H")
