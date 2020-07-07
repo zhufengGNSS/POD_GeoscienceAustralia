@@ -64,6 +64,7 @@ src/m_statorbit.f03
 src/m_statorbit2.f03 
 src/m_writearray.f03 
 src/m_writearray2.f03 
+src/m_write_orbres.f03
 src/m_orbresize.f03 
 src/m_orbext.f03 
 src/m_orbext2.f03 
