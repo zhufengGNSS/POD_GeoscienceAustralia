@@ -16,9 +16,6 @@ use mdl_config
         ! from module config
         gbl_debug = 0
 
-        ! from module config
-        gbl_debug = 0
-
         ! from module EOP
         EOP_MJD0_glb = 0.d0
 
