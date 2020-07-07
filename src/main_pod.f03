@@ -35,6 +35,7 @@
       USE m_writeorbit_multi
       USE m_writearray
       USE m_writearray2
+      USE m_write_orbres
       USE m_writeorbit
 	  USE m_write_orb2sp3
 	  USE m_clock_read
@@ -694,7 +695,7 @@ Call writearray (orbit_resN, filename)
 ! ----------------------------------------------------------------------
 ! Write combined orbit residuals file (RTN)
 write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbdiff_rtn.out'
-Call writearray2 (orbdiff2, filename)
+Call write_orbres (orbdiff2, filename)
 ! ----------------------------------------------------------------------
 
 
