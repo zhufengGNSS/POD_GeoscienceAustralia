@@ -42,6 +42,7 @@
 	  USE m_attitude_orb
 	  USE m_write_orbex	  
 	  USE m_satmetadata	  
+	  USE m_interpclocks	  
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -113,7 +114,7 @@
       CHARACTER (len=300) :: str
       INTEGER (KIND = prec_int2) :: j
       CHARACTER (len=9) :: POD_version
-      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: CLKmatrix 
+      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: CLKmatrix, CLKmatrix_initial 
       CHARACTER (LEN=300) :: CLKfname
       INTEGER (KIND = prec_int2) :: CLKformat
 ! ----------------------------------------------------------------------
@@ -635,7 +636,11 @@ ELSE
 CLKformat = 0
 CLKfname = ''
 END IF 
-CALL clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
+CALL clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix_initial)
+
+! Satellite clocks interpolation based on orbit integration step
+!CALL interp_clocks (ORBmatrix, CLKmatrix, PRNmatrix, CLKmatrix_int)
+CALL interp_clocks (orbits_partials_icrf, CLKmatrix_initial, PRNmatrix, CLKmatrix)
 ! ---------------------------------------------------------------------- 
 !print *,"CLKformat, CLKfname ",CLKformat,CLKfname
 
