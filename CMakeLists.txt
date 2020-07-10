@@ -109,6 +109,8 @@ src/m_orbitIC.f03
 src/m_attitude_orb.f03
 src/m_write_orbex.f03
 src/m_satmetadata.f03
+src/m_interpclocks.f03
+src/m_interpclock_nom.f03
 )
 
 add_library(iau_math
