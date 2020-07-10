@@ -21,7 +21,7 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
-              - python3 ../scripts/install_examples.py
+              - python3 ../scripts/download_examples.py
               - cd /data/acs/pod/examples/ex1
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
@@ -46,7 +46,7 @@ pipelines:
               - make >make.out 2>make.err
               - less make.err
               - mkdir -p /data/acs/pod/examples
-              - python3 ../scripts/install_examples.py
+              - python3 ../scripts/download_examples.py
               - cd /data/acs/pod/examples/ex2
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
@@ -81,7 +81,7 @@ pipelines:
               - make >make.out 2>make.err
               - less make.err
               - mkdir -p /data/acs/pod/examples
-              - python3 ../scripts/install_examples.py
+              - python3 ../scripts/download_examples.py
               - cd /data/acs/pod/examples/ex3
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
@@ -107,7 +107,7 @@ pipelines:
               - make >make.out 2>make.err
               - less make.err
               - mkdir -p /data/acs/pod/examples
-              - python3 ../scripts/install_examples.py
+              - python3 ../scripts/download_examples.py
               - cd /data/acs/pod/examples/ex4
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
