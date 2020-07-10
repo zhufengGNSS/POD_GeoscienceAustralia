@@ -15,14 +15,14 @@ pipelines:
             name: Run Example 1
             script:
               - ln -s /opt/atlassian/pipelines/agent/build /root/pod
-              - mkdir -p /data/acs/pod/examples
+              - mkdir -p /data/acs/pod
               - mkdir build
               - cd build
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
               - python3 ../scripts/download_examples.py
-              - cd /data/acs/pod/examples/ex1
+              - cd /data/acs/pod/ex1
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
               - ln -s /data/acs/pod/tables/fes2004_Cnm-Snm.dat .      >& /dev/null
@@ -45,9 +45,9 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
-              - mkdir -p /data/acs/pod/examples
+              - mkdir -p /data/acs/pod
               - python3 ../scripts/download_examples.py
-              - cd /data/acs/pod/examples/ex2
+              - cd /data/acs/pod/ex2
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
               - ln -s /data/acs/pod/tables/fes2004_Cnm-Snm.dat .      >& /dev/null
@@ -80,9 +80,9 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
-              - mkdir -p /data/acs/pod/examples
+              - mkdir -p /data/acs/pod
               - python3 ../scripts/download_examples.py
-              - cd /data/acs/pod/examples/ex3
+              - cd /data/acs/pod/ex3
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
               - ln -s /data/acs/pod/tables/fes2004_Cnm-Snm.dat .      >& /dev/null
@@ -106,9 +106,9 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
-              - mkdir -p /data/acs/pod/examples
+              - mkdir -p /data/acs/pod
               - python3 ../scripts/download_examples.py
-              - cd /data/acs/pod/examples/ex4
+              - cd /data/acs/pod/ex4
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
               - ln -s /data/acs/pod/tables/fes2004_Cnm-Snm.dat .      >& /dev/null
