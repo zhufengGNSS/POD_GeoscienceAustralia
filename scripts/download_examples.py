@@ -82,7 +82,7 @@ ex4DestSolDir = ex4DestDir + 'solution/'
 #
 # table files
 #
-tablesFiles = ('ascp1950.430','fes2004_Cnm-Snm.dat','goco05s.gfc','header.430_229','igs_metadata_2063.snx','leap.second','eopc04_14_IAU2000.62-now')
+tablesFiles = ('ascp1950.430','fes2004_Cnm-Snm.dat','goco05s.gfc','header.430_229','igs_metadata_2063.snx','leap.second','eopc04_14_IAU2000.62-now', 'eopc04_IAU2000.62-now')
 #
 # EX1 files
 #
