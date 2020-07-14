@@ -82,7 +82,7 @@ ex4DestSolDir = ex4DestDir + 'solution/'
 #
 # table files
 #
-tablesFiles = ('ascp1950.430','fes2004_Cnm-Snm.dat','goco05s.gfc','header.430_229','igs_metadata_2063.snx','leap.second','eopc04_14_IAU2000.62-now')
+tablesFiles = ('ascp1950.430','fes2004_Cnm-Snm.dat','goco05s.gfc','header.430_229','igs_metadata_2063.snx','leap.second','eopc04_14_IAU2000.62-now', 'eopc04_IAU2000.62-now')
 #
 # EX1 files
 #
@@ -96,7 +96,7 @@ ex2SolFiles = ('gag20624.sp3','gag20624__orbdiff_rtn.out','gag20624__orbitstat_N
 #
 # EX3 files
 #
-ex3Files = ('EQM.in','POD.in','VEQ.in','ex3.clean','igs20011.sp3','sh_ex3')
+ex3Files = ('EQM.in','POD.in','VEQ.in','ex3.clean','igs20010.sp3','igs20011.sp3','sh_ex3')
 ex3SolFiles = ('gag20010.obx','gag20010.sp3','gag20010_attitude.out','gag20010_igs20010_orbdiff_rtn.out','gag20010_igs20010_orbitstat_N.out','gag20010_igs20010_orbitstat_R.out','gag20010_igs20010_orbitstat_T.out','gag20010_orbits_partials.out','orb_icrf.out','orb_itrf.out','orbres_gag20010_igs20010.out_G.png','orbrms_gag20010_igs20010G.png','pod.out','pod.rms')
 #
 # EX4 files

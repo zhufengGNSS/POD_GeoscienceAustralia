@@ -15,9 +15,15 @@ run git lfs install
 
 ADD ./ /root/pod
 
-run mkdir /root/pod/build
+run mkdir /root/pod/run
 
-WORKDIR /root/pod/build
+WORKDIR /root/pod/run
 
-run cmake ..
-run make
+RUN ln -s /data/test/ascp1950.430 .
+RUN ln -s /data/test/fes2004_Cnm-Snm.dat . 
+RUN ln -s /data/test/goco05s.gfc .
+RUN ln -s /data/test/header.430_229 .
+RUN ln -s /data/test/igs_metadata_2063.snx .
+RUN ln -s /data/test/leap.second .
+RUN ln -s /data/test/eopc04_14_IAU2000.62-now .
+
