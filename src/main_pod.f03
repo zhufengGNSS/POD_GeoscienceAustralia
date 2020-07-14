@@ -636,7 +636,7 @@ ELSE
 CLKformat = 0
 CLKfname = ''
 END IF 
-CALL clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix_initial)
+CALL clock_read (CLKfname,CLKformat, PRNmatrix, orbits_partials_itrf, CLKmatrix_initial)
 
 ! Satellite clocks interpolation based on orbit integration step
 !CALL interp_clocks (ORBmatrix, CLKmatrix, PRNmatrix, CLKmatrix_int)
