@@ -20,7 +20,7 @@ MODULE m_clock_read
 Contains
 
 
-SUBROUTINE clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
+SUBROUTINE clock_read (CLKfname,CLKformat, PRNmatrix, ORB_matrix, CLKmatrix)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: clock_read
@@ -58,6 +58,7 @@ SUBROUTINE clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
       CHARACTER (LEN=300), INTENT(IN) :: CLKfname
       INTEGER (KIND = prec_int2), INTENT(IN) :: CLKformat
       CHARACTER (LEN=3), INTENT(IN), ALLOCATABLE :: PRNmatrix(:)
+      REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:,:), ALLOCATABLE :: ORB_matrix	  
 
 ! OUT
       REAL (KIND = prec_q), INTENT(OUT), DIMENSION(:,:,:), ALLOCATABLE :: CLKmatrix
@@ -66,7 +67,7 @@ SUBROUTINE clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
 ! ----------------------------------------------------------------------
 ! Local variables declaration
 ! ----------------------------------------------------------------------
-      INTEGER (KIND = prec_int8) :: Nsat, isat, Nepochs, Nel  
+      INTEGER (KIND = prec_int8) :: Nsat, isat, Nepochs, Nel, Nepochs_orb, i_epochs  
       CHARACTER (LEN=3) :: PRNid
       REAL (KIND = prec_q), DIMENSION(:,:), ALLOCATABLE :: orbsp3, clock_matrix
       INTEGER (KIND = prec_int2) :: AllocateStatus
@@ -77,8 +78,18 @@ SUBROUTINE clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
 Nsat = SIZE (PRNmatrix,DIM=1)
 
 IF (CLKformat == 0) THEN
-	ALLOCATE (CLKmatrix(1,1,1), STAT = AllocateStatus)
-	CLKmatrix = 0.0D0  
+	!CLKmatrix = 0.0D0  
+	! Set Clocks matrix' values to "999999.999999D0" and dimesnions follow the dimensions of Orbit matrix
+	Nepochs_orb = size(ORB_matrix, DIM = 1)
+	ALLOCATE (CLKmatrix(Nepochs_orb,4,Nsat), STAT = AllocateStatus)
+	DO isat = 1 , Nsat
+		DO i_epochs = 1 , Nepochs_orb
+			CLKmatrix (i_epochs,1,isat) = ORB_matrix (i_epochs,1,isat)
+			CLKmatrix (i_epochs,2,isat) = ORB_matrix (i_epochs,2,isat)
+			CLKmatrix (i_epochs,3,isat) = 999999.999999D0
+			CLKmatrix (i_epochs,4,isat) = 999999.999999D0
+		END DO
+	END DO
 ! ----------------------------------------------------------------------
 ELSE IF (CLKformat == 1) THEN	  
 	DO isat = 1 , Nsat
