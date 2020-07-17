@@ -26,7 +26,11 @@ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../lib")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin")
 file(GLOB_RECURSE sources src/*.f90 src/*.F90 src/*.f03 src/*.f src/*.for src/*.F)
 foreach (file ${sources})
-	execute_process(COMMAND /usr/bin/basename -z ${file} OUTPUT_VARIABLE srcfile)
+    if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin") 
+	  execute_process(COMMAND /usr/bin/basename    ${file} OUTPUT_VARIABLE srcfile)
+    else()
+      execute_process(COMMAND /usr/bin/basename -z ${file} OUTPUT_VARIABLE srcfile)
+    endif()
 	set_source_files_properties(src/${srcfile} PROPERTIES LANGUAGE Fortran)
 	#set_source_files_properties(src/${srcfile} PROPERTIES COMPILE_FLAGS "-O3 -frecursive")
 	#message("set src/${srcfile} to fortran compile")
@@ -75,6 +79,7 @@ src/m_statorbit.f03
 src/m_statorbit2.f03 
 src/m_writearray.f03 
 src/m_writearray2.f03 
+src/m_write_orbres.f03
 src/m_orbresize.f03 
 src/m_orbext.f03 
 src/m_orbext2.f03 
@@ -92,6 +97,9 @@ src/m_sp3.f03
 src/m_sp3_PRN.f03 
 src/m_lagrange.f03 
 src/m_interporb.f03 
+src/m_interporb_nom.f03
+src/m_interporb_filt.f03
+src/m_orb_outlier.f03
 src/m_eop_data.f03 
 src/m_keplerorb.f03 
 src/m_ecom_init.f03
@@ -101,6 +109,8 @@ src/m_orbitIC.f03
 src/m_attitude_orb.f03
 src/m_write_orbex.f03
 src/m_satmetadata.f03
+src/m_interpclocks.f03
+src/m_interpclock_nom.f03
 )
 
 add_library(iau_math
@@ -265,9 +275,15 @@ src/yaw_angle.f90
 src/yaw_attitude.f90 
 src/yaw_bds.f90 
 src/yaw_gal.f90 
-src/yawdyn.f90 
+src/yaw_gal_iov.f03
+src/yaw_gal_foc.f03
+src/yawdyn.f90
 src/att_matrix.f03
 src/mat2quater.f03
+src/yaw_gal_foc_nom.f03
+src/yaw_pred.f03
+src/colinearity_angle.f03
+src/colinear_pred.f03
 )
 
 add_library(eop
@@ -361,6 +377,12 @@ src/readbrdcmessg.f90
 src/main_brdcorbit.f90
 )
 
+add_executable(timesystem
+src/mdl_timeconfig.f03
+src/time_cmdline.f03
+src/main_time.f03
+)
+
 link_directories(/usr/lib64 ${CMAKE_BINARY_DIR}/lib)
 
 target_include_directories(pod PUBLIC
@@ -392,13 +414,16 @@ target_link_libraries(eclipse pod_lib)
 target_link_libraries(pod pod_lib rw_param pod_lib rel kepler yaw eclipse tides ga_tz rk force eop boxwing ga_math ga_gen iers iau_math ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 target_link_libraries(crs2trs pod_lib rw_param pod_lib ga_tz rk force eop boxwing ga_math ga_gen iers iau_math)
 target_link_libraries(brdc2ecef pod_lib rw_param pod_lib ga_tz rk force eop boxwing ga_math ga_gen iers iau_math)
+target_link_libraries(timesystem pod_lib rw_param pod_lib ga_tz rk force eop boxwing ga_math ga_gen iers iau_math)
 
 set_target_properties(pod PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties(crs2trs PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties(brdc2ecef PROPERTIES LINKER_LANGUAGE Fortran)
+set_target_properties(timesystem PROPERTIES LINKER_LANGUAGE Fortran)
 
 target_compile_definitions(pod PRIVATE LAPACK BLAS)
 target_compile_definitions(crs2trs PRIVATE)
 target_compile_definitions(brdc2ecef PRIVATE)
+target_compile_definitions(timesystem PRIVATE)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)

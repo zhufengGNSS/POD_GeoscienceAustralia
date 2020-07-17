@@ -94,14 +94,8 @@
  Earth_radiation 		  0
  Antenna_thrust 			  0
  
- ! Select estimable SRP models
- ! ECOM_param = 1 (ECOM1), forces estimated on D,Y,B directions
- ! ECOM_param = 2 (ECOM2), forces estimated on D,Y,B directions
- ! ECOM_param = 3 (SBOXW), forces estimated on D,Y,B,X,Z directions
- ! ECOM_param = 0, no parameters are estimated
  ---------------------------------------------------------------------------
  %% ECOM SRP parameters
- ECOM_param                                1                           
  ! Bias accelerations in D, Y and B directions
  bias_D                                    1
  bias_Y                                    1
@@ -113,7 +107,6 @@
  
  ---------------------------------------------------------------------------
  %% Empirical parameters
- EMP_param				  0
  ! Bias accelerations per radial, along-track and cross-track directions
  bias_r				  	  1
  bias_t				  	  1

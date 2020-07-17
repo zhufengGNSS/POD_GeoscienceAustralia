@@ -103,7 +103,8 @@ Param_CPR  = 0
 
 ! ----------------------------------------------------------------------
 ! Partial derivatives w.r.t. unknown parameters
-N_param = NPARAM_glb
+!N_param = NPARAM_glb
+N_param = EMPNUM
 If (N_param == 0) Then
 N_param = 1
 End If

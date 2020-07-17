@@ -35,12 +35,14 @@
       USE m_writeorbit_multi
       USE m_writearray
       USE m_writearray2
+      USE m_write_orbres
       USE m_writeorbit
 	  USE m_write_orb2sp3
 	  USE m_clock_read
 	  USE m_attitude_orb
 	  USE m_write_orbex	  
 	  USE m_satmetadata	  
+	  USE m_interpclocks	  
       IMPLICIT NONE
 	  
 ! ----------------------------------------------------------------------
@@ -112,7 +114,7 @@
       CHARACTER (len=300) :: str
       INTEGER (KIND = prec_int2) :: j
       CHARACTER (len=9) :: POD_version
-      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: CLKmatrix 
+      REAL (KIND = prec_q), DIMENSION(:,:,:), ALLOCATABLE :: CLKmatrix, CLKmatrix_initial 
       CHARACTER (LEN=300) :: CLKfname
       INTEGER (KIND = prec_int2) :: CLKformat
 ! ----------------------------------------------------------------------
@@ -384,6 +386,28 @@ IF (SRP_MOD_arp == 0) PRINT*,'no a priori SRP model'
 IF (SRP_MOD_arp == 1) PRINT*,'use cannonball f0 model as a priori SRP model'
 IF (SRP_MOD_arp == 2) PRINT*,'use simple box-wing model as a priori SRP model'
 IF (SRP_MOD_arp == 3) PRINT*,'use box-wing model from repro3 routines as a priori SRP model'
+
+! Estimable SRP models
+! ---------------------------------------------------------------------
+! ECOM_param = 1 (ECOM1), forces estimated in D,Y,B directions
+! ECOM_param = 2 (ECOM2), forces estimated in D,Y,B directions
+! ECOM_param = 3 (SBOXW), forces estimated in D,Y,B,X,Z directions
+! ECOM_param = 0, no parameters are estimated
+
+param_id = 'ECOM_param'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) ECOM_param_glb
+
+! Estimable EMP model
+! ---------------------------------------------------------------------
+! EMP_param = 1, forces estimated in radial,along-track and cross-track directions
+! EMP_param = 0, no parameters are estimated
+
+param_id = 'EMP_param'
+CALL readparam (PODfname, param_id, param_value)
+READ ( param_value, FMT = * , IOSTAT=ios_key ) EMP_param_glb
+
+
 ! ----------------------------------------------------------------------
 ! Reference System of Variational Equations' Partials & Parameter Estimation 
 ! ----------------------------------------------------------------------
@@ -612,7 +636,11 @@ ELSE
 CLKformat = 0
 CLKfname = ''
 END IF 
-CALL clock_read (CLKfname,CLKformat, PRNmatrix, CLKmatrix)
+CALL clock_read (CLKfname,CLKformat, PRNmatrix, orbits_partials_itrf, CLKmatrix_initial)
+
+! Satellite clocks interpolation based on orbit integration step
+!CALL interp_clocks (ORBmatrix, CLKmatrix, PRNmatrix, CLKmatrix_int)
+CALL interp_clocks (orbits_partials_icrf, CLKmatrix_initial, PRNmatrix, CLKmatrix)
 ! ---------------------------------------------------------------------- 
 !print *,"CLKformat, CLKfname ",CLKformat,CLKfname
 
@@ -672,7 +700,7 @@ Call writearray (orbit_resN, filename)
 ! ----------------------------------------------------------------------
 ! Write combined orbit residuals file (RTN)
 write (filename, FMT='(A3,I4,I1,a1,a,A16)') 'gag', (GPS_week), INT(GPS_day), '_', str(1:j) ,'_orbdiff_rtn.out'
-Call writearray2 (orbdiff2, filename)
+Call write_orbres (orbdiff2, filename)
 ! ----------------------------------------------------------------------
 
 

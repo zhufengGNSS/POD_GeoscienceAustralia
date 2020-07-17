@@ -74,7 +74,6 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  USE m_sp3_PRN
 	  USE m_write_orb2sp3
       USE m_orbitIC
-      USE mdl_config
       USE m_read_satsnx 
 	  
       IMPLICIT NONE
@@ -170,6 +169,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  REAL (KIND = prec_d) :: dt_TT_TAI, dt_TAI_UTC, dt_TAI_GPS
       REAL (KIND = prec_d) :: t_sec     
 ! ----------------------------------------------------------------------
+      INTEGER (KIND = prec_int2) :: pseudobs_opt
 
 ! ----------------------------------------------------------------------
 ! Delete Planetary ephemeris written file DE.430
@@ -177,7 +177,6 @@ fname_write = 'DE.430'
 OPEN  (UNIT=7, FILE=fname_write)
 CLOSE (UNIT=7, STATUS="DELETE")
 ! ----------------------------------------------------------------------
-
 
 ! ----------------------------------------------------------------------
 ! Satellite Orbits :: common configuration :: Forces model
@@ -281,12 +280,16 @@ CALL prm_ocean (EQMfname)
 !PRINT*,'NUMBER OF FORCE PARAMETERS =', NPARAM_glb
 write(mesg, *) "A priori SRP model = ",SRP_MOD_arp
 call report ('STATUS',pgrm_name,'',trim(mesg), '', 0)
-if      (ECOM_param_glb /= 0 .and.  EMP_param_glb == 0) then
-  write(mesg, *) "SRP model = ",ECOM_param_glb
-else if (ECOM_param_glb == 0 .and.  EMP_param_glb /= 0) then
+if      (ECOM_param_glb /= 0 .and. EMP_param_glb == 0) then
+  write(mesg, *) "SRP force model = ",ECOM_param_glb
+else if (ECOM_param_glb == 0 .and. EMP_param_glb /= 0) then
   write(mesg, *) "Empirical force model = ",EMP_param_glb
+else if (ECOM_param_glb == 0 .and. EMP_param_glb == 0) then
+  write(mesg, *) "WARNING: No SRP or Empirical force model estimated",EMP_param_glb,ECOM_param_glb
+else if (ECOM_param_glb /= 0 .and. EMP_param_glb /= 0) then
+  write(mesg, *) "Estimating EMP force model and ECOM SRP parameters estimated together: ",EMP_param_glb,ECOM_param_glb
 else
-  write(mesg, *) "Estimating EMP force model and ECOM SRP parameters not yet not supported: ",EMP_param_glb,ECOM_param_glb
+  write(mesg, *) "Estimating both EMP force model and ECOM SRP parameters not yet not supported: ",EMP_param_glb,ECOM_param_glb
   call report ('FATAL',pgrm_name,'pod_gnss',mesg, '/src/m_pod_gnss.f03', 1)
 endif
 call report ('STATUS',pgrm_name,'',mesg, ' ', 0)
@@ -332,9 +335,12 @@ Call write_prmfile (VEQfname_PRN, fname_id, param_id, param_value)
 IF (IC_MODE_cfg == 1) THEN
 ! Interpolated Orbit: Read sp3 orbit data and apply Lagrange interpolation
 Call prm_main     (EQMfname_PRN)
-CALL prm_pseudobs (EQMfname_PRN)
+pseudobs_opt = 2
+CALL prm_pseudobs (EQMfname_PRN, pseudobs_opt)
 Zo = pseudobs_ITRF(1,3:8)
 print *,"IC: ", pseudobs_ITRF(1,:)
+Deallocate(pseudobs_ITRF, STAT = DeAllocateStatus)
+Deallocate(pseudobs_ICRF, STAT = DeAllocateStatus)
 
 ELSE IF (IC_MODE_cfg == 2) THEN
 ! Initial Conditions file option
@@ -511,14 +517,22 @@ orbits_ics_icrf(3:8,isat) = SVEC_Zo
 !orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_aposteriori !*1.0D9
 IF (NPARAM_glb /= 0) THEN
 ! ECOM SRP parameters estimated
-  if ( ECOM_param_glb > 0 ) then
-    orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_glb  ! Correction : Write the ECOM parameters in all POD cases including orbit propagation without estimation (POD MODE cases: 3 & 4)
+  if ( ECOM_param_glb > 0 .and. EMP_param_glb == 0) then
+    orbits_ics_icrf(9:8+(ECOMNUM),isat) = ECOM_accel_glb
+!    orbits_ics_icrf(9:8+(NPARAM_glb),isat) = ECOM_accel_glb  ! Correction : Write the ECOM parameters in all POD cases including orbit propagation without estimation (POD MODE cases: 3 & 4)
 ! Empirical SRP parameters estimated
-  else if ( EMP_param_glb > 0 ) then
+  else if ( EMP_param_glb > 0 .and. ECOM_param_glb == 0) then
     orbits_ics_icrf(9:11,isat)  = Bias_accel_glb  ! Write the EMP bias parameters
     orbits_ics_icrf(12:13,isat) = CPR_CS_glb(1,:) ! Write the EMP Radial CS  parameters
     orbits_ics_icrf(14:15,isat) = CPR_CS_glb(2,:) ! Write the EMP Transverse CS parameters
     orbits_ics_icrf(16:17,isat) = CPR_CS_glb(3,:) ! Write the EMP Normal CS  parameters
+  else if (ECOM_param_glb > 0 .and. EMP_param_glb > 0) then
+    orbits_ics_icrf(9:11,isat)  = Bias_accel_glb  
+    orbits_ics_icrf(12:13,isat) = CPR_CS_glb(1,:) 
+    orbits_ics_icrf(14:15,isat) = CPR_CS_glb(2,:) 
+    orbits_ics_icrf(16:17,isat) = CPR_CS_glb(3,:)
+    orbits_ics_icrf(18:17+(ECOMNUM),isat) = ECOM_accel_glb
+
   end if
 END IF
 !write(*,fmt='(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))') PRN_isat,orbits_ics_icrf(:,isat)
