@@ -18,7 +18,7 @@ from argparse import ArgumentParser
 import time
 import numpy as np
 import matplotlib as mpl
-#mpl.use('Agg')
+mpl.use('Agg')
 #mpl.use('Gtk')
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
@@ -48,7 +48,7 @@ prn_list = args.p
 
 # End of command line argument
 infile = open(inputfile,'r')
-mat_1 = np.loadtxt(infile)
+mat_1 = np.loadtxt(infile,skiprows=1)
 prn = mat_1[:,1]
 year  = time.strftime("%Y")
 doy   = time.strftime("%j")

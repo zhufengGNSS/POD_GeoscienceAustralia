@@ -10,7 +10,7 @@
 ! 3. Orbit Integration (Equation of Motion only)
 ! 4. Orbit Integration and Partials (Equation of Motion and Variational Equations)
 ! ----------------------------------------------------------------------
-POD_MODE_cfg              1
+POD_MODE_cfg              4
 
 ! ----------------------------------------------------------------------
 %% Initial Conditions input mode
@@ -18,7 +18,7 @@ POD_MODE_cfg              1
 ! 1. Input a-priori orbit in sp3 format (applied as pseudo-observations)
 ! 2. Input file with Initial Conditions (State Vector and Parameters at initial epoch per satellite) 
 ! ----------------------------------------------------------------------
-IC_input                   1
+IC_input                  2 
 ! Initial Conditions Reference Frame: ITRF, ICRF
 IC_refsys                  ICRF		
 
@@ -42,7 +42,7 @@ orbit_determination_arc_cfg     26
 orbit_prediction_arc_cfg        12
 
 ! Orbit Propagation backwards arc
-orbit_backwards_arc_cfg          2
+orbit_backwards_arc_cfg         2 
 
 
 ! ---------------------------------------------------------------------------
@@ -73,11 +73,11 @@ iau_model_cfg             2000
 ---------------------------------------------------------------------------
 %% Observation Model                                                       
 ! External orbit as pseudo-observations                                                
-pseudobs_orbit_filename_cfg		  igs19920.sp3
+pseudobs_orbit_filename_cfg		  igs20624.sp3
  
 ---------------------------------------------------------------------------
 %% External Orbit Comparison  
-ext_orbit_filename_cfg		  	  igs19920.sp3					
+ext_orbit_filename_cfg		  	  igs20624.sp3					
 
 
 ---------------------------------------------------------------------------
@@ -115,6 +115,7 @@ partials_velocity_cfg	  	  0
 leapsec_filename_cfg        leap.second
 ! ----------------------------------------------------------------------
 
+
 ! ----------------------------------------------------------------------
 %% Satellite metadata SINEX
 satsinex_filename_cfg        igs_metadata_2063.snx
@@ -127,6 +128,23 @@ satsinex_filename_cfg        igs_metadata_2063.snx
 ! 3 : use box-wing model from repro3 routines 
 ! 0 : no a priori model  
 
-SRP_MOD_arp        1
+SRP_MOD_arp        0
+
 ! ----------------------------------------------------------------------
+
+%% Select estimable SRP models
+! ECOM_param = 1 (ECOM1), forces estimated in D,Y,B directions
+! ECOM_param = 2 (ECOM2), forces estimated in D,Y,B directions
+! ECOM_param = 3 (SBOXW), forces estimated in D,Y,B,X,Z directions
+! ECOM_param = 0, no parameters are estimated
+
+ECOM_param   1
+
+! ----------------------------------------------------------------------
+%% Estimable EMP model
+! ---------------------------------------------------------------------
+! EMP_param = 1, forces estimated in radial,along-track and cross-track directions
+! EMP_param = 0, no parameters are estimated
+
+EMP_param     0
 

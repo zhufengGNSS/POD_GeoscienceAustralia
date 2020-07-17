@@ -1,0 +1,29 @@
+from ubuntu:18.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+run apt-get update -y
+run apt-get -y install cmake curl git zip unzip bzip2 wget ftp vim
+run apt-get -y install build-essential
+run apt-get -y install libblas-dev liblapack-dev libboost-dev libatlas-base-dev
+run apt-get -y install gfortran
+run apt-get -y install libopenblas-dev
+run apt-get -y install python3 python3-numpy python3-matplotlib
+run curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh |  bash
+run apt-get -y install git-lfs
+run git lfs install
+
+ADD ./ /root/pod
+
+run mkdir /root/pod/run
+
+WORKDIR /root/pod/run
+
+RUN ln -s /data/test/ascp1950.430 .
+RUN ln -s /data/test/fes2004_Cnm-Snm.dat . 
+RUN ln -s /data/test/goco05s.gfc .
+RUN ln -s /data/test/header.430_229 .
+RUN ln -s /data/test/igs_metadata_2063.snx .
+RUN ln -s /data/test/leap.second .
+RUN ln -s /data/test/eopc04_14_IAU2000.62-now .
+
