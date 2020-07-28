@@ -390,6 +390,7 @@ IF (SRP_MOD_arp == 3) PRINT*,'use box-wing model from repro3 routines as a prior
 ! ---------------------------------------------------------------------
 ! ECOM_param = 1 (ECOM1), forces estimated in D,Y,B directions
 ! ECOM_param = 2 (ECOM2), forces estimated in D,Y,B directions
+! ECOM_param =12 (ECOM12), a hybrid ECOM1+ECOM2 model
 ! ECOM_param = 3 (SBOXW), forces estimated in D,Y,B,X,Z directions
 ! ECOM_param = 0, no parameters are estimated
 

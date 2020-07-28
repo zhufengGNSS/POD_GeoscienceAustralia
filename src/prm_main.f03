@@ -497,43 +497,63 @@ End	If
 ! --------------------------------------------------------------------
 ! Solar radiation pressure model
 ! -------------------------------------------------------------------
-If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
+If (ECOM_param_glb/=0 .and.ECOM_param_glb <= 2 .or. ECOM_param_glb == 12) Then
 ! Bias parameters
         If (ECOM_Bias_glb(1) == 1) Then
                 IECOM = IECOM + 1
-        ELSE
-                IECOM = IECOM
+!        ELSE
+!                IECOM = IECOM
         End If
         If (ECOM_Bias_glb(2) == 1) Then
                 IECOM = IECOM + 1
-        ELSE
-                IECOM = IECOM
+!        ELSE
+!                IECOM = IECOM
         End If
         If (ECOM_Bias_glb(3) == 1) Then
                 IECOM = IECOM + 1
-        ELSE
-                IECOM = IECOM
+!        ELSE
+!                IECOM = IECOM
         End If
 ! Cycle-per-revolution parameters
         IF (ECOM_CPR_glb(1) == 1) Then
                 IECOM = IECOM + 2
-        ELSE
-                IECOM = IECOM
+!        ELSE
+!                IECOM = IECOM
         End If
         IF (ECOM_CPR_glb(2) == 1) Then
                 IECOM = IECOM + 2
-        ELSE
-                IECOM = IECOM
+!        ELSE
+!                IECOM = IECOM
         End If
         IF (ECOM_CPR_glb(3) == 1) Then
                 IECOM = IECOM + 2
-        ELSE
-                IECOM = IECOM
+!        ELSE
+!                IECOM = IECOM
         End If
-ECOMNUM = IECOM
-NPARAM_glb = IECOM
-!print*,'ECOM_Bias_glb=',ECOM_Bias_glb, 'ECOM_CPR_glb=',ECOM_CPR_glb
-!print*,'NPARAM_glb=',NPARAM_glb
+        IF (ECOM_CPR_glb(4) == 1) Then
+                IECOM = IECOM + 2
+!        ELSE
+!                IECOM = IECOM
+        End If
+        IF (ECOM_CPR_glb(5) == 1) Then
+                IECOM = IECOM + 2
+!        ELSE
+!                IECOM = IECOM
+        End If
+
+        ECOMNUM = IECOM
+        NPARAM_glb = IECOM
+
+        IF (ECOM_param_glb<=2.AND.ECOMNUM>9)THEN
+        PRINT*,'PLEASE CHECK THE PARAMETERIZATIONS OF THE SELECTED SRP MODEL'
+        PRINT*,'ECOM SRP MODEL INDEX =', ECOM_param_glb
+        PRINT*,'ECOM1=1, ECOM2=2'
+        PRINT*,'ECOM1:D0,Y0,B0,DC,DS,YC,YS,BC,BS'
+        PRINT*,'ECOM2:D0,Y0,B0,BC,BS,D2C,D2S,D4C,D4S'
+        PRINT*,'PROGRAM:prm_main.f03'
+        STOP
+        END IF
+
 ELSEIF (ECOM_param_glb == 3) THEN
 
         ECOMNUM = 7

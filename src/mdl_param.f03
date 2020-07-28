@@ -139,7 +139,7 @@ INTEGER (KIND = prec_int2) :: FMOD_NONGRAV(3)
 ! ----------------------------------------------------------------------
 INTEGER (KIND = prec_int8) :: ECOMNUM
 INTEGER (KIND = prec_int2) :: ECOM_Bias_glb(3)
-INTEGER (KIND = prec_int2) :: ECOM_CPR_glb(3)
+INTEGER (KIND = prec_int2) :: ECOM_CPR_glb(5)
 !REAL (KIND = prec_q) :: ECOM_accel_glb(9)
 !REAL (KIND = prec_q) :: ECOM_accel_aposteriori(9)
 REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_glb

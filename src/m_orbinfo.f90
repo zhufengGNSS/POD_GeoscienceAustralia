@@ -365,48 +365,8 @@ sclfa=(AU/Ds)**2
 
       end if
 
-IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
-! Bias partial derivatives matrix allocation
-   PD_Param_ID = 0
-   If (ECOM_Bias_glb(1) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-   End IF
-   If (ECOM_Bias_glb(2) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-   End IF
-   If (ECOM_Bias_glb(3) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-   End IF
-
-! CPR partial derivatives matrix allocation
-
-   If (ECOM_CPR_glb(1) == 1) THEN
-        PD_Param_ID = PD_Param_ID + 2
-   End IF
-   If (ECOM_CPR_glb(2) == 1) THEN
-        PD_Param_ID = PD_Param_ID + 2
-   End IF
-   If (ECOM_CPR_glb(3) == 1) THEN
-        PD_Param_ID = PD_Param_ID + 2
-   End If
-
-   IF (ECOMNUM /= PD_Param_ID) THEN
-   PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-   PRINT*,           'ECOMNUM  =', ECOMNUM
-   PRINT*,           'PD_Param_ID =', PD_Param_ID
-   PRINT*, 'PROGRAM STOP AT m_orbinfo.f90'
-   STOP
-   END IF
-
-
-ELSE IF(ECOM_param_glb == 3) THEN
-!   PD_Param_ID = NPARAM_glb
-    PD_Param_ID = ECOMNUM
-END IF
 
 ALLOCATE (srpcoef(ECOMNUM), STAT = AllocateStatus)
-!ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
-!ALLOCATE (srpcoef(PD_Param_ID), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
         write(mesg, *) "Not enough memory - failed to allocate srpceof, dimension =", PD_Param_ID
         call report('FATAL', pgrm_name, 'orbinfo', mesg, 'src/m_orbinfo.f90', 1)
@@ -414,11 +374,9 @@ endif
 
 srpcoef = 0.d0
 
-! ECOM1 model
-! ***********************************************************************
-      IF (ECOM_param_glb == 1 ) then
-      PD_Param_ID = 0
-If (ECOM_Bias_glb(1) == 1) Then
+IF (ECOM_param_glb/=0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
+        PD_Param_ID = 0
+        If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
@@ -427,30 +385,30 @@ If (ECOM_Bias_glb(1) == 1) Then
         END DO
 !print*,'ECOM1-caused accelerations'
 !print*,'D0'
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(2) == 1) Then
+!        Else
+!        PD_Param_ID = PD_Param_ID
+        End IF
+        If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)*alpha
         END DO
 !print*,'Y0'
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(3) == 1) Then
+!        Else
+!        PD_Param_ID = PD_Param_ID
+        End IF
+        If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)*alpha
         END DO
 !print*,'B0'
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(1) == 1) THEN
+!        Else
+!        PD_Param_ID = PD_Param_ID
+        End IF
+        If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
@@ -465,10 +423,10 @@ If (ECOM_CPR_glb(1) == 1) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ed(i)*alpha
         END DO
 !print*,'DS'
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(2) == 1) THEN
+!        Else
+!        PD_Param_ID = PD_Param_ID
+        End IF
+        If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
@@ -483,10 +441,10 @@ If (ECOM_CPR_glb(2) == 1) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ey(i)*alpha
         END DO
 !print*,'YS'
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(3) == 1) THEN
+!        Else
+!        PD_Param_ID = PD_Param_ID
+        End IF
+        If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
@@ -501,43 +459,11 @@ If (ECOM_CPR_glb(3) == 1) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)*alpha
         END DO
 !print*,'BS'
-Else
-        PD_Param_ID = PD_Param_ID
-End If
+!        Else
+!        PD_Param_ID = PD_Param_ID
+        End If
 
-! ECOM2 model
-! **********************************************************************
-     ELSE IF (ECOM_param_glb == 2 ) then
-      PD_Param_ID = 0
-If (ECOM_Bias_glb(1) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
-        IF (lambda .lt. 1) srpcoef(PD_Param_ID) = lambda*srpcoef(PD_Param_ID)
-        DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ed(i)*alpha
-        END DO
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(2) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
-        DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)*alpha
-        END DO
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(3) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
-        DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)*alpha
-        END DO
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(1) == 1) THEN
+        If (ECOM_CPR_glb(4) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
@@ -550,10 +476,10 @@ If (ECOM_CPR_glb(1) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(2*del_u)*ed(i)*alpha
         END DO
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(2) == 1) THEN
+!        Else
+!        PD_Param_ID = PD_Param_ID
+        End IF
+        If (ECOM_CPR_glb(5) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
@@ -566,28 +492,20 @@ If (ECOM_CPR_glb(2) == 1) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(4*del_u)*ed(i)*alpha
         END DO
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(3) == 1) THEN
-! C term
-        PD_Param_ID = PD_Param_ID + 1
-        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
-        DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DCOS(del_u)*eb(i)*alpha
-        END DO
-! S term
-        PD_Param_ID = PD_Param_ID + 1
-        srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
-        DO i=1,3
-        fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)*alpha
-        END DO
-Else
-        PD_Param_ID = PD_Param_ID
-End If
-! SIMPLE BOX WING
-! *******************************************************************
-      ELSE IF (ECOM_param_glb == 3 ) THEN
+!        Else
+!        PD_Param_ID = PD_Param_ID
+        End IF
+
+        IF (ECOMNUM /= PD_Param_ID) THEN
+        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+        PRINT*,           'ECOMNUM  =', ECOMNUM
+        PRINT*,           'PD_Param_ID =', PD_Param_ID
+        PRINT*, 'PROGRAM STOP AT m_orbinfo.f90'
+        STOP
+        END IF
+
+
+ELSE IF (ECOM_param_glb == 3 ) THEN
       DO PD_Param_ID = 1, 7
          IF (PD_Param_ID == 1) THEN
          srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
@@ -629,7 +547,16 @@ End If
          END DO
          END IF
       END DO
-      END IF
+
+        IF (ECOMNUM /= PD_Param_ID) THEN
+        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+        PRINT*,           'ECOMNUM  =', ECOMNUM
+        PRINT*,           'PD_Param_ID =', PD_Param_ID
+        PRINT*, 'PROGRAM STOP AT m_orbinfo.f90'
+        STOP
+        END IF
+
+END IF
 
      fx=-fsrp(1)
      fy=-fsrp(2)
