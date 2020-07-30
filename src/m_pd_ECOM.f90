@@ -348,8 +348,6 @@ IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)*alpha
 !print*,'D0=',PD_Param_ID
-        Else
-        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -357,8 +355,6 @@ IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ey(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ey(3)*alpha
 !print*,'Y0=',PD_Param_ID
-        Else
-        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -366,8 +362,6 @@ IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*eb(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*eb(3)*alpha
 !print*,'B0=',PD_Param_ID
-        Else
-        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
@@ -382,8 +376,6 @@ IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(3)*alpha
 !print*,'DS=',PD_Param_ID
-        Else
-        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
@@ -398,8 +390,6 @@ IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(3)*alpha
 !print*,'YS=',PD_Param_ID
-        Else
-        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
@@ -414,8 +404,6 @@ IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         Asrp(2,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(2)*alpha
         Asrp(3,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(3)*alpha
 !print*,'BS=',PD_Param_ID
-        Else
-        PD_Param_ID = PD_Param_ID
         End If
 
         If (ECOM_CPR_glb(4) == 1) THEN
@@ -429,8 +417,6 @@ IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         Asrp (1,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(1)*alpha
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(3)*alpha
-        Else
-        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_CPR_glb(5) == 1) THEN
 ! C term
@@ -443,8 +429,6 @@ IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         Asrp (1,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(1)*alpha
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(3)*alpha
-        Else
-        PD_Param_ID = PD_Param_ID
         End IF
 
         IF (ECOMNUM /= PD_Param_ID) THEN

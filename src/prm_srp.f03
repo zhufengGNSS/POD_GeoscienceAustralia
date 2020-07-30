@@ -203,69 +203,62 @@ IF (ECOM_param_glb/=0 .and.ECOM_param_glb <= 2 .or. ECOM_param_glb == 12) THEN
     PD_Param_ID = 0
     If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-   ! ELSE
-   !     PD_Param_ID = PD_Param_ID
     End IF
     If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-   ! ELSE
-   !     PD_Param_ID = PD_Param_ID
     End IF
     If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
-    !ELSE
-    !    PD_Param_ID = PD_Param_ID
     End IF
     If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-    !ELSE
-    !    PD_Param_ID = PD_Param_ID
     End IF
     If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-    !ELSE
-    !    PD_Param_ID = PD_Param_ID
     End IF
     If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-    !ELSE
-    !    PD_Param_ID = PD_Param_ID
     End IF
     If (ECOM_CPR_glb(4) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-    !ELSE
-    !    PD_Param_ID = PD_Param_ID
     End IF
     If (ECOM_CPR_glb(5) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
 ! S term
         PD_Param_ID = PD_Param_ID + 1
-    !ELSE
-    !    PD_Param_ID = PD_Param_ID
     End IF
 
 END IF
 
 IF (ECOM_param_glb == 3) PD_Param_ID = 7
 
-PRINT*,'Reading config,  PD_Param_ID =', PD_Param_ID
+!PRINT*,'Reading config,  PD_Param_ID =', PD_Param_ID
 
 ALLOCATE (ECOM_accel_glb(PD_Param_ID), STAT = AllocateStatus)
+
+IF(ECOM_param_glb==0)THEN
+
+RETURN
+
+ELSE
+
 ALLOCATE (SRP_PARA(PD_Param_ID), STAT = AllocateStatus)
 SRP_PARA = 0.d0
+
+END IF
 
 ! ----------------------------------------------------------------------
 ! Open .in file if ECOM activated
@@ -306,24 +299,18 @@ IF (ECOM_param_glb > 0 ) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'D0=',PD_Param_ID
-      Else
-        PD_Param_ID = PD_Param_ID
       End IF
 
       If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'Y0=',PD_Param_ID
-      Else
-        PD_Param_ID = PD_Param_ID
       End IF
 
       If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'B0=',PD_Param_ID
-      Else
-        PD_Param_ID = PD_Param_ID
       End IF
 
       If (ECOM_CPR_glb(1) == 1) THEN
@@ -335,8 +322,6 @@ IF (ECOM_param_glb > 0 ) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'DS=',PD_Param_ID
-      Else
-        PD_Param_ID = PD_Param_ID
       End IF
 
       If (ECOM_CPR_glb(2) == 1) THEN
@@ -348,8 +333,6 @@ IF (ECOM_param_glb > 0 ) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'YS=',PD_Param_ID
-      Else
-        PD_Param_ID = PD_Param_ID
       End IF
 
       If (ECOM_CPR_glb(3) == 1) THEN
@@ -361,8 +344,6 @@ IF (ECOM_param_glb > 0 ) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'BS=',PD_Param_ID
-      Else
-        PD_Param_ID = PD_Param_ID
       End If
 
       If (ECOM_CPR_glb(4) == 1) THEN
@@ -374,8 +355,6 @@ IF (ECOM_param_glb > 0 ) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'D2S=',PD_Param_ID
-      Else
-        PD_Param_ID = PD_Param_ID
       End If
 
       If (ECOM_CPR_glb(5) == 1) THEN
@@ -387,8 +366,6 @@ IF (ECOM_param_glb > 0 ) THEN
         PD_Param_ID = PD_Param_ID + 1
         ECOM_accel_glb(PD_Param_ID) = SRP_PARA(PD_Param_ID)
 !print*,'D4S=',PD_Param_ID
-      Else
-        PD_Param_ID = PD_Param_ID
       End If
 
 

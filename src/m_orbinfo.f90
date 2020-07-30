@@ -385,8 +385,6 @@ IF (ECOM_param_glb/=0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         END DO
 !print*,'ECOM1-caused accelerations'
 !print*,'D0'
-!        Else
-!        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -395,8 +393,6 @@ IF (ECOM_param_glb/=0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*ey(i)*alpha
         END DO
 !print*,'Y0'
-!        Else
-!        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -405,8 +401,6 @@ IF (ECOM_param_glb/=0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*eb(i)*alpha
         END DO
 !print*,'B0'
-!        Else
-!        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
@@ -423,8 +417,6 @@ IF (ECOM_param_glb/=0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ed(i)*alpha
         END DO
 !print*,'DS'
-!        Else
-!        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
@@ -441,8 +433,6 @@ IF (ECOM_param_glb/=0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*ey(i)*alpha
         END DO
 !print*,'YS'
-!        Else
-!        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
@@ -459,8 +449,6 @@ IF (ECOM_param_glb/=0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(del_u)*eb(i)*alpha
         END DO
 !print*,'BS'
-!        Else
-!        PD_Param_ID = PD_Param_ID
         End If
 
         If (ECOM_CPR_glb(4) == 1) THEN
@@ -476,8 +464,6 @@ IF (ECOM_param_glb/=0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(2*del_u)*ed(i)*alpha
         END DO
-!        Else
-!        PD_Param_ID = PD_Param_ID
         End IF
         If (ECOM_CPR_glb(5) == 1) THEN
 ! C term
@@ -492,8 +478,6 @@ IF (ECOM_param_glb/=0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         DO i=1,3
         fsrp(i) = fsrp(i) + srpcoef(PD_Param_ID)*sclfa*DSIN(4*del_u)*ed(i)*alpha
         END DO
-!        Else
-!        PD_Param_ID = PD_Param_ID
         End IF
 
         IF (ECOMNUM /= PD_Param_ID) THEN
@@ -547,14 +531,6 @@ ELSE IF (ECOM_param_glb == 3 ) THEN
          END DO
          END IF
       END DO
-
-        IF (ECOMNUM /= PD_Param_ID) THEN
-        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-        PRINT*,           'ECOMNUM  =', ECOMNUM
-        PRINT*,           'PD_Param_ID =', PD_Param_ID
-        PRINT*, 'PROGRAM STOP AT m_orbinfo.f90'
-        STOP
-        END IF
 
 END IF
 

@@ -358,55 +358,6 @@ END IF
 
       end if
 
-      
-!     IF (ECOM_param_glb /= 0) THEN 
-!IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
-! Bias partial derivatives matrix allocation
-!    PD_Param_ID = 0
-!    If (ECOM_Bias_glb(1) == 1) Then
-!        PD_Param_ID = PD_Param_ID + 1
-!    End IF
-!    If (ECOM_Bias_glb(2) == 1) Then
-!        PD_Param_ID = PD_Param_ID + 1
-!    End IF
-!    If (ECOM_Bias_glb(3) == 1) Then
-!        PD_Param_ID = PD_Param_ID + 1
-!    End IF
-
-! CPR partial derivatives matrix allocation
-
-!    If (ECOM_CPR_glb(1) == 1) THEN
-!        PD_Param_ID = PD_Param_ID + 2
-!    End IF
-!    If (ECOM_CPR_glb(2) == 1) THEN
-!        PD_Param_ID = PD_Param_ID + 2
-!    End IF
-!    If (ECOM_CPR_glb(3) == 1) THEN
-!        PD_Param_ID = PD_Param_ID + 2
-!    End If
-
-
-!    IF (ECOMNUM /= PD_Param_ID) THEN
-!    PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-!    PRINT*,           'ECOMNUM     =', ECOMNUM
-!    PRINT*,           'PD_Param_ID =', PD_Param_ID
-!    PRINT*,'PROGRAM STOP AT force_srp.f90'
-!    STOP
-!    END IF
-
-!ELSE IF (ECOM_param_glb == 3) THEN
-!    PD_Param_ID = 7
-
-!   IF (ECOMNUM /= PD_Param_ID) THEN
-!   PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-!   PRINT*,           'ECOMNUM     =', ECOMNUM
-!   PRINT*,           'PD_Param_ID =', PD_Param_ID
-!   PRINT*,'PROGRAM STOP AT force_srp.f90'
-!   STOP
-!   END IF
-
-!END IF
-
 
 ALLOCATE (srpcoef(ECOMNUM), STAT = AllocateStatus)
 if (AllocateStatus .ne. 0) then
@@ -541,14 +492,6 @@ IF (ECOM_param_glb /= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb ==12) then
 ! *******************************************************************
 ELSE IF (ECOM_param_glb == 3) THEN
         
-        IF (ECOMNUM /= PD_Param_ID) THEN
-        PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-        PRINT*,           'ECOMNUM     =', ECOMNUM
-        PRINT*,           'PD_Param_ID =', PD_Param_ID
-        PRINT*,'PROGRAM STOP AT force_srp.f90'
-        STOP
-        END IF
-
       DO PD_Param_ID = 1, 7
          IF (PD_Param_ID == 1) THEN
          srpcoef (PD_Param_ID) = ECOM_accel_glb(PD_Param_ID)
@@ -590,6 +533,7 @@ ELSE IF (ECOM_param_glb == 3) THEN
          END DO
          END IF
       END DO
+
 END IF 
 
 

@@ -297,15 +297,19 @@ DO i_sat = 1 , Nsat
    IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 0) THEN
      IF      (ECOM_param_glb == 1) THEN
        srp_model = 'ECOM1  '
-       ic_param_list =  'X Y Z XV YV ZV DR YR BR C1DR S1DR C1YR S1YR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV D0 Y0 B0 DC DS YC YS BC BS'
        
      ELSE IF (ECOM_param_glb == 2) THEN
        srp_model = 'ECOM2  '   
-       ic_param_list =  'X Y Z XV YV ZV DR YR BR C2DR S2DR C4DR S4DR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV D0 Y0 B0 BC BS D2C D2S D4C D4S'
+
+     ELSE IF (ECOM_param_glb == 12) THEN
+       srp_model = 'ECOM12  '
+       ic_param_list =  'X Y Z XV YV ZV D0 Y0 B0 DC DS YC YS BC BS D2C D2S D4C D4S'
        
      ELSE IF (ECOM_param_glb == 3) THEN
        srp_model = 'SBOXW  '
-       ic_param_list =  'X Y Z XV YV ZV DXR DZR DSPR YR BR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV DX DZ DSP Y0 B0 BC BS'
      END IF
    END IF
       
@@ -319,13 +323,16 @@ DO i_sat = 1 , Nsat
    IF (ECOM_param_glb /= 0 .AND. EMP_param_glb /= 0) THEN
       srp_model = 'ECOM + EMPRCL'
       IF      (ECOM_param_glb == 1) THEN
-       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DR YR BR C1DR S1DR C1YR S1YR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N D0 Y0 B0 DC DS YC YS BC BS'
 
      ELSE IF (ECOM_param_glb == 2) THEN
-       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DR YR BR C2DR S2DR C4DR S4DR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N D0 Y0 B0 BC BS D2C D2S D4C D4S'
+
+     ELSE IF (ECOM_param_glb == 12) THEN
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N D0 Y0 B0 DC DS YC YS BC BS D2C D2S D4C D4S'
 
      ELSE IF (ECOM_param_glb == 3) THEN
-       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DXR DZR DSPR YR BR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DX DZ DSPR Y0 B0 BC BS'
      END IF
 
    END IF
