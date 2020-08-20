@@ -92,10 +92,14 @@ Bash shell example:
 
 To test your build of the  `POD` ...
 
-    $ cd ~/pod/test
-    $ sh_test_pod
+    $ cd ~/pod
+    $python ./scripts/download_tables.py
+    $python ./scripts/download_examples.py -p ./examples
+    $cd examples/ex1
+    $chmod oug+x sh_ex1
+    $sh_ex1
 
-At the completion of the test run, the sh_test_pod script will return any differences to the standard test resuts
+At the completion of the test run, the sh_ex1 script will return any differences to the standard test resuts
 
 
 62 directories, 1135 files
