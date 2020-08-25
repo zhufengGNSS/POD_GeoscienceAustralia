@@ -347,6 +347,7 @@ IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ed(1)*alpha
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)*alpha
+        IF (lambda .lt. 1) Asrp(1:3,PD_Param_ID) = lambda*Asrp(1:3,PD_Param_ID)
 !print*,'D0=',PD_Param_ID
         End IF
         If (ECOM_Bias_glb(2) == 1) Then
@@ -447,14 +448,17 @@ ELSE IF (ECOM_param_glb == 3) THEN
            DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*ex(i)
            END DO
+           IF (lambda .lt. 1) Asrp(1:3,PD_Param_ID) = lambda*Asrp(1:3,PD_Param_ID)
         ELSE IF (PD_Param_ID == 2) THEN
            DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*ez(i)
            END DO
+           IF (lambda .lt. 1) Asrp(1:3,PD_Param_ID) = lambda*Asrp(1:3,PD_Param_ID)
         ELSE IF (PD_Param_ID == 3) THEN
            DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*ed(i)
            END DO
+           IF (lambda .lt. 1) Asrp(1:3,PD_Param_ID) = lambda*Asrp(1:3,PD_Param_ID)
         ELSE IF (PD_Param_ID == 4) THEN
            DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*ey(i)
@@ -477,14 +481,14 @@ END IF
 ! ==================================================================
 ! use the shadow coefficient for scaling the SRP effect
 !-------------------------------------------------------
-IF (lambda .lt. 1) THEN
-   IF(ECOM_param_glb/=0 .and.ECOM_param_glb <= 2 .or. ECOM_param_glb == 12) Asrp(1:3,1) = lambda*Asrp(1:3,1)
-   IF(ECOM_param_glb == 3) THEN
-   Asrp(1:3,1) = lambda*Asrp(1:3,1)
-   Asrp(1:3,2) = lambda*Asrp(1:3,2)
-   Asrp(1:3,3) = lambda*Asrp(1:3,3)
-   END IF
-END IF
+!IF (lambda .lt. 1) THEN
+!   IF(ECOM_param_glb/=0 .and.ECOM_param_glb <= 2 .or. ECOM_param_glb == 12) Asrp(1:3,1) = lambda*Asrp(1:3,1)
+!   IF(ECOM_param_glb == 3) THEN
+!   Asrp(1:3,1) = lambda*Asrp(1:3,1)
+!   Asrp(1:3,2) = lambda*Asrp(1:3,2)
+!   Asrp(1:3,3) = lambda*Asrp(1:3,3)
+!   END IF
+!END IF
 !-------------------------------------------------------
 END SUBROUTINE
 
