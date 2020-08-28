@@ -112,7 +112,7 @@ ex4SolFiles = ('gag20624.obx','gag20624_attitude.out','gag20624_igs20624_orbdiff
 #
 # EX5 files
 #
-ex5Files = ('EQM.in','POD.in','VEQ.in','igs20624.sp3')
+ex5Files = ('EQM.in','POD.in','VEQ.in','igs19424.sp3')
 ex5SolFiles = ('pod.out','pod.rms')
 
 #       
