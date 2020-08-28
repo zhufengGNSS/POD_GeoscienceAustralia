@@ -138,7 +138,7 @@ pipelines:
               - less make.err
               - mkdir -p /data/acs/pod
               - python3 ../scripts/download_examples.py
-              - cd /data/acs/pod/ex4
+              - cd /data/acs/pod/ex5
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
               - ln -s /data/acs/pod/tables/fes2004_Cnm-Snm.dat .      >& /dev/null
@@ -149,7 +149,7 @@ pipelines:
               - ln -s /data/acs/pod/tables/eopc04_IAU2000.62-now . >& /dev/null
               - cd /data/acs/pod/tables/
               - ls
-              - cd /data/acs/pod/ex4
+              - cd /data/acs/pod/ex5
               - python3 /root/pod/scripts/update_tables.py
               - ls
               - ~/pod/bin/pod -r eopc04_IAU2000.62-now -m 1 -q 1 -k 12 -w 0 -s igs19424.sp3 -o igs19424.sp3 | tee pod.out
