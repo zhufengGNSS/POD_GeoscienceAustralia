@@ -136,9 +136,9 @@ pipelines:
               - cmake ..
               - make >make.out 2>make.err
               - less make.err
-              - mkdir -p /data/acs/pod/examples
+              - mkdir -p /data/acs/pod
               - python3 ../scripts/download_examples.py
-              - cd /data/acs/pod/examples/ex5
+              - cd /data/acs/pod/ex4
               - find -type l -delete
               - ln -s /data/acs/pod/tables/ascp1950.430 .             >& /dev/null
               - ln -s /data/acs/pod/tables/fes2004_Cnm-Snm.dat .      >& /dev/null
