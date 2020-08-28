@@ -147,6 +147,11 @@ pipelines:
               - ln -s /data/acs/pod/tables/igs_metadata_2063.snx .    >& /dev/null
               - ln -s /data/acs/pod/tables/leap.second .              >& /dev/null
               - ln -s /data/acs/pod/tables/eopc04_IAU2000.62-now . >& /dev/null
+              - cd /data/acs/pod/tables/
+              - ls
+              - cd /data/acs/pod/ex4
+              - python3 /root/pod/scripts/update_tables.py
+              - ls
               - ~/pod/bin/pod -r eopc04_IAU2000.62-now -m 1 -q 1 -k 12 -w 0 -s igs19424.sp3 -o igs19424.sp3 | tee pod.out
               - python3 ~/pod/scripts/res_plot.py     -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& /dev/null
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag19424_igs19424_orbdiff_rtn.out -d . -c G >& pod.rms
