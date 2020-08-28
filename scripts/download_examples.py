@@ -57,6 +57,9 @@ ex3SrcSolDir = ex3SrcDir + 'solution/'
 ex4SrcDir = S3bucket + 'examples/ex4/'
 ex4SrcSolDir = ex4SrcDir + 'solution/'
 
+ex5SrcDir = S3bucket + 'examples/ex5/'
+ex5SrcSolDir = ex5SrcDir + 'solution/'
+
 #===============================================================================
 # Form destination paths
 #===============================================================================
@@ -72,6 +75,9 @@ ex3DestSolDir = ex3DestDir + 'solution/'
 
 ex4DestDir = destDir + '/ex4/'
 ex4DestSolDir = ex4DestDir + 'solution/' 
+
+ex5DestDir = destDir + '/ex5/'
+ex5DestSolDir = ex5DestDir + 'solution/' 
 #===============================================================================
 # Define the files to be downloaded
 #===============================================================================
@@ -82,7 +88,7 @@ ex4DestSolDir = ex4DestDir + 'solution/'
 #
 # table files
 #
-tablesFiles = ('ascp1950.430','fes2004_Cnm-Snm.dat','goco05s.gfc','header.430_229','igs_metadata_2063.snx','leap.second','eopc04_14_IAU2000.62-now')
+tablesFiles = ('ascp1950.430','fes2004_Cnm-Snm.dat','goco05s.gfc','header.430_229','igs_metadata_2063.snx','leap.second','eopc04_14_IAU2000.62-now','eopc04_IAU2000.62-now')
 #
 # EX1 files
 #
@@ -103,6 +109,11 @@ ex3SolFiles = ('gag20010.obx','gag20010.sp3','gag20010_attitude.out','gag20010_i
 #
 ex4Files = ('EQM.in','POD.in','VEQ.in','ex4.clean','igs20624.sp3','sh_ex4','orb_pea.out')
 ex4SolFiles = ('gag20624.obx','gag20624_attitude.out','gag20624_igs20624_orbdiff_rtn.out','gag20624_igs20624_orbitstat_N.out','gag20624_igs20624_orbitstat_R.out','gag20624_igs20624_orbitstat_T.out','gag20624_orbits_partials.out','orb_icrf.out','orb_itrf.out','orbres_gag20624_igs20624.out_G.png','orbrms_gag20624_igs20624G.png','pod.out','pod.rms')
+#
+# EX5 files
+#
+ex5Files = ('EQM.in','POD.in','VEQ.in','igs20624.sp3')
+ex5SolFiles = ('pod.out','pod.rms')
 
 #       
 #===============================================================================
@@ -121,4 +132,6 @@ downloadfiles(ex3SrcSolDir,ex3DestSolDir,ex3SolFiles)
 #
 downloadfiles(ex4SrcDir,ex4DestDir,ex4Files)
 downloadfiles(ex4SrcSolDir,ex4DestSolDir,ex4SolFiles)
-
+#
+downloadfiles(ex5SrcDir,ex5DestDir,ex5Files)
+downloadfiles(ex5SrcSolDir,ex5DestSolDir,ex5SolFiles)
