@@ -8,7 +8,7 @@ import re
 # Command line argument
 parser = argparse.ArgumentParser(description="Download POD examples")
 
-parser.add_argument('-d',dest='DestDir',type=str, required=False, default='/data/acs/pod/examples', help='Destination directory path (default: /data/acs/pod/examples/)')
+parser.add_argument('-d',dest='DestDir',type=str, required=False, default='/data/acs/pod_test/examples', help='Destination directory path (default: /data/acs/pod_test/examples/)')
 args = parser.parse_args()
 
 # This will remove a trailing slash, which we can add on later
@@ -41,7 +41,7 @@ def downloadfiles(srcdir,destdir,srcfiles):
 #===============================================================================
 # Define source paths
 #===============================================================================
-S3bucket = 'https://peanpod.s3-ap-southeast-2.amazonaws.com/pod/'
+S3bucket = 'https://peanpod.s3-ap-southeast-2.amazonaws.com/pod_test/'
 
 tablesSrcDir = S3bucket+'tables/'
 
@@ -88,27 +88,27 @@ ex5DestSolDir = ex5DestDir + 'solution/'
 #
 # table files
 #
-tablesFiles = ('ascp1950.430','fes2004_Cnm-Snm.dat','goco05s.gfc','header.430_229','igs_metadata_2063.snx','leap.second','eopc04_14_IAU2000.62-now', 'eopc04_IAU2000.62-now')
+tablesFiles = ('ascp1950.430','fes2004_Cnm-Snm.dat','goco05s.gfc','header.430_229','igs_metadata_2063.snx','leap.second', 'eopc04_IAU2000.62-now')
 #
 # EX1 files
 #
-ex1Files = ('EQM.in','POD.in','VEQ.in','ex1.clean','igs19424.sp3','sh_ex1')
-ex1SolFiles = ('gag19424.sp3','gag19424_igs19424_orbdiff_rtn.out','gag19424_igs19424_orbitstat_N.out','gag19424_igs19424_orbitstat_R.out','gag19424_igs19424_orbitstat_T.out','gag19424_orbits_partials.out','orb_icrf.out','orb_itrf.out','orbres_gag19424_igs19424.out_G.png','orbrms_gag19424_igs19424G.png','pod.out','pod.rms','pseudobs_ICRF.out','pseudobs_ITRF.out')
+ex1Files = ('EQM.in','POD.in','VEQ.in','igs19424.sp3')
+ex1SolFiles = ('pod.out','pod.rms')
 #
 # EX2 files
 #
-ex2Files = ('COD0MGXFIN_20191990000_01D_05M_ORB.SP3','EQM.in','POD.in','VEQ.in','eop_c04_14_iau2000a_19','ex2.clean','sh_ex2')
-ex2SolFiles = ('gag20624.sp3','gag20624__orbdiff_rtn.out','gag20624__orbitstat_N.out','gag20624__orbitstat_R.out','gag20624__orbitstat_T.out','gag20624_attitude.out','gag20624_orbits_partials.out','orb_icrf.out','orb_itrf.out','orbres_gag20624_.out_C.png','orbres_gag20624_.out_E.png','orbres_gag20624_.out_G.png','orbres_gag20624_.out_R.png','orbrms_gag20624_C.png','orbrms_gag20624_E.png','orbrms_gag20624_G.png','orbrms_gag20624_R.png','pod.out','pod_C.rms','pod_E.rms','pod_G.rms','pod_R.rms','pseudobs_ICRF.out','pseudobs_ITRF.out')
+ex2Files = ('EQM.in','POD.in','VEQ.in','igs19424.sp3')
+ex2SolFiles = ('pod.out','pod_C.rms','pod_E.rms','pod_G.rms','pod_R.rms')
 #
 # EX3 files
 #
-ex3Files = ('EQM.in','POD.in','VEQ.in','ex3.clean','igs20010.sp3','igs20011.sp3','sh_ex3')
-ex3SolFiles = ('gag20010.obx','gag20010.sp3','gag20010_attitude.out','gag20010_igs20010_orbdiff_rtn.out','gag20010_igs20010_orbitstat_N.out','gag20010_igs20010_orbitstat_R.out','gag20010_igs20010_orbitstat_T.out','gag20010_orbits_partials.out','orb_icrf.out','orb_itrf.out','orbres_gag20010_igs20010.out_G.png','orbrms_gag20010_igs20010G.png','pod.out','pod.rms')
+ex3Files = ('EQM.in','POD.in','VEQ.in','igs20010.sp3')
+ex3SolFiles = ('pod.out','pod.rms')
 #
 # EX4 files
 #
-ex4Files = ('EQM.in','POD.in','VEQ.in','ex4.clean','igs20624.sp3','sh_ex4','orb_pea.out')
-ex4SolFiles = ('gag20624.obx','gag20624_attitude.out','gag20624_igs20624_orbdiff_rtn.out','gag20624_igs20624_orbitstat_N.out','gag20624_igs20624_orbitstat_R.out','gag20624_igs20624_orbitstat_T.out','gag20624_orbits_partials.out','orb_icrf.out','orb_itrf.out','orbres_gag20624_igs20624.out_G.png','orbrms_gag20624_igs20624G.png','pod.out','pod.rms')
+ex4Files = ('EQM.in','POD.in','VEQ.in','igs20624.sp3')
+ex4SolFiles = ('pod.out','pod.rms')
 #
 # EX5 files
 #
