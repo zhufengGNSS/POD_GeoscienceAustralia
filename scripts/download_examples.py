@@ -8,7 +8,7 @@ import re
 # Command line argument
 parser = argparse.ArgumentParser(description="Download POD examples")
 
-parser.add_argument('-d',dest='DestDir',type=str, required=False, default='/data/acs/pod_test/examples', help='Destination directory path (default: /data/acs/pod_test/examples/)')
+parser.add_argument('-d',dest='DestDir',type=str, required=False, default='/data/acs/pod/examples', help='Destination directory path (default: /data/acs/pod/examples/)')
 args = parser.parse_args()
 
 # This will remove a trailing slash, which we can add on later
