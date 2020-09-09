@@ -107,7 +107,7 @@ ex3SolFiles = ('pod.out','pod.rms')
 #
 # EX4 files
 #
-ex4Files = ('EQM.in','POD.in','VEQ.in','igs20624.sp3')
+ex4Files = ('EQM.in','POD.in','VEQ.in','igs20624.sp3','orb_pea.out')
 ex4SolFiles = ('pod.out','pod.rms')
 #
 # EX5 files
