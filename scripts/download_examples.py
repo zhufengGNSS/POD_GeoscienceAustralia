@@ -97,12 +97,12 @@ ex1SolFiles = ('pod.out','pod.rms')
 #
 # EX2 files
 #
-ex2Files = ('EQM.in','POD.in','VEQ.in','igs19424.sp3')
+ex2Files = ('EQM.in','POD.in','VEQ.in','igs19424.sp3','COD0MGXFIN_20191990000_01D_05M_ORB.SP3')
 ex2SolFiles = ('pod.out','pod_C.rms','pod_E.rms','pod_G.rms','pod_R.rms')
 #
 # EX3 files
 #
-ex3Files = ('EQM.in','POD.in','VEQ.in','igs20010.sp3')
+ex3Files = ('EQM.in','POD.in','VEQ.in','igs20010.sp3', 'igs20011.sp3')
 ex3SolFiles = ('pod.out','pod.rms')
 #
 # EX4 files

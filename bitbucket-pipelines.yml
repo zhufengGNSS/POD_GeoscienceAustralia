@@ -58,7 +58,7 @@ pipelines:
               - ln -s /data/acs/pod/tables/leap.second .              >& /dev/null
               - ln -s /data/acs/pod/tables/eopc04_IAU2000.62-now . >& /dev/null
               - python3 /root/pod/scripts/update_tables.py
-              - ~/pod/bin/pod -m 1 -q 1 -k 2 -w 0 -r eopc04_IAU2000.62-now -s igs19424.sp3 -o igs19424.sp3 | tee pod.out
+              - ~/pod/bin/pod -m 1 -q 1 -k 2 -w 0 -r eopc04_IAU2000.62-now -s COD0MGXFIN_20191990000_01D_05M_ORB.SP3 -o COD0MGXFIN_20191990000_01D_05M_ORB.SP3 | tee pod.out
               - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c C >& /dev/null
               - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c E >& /dev/null
               - python3 ~/pod/scripts/res_plot.py     -i gag20624__orbdiff_rtn.out -d . -c G >& /dev/null
@@ -122,7 +122,7 @@ pipelines:
               - ls
               - cd /data/acs/pod/ex4
               - python3 /root/pod/scripts/update_tables.py
-              - ~/pod/bin/pod -m 4 -q 2 -k 1 -w 0 -r eopc04_IAU2000.62-now -s igs20624.sp3 -o igs20624.sp3   | tee pod.out
+              - ~/pod/bin/pod -m 4 -q 1 -k 1 -w 0 -r eopc04_IAU2000.62-now -s igs20624.sp3 -o igs20624.sp3   | tee pod.out
               - python3 ~/pod/scripts/res_plot.py     -i gag20624_igs20624_orbdiff_rtn.out -d . -c G >& /dev/null
               - python3 ~/pod/scripts/rms_bar_plot_bitbucket.py -i gag20624_igs20624_orbdiff_rtn.out -d . -c G >& pod.rms
               - cp /root/pod/scripts/compare_pod_rms.py .
