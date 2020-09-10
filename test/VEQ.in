@@ -104,6 +104,8 @@
  cpr_D                            1                     ! If ECOM2 is applied, cpr_D becomes cpr_D2
  cpr_Y                            1                     ! If ECOM2 is applied, cpr_Y becomes cpr_D4
  cpr_B                            1
+ cpr_D2                           0
+ cpr_D4                           0
  
  ---------------------------------------------------------------------------
  %% Empirical parameters

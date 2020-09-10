@@ -125,6 +125,7 @@ SRP_MOD_arp        1
 %% Select estimable SRP models
 ! ECOM_param = 1 (ECOM1), forces estimated in D,Y,B directions
 ! ECOM_param = 2 (ECOM2), forces estimated in D,Y,B directions
+! ECOM_param = 12(ECOM1+ECOM2), Hybrid model
 ! ECOM_param = 3 (SBOXW), forces estimated in D,Y,B,X,Z directions
 ! ECOM_param = 0, no parameters are estimated
 
