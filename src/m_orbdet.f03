@@ -20,7 +20,7 @@ MODULE m_orbdet
 Contains
 	  
 	  
-SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatrix_final, veqPmatrix_final, Vres, Vrms)
+SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatrix_final, veqPmatrix_final, Vres, Vrms, Xsigma)
 
 
 ! ----------------------------------------------------------------------
@@ -109,7 +109,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 ! OUT
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orb_icrf_final, orb_itrf_final  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: veqSmatrix_final, veqPmatrix_final  
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Vres  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Vres, Xsigma 
       REAL (KIND = prec_d), DIMENSION(3), INTENT(OUT) :: Vrms 
 ! ----------------------------------------------------------------------
 
@@ -126,7 +126,8 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       INTEGER (KIND = prec_int8) :: sz1, sz2 
       INTEGER (KIND = prec_int8) :: Nepochs	  
       !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix  
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Xmatrix, Wmatrix, Amatrix  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Xmatrix, Wmatrix, Amatrix
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Vmatrix
       !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqC, veqT  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb0, veq0, veq1  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb, dorb_icrf, dorb_itrf 
@@ -332,14 +333,14 @@ Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MI
 ! ----------------------------------------------------------------------
 IF (VEQ_refsys == 1) THEN
 	! Orbit parameter estimator
-	Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
+	Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix, Vmatrix, Xsigma)			! ----------------------------------------------------------------------
 ELSE IF (VEQ_refsys == 2) THEN
 	! Time System according to global variable TIME_Scale (Module mdl_param.f03)
 	time_sys = TIME_SCALE
 	! Orbit transformation to terrestrial frame: ICRF to ITRF
 	CALL orbC2T (orb_icrf, time_sys, orb_itrf)
 	! Orbit parameter estimator
-	Call orb_estimator(orb_itrf, veqSmatrix, veqPmatrix, pseudobs_ITRF, Xmatrix, Wmatrix, Amatrix)		
+	Call orb_estimator(orb_itrf, veqSmatrix, veqPmatrix, pseudobs_ITRF, Xmatrix, Wmatrix, Amatrix, Vmatrix, Xsigma)		
 END IF
 
 !filename = "Amatrix.out"

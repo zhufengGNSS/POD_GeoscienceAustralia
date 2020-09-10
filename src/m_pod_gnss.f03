@@ -20,7 +20,7 @@ MODULE m_pod_gnss
 Contains
 
 
-SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, &
+SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbpara_sigma, orbits_partials_icrf, orbits_partials_itrf, &
                      orbits_ics_icrf, orbit_resR, orbit_resT, orbit_resN, orbdiff2)
 
 ! ----------------------------------------------------------------------
@@ -92,7 +92,8 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbits_ics_icrf  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbit_resR  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbit_resT  
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbit_resN  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbit_resN
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orbpara_sigma 
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -102,7 +103,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
       CHARACTER (LEN=100) :: PODfname, ORBMODfname				
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf, orb_itrf  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Vres  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Vres, Xsigma
       REAL (KIND = prec_d), DIMENSION(3) :: Vrms 	    
 	  !REAL (KIND = prec_d), DIMENSION(5,6) :: stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT
 ! ----------------------------------------------------------------------
@@ -111,7 +112,7 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 ! ----------------------------------------------------------------------
 	  INTEGER (KIND = prec_int8) :: Nsat, isat
 	  INTEGER (KIND = prec_int8) :: iepoch, iparam
-	  INTEGER (KIND = prec_int8) :: i
+	  INTEGER (KIND = prec_int8) :: i, iele
 	  INTEGER (KIND = prec_int8) :: sz1, sz2, Nepochs, N2_orb, N2_veqSmatrix, N2_veqPmatrix, N2sum , N2ics
       !REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbits_partials_icrf  
       !REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbits_partials_itrf  
@@ -377,7 +378,7 @@ END IF
 ! ----------------------------------------------------------------------
 ! Precise Orbit Determination :: main subroutine
 !CAll orbitmain (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
-CALL orbitmain (EQMfname_PRN, VEQfname_PRN, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, &
+CALL orbitmain (EQMfname_PRN, VEQfname_PRN, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, Xsigma, &
 		dorb_icrf, dorb_RTN, dorb_Kepler, dorb_itrf, orbdiff) 
 ! ----------------------------------------------------------------------
 print *," "
@@ -444,11 +445,28 @@ sz2 = size(orbdiff, DIM = 2)
 ALLOCATE (orbdiff2(Nsat, sz1, sz2), STAT = AllocateStatus)
 orbdiff2=0.0d0
 
+! Diagonal elements in Xsigma matrix (Orbit parameter uncertainties)
+ALLOCATE (orbpara_sigma(Nsat, 6+NPARAM_glb))
+
 end if
 ! ----------------------------------------------------------------------
 
+! orbit difference between the resulting solution and an external SP3 file
 orbdiff2 (isat,:,:) = orbdiff(:,:)
 
+
+! Diagonal elements in Xsigma matrix (Orbit parameter uncertainties)
+sz1 = size(Xsigma, DIM = 1)
+sz2 = size(Xsigma, DIM = 2)
+
+IF (sz1 /= sz2) THEN
+PRINT*,'The Xsigma is not a square matrix !!'
+STOP
+END IF
+
+DO iele=1,sz1
+orbpara_sigma(isat,iele) = Xsigma(iele,iele)
+END DO
 ! ----------------------------------------------------------------------
 ! Create Orbit IC's matrix :: Write estimates for Satellite(isat) SVEC_Zo_ESTIM and ECOM_accel_aposteriori
 ! ----------------------------------------------------------------------
