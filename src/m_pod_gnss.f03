@@ -454,19 +454,21 @@ end if
 ! orbit difference between the resulting solution and an external SP3 file
 orbdiff2 (isat,:,:) = orbdiff(:,:)
 
-
+IF (IC_MODE_cfg /= 2) THEN
 ! Diagonal elements in Xsigma matrix (Orbit parameter uncertainties)
-sz1 = size(Xsigma, DIM = 1)
-sz2 = size(Xsigma, DIM = 2)
+        sz1 = size(Xsigma, DIM = 1)
+        sz2 = size(Xsigma, DIM = 2)
 
-IF (sz1 /= sz2) THEN
-PRINT*,'The Xsigma is not a square matrix !!'
-STOP
+        IF (sz1 /= sz2) THEN
+        PRINT*,'The Xsigma is not a square matrix !!'
+        STOP
+        END IF
+
+        DO iele=1,sz1
+        orbpara_sigma(isat,iele) = Xsigma(iele,iele)
+        END DO
+
 END IF
-
-DO iele=1,sz1
-orbpara_sigma(isat,iele) = Xsigma(iele,iele)
-END DO
 ! ----------------------------------------------------------------------
 ! Create Orbit IC's matrix :: Write estimates for Satellite(isat) SVEC_Zo_ESTIM and ECOM_accel_aposteriori
 ! ----------------------------------------------------------------------
