@@ -165,7 +165,7 @@ The options in the major configuration file 'POD.in' can be overridden on the co
        -q --icmode  = Initial condition from parameter estimation procedure
                                 0 - Do not write Velocity vector to sp3 orbit
                                 1 - Write Velocity vector to sp3 orbit
-       -k --srpmodel= 1: ECOM1, 2:ECOM2, 3:SBOX
+       -k --srpmodel= 1: ECOM1, 2:ECOM2, 12: ECOM1+ECOM2, 3:SBOX
        -w --empmodel= 1: activated, 0: no estimation
        -d --verbosity = output verbosity level [Default: 0]
        -h --help.   = Print program help
@@ -207,13 +207,13 @@ In the pod/examples directory, there are six POD user exmples:
 
 ## Example 1 - (pod/examples/ex1):
 
-* Simple GPS IGS final SP3 file orbit fitting (same as pod/test example)
+* Simple GPS IGS final SP3 file orbit fitting with ECOM1 (same as pod/test example)
 
 * Command line: ./pod -m 1 -q 1 -k 1 -w 0 -s igs16403.sp3 -o igs16403.sp3
 
 ## Example 2 - (pod/examples/ex2):
 
-* Multi GNSS CODE MGEX SP3 file orbit fitting
+* Multi GNSS CODE MGEX SP3 file orbit fitting with ECOM1
 
 * Command line: ./pod -m 1 -q 1 -k 1 -w 0 -s COD0MGXFIN_20191990000_01D_05M_ORB.SP3 -o COD0MGXFIN_20191990000_01D_05M_ORB.SP3
 ## Example 3 - (pod/examples/ex3):
@@ -231,17 +231,16 @@ In the pod/examples directory, there are six POD user exmples:
 
 ## Example 5 - (pod/examples/ex5):
 
+* ECOM1+ECOM2 hybrid model in POD
+
+* Command line: /pod -m 1 -q 1 -k 12 -w 1 -s igs20000.sp3 -o igs20000.sp3
+
+## Example 6 - (pod/examples/ex6):
+
 * SP3 orbital file generated from broadcast ephemeris 
 
 * Command line: ulimit -s unlimited
 * Command line: ./brdc2ecef -f BRDC00IGS_R_20163210000_01D_MN.rnx -o brdc16321.sp3 -c A -l leap.second -r finals2000A.daily
-
-## Example 6 - (pod/examples/ex6):
-
-* ECOM + empirical hybrid model in POD
-
-* Command line: /pod -m 1 -q 1 -k 1 -w 1 -s igs20000.sp3 -o igs20000.sp3
-
 
 In each example directory (ex1/ex2/ex3/ex4) there is a sh_ex? script that when exectuted 
 will run the example and compare the output with the expected solution. 
