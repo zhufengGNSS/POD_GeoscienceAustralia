@@ -22,19 +22,19 @@ export P=/data/test
 echo "====Download GNSS orbit files===="
 echo
 
-#for (( GPSWEEK=2062; GPSWEEK<=2062; GPSWEEK++ ))
-#do
-#wget -N ftp:/cddis.gsfc.nasa.gov/gnss/products/$GPSWEEK/igs*.sp3.Z
-#wget -N ftp:/cddis.gsfc.nasa.gov/gnss/products/$GPSWEEK/igs*.erp.Z
-#wget -N ftp:/cddis.gsfc.nasa.gov/gnss/products/$GPSWEEK/igs*.snx.Z
-#done
+for (( GPSWEEK=2062; GPSWEEK<=2062; GPSWEEK++ ))
+do
+wget -N ftp://cddis.gsfc.nasa.gov/gnss/products/$GPSWEEK/igs*.sp3.Z
+wget -N ftp://cddis.gsfc.nasa.gov/gnss/products/$GPSWEEK/igs*.erp.Z
+wget -N ftp://cddis.gsfc.nasa.gov/gnss/products/$GPSWEEK/igs*.snx.Z
+done
 
 echo "====Data download completion===="
 echo
-
+GPSWEEK=$(( $GPSWEEK - 1 ))
 # Decompress *.Z files
 #---------------------
-#gzip -d *.Z
+gzip -d *.Z
 
 
 # Set up GPSWEEK DAY for data process
@@ -52,6 +52,8 @@ date
 rm $P/POD_TEMP"$GPSDAY".txt
 rm $P/ORBIT_TMP"$GPSDAY".txt
 rm $P/*_srp*
+rm $P/VEQ0*
+rm $P/EQM0*
 
 
 # Start to run POD
@@ -60,7 +62,7 @@ echo
 echo "====Precise orbit determination and prediction====";
 
 #echo $POD/bin/pod
-$POD/bin/pod -m 1 -q 1 -s igs"$GPSDAY".sp3 -o igs"$GPSDAY".sp3 > gnss_rms_fit"$GPSDAY".txt
+$POD/bin/pod -m 1 -q 1 -k 1 -w 0 -s igs"$GPSDAY".sp3 -o igs"$GPSDAY".sp3 > gnss_rms_fit"$GPSDAY".txt
 
 
 # Prepare a summary report for POD
@@ -77,7 +79,7 @@ echo                                    >> POD_TEMP"$GPSDAY".txt
 echo "================================" >> POD_TEMP"$GPSDAY".txt
 echo "Orbit fitting in Radial (R), Along-track (T) and Cross-track (N) in meter" >> POD_TEMP"$GPSDAY".txt
 echo "=========================================================================" >> POD_TEMP"$GPSDAY".txt
-grep 'RMS-RTN ICRF FIT' $P/gnss_rms_fit"$GPSDAY".txt >> POD_TEMP"$GPSDAY".txt
+grep 'RMS-RTN ICRF CMP' $P/gnss_rms_fit"$GPSDAY".txt >> POD_TEMP"$GPSDAY".txt
 echo                                                 >> POD_TEMP"$GPSDAY".txt
 
 echo "Solar radiation pressure" >> POD_TEMP"$GPSDAY".txt
@@ -152,6 +154,7 @@ echo
 echo "====Satellite orbit fitting completion===="
 
 
+
 # Start to run PEA (Parameter Estimation Algorithm)
 #--------------------------------------------------
 echo
@@ -170,11 +173,13 @@ echo
 #for YEAR4 in 2019
 #YEAR2=$(( $YEAR4 - 2000 ))
 #do
+##(Should we specify the station name for processing?)
 #wget -N ftp://cddis.gsfc.nasa.gov/gnss/pub/gps/data/daily/$GPSYEAR4/$DOY/$YEAR2o/*.$YEAR2o.Z
 #done
 
-#cp *.19o.Z $PEA/example/EX03/data/
 #gzip -d *.Z
+#mv *.19o $PEA/example/EX03/data/
+
 
 echo "====RINEX download completion===="
 
@@ -220,7 +225,7 @@ cp /data/acs/output/orb_pea.out $P/
 
 
 # Chnage the POD option to the integration only
-$POD/bin/pod -m 4 -q 2 -s igs"$GPSDAY".sp3 -o igs"$GPSDAY".sp3 > orb_est_acc"$GPSDAY".txt
+$POD/bin/pod -m 4 -q 2 -k 1 -w 0 -o igs"$GPSDAY".sp3 > orb_est_acc"$GPSDAY".txt
 
 echo 
 
