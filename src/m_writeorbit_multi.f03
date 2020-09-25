@@ -359,19 +359,47 @@ DO i_sat = 1 , Nsat
    WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) kepler_ic(1:6)    
 END DO 
 IF (partials_velocity_cfg > 0) THEN
-WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
-                                           &Partials [dx/dX dx/dY dx/dZ dx/dXD dx/dYD dx/dZD dY/dX dY/dY dY/dZ &
-                                           &dY/dXD dY/dYD dY/dZD ... dx/dRAD1,dx/dRAD1,dx/dRAD3,dx/dRAD3 dx/dRAD4 &
-                                           &... dx/dRADN ... dy/dRAD1,dx/dRAD2 ... dy/dRADN ... ]'   
+!WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
+!                                           &Partials [dx/dX dx/dY dx/dZ dx/dXD dx/dYD dx/dZD dY/dX dY/dY dY/dZ &
+!                                           &dY/dXD dY/dYD dY/dZD ... dx/dRAD1,dx/dRAD1,dx/dRAD3,dx/dRAD3 dx/dRAD4 &
+!                                           &... dx/dRADN ... dy/dRAD1,dx/dRAD2 ... dy/dRADN ... ]'   
+  WRITE (UNIT=UNIT_IN,FMT='(a)'            ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
+                                           &Partials &
+                                           &[dx/dXo dy/dXo dz/dXo   dx/dYo dy/dYo dz/dYo   &
+                                           &dx/dZo dy/dZo dz/dZo   dx/dvXo dy/dvXo dz/dvXo   & 
+                                           &dx/dvYo dy/dvYo dz/dvYo   dx/dvZo dy/dvZo dz/dvZo   & 
+					   &dx/dRAD1 dy/dRAD1 dz/dRAD1   dx/dRAD2 dy/dRAD2 dz/dRAD2   &
+                                           &dx/dRAD3 dy/dRAD3 dz/dRAD3   ...   dx/dRADN dy/dRADN dz/dRADN   & 
+                                           &dvx/dXo dvy/dXo dvz/dXo   dvx/dYo dvy/dYo dvz/dYo   &
+                                           &dvx/dZo dvy/dZo dvz/dZo   dvx/dvXo dvy/dvXo dvz/dvXo   & 
+                                           &dvx/dvYo dvy/dvYo dvz/dvYo   dvx/dvZo dvy/dvZo dvz/dvZo   & 
+					   &dvx/dRAD1 dvy/dRAD1 dvz/dRAD1   dvx/dRAD2 dvy/dRAD2 dvz/dRAD2   &
+                                           &dvx/dRAD3 dvy/dRAD3 dvz/dRAD3   ...   dvx/dRADN dvy/dRADN dvz/dRADN]' 
 ELSE IF (partials_velocity_cfg == 0) THEN
-WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
-                                           &Partials [dx/dXo dx/dYo dx/dZo dx/dVxo dx/dVyo dx/dVzo &
-                                           &          dy/dXo dy/dYo dy/dZo dy/dVxo dy/dVyo dy/dVzo & 
-                                           &          dz/dXo dz/dYo dz/dZo dz/dVxo dz/dVyo dz/dVzo & 
-										   &          dx/dRAD1  dx/dRAD2  dx/dRAD3 .....  dx/dRADN &
-										   &          dy/dRAD1  dy/dRAD2  dy/dRAD3 .....  dy/dRADN &
-										   &          dz/dRAD1  dz/dRAD2  dz/dRAD3 .....  dz/dRADN ]' 
-END IF                                                       
+!WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
+!                                           &Partials [dx/dXo dx/dYo dx/dZo dx/dVxo dx/dVyo dx/dVzo &
+!                                           &          dy/dXo dy/dYo dy/dZo dy/dVxo dy/dVyo dy/dVzo & 
+!                                           &          dz/dXo dz/dYo dz/dZo dz/dVxo dz/dVyo dz/dVzo & 
+!										   &          dx/dRAD1  dx/dRAD2  dx/dRAD3 .....  dx/dRADN &
+!										   &          dy/dRAD1  dy/dRAD2  dy/dRAD3 .....  dy/dRADN &
+!										   &          dz/dRAD1  dz/dRAD2  dz/dRAD3 .....  dz/dRADN ]' 
+
+!WRITE (UNIT=UNIT_IN,FMT='(a)'              ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
+!                                           &Partials [dx/dXo dx/dYo dx/dZo dx/dVxo dx/dVyo dx/dVzo &
+!					   &          dx/dRAD1  dx/dRAD2  dx/dRAD3 .....  dx/dRADN &
+!                                           &          dy/dXo dy/dYo dy/dZo dy/dVxo dy/dVyo dy/dVzo & 
+!					   &          dy/dRAD1  dy/dRAD2  dy/dRAD3 .....  dy/dRADN &
+!                                           &          dz/dXo dz/dYo dz/dZo dz/dVxo dz/dVyo dz/dVzo & 
+!				           &          dz/dRAD1  dz/dRAD2  dz/dRAD3 .....  dz/dRADN ]' 
+  WRITE (UNIT=UNIT_IN,FMT='(a)'            ,IOSTAT=ios_ith) '#INFO PRN MJD SOD, ICRF [X Y Z ZD YD ZD], ITRF [X Y Z XD YD ZD], &
+                                           &Partials &
+                                           &[dx/dXo dy/dXo dz/dXo   dx/dYo dy/dYo dz/dYo   &
+                                           &dx/dZo dy/dZo dz/dZo   dx/dvXo dy/dvXo dz/dvXo   & 
+                                           &dx/dvYo dy/dvYo dz/dvYo   dx/dvZo dy/dvZo dz/dvZo   & 
+					   &dx/dRAD1 dy/dRAD1 dz/dRAD1   dx/dRAD2 dy/dRAD2 dz/dRAD2   &
+                                           &dx/dRAD3 dy/dRAD3 dz/dRAD3   ...   dx/dRADN dy/dRADN dz/dRADN]' 
+END IF 
+                                                      
 WRITE (UNIT=UNIT_IN,FMT= '(A13)' ,IOSTAT=ios_ith) 'End_of_Header'
 ! ----------------------------------------------------------------------
 ! Write data to file | Line by line	  

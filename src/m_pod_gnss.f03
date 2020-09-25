@@ -110,8 +110,8 @@ SUBROUTINE pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits
 	  INTEGER (KIND = prec_int2) :: ORB_mode
 ! ----------------------------------------------------------------------
 	  INTEGER (KIND = prec_int8) :: Nsat, isat
-	  INTEGER (KIND = prec_int8) :: iepoch, iparam
-	  INTEGER (KIND = prec_int8) :: i
+	  INTEGER (KIND = prec_int8) :: iepoch, iparam, jparam, npart
+	  INTEGER (KIND = prec_int8) :: i,icnt,jcnt
 	  INTEGER (KIND = prec_int8) :: sz1, sz2, Nepochs, N2_orb, N2_veqSmatrix, N2_veqPmatrix, N2sum , N2ics
       !REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbits_partials_icrf  
       !REAL (KIND = prec_d), DIMENSION(:,:,:), ALLOCATABLE :: orbits_partials_itrf  
@@ -545,27 +545,110 @@ END IF
 !orbits_partials_icrf(:, N2_orb + 1 : N2_orb + N2_veqSmatrix-2 , isat) = veqSmatrix(: , 3:N2_veqSmatrix)
 !orbits_partials_icrf(:, N2_orb+N2_veqSmatrix-2 + 1 : N2_orb+N2_veqSmatrix-2 + N2_veqPmatrix-2 , isat)  &
 !          = veqPmatrix(: , 3:N2_veqPmatrix)
-		  
+!print*,'N2_orb, N2_veqSmatrix-2, N2_veqPmatrix-2: ',N2_orb, N2_veqSmatrix-2, N2_veqPmatrix-2
+
+!!! NEW code to fill partial derivative arrays !!! SCM 07/09/2020
+! New order:
+! POS partials output in order: x,y,z position wrt IC poarameters
+! SV dx,dy,dz wrt IC parameters (x0,Y0,Z0,vx0,vy0,vz0,SRP1,SRP2,SRP3....,SRPN)
+! If VEL partials requested then add velocity partials block after the POS partials block
+! VEL partials output in order: vx,vy,vz position wrt IC poarameters
+! SV dvx,dvy,dvz wrt IC parameters (x0,Y0,Z0,vx0,vy0,vz0,SRP1,SRP2,SRP3....,SRPN)
+!
+! Start loop over epochs
 Do iepoch = 1 , Nepochs
-Do iparam = 1 , N2_orb
-orbits_partials_icrf(iepoch, iparam , isat) = orb_icrf(iepoch,iparam)
-orbits_partials_itrf(iepoch, iparam , isat) = orb_itrf(iepoch,iparam)
-End Do
+
+! Fill Epoch, Position and Velocity slots
+  Do iparam = 1 , N2_orb
+    orbits_partials_icrf(iepoch, iparam , isat) = orb_icrf(iepoch,iparam)
+    orbits_partials_itrf(iepoch, iparam , isat) = orb_itrf(iepoch,iparam)
+  End Do
+
+  iparam = 0
+  jparam = 0
+! POS partials only
+  npart = 3
+
+! Check if velocity partials are integrated.
+  IF (partials_velocity_cfg > 0) npart = 6
+
+! Fill POS (XYZ) / IC element partials from the veqSmatrix - Loop over X,Y,Z,VX,VY,VY partial components
+  Do icnt = 1, (N2_veqSmatrix-2)/npart
+    Do jcnt = 0,2
+      iparam = icnt + jcnt * (N2_veqSmatrix-2)/npart
+      jparam = jparam + 1 
+!      print*,'POS EQM - iparam, jparam: ',iparam, jparam, veqSmatrix(iepoch , iparam+2)
+      orbits_partials_icrf(iepoch, N2_orb+jparam, isat) = veqSmatrix(iepoch , iparam+2)
+      orbits_partials_itrf(iepoch, N2_orb+jparam, isat) = veqSmatrix(iepoch , iparam+2)
+    End Do
+  End Do
+
+! Fill POS (XYZ) / SRP partials from the veqPmatrix - Loop over (RAD1, RAD2, RAD3 .... RADN) SRP parameter partial components
+  iparam = 0
+  Do icnt = 1, (N2_veqPmatrix-2)/npart
+    Do jcnt = 0,2
+      iparam = icnt + jcnt * (N2_veqPmatrix-2)/npart
+      jparam = jparam + 1 
+!      print*,'POS VEQ - iparam, jparam: ',iparam, jparam, veqPmatrix(iepoch , iparam+2)
+      orbits_partials_icrf(iepoch, N2_orb+jparam , isat) = veqPmatrix(iepoch , iparam+2)
+      orbits_partials_itrf(iepoch, N2_orb+jparam , isat) = veqPmatrix(iepoch , iparam+2)
+    End Do
+  End Do
+
+  IF (partials_velocity_cfg > 0) then
+
+! Fill VEL (XYZ) / IC partials from the veqSmatrix - Loop over X,Y,Z,VX,VY,VY partial components
+    iparam = 0
+    Do icnt = 1, (N2_veqSmatrix-2)/npart
+      Do jcnt = 0,2
+        iparam = (icnt + jcnt * (N2_veqSmatrix-2)/npart) + (N2_veqSmatrix-2)/2
+        jparam = jparam + 1 
+!        print*,'VEL EQM - iparam, jparam: ',iparam, jparam, veqSmatrix(iepoch , iparam+2)
+        orbits_partials_icrf(iepoch, N2_orb+jparam, isat) = veqSmatrix(iepoch , iparam+2)
+        orbits_partials_itrf(iepoch, N2_orb+jparam, isat) = veqSmatrix(iepoch , iparam+2)
+      End Do
+    End Do
+
+! Fill VEL (XYZ) / SRP partials from the veqPmatrix - Loop over (RAD1, RAD2, RAD3 .... RADN) SRP parameter partial components
+    iparam = 0
+    Do icnt = 1, (N2_veqPmatrix-2)/npart
+      Do jcnt = 0,2
+        iparam = (icnt + jcnt * (N2_veqPmatrix-2)/npart) + (N2_veqPmatrix-2)/2
+        jparam = jparam + 1 
+!        print*,'VEL VEQ - iparam, jparam: ',iparam, jparam, veqPmatrix(iepoch , iparam+2)
+        orbits_partials_icrf(iepoch, N2_orb+jparam , isat) = veqPmatrix(iepoch , iparam+2)
+        orbits_partials_itrf(iepoch, N2_orb+jparam , isat) = veqPmatrix(iepoch , iparam+2)
+      End Do
+    End Do
+
+  END IF
+
+!End loop on epochs
 End Do
 
-Do iepoch = 1 , Nepochs
-Do iparam = 1 , N2_veqSmatrix-2
-orbits_partials_icrf(iepoch, N2_orb+iparam , isat) = veqSmatrix(iepoch , iparam+2)
-orbits_partials_itrf(iepoch, N2_orb+iparam , isat) = veqSmatrix(iepoch , iparam+2)
-End Do
-End Do
+! ----------------------------------------------------------------------
+! Old code for filling partials matricies
+!Do iepoch = 1 , Nepochs
+!Do iparam = 1 , N2_orb
+!orbits_partials_icrf(iepoch, iparam , isat) = orb_icrf(iepoch,iparam)
+!orbits_partials_itrf(iepoch, iparam , isat) = orb_itrf(iepoch,iparam)
+!End Do
+!End Do
 
-Do iepoch = 1 , Nepochs
-Do iparam = 1 , N2_veqPmatrix-2
-orbits_partials_icrf(iepoch, N2_orb+N2_veqSmatrix-2+iparam , isat) = veqPmatrix(iepoch , iparam+2)
-orbits_partials_itrf(iepoch, N2_orb+N2_veqSmatrix-2+iparam , isat) = veqPmatrix(iepoch , iparam+2)
-End Do
-End Do
+!Do iepoch = 1 , Nepochs
+!Do iparam = 1 , N2_veqSmatrix-2
+!orbits_partials_icrf(iepoch, N2_orb+iparam , isat) = veqSmatrix(iepoch , iparam+2)
+!orbits_partials_itrf(iepoch, N2_orb+iparam , isat) = veqSmatrix(iepoch , iparam+2)
+!End Do
+!End Do
+
+!Do iepoch = 1 , Nepochs
+!Do iparam = 1 , N2_veqPmatrix-2
+!orbits_partials_icrf(iepoch, N2_orb+N2_veqSmatrix-2+iparam , isat) = veqPmatrix(iepoch , iparam+2)
+!orbits_partials_itrf(iepoch, N2_orb+N2_veqSmatrix-2+iparam , isat) = veqPmatrix(iepoch , iparam+2)
+!End Do
+!End Do
+
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
