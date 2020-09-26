@@ -64,7 +64,7 @@ SUBROUTINE orbitIC (fname, IC_matrix, PRNmatrix)
       INTEGER (KIND = prec_int8) :: i
       INTEGER (KIND = prec_int2) :: UNIT_IN, ios, ios_ith, ios_data, ios_line
       INTEGER (KIND = prec_int8) :: sz1, sz2, sz3
-      CHARACTER (LEN=500) :: line_ith	  
+      CHARACTER (LEN=1024) :: line_ith	  
       CHARACTER (LEN=150) :: word1_ln, word_i
       INTEGER (KIND = prec_int2) :: AllocateStatus	  
 ! ----------------------------------------------------------------------
