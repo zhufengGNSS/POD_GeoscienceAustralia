@@ -45,6 +45,7 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
 ! Created:	September 2018
 !
 ! Changes:     02-05-2019 Tzupang Tseng: use the coefficient from the shadow.f90 for scaling the SRP effect
+! Last modified:	17 August 2020, Dr. Thomas Papanikolaou, Velocity pulses added  
 ! ----------------------------------------------------------------------
 
 
@@ -63,6 +64,7 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       USE m_pd_ECOM
       USE m_shadow
       USE mdl_config
+      USE m_pd_pulses
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -150,6 +152,18 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       CHARACTER (KIND = 1) :: ECLTYP
       CHARACTER (LEN=20) :: BLKsat
 ! ----------------------------------------------------------------------
+      REAL (KIND = prec_d), DIMENSION(3) :: SFpulses
+      REAL (KIND = prec_d) :: Fpulse (3)
+      REAL (KIND = prec_d) :: PD_pulse_r(3,3), PD_pulse_v(3,3)
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: PD_pulse_param_i
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: PD_pulses_param
+      INTEGER (KIND = prec_int8) :: PULSE_param, N_PULSE_param
+      INTEGER (KIND = prec_int2) :: dir_pulse
+      REAL (KIND = prec_d), DIMENSION(3) :: delta_v
+	  REAL (KIND = prec_d) :: mjd_ti_pulse
+      INTEGER (KIND = prec_int8) :: N1_param
+! ----------------------------------------------------------------------
+
 
 ! ----------------------------------------------------------------------
 ! Global variables used
@@ -623,10 +637,48 @@ End IF
 
 
 ! ----------------------------------------------------------------------
+! Pseudo-stochastic pulses
+! ----------------------------------------------------------------------
+PULSE_param = PULSE_param_glb
+
+IF (PULSE_param == 1) Then
+
+	ALLOCATE (PD_pulses_param(3,N_PULSE_param_glb), STAT = AllocateStatus)
+      IF (AllocateStatus /= 0) THEN
+         PRINT *, "Error: Not enough memory"
+         PRINT *, "Error: SUBROUTINE m_pd_force.f03"
+         PRINT *, "Error: Allocatable Array: PD_pulses_param"
+!         STOP "*** Not enough memory ***"
+      END IF  
+
+	delta_v = DELTA_V_apriori_glb
+	mjd_ti_pulse = MJD_DELTA_V_glb
+	SFpulses = (/ 0.0D0, 0.0D0, 0.0D0 /)
+	DO i = 1 , 3
+	dir_pulse = i	
+	!CALL pd_pulses (rsat, vsat, mjd_t, delta_v, mjd_ti, dir, Fpulse, PDr, PDv, PD_param)
+	CALL pd_pulses (rsat_icrf, vsat_icrf, mjd, delta_v, mjd_ti_pulse, dir_pulse, Fpulse, PD_pulse_r, PD_pulse_v, PD_pulse_param_i)
+
+	SFpulses = SFpulses + Fpulse
+	PD_pulses_param(1,i) = PD_pulse_param_i(1,1)
+	PD_pulses_param(2,i) = PD_pulse_param_i(2,1)
+	PD_pulses_param(3,i) = PD_pulse_param_i(3,1)
+	
+	END DO 
+!print *,"SFpulses", SFpulses
+!print *,"PD_pulses_param", PD_pulses_param
+	
+Else IF (PULSE_param == 0) Then
+	SFpulses = (/ 0.0D0, 0.0D0, 0.0D0 /)
+End IF
+! ----------------------------------------------------------------------
+
+
+! ----------------------------------------------------------------------
 ! Acceleration sum of the force model
 ! ----------------------------------------------------------------------
 !SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf
-SF = SFgrav + SFnongrav + SFemp 		
+SF = SFgrav + SFnongrav + SFemp + SFpulses		
 Fvec = SF
 ! ----------------------------------------------------------------------
 
@@ -636,20 +688,58 @@ Fvec = SF
 ! PD w.r.t position vector
 PDr = Ugrav_icrf + PD_EMP_r
 ! PD  w.r.t velocity vector
-!PDv - initialise to zero for now
-! ----------------------------------------------------------------------
 PDv = 0.d0
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Partial derivatives w.r.t unknown parameters to be estimated
 ! ----------------------------------------------------------------------
-IF (EMP_param_glb == 1) Then
-PD_param = PD_EMP_param
-End IF
+IF (PULSE_param_glb == 0) THEN
 
+IF (EMP_param_glb == 1) Then
+	PD_param = PD_EMP_param
+END IF
 
 IF (ECOM_param_glb /= 0) Then
-PD_param = PD_ECOM_param
+	PD_param = PD_ECOM_param
+END IF
+
+END IF
+
+
+! Case of pseudo-stochastic pulses added
+IF (PULSE_param_glb /= 0) THEN
+
+IF (EMP_param_glb == 1) Then
+	N1_param = size(PD_EMP_param, DIM = 2)
+	DO i = 1 , 3
+	DO j = 1 , N1_param
+	PD_param(i,j) = PD_EMP_param(i,j)
+	END DO
+	END DO
+	N_pulse_param = size(PD_pulses_param, DIM = 2)
+	DO i = 1 , 3
+	DO j = 1 , N_pulse_param
+	PD_param(i,j + N1_param) = PD_pulses_param(i,j)
+	END DO
+	END DO
+End IF
+
+IF (ECOM_param_glb /= 0) Then
+	N1_param = size(PD_ECOM_param, DIM = 2)
+	DO i = 1 , 3
+	DO j = 1 , N1_param
+	PD_param(i,j) = PD_ECOM_param(i,j)
+	END DO
+	END DO
+	N_pulse_param = size(PD_pulses_param, DIM = 2)
+	DO i = 1 , 3
+	DO j = 1 , N_pulse_param
+	PD_param(i,j + N1_param) = PD_pulses_param(i,j)
+	END DO
+	END DO
+END IF
+
 END IF
 !print*,'ECOM_param_glb=',ECOM_param_glb
 !print*,'PD_param=',PD_param

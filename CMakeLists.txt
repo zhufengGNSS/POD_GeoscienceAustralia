@@ -5,19 +5,23 @@ project(pod)
 #project (add_vectors Fortran)
 enable_language(Fortran)
 
-set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
+#set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
 
-set (BLA_VENDOR OpenBLAS)
-find_package(BLAS)
-if(BLAS_FOUND)
-  set(LAPACK_LIBRARIES "")
-  message(STATUS "Found Vendor sprecific OpenBLAS")
-else()
-  set (BLA_VENDOR "")
-  find_package(LAPACK required)
-  find_package(BLAS required)  
-  message(STATUS "Found LAPACK and BLAS")
-endif()
+#set (BLA_VENDOR OpenBLAS)
+#find_package(BLAS)
+#if(BLAS_FOUND)
+#  set(LAPACK_LIBRARIES "")
+#  message(STATUS "Found Vendor sprecific OpenBLAS")
+#else()
+#  set (BLA_VENDOR "")
+#  find_package(LAPACK required)
+#  find_package(BLAS required)  
+#  message(STATUS "Found LAPACK and BLAS")
+#endif()
+
+set (CMAKE_Fortran_FLAGS "-g -O3 -frecursive -fall-intrinsics -Winteger-division -Wmaybe-uninitialized -Wunused-dummy-argument -fcheck=all -fbacktrace")
+find_package(LAPACK REQUIRED)
+find_package(BLAS REQUIRED)
 
 #message("Fortran default extensions = ${CMake_Fortran_SOURCE_FILE_EXTENSIONS}")
 set (CMAKE_Fortran_SOURCE_FILE_EXTENSIONS "f03;F90;f90;for;f;F")
@@ -58,6 +62,7 @@ src/m_get_lambda.f
 src/m_shadow.f90 
 src/m_pd_empirical.f03 
 src/m_pd_ECOM.f90 
+src/m_pd_pulses.f03
 src/m_satinfo.f90 
 src/m_pd_force.f03 
 src/m_veq_rkn768.f03 
@@ -94,6 +99,8 @@ src/m_lagrange.f03
 src/m_interporb.f03 
 src/m_interporb_nom.f03
 src/m_interporb_filt.f03
+src/m_interpclocks.f03
+src/m_interpclock_nom.f03
 src/m_orb_outlier.f03
 src/m_eop_data.f03 
 src/m_keplerorb.f03 
@@ -316,6 +323,7 @@ src/crs_trs.f90
 src/erp_igu.f90 
 src/era_matrix.f90 
 src/orb_frame.f90 
+src/orb_frame2_unit.f90
 src/crf_bff.f90 
 src/GM_de.f90 
 src/CATfile.f90 

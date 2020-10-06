@@ -31,6 +31,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
 !      The satellite attitude models have now been integrated into POD through
 !   the "attitude.f03 subroutine" obtained from the conversion of the 
 !   "GNSS yaw-attitude program" to subroutine 
+! - Last modified:	17 August 2020, Dr. Thomas Papanikolaou, Velocity pulses added  
 ! ----------------------------------------------------------------------
 
 
@@ -47,6 +48,7 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       USE m_writedata
       USE m_shadow
       USE mdl_config
+      USE m_pd_pulses
       IMPLICIT NONE
 
 ! ----------------------------------------------------------------------
@@ -133,13 +135,23 @@ SUBROUTINE force_sum (mjd, rsat, vsat, SFx, SFy, SFz)
       CHARACTER (LEN=5)  :: BDSorbtype
       INTEGER (KIND = 4) :: eclipsf
       REAL (KIND = prec_d) :: beta, Mangle, Yangle(2)
-  REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
+	  REAL (KIND = prec_d) , Dimension(3) :: eBX_nom, eBX_ecl
       INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces
       REAL (KIND = prec_d) :: Yawangle
 ! ----------------------------------------------------------------------
       CHARACTER (LEN=20) :: BLKsat
+! ----------------------------------------------------------------------
+      REAL (KIND = prec_d), DIMENSION(3) :: SFpulses
+      REAL (KIND = prec_d) :: Fpulse (3)
+      REAL (KIND = prec_d) :: PD_pulse_r(3,3), PD_pulse_v(3,3)
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: PD_pulse_param
+      INTEGER (KIND = prec_int8) :: PULSE_param, N_PULSE_param
+      INTEGER (KIND = prec_int2) :: dir_pulse
+      REAL (KIND = prec_d), DIMENSION(3) :: delta_v
+	  REAL (KIND = prec_d) :: mjd_ti_pulse
+! ----------------------------------------------------------------------
 
-
+	
 ! ----------------------------------------------------------------------
 ! Global variables used
 ! ----------------------------------------------------------------------
@@ -696,10 +708,34 @@ End IF
 
 
 ! ----------------------------------------------------------------------
+! Pseudo-stochastic pulses
+! ----------------------------------------------------------------------
+PULSE_param = PULSE_param_glb
+IF (PULSE_param == 1) Then
+	!dir_pulse = PULSE_DIR_glb
+	!CALL pd_pulses (rsat_icrf, vsat_icrf, mjd, delta_v, mjd_ti_pulse, dir_pulse, SFpulses, PD_pulse_r, PD_pulse_v, PD_pulse_param)
+
+	delta_v = DELTA_V_apriori_glb
+	mjd_ti_pulse = MJD_DELTA_V_glb
+	SFpulses = (/ 0.0D0, 0.0D0, 0.0D0 /) 
+	DO i = 1 , 3
+	dir_pulse = i	
+	!CALL pd_pulses (rsat, vsat, mjd_t, delta_v, mjd_ti, dir, Fpulse, PDr, PDv, PD_param)
+	CALL pd_pulses (rsat_icrf, vsat_icrf, mjd, delta_v, mjd_ti_pulse, dir_pulse, Fpulse, PD_pulse_r, PD_pulse_v, PD_pulse_param)
+	SFpulses = SFpulses + Fpulse	
+	END DO 
+!print *,"SFpulses", SFpulses
+	
+Else IF (PULSE_param == 0) Then
+	SFpulses = (/ 0.0D0, 0.0D0, 0.0D0 /)
+End IF
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
 ! Acceleration sum of the force model
 ! ----------------------------------------------------------------------
 !SF = Fgrav_icrf + Fplanets_icrf + Ftides_icrf + Frelativity_icrf + Fsrp_icrf
-SF = SFgrav + SFnongrav + SFemp 		
+SF = SFgrav + SFnongrav + SFemp + SFpulses 		
 SFx = SF(1) 
 SFy = SF(2)
 SFz = SF(3)

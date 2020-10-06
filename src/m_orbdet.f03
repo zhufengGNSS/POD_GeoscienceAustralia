@@ -78,6 +78,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 ! 11 June 2019,	Dr. Thomas Papanikolaou
 ! 				Modification of the orbit integrator step in case of eclipse seasons; 
 !               Resize the orbit and partials matrices according to the initial integrator step prior passing to output arguments 
+! 17/08/2020,	Dr. Thomas Papanikolaou, Pseudo-stochastic pulses (velocity) added  
 ! ----------------------------------------------------------------------
 	  
 	  
@@ -171,11 +172,27 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_back, veqSmatrix_back, veqPmatrix_back
       CHARACTER (LEN=100):: mesg
       INTEGER (KIND = prec_int2) :: pseudobs_opt
+! ----------------------------------------------------------------------
+	  REAL (KIND = prec_q) :: delta_v_corr(3)
+      INTEGER (KIND = prec_int8) :: PULSE_param, N_PULSE_param
+      INTEGER (KIND = prec_int8) :: i_pulse
+! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
 ! Variable initialisation
 CPR_corr = 0.d0
 Bias_corr = 0.d0
+
+! ----------------------------------------------------------------------
+! TEMP: Pseudo-stochastic pulses
+N_PULSE_param_glb = 3
+PULSE_param_glb = 1
+MJD_DELTA_V_glb = MJD_to + 0.5D0
+!DELTA_V_apriori_glb = (/ 0.0D0, 0.0D0, 0.0D0 /) 
+DELTA_V_aposteriori_glb = (/ 1.0D-9, 1.0D-9, 1.0D-9 /) 
+!DELTA_V_aposteriori_glb = (/ 0.0D0, 0.0D0, 0.0D0 /) 
+! ----------------------------------------------------------------------
+PULSE_param = PULSE_param_glb
 	  
 ! ----------------------------------------------------------------------
 ! Read orbit parameterization											
@@ -268,15 +285,15 @@ IF (ECOM_param_glb /= 0) THEN
    IF (ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
    IF (ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
    IF (ECOM_param_glb > 3) PRINT*,'UNKNOWN SRP MODEL IS ACTIVATED :-('
-   ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
+   ALLOCATE (ECOM_coef(NPARAM_EMP_ECOM_glb), STAT = AllocateStatus)
    if (AllocateStatus .ne. 0) then
-        write(mesg, *) "Not enough memory - failed to allocate ECOM_coef, dimension = ", Nparam_glb
+        write(mesg, *) "Not enough memory - failed to allocate ECOM_coef, dimension = ", NPARAM_EMP_ECOM_glb
         call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
    end if
-   ALLOCATE (ECOM_accel_aposteriori(NPARAM_glb), STAT = AllocateStatus)
+   ALLOCATE (ECOM_accel_aposteriori(NPARAM_EMP_ECOM_glb), STAT = AllocateStatus)
    if (AllocateStatus .ne. 0) then
         write(mesg, *) "Not enough memory - failed to allocate ECOM_accel_aposteroiri, ", &
-                "dimension = ", Nparam_glb
+                "dimension = ", NPARAM_EMP_ECOM_glb
         call report('FATAL', pgrm_name, 'orbdet', mesg, 'src/m_orbdet.f03', 1)
    end if
 !srp_i = ECOM_param_glb
@@ -309,6 +326,14 @@ If (ESTmode > 0) then
 Do i = 0 , Niter
 !PRINT *,"Iteration:", i
 
+! ----------------------------------------------------------------------
+! A-priori values of Parameters
+! ----------------------------------------------------------------------
+! Pseudo-stachastic pulses
+DELTA_V_apriori_glb = DELTA_V_aposteriori_glb
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
 ! Orbit Numerical Integration: Equation of Motion and Variational Equations
 ! ----------------------------------------------------------------------
 ! Numerical Integration: Variational Equations
@@ -461,9 +486,9 @@ If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Then
    End If
 
 
-   IF (NPARAM_glb /= PD_Param_ID) THEN
+   IF (NPARAM_EMP_ECOM_glb /= PD_Param_ID) THEN
    PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-   PRINT*,           'NPARAM_glb  =', NPARAM_glb
+   PRINT*,           'NPARAM_EMP_ECOM_glb  =', NPARAM_EMP_ECOM_glb
    PRINT*,           'PD_Param_ID =', PD_Param_ID
    PRINT*,'PROGRAM STOP AT m_orbdet.f03'
    STOP
@@ -476,9 +501,9 @@ IF (ECOM_param_glb == 3) THEN
    ECOM_coef (k) = Xmatrix(6+k,1)
    END DO
 
-   IF (NPARAM_glb /= PD_Param_ID) THEN
+   IF (NPARAM_EMP_ECOM_glb /= PD_Param_ID) THEN
    PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-   PRINT*,           'NPARAM_glb  =', NPARAM_glb
+   PRINT*,           'NPARAM_EMP_ECOM_glb  =', NPARAM_EMP_ECOM_glb
    PRINT*,           'PD_Param_ID =', PD_Param_ID
    PRINT*,'PROGRAM STOP AT m_orbdet.f03'
    STOP
@@ -531,8 +556,22 @@ END IF
 
 ! End of SRP model
 ! **********************************************************************
-  
 
+
+print *,"DELTA_V_apriori_glb", DELTA_V_apriori_glb  
+
+! ----------------------------------------------------------------------
+! Pseudo-stochastic pulses 
+! ----------------------------------------------------------------------
+IF (PULSE_param == 1) Then
+	DO i_pulse = 1 , 3
+		delta_v_corr(i_pulse) = Xmatrix(6 + NPARAM_EMP_ECOM_glb + i_pulse ,1)
+	END DO
+	DELTA_V_aposteriori_glb = DELTA_V_apriori_glb + delta_v_corr
+END IF
+! ----------------------------------------------------------------------
+
+print *,"DELTA_V_aposteriori_glb", DELTA_V_aposteriori_glb
 
 ! ----------------------------------------------------------------------
 

@@ -17,6 +17,7 @@ SUBROUTINE prm_main (PRMfname)
 !                                         on and off some parameters in ECOM models
 !               03-12-2019 Tzupang Tseng: added a function of estimating the
 !                                         parameters in simple box wing model
+! 				17-08-2020 Dr. Thomas Papanikolaou: pseudo-stachastic pulses added  
 ! ----------------------------------------------------------------------
 
 
@@ -464,7 +465,10 @@ Call prm_srp (PRMfname)
 ! ----------------------------------------------------------------------
 ! Number of parameters to be estimated
 NPARAM_glb = 0
-! Empirical parameters
+
+! ----------------------------------------------------------------------
+! Empirical Forces parameters
+! ----------------------------------------------------------------------
 If (EMP_param_glb == 1) Then
 ! Bias parameters
 	If (EMP_Bias_glb(1) == 1) Then
@@ -536,7 +540,22 @@ ELSEIF (ECOM_param_glb < 0) THEN
         STOP
 End If
 
+
+
 ! ----------------------------------------------------------------------
+! Number of parameters of Empirical models (Empirical Forces and/or ECOM models)
+NPARAM_EMP_ECOM_glb = NPARAM_glb
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
+! Pseudo-stochastic pulses parameters
+! ----------------------------------------------------------------------
+If (PULSE_param_glb == 1) Then
+		NPARAM_glb = NPARAM_glb + N_PULSE_param_glb
+END IF
+
+! ----------------------------------------------------------------------
+
 
 if (1<0) then
 !if (0 .eq. 0) then

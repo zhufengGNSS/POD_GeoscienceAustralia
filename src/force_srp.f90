@@ -385,9 +385,9 @@ IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
     End If
 
 
-    IF (NPARAM_glb /= PD_Param_ID) THEN
+    IF (NPARAM_EMP_ECOM_glb /= PD_Param_ID) THEN
     PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-    PRINT*,           'NPARAM_glb  =', NPARAM_glb
+    PRINT*,           'NPARAM_EMP_ECOM_glb  =', NPARAM_EMP_ECOM_glb
     PRINT*,           'PD_Param_ID =', PD_Param_ID
     PRINT*,'PROGRAM STOP AT force_srp.f90'
     STOP
@@ -396,9 +396,9 @@ IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
 ELSE IF (ECOM_param_glb == 3) THEN
     PD_Param_ID = 7
 
-   IF (NPARAM_glb /= PD_Param_ID) THEN
+   IF (NPARAM_EMP_ECOM_glb /= PD_Param_ID) THEN
    PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-   PRINT*,           'NPARAM_glb  =', NPARAM_glb
+   PRINT*,           'NPARAM_EMP_ECOM_glb  =', NPARAM_EMP_ECOM_glb
    PRINT*,           'PD_Param_ID =', PD_Param_ID
    PRINT*,'PROGRAM STOP AT force_srp.f90'
    STOP
@@ -413,7 +413,7 @@ if (AllocateStatus .ne. 0) then
         call report('FATAL', pgrm_name, 'force_srp', mesg, 'src/force_srp.f90', 1)
 endif
 
-!ALLOCATE (srpcoef(NPARAM_glb), STAT = AllocateStatus)
+!ALLOCATE (srpcoef(NPARAM_EMP_ECOM_glb), STAT = AllocateStatus)
 
 srpcoef = 0.d0
 

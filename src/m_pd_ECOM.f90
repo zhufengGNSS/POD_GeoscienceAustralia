@@ -366,9 +366,9 @@ ELSEIF (ECOM_param_glb == 3) THEN
 END IF
 
 
-IF (NPARAM_glb /= PD_Param_ID) THEN
+IF (NPARAM_EMP_ECOM_glb /= PD_Param_ID) THEN
     PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-    PRINT*,           'NPARAM_glb  =', NPARAM_glb
+    PRINT*,           'NPARAM_EMP_ECOM_glb  =', NPARAM_EMP_ECOM_glb
     PRINT*,           'PD_Param_ID =', PD_Param_ID
     PRINT*, 'PROGRAM STOP AT m_pd_ECOM.f90'
     STOP

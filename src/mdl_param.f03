@@ -11,6 +11,7 @@ MODULE mdl_param
 ! Changes:      12-12-2018 Dr. Tzupang Tseng : added specific global parameters
 !                                              for ECOM-based SRP model
 !                5-03-2020 John Donovan: make sinex file a global array
+! 			17 August 2020 Dr. Thomas Papanikolaou: pseudo-stachastic pulses added  
 ! ----------------------------------------------------------------------
 
       USE mdl_precision
@@ -159,6 +160,11 @@ INTEGER (KIND = prec_int2) :: Frame_EmpiricalForces_glb
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
+! Number of parameters of Empirical models (Empirical Forces and/or ECOM models)
+INTEGER (KIND = prec_int8) :: NPARAM_EMP_ECOM_glb
+! ----------------------------------------------------------------------
+
+! ----------------------------------------------------------------------
 ! Variational Equations
 ! ----------------------------------------------------------------------
 ! Numerical Integration of Variational Equations
@@ -237,6 +243,16 @@ END TYPE
 
 TYPE (sinex) satellites(MAX_SAT)
         INTEGER (Kind=8)          SAT_COUNT ! actual number of satellites
+! ----------------------------------------------------------------------
 
+! ----------------------------------------------------------------------
+! Pseudo-stachstic pulses
+! ----------------------------------------------------------------------
+      INTEGER (KIND = prec_int8) :: PULSE_param_glb
+      INTEGER (KIND = prec_int8) :: N_PULSE_param_glb
+	  REAL (KIND = prec_q) :: MJD_DELTA_V_glb
+	  REAL (KIND = prec_q) :: DELTA_V_apriori_glb(3)
+	  REAL (KIND = prec_q) :: DELTA_V_aposteriori_glb(3)
+! ----------------------------------------------------------------------
 
 END
