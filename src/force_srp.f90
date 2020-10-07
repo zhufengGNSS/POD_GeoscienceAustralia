@@ -385,9 +385,9 @@ IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
     End If
 
 
-    IF (NPARAM_EMP_ECOM_glb /= PD_Param_ID) THEN
+    IF (ECOMNUM /= PD_Param_ID) THEN
     PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-    PRINT*,           'NPARAM_EMP_ECOM_glb  =', NPARAM_EMP_ECOM_glb
+    PRINT*,           'ECOMNUM     =', ECOMNUM
     PRINT*,           'PD_Param_ID =', PD_Param_ID
     PRINT*,'PROGRAM STOP AT force_srp.f90'
     STOP
@@ -396,9 +396,9 @@ IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
 ELSE IF (ECOM_param_glb == 3) THEN
     PD_Param_ID = 7
 
-   IF (NPARAM_EMP_ECOM_glb /= PD_Param_ID) THEN
+   IF (ECOMNUM /= PD_Param_ID) THEN
    PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-   PRINT*,           'NPARAM_EMP_ECOM_glb  =', NPARAM_EMP_ECOM_glb
+   PRINT*,           'ECOMNUM     =', ECOMNUM
    PRINT*,           'PD_Param_ID =', PD_Param_ID
    PRINT*,'PROGRAM STOP AT force_srp.f90'
    STOP

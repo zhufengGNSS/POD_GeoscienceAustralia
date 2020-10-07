@@ -161,9 +161,9 @@ SUBROUTINE pd_force (mjd, rsat, vsat, Fvec, PDr, PDv, PD_param)
       INTEGER (KIND = prec_int2) :: dir_pulse
       REAL (KIND = prec_d), DIMENSION(3) :: delta_v
 	  REAL (KIND = prec_d) :: mjd_ti_pulse
-      INTEGER (KIND = prec_int8) :: N1_param
+      INTEGER (KIND = prec_int8) :: N1_param, N2_param
 ! ----------------------------------------------------------------------
-
+      INTEGER (KIND = prec_int2) :: sz1, sz2, sz3, sz4
 
 ! ----------------------------------------------------------------------
 ! Global variables used
@@ -696,13 +696,39 @@ PDv = 0.d0
 ! ----------------------------------------------------------------------
 IF (PULSE_param_glb == 0) THEN
 
-IF (EMP_param_glb == 1) Then
-	PD_param = PD_EMP_param
+IF (EMP_param_glb == 1 .AND. ECOM_param_glb == 0) THEN
+PD_param = PD_EMP_param
+ELSE IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 0) THEN
+PD_param = PD_ECOM_param
+ELSE IF (EMP_param_glb == 1 .AND. ECOM_param_glb /= 0) THEN
+sz1 = SIZE(PD_EMP_param,DIM=1)
+sz2 = SIZE(PD_EMP_param,DIM=2)
+sz3 = SIZE(PD_ECOM_param,DIM=1)
+sz4 = SIZE(PD_ECOM_param,DIM=2)
+
+
+IF (sz1 /= sz3) THEN
+PRINT*,'SUBROUTINE : m_pd_force.f03'
+PRINT*,'THE NUMBER OF DIMENSION COLUMS ARE NOT CONSISTENT.'
+PRINT*,'THE NUMBER OF EMPIRICAL PARAMETERS :', sz1
+PRINT*,'THE NUMBER OF ECOM-BASED SRP PARAMETERS :', sz3
+PRINT*,'THE EXPECTED NUMBER : 3'
+STOP
 END IF
 
-IF (ECOM_param_glb /= 0) Then
-	PD_param = PD_ECOM_param
+IF ((sz2+sz4) /= NPARAM_glb) THEN
+PRINT*,'SUBROUTINE : m_pd_force.f03'
+PRINT*,'THE NUMBER OF FORCE PARAMETERS ARE NOT CONSISTENT.'
+PRINT*,'THE NUMBER OF EMPIRICAL PARAMETERS :', sz2
+PRINT*,'THE NUMBER OF ECOM-BASED SRP PARAMETERS :', sz4
+PRINT*,'THE EXPECTED NUMBER :', NPARAM_glb
+STOP
 END IF
+
+PD_param(1:sz1,1:sz2) = PD_EMP_param
+PD_param(1:sz3,sz2+1:sz2+sz4) = PD_ECOM_param 
+ 
+End IF
 
 END IF
 
@@ -710,7 +736,8 @@ END IF
 ! Case of pseudo-stochastic pulses added
 IF (PULSE_param_glb /= 0) THEN
 
-IF (EMP_param_glb == 1) Then
+IF (EMP_param_glb == 1 .AND. ECOM_param_glb == 0) THEN
+
 	N1_param = size(PD_EMP_param, DIM = 2)
 	DO i = 1 , 3
 	DO j = 1 , N1_param
@@ -723,9 +750,9 @@ IF (EMP_param_glb == 1) Then
 	PD_param(i,j + N1_param) = PD_pulses_param(i,j)
 	END DO
 	END DO
-End IF
 
-IF (ECOM_param_glb /= 0) Then
+ELSE IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 0) THEN
+
 	N1_param = size(PD_ECOM_param, DIM = 2)
 	DO i = 1 , 3
 	DO j = 1 , N1_param
@@ -738,14 +765,19 @@ IF (ECOM_param_glb /= 0) Then
 	PD_param(i,j + N1_param) = PD_pulses_param(i,j)
 	END DO
 	END DO
-END IF
+
+ELSE IF (EMP_param_glb == 1 .AND. ECOM_param_glb /= 0) THEN
+
+sz1 = SIZE(PD_EMP_param,DIM=1)
+N1_param = size(PD_EMP_param, DIM = 2)
+N2_param = size(PD_ECOM_param, DIM = 2)
+N_pulse_param = size(PD_pulses_param, DIM = 2)
+
+PD_param(1:sz1,1:N1_param) = PD_EMP_param
+PD_param(1:sz1,N1_param+1 : N1_param+N2_param) = PD_ECOM_param 
+PD_param(1:sz1,N1_param+N2_param+1 : N1_param+N2_param+N_pulse_param) = PD_pulses_param 
 
 END IF
-!print*,'ECOM_param_glb=',ECOM_param_glb
-!print*,'PD_param=',PD_param
-!print*,'NPARAM_glb=',NPARAM_glb
-!pause
-
 ! ----------------------------------------------------------------------
 
 END SUBROUTINE

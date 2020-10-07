@@ -15,7 +15,8 @@ MODULE mdl_param
 ! ----------------------------------------------------------------------
 
       USE mdl_precision
-      use iso_c_binding, only : c_int, c_long, c_double, c_short
+! Remove bind(c) bits for now - can't make them work. (SCM 20200430)
+!      use iso_c_binding, only : c_int, c_long, c_double, c_short
       IMPLICIT NONE
       SAVE 			
 	  
@@ -137,7 +138,7 @@ INTEGER (KIND = prec_int2) :: FMOD_NONGRAV(3)
 
 ! ECOM-based solar radiation pressure model
 ! ----------------------------------------------------------------------
-INTEGER (KIND = prec_int2) :: ECOM_param_glb
+INTEGER (KIND = prec_int8) :: ECOMNUM
 INTEGER (KIND = prec_int2) :: ECOM_Bias_glb(3)
 INTEGER (KIND = prec_int2) :: ECOM_CPR_glb(3)
 !REAL (KIND = prec_q) :: ECOM_accel_glb(9)
@@ -148,7 +149,7 @@ REAL (KIND = prec_q), DIMENSION(:), ALLOCATABLE :: ECOM_accel_glb
 
 ! ----------------------------------------------------------------------
 ! Empirical forces
-INTEGER (KIND = prec_int2) :: EMP_param_glb
+INTEGER (KIND = prec_int8) :: EMPNUM
 INTEGER (KIND = prec_int2) :: EMP_Bias_glb(3)
 REAL (KIND = prec_q) :: Bias_accel_glb(3), Bias_accel_aposteriori(3)
 
@@ -221,21 +222,40 @@ INTEGER (KIND = prec_int8) :: NPARAM_glb
 ! boundary.  'Bus' errors may occur otherwise.
 ! NB Satellites can have different PRNs for different time windows
 ! ----------------------------------------------------------------------
-TYPE, bind(c) :: sinex
-        REAL (c_double)      :: MASS
-        REAL (c_double)      :: E_PX, E_PY, E_PZ ! P-eccentricity (not epoch bound)
-        REAL (c_double)      :: E_LX, E_LY, E_LZ ! L-eccentricity (not epoch bound)
-        REAL (c_double)      :: COM_X, COM_Y, COM_Z ! center-of-mass
-        REAL (c_double)      :: TSTART, TSTOP
-        INTEGER (c_int)      :: startyr, startdoy, startsod
-        INTEGER (c_int)      :: stopyr, stopdoy, stopsod
-        INTEGER (c_int)      :: POWER
-        INTEGER (c_int)      :: FRQCHN  ! only for GLONASS
-        INTEGER (c_short)    :: BLKID   ! see above
-        CHARACTER (len=20)   :: BLKTYP  ! character definition of above
-        CHARACTER (len=10)   :: COSPAR  ! ???
-        CHARACTER (len=5)    :: SVN
-        CHARACTER (len=4)    :: PRN
+!!!! Remove bind(c) bits for now - can't make them work. (SCM 20200430) !!!
+!TYPE, bind(c) :: sinex
+!        REAL (c_double)      :: MASS
+!        REAL (c_double)      :: E_PX, E_PY, E_PZ ! P-eccentricity (not epoch bound)
+!        REAL (c_double)      :: E_LX, E_LY, E_LZ ! L-eccentricity (not epoch bound)
+!        REAL (c_double)      :: COM_X, COM_Y, COM_Z ! center-of-mass
+!        REAL (c_double)      :: TSTART, TSTOP
+!        INTEGER (c_int)      :: startyr, startdoy, startsod
+!        INTEGER (c_int)      :: stopyr, stopdoy, stopsod
+!        INTEGER (c_int)      :: POWER
+!        INTEGER (c_int)      :: FRQCHN  ! only for GLONASS
+!        INTEGER (c_short)    :: BLKID   ! see above
+!        CHARACTER (len=20)   :: BLKTYP  ! character definition of above
+!        CHARACTER (len=10)   :: COSPAR  ! ???
+!        CHARACTER (len=5)    :: SVN
+!        CHARACTER (len=4)    :: PRN
+!END TYPE 
+!!!!
+       
+TYPE :: sinex
+        REAL (kind=prec_q)       :: MASS
+        REAL (kind=prec_q)       :: E_PX, E_PY, E_PZ ! P-eccentricity (not epoch bound)
+        REAL (kind=prec_q)       :: E_LX, E_LY, E_LZ ! L-eccentricity (not epoch bound)
+        REAL (kind=prec_q)       :: COM_X, COM_Y, COM_Z ! center-of-mass
+        REAL (kind=prec_q)       :: TSTART, TSTOP
+        INTEGER (kind=prec_int4) :: startyr, startdoy, startsod
+        INTEGER (kind=prec_int4) :: stopyr, stopdoy, stopsod
+        INTEGER (kind=prec_int4) :: POWER
+        INTEGER (kind=prec_int4) :: FRQCHN  ! only for GLONASS
+        INTEGER (kind=prec_int2) :: BLKID   ! see above
+        CHARACTER (len=20)       :: BLKTYP  ! SVN Block Type Identifier
+        CHARACTER (len=10)       :: COSPAR  ! COSPAR ID
+        CHARACTER (len=4)        :: SVN     ! Satellite SVN Identifier
+        CHARACTER (len=3)        :: PRN     ! Satellite PRN Identifier
 END TYPE        
 
         INTEGER (Kind=4)          MAX_SAT ! Maximum we can handle
