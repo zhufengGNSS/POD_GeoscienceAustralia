@@ -1,6 +1,6 @@
 pod_data:    # Use initial condition input data below
 #---------------------------------------------------------------------------
-   enable: false
+   enable: true
    satellite_PRN:    G23
    reference_frame:  ITRF
    time_scale:       GPS
@@ -8,16 +8,21 @@ pod_data:    # Use initial condition input data below
    initial_epoch: 2015-04-12-00.0000 # YYYY-MM-DD-SEC.DSEC
    state_vector:  6804571.8859999999,  -15232535.475000001,  -20431678.779000003, 1697.1661907155067,  2026.6151679363102,  -982.28787769004703 # X, Y, Z, VX, VY, VZ
  
-pod_options:
+pod_options: 
+# can only choose one option here
 #----------------------------------------------------------------------
    pod_mode_fit:     true   # pod_mode = 1 Orbit Determination (pseudo-observations; orbit fitting)
    pod_mode_predict: false  # pod_mode = 2 Orbit Determination and Prediction
    pod_mode_eqm_int: false  # pod_mode = 3 Orbit Integration (Equation of Motion only)
    pod_mode_ic_int:  false  # pod_mode = 4 Orbit Integration and Partials (Equation of Motion and Variational Equations)
       
+# can only choose one option here
 #----------------------------------------------------------------------
    ic_input_format_sp3:  true   # Input a-priori orbit in sp3 format
    ic_input_format_icf:  false  # Input a-priori orbit in POD Initial Conditions File (ICF) format
+
+# can only choose one option here
+#----------------------------------------------------------------------   
    ic_input_refsys_itrf: true   # Initial Conditions Reference Frame: ITRF, ICRF
    ic_input_refsys_icrf: false  # Initial Conditions Reference Frame: ITRF, ICRF
 
@@ -36,23 +41,26 @@ pod_options:
 #---------------------------------------------------------------------------
 # External Orbit Comparison
    ext_orbit_enabled: true
-   ext_orbit_type_sp3:       true         # Orbit data in sp3 format (including position and velocity vectors)
-   ext_orbit_type_iterp:     false        # Interpolated orbit based on Lagrange interpolation of sp3 file
+   ext_orbit_type_sp3:       false        # Orbit data in sp3 format (including position and velocity vectors)
+   ext_orbit_type_iterp:     true        # Interpolated orbit based on Lagrange interpolation of sp3 file
    ext_orbit_type_kepler:    false        # Keplerian orbit
    ext_orbit_filename:       igs19424.sp3 # Extrenal (comparison)  orbit filename					
    ext_orbit_interp_step:    900          # Interval (sec) of the interpolated/Kepler orbit
    ext_orbit_interp_points:  12           # Number of data points used in Lagrange interpolation
-   ext_orbit_refsys_itrf: true            # External orbit reference frame - ITRF 
-   ext_orbit_refsys_icrf: false           # External orbit reference frame - ICRF
+
+# can only choose one option here
+#----------------------------------------------------------------------   
+   ext_orbit_frame_itrf: true            # External orbit reference frame - ITRF 
+   ext_orbit_frame_icrf: false           # External orbit reference frame - ICRF
  
 #---------------------------------------------------------------------------
 # Earth Orientation - EOP solution options:
    EOP_soln_c04:   true         # IERS C04 solution : EOP_sol = 1
    EOP_soln_rapid: false        # IERS rapid service/prediction center (RS/PC) Daily : EOP_sol = 2
    EOP_soln_igs:   false        # IGS ultra-rapid ERP + IERS RS/PC Daily (dX,dY) : EOP_sol = 3
-   EOP_soln_c04_fname: eopc04_14_IAU2000.62-now 		
-   EOP_soln_rapid_fname: finals2000A.daily 		
-   ERP_soln_igs_fname: igu18543_12.erp	
+   EOP_soln_c04_file: eopc04_14_IAU2000.62-now 		
+   EOP_soln_rapid_file: finals2000A.daily 		
+   ERP_soln_igs_file: igu18543_12.erp	
    EOP_soln_interp_points: 4    # EOP solution interpolation points 	
  
 # ---------------------------------------------------------------------------
@@ -61,13 +69,16 @@ pod_options:
    iau_model_2006: false        # IAU2006/2000A: iau_pn_model = 2006
 
 #---------------------------------------------------------------------------
-# Numerical integration method
-   integrator_method: RKN7      # Runge-Kutta-Nystrom 7th order RKN7(6): RKN7, Runge-Kutta 4th order: RK4, Runge-Kutta 8th order RK8(7)13: RK8
+# Numerical integration method      
+# Runge-Kutta-Nystrom 7th order RKN7(6): RKN7, Runge-Kutta 4th order: RK4, Runge-Kutta 8th order RK8(7)13: RK8
+   RK4_integrator_method: false
+   RKN7_integrator_method: true
+   RK8_integrator_method: false
    integrator_step: 900         # Integrator stepsize in seconds
 
 #---------------------------------------------------------------------------
 # Gravity model file
-   gravity_model_filename: goco05s.gfc  # goco05s.gfc, eigen-6s2.gfc, ITSG-Grace2014k.gfc	
+   gravity_model_file: goco05s.gfc  # goco05s.gfc, eigen-6s2.gfc, ITSG-Grace2014k.gfc	
 
 #---------------------------------------------------------------------------
 # Planetary/Lunar ephemeris - JPL DE Ephemeris
@@ -115,41 +126,33 @@ pod_options:
 # full_boxwing   : use full box-wing model from repro3 routines - mode 3
 # none           : no a priori SRP model - mode 0
    srp_apriori_model: 
-      default: none
-      GPS:     cannon_ball
-      GPS-IIF: simple_boxwing
-      G01:     full_boxwing
-      GAL:     full_boxwing
-      GLO:     simple_boxwing
-      BDS:     simple_boxwing
-
+      no_model:   true
+      cannon_ball_model:   false
+      simple_boxwing_model:   false
+      full_boxwing_model:     false
 #----------------------------------------------------------------------
-# SRP parameterisation - Default srp_parameters  = ECOM1
+# SRP parameterisation - Default srp_parameters  = ECOM1 + EMP
    srp_parameters:
-      default:
-         D_Bias:  true 
-         Y_bias:  true 
-         B_bias:  true
-         R_bias:  false 
-         T_bias:  false
-         N_bias:  false
-         D_cpr:   true 
-         Y_cpr:   true 
-         B_cpr:   true 
-         D_2_cpr: false 
-         D_4_cpr: false
-         R_cpr:   false
-         T_cpr:   false
-         N_cpr:   false
-
-# GPS BLK IIF use ECOM2 parameters
-      GPS-IIF:
-         D_bias:   true
-         Y_bias:   true 
-         B_bias:   true 
-         D_2_cpr: false 
-         D_4_cpr: false
-         B_cpr:   true
+      ECOM_D_bias:  true 
+      ECOM_Y_bias:  true 
+      ECOM_B_bias:  true
+      ECOM_R_bias:  false 
+      ECOM_T_bias:  false
+      ECOM_N_bias:  false
+      EMP_R_bias:   true
+      EMP_T_bias:   true
+      EMP_N_bias:   true
+      ECOM_D_cpr:   true 
+      ECOM_Y_cpr:   true 
+      ECOM_B_cpr:   true 
+      ECOM_D_2_cpr: false 
+      ECOM_D_4_cpr: false
+      ECOM_R_cpr:   false
+      ECOM_T_cpr:   false
+      ECOM_N_cpr:   false
+      EMP_R_cpr:    true
+      EMP_T_cpr:    true
+      EMP_N_cpr:    true
 
 eqm_options:
 #---------------------------------------------------------------------------
@@ -161,8 +164,8 @@ eqm_options:
          static_gravity_model:    false   # Static global gravity field model        : gravity_model = 1
          time_variable_model:     true    # Time-variable global gravity field model : gravity_model = 2
          iers_geopotential_model: false   # IERS conventional geopotential model     : gravity_model = 3
-         gravity_degree_max:      15      # Gravity model maximum degree/order (d/o)
-         timevar_degree_max:      15      # Time-variable coefficients maximum d/o
+      gravity_degree_max:      15      # Gravity model maximum degree/order (d/o)
+      timevar_degree_max:      15      # Time-variable coefficients maximum d/o
 
 #---------------------------------------------------------------------------
 # Planetary Gravitational Forces
@@ -232,3 +235,53 @@ veq_options:
       solar_radiation: true
       earth_radiation: false
       antenna_thrust:  false
+
+# put any system, block or PRN overrides here
+overrides:
+   system:
+      GPS:
+         srp_apriori_model: 
+            no_model:   false
+            cannon_ball_model:   true
+            simple_boxwing_model:   false
+            full_boxwing_model:     false
+      GAL:
+         srp_apriori_model: 
+            no_model:   false
+            cannon_ball_model:   false
+            simple_boxwing_model:   false
+            full_boxwing_model:     true
+      GLO:
+         srp_apriori_model: 
+            no_model:   false
+            cannon_ball_model:   false
+            simple_boxwing_model:   true
+            full_boxwing_model:     false
+      BDS:
+         srp_apriori_model: 
+            no_model:   false
+            cannon_ball_model:   false
+            simple_boxwing_model:   true
+            full_boxwing_model:     false
+   block:
+      GPS-IIF:
+         srp_apriori_model: 
+            no_model:   false
+            cannon_ball_model:   false
+            simple_boxwing_model:   true
+            full_boxwing_model:     false
+# GPS BLK IIF use ECOM2 parameters
+         srp_parameters:
+            D_bias:   true
+            Y_bias:   true 
+            B_bias:   true 
+            D_2_cpr: false 
+            D_4_cpr: false
+            B_cpr:   true
+   prn:
+      G01:
+         srp_apriori_model: 
+            no_model:   false
+            cannon_ball_model:   false
+            simple_boxwing_model:   false
+            full_boxwing_model:     true

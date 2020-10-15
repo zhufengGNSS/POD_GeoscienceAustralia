@@ -394,7 +394,7 @@ src/yaml_version.F90
 src/test_yaml.F90
 )
 
-link_directories(/usr/lib64 ${CMAKE_BINARY_DIR}/lib)
+link_directories(/usr/lib64 ${CMAKE_BINARY_DIR}/../lib)
 
 target_include_directories(pod PUBLIC
 	.
