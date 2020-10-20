@@ -30,7 +30,7 @@ program test_yaml
    type (type_error), target :: my_error
    type (type_error), pointer :: my_error_p
    type (type_dictionary), pointer :: root_dict, pod_data_dict, pod_options_dict, eqm_options_dict, veq_options_dict
-   type (type_dictionary), pointer :: srp_dict, srp_parameters_dict
+   type (type_dictionary), pointer :: srp_dict, srp_parameters_dict, integ_dict
    type (type_dictionary), pointer :: gravity_dict, gravity_model_dict, planets_dict, tides_dict, rel_dict, non_grav_dict
    type (type_dictionary), pointer :: overrides_dict
    logical pod_data_enabled, ext_orbit_enabled, estimate_params, write_sp3_velocities, write_partial_velocities
@@ -41,7 +41,7 @@ program test_yaml
    integer*2 ext_orbit_opt, get_ext_orbit_opt
    integer*2 ext_orbit_frame, get_ext_orbit_frame
    integer*2 iau_model, get_iau_model
-   integer*2 integrate_method, get_integrator_method
+   integer*2 eqm_integrate_method, veq_integrate_method, get_integrator_method
    integer*2 ECOM_estimator, get_ECOM_estimator
    integer*2 apriori_srp, get_apriori_srp
    integer*2 eqm_gravity_model, veq_gravity_model, get_gravity_model
@@ -68,8 +68,8 @@ program test_yaml
    character(128) gravity_filename, ephemeris_header, ephemeris_data_file, ocean_tides_file
 
    integer*4 orbit_step, orbit_points, orbit_arc_determination, orbit_arc_prediction, orbit_arc_backwards
-   integer*4 ext_orbit_steps, ext_orbit_points, eop_option, eop_int_points, integ_stepsize
-   integer*4 estimator_iterations, estimator_procedure
+   integer*4 ext_orbit_steps, ext_orbit_points, eop_option, eop_int_points, eqm_integ_stepsize
+   integer*4 estimator_iterations, estimator_procedure, veq_integ_stepsize
 
    nullify(root_dict)
    nullify(pod_data_dict)
@@ -85,6 +85,7 @@ program test_yaml
    nullify(rel_dict)
    nullify(non_grav_dict)
    nullify(overrides_dict)
+   nullify(integ_dict)
 
    my_error_p => my_error
    pod_mode = -1
@@ -148,7 +149,6 @@ program test_yaml
       end if
       iau_model = get_iau_model(pod_options_dict, my_error)
       call get_earth_orientation_params(pod_options_dict, my_error, eop_option, eop_filename, eop_int_points)
-      integrate_method = get_integrator_method(pod_options_dict, my_error, integ_stepsize)
       satsinex_filename = pod_options_dict%get_string("satsinex_filename", "", my_error_p)
       leapsecond_filename = pod_options_dict%get_string("leapsecond_filename", "", my_error_p)
       gravity_filename = pod_options_dict%get_string("gravity_model_file", "", my_error_p)
@@ -217,6 +217,12 @@ program test_yaml
          write (*,*) "could not find non_gravitational_effects label in eqm_options"
          STOP
       end if
+      integ_dict = eqm_options_dict%get_dictionary("integration_options", .true., my_error_p)
+      if (.not.associated(integ_dict)) then
+         write (*,*) "could not find integration_options label in eqm_options"
+         STOP
+      end if
+
       eqm_gravity_enabled = gravity_dict%get_logical("enabled", .false., my_error_p)
       eqm_gravity_model = get_gravity_model(gravity_model_dict, my_error, "eqm")
       eqm_gravity_max_degree = gravity_dict%get_integer("gravity_degree_max", -1, my_error_p)
@@ -228,6 +234,7 @@ program test_yaml
       eqm_rel_effects_enabled = rel_dict%get_logical("enabled", .false., my_error_p)
       eqm_non_grav_effects_enabled = non_grav_dict%get_logical("enabled", .false., my_error_p)
       eqm_non_grav_effects = get_non_grav_effects(non_grav_dict, my_error, "eqm")
+      eqm_integrate_method = get_integrator_method(integ_dict, my_error, eqm_integ_stepsize)
    end if
 
    veq_options_dict = root_dict%get_dictionary("veq_options", .true., my_error_p)
@@ -265,6 +272,11 @@ program test_yaml
          write (*,*) "could not find non_gravitational_effects label in veq_options"
          STOP
       end if
+      integ_dict = veq_options_dict%get_dictionary("integration_options", .true., my_error_p)
+      if (.not.associated(integ_dict)) then
+         write (*,*) "could not find integration_options label in veq_options"
+         STOP
+      end if
       veq_gravity_enabled = gravity_dict%get_logical("enabled", .false., my_error_p)
       veq_gravity_model = get_gravity_model(gravity_model_dict, my_error, "veq")
       veq_gravity_max_degree = gravity_dict%get_integer("gravity_degree_max", -1, my_error_p)
@@ -276,6 +288,7 @@ program test_yaml
       veq_rel_effects_enabled = rel_dict%get_logical("enabled", .false., my_error_p)
       veq_non_grav_effects_enabled = non_grav_dict%get_logical("enabled", .false., my_error_p)
       veq_non_grav_effects = get_non_grav_effects(non_grav_dict, my_error, "veq")
+      veq_integrate_method = get_integrator_method(integ_dict, my_error, veq_integ_stepsize)
    end if
 
 end program

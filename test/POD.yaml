@@ -69,14 +69,6 @@ pod_options:
    iau_model_2006: false        # IAU2006/2000A: iau_pn_model = 2006
 
 #---------------------------------------------------------------------------
-# Numerical integration method      
-# Runge-Kutta-Nystrom 7th order RKN7(6): RKN7, Runge-Kutta 4th order: RK4, Runge-Kutta 8th order RK8(7)13: RK8
-   RK4_integrator_method: false
-   RKN7_integrator_method: true
-   RK8_integrator_method: false
-   integrator_step: 900         # Integrator stepsize in seconds
-
-#---------------------------------------------------------------------------
 # Gravity model file
    gravity_model_file: goco05s.gfc  # goco05s.gfc, eigen-6s2.gfc, ITSG-Grace2014k.gfc	
 
@@ -195,6 +187,15 @@ eqm_options:
       earth_radiation: true
       antenna_thrust:  true
 
+#---------------------------------------------------------------------------
+# Numerical integration method      
+# Runge-Kutta-Nystrom 7th order RKN7(6): RKN7, Runge-Kutta 4th order: RK4, Runge-Kutta 8th order RK8(7)13: RK8
+   integration_options:
+      RK4_integrator_method: false
+      RKN7_integrator_method: true
+      RK8_integrator_method: false
+      integrator_step: 900         # Integrator stepsize in seconds
+
 veq_options:
 #---------------------------------------------------------------------------
 # Gravitational Forces 
@@ -236,6 +237,15 @@ veq_options:
       earth_radiation: false
       antenna_thrust:  false
 
+#---------------------------------------------------------------------------
+# Numerical integration method      
+# Runge-Kutta-Nystrom 7th order RKN7(6): RKN7, Runge-Kutta 4th order: RK4, Runge-Kutta 8th order RK8(7)13: RK8
+   integration_options:
+      RK4_integrator_method: false
+      RKN7_integrator_method: true
+      RK8_integrator_method: false
+      integrator_step: 900         # Integrator stepsize in seconds
+
 # put any system, block or PRN overrides here
 overrides:
    system:
@@ -272,12 +282,12 @@ overrides:
             full_boxwing_model:     false
 # GPS BLK IIF use ECOM2 parameters
          srp_parameters:
-            D_bias:   true
-            Y_bias:   true 
-            B_bias:   true 
-            D_2_cpr: false 
-            D_4_cpr: false
-            B_cpr:   true
+            ECOM_D_bias:   true
+            ECOM_Y_bias:   true 
+            ECOM_B_bias:   true 
+            ECOM_D_2_cpr: false 
+            ECOM_D_4_cpr: false
+            ECOM_B_cpr:   true
    prn:
       G01:
          srp_apriori_model: 
