@@ -89,7 +89,8 @@
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbit_resR  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbit_resT  
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbit_resN  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbit_resN
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orbpara_sigma
 ! ----------------------------------------------------------------------
       REAL (KIND = prec_d) :: mjd
       INTEGER (KIND = prec_int8) :: GPS_week, GPSweek_mod1024
@@ -391,6 +392,7 @@ IF (SRP_MOD_arp == 3) PRINT*,'use box-wing model from repro3 routines as a prior
 ! ---------------------------------------------------------------------
 ! ECOM_param = 1 (ECOM1), forces estimated in D,Y,B directions
 ! ECOM_param = 2 (ECOM2), forces estimated in D,Y,B directions
+! ECOM_param =12 (ECOM12), a hybrid ECOM1+ECOM2 model
 ! ECOM_param = 3 (SBOXW), forces estimated in D,Y,B,X,Z directions
 ! ECOM_param = 0, no parameters are estimated
 
@@ -622,7 +624,7 @@ Call write_prmfile (VEQfname, fname_id, param_id, param_value)
 ! ----------------------------------------------------------------------
 ! POD of the GNSS satellite constellations
 ! ----------------------------------------------------------------------
-CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbits_partials_icrf, orbits_partials_itrf, &
+CALL pod_gnss (EQMfname, VEQfname, PRNmatrix, orbpara_sigma, orbits_partials_icrf, orbits_partials_itrf, &
                orbits_ics_icrf,orbit_resR, orbit_resT, orbit_resN, orbdiff2)
 ! ----------------------------------------------------------------------
 
@@ -661,8 +663,8 @@ GPS_day = ( GPS_wsec/86400.0D0 )
 !orbits_partials_fname = 'orbits_partials_icrf.orb'
 write (orbits_partials_fname, FMT='(A3,I4,I1,A20)') 'gag', (GPS_week), INT(GPS_day) ,'_orbits_partials.out'
 !CALL writeorbit_multi (orbits_partials_icrf, PRNmatrix, orbits_partials_fname)
-CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_icrf, PRNmatrix, & 
-						orbits_partials_fname, EQMfname, VEQfname, POD_version)
+CALL writeorbit_multi (orbits_partials_icrf, orbits_partials_itrf, orbits_ics_icrf, PRNmatrix, orbpara_sigma, & 
+                       orbits_partials_fname, EQMfname, VEQfname, POD_version)
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------

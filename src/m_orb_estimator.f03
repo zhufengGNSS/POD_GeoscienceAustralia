@@ -23,7 +23,7 @@ MODULE m_orb_estimator
 Contains
 
 
-SUBROUTINE orb_estimator(orbref, veqZarray, veqParray, orbobs, Xmatrix, Wmatrix, Amatrix)
+SUBROUTINE orb_estimator(orbref, veqZarray, veqParray, orbobs, Xmatrix, Wmatrix, Amatrix, Vmatrix, Xsigma)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: orb_estimator
@@ -38,6 +38,10 @@ SUBROUTINE orb_estimator(orbref, veqZarray, veqParray, orbobs, Xmatrix, Wmatrix,
 !
 ! Output arguments:
 ! - Xmatrix: 	Optimum estimated parameters corrections (initial state vector + additional parameters)
+! - Wmatrix:    Observed-Computed matrix
+! - Amatrix:    Design matrix
+! - Vmatrix:    Residual matrix
+! - Xsigma :    Unknow parameter sigma matrix
 ! ----------------------------------------------------------------------
 ! Dr. Thomas Papanikolaou, Geoscience Australia            19 March 2018
 ! ----------------------------------------------------------------------
@@ -59,7 +63,9 @@ SUBROUTINE orb_estimator(orbref, veqZarray, veqParray, orbobs, Xmatrix, Wmatrix,
 ! OUT
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Xmatrix  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Wmatrix  
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Amatrix  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Amatrix
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Vmatrix
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Xsigma
 ! ----------------------------------------------------------------------
 
 ! ----------------------------------------------------------------------
@@ -73,6 +79,7 @@ SUBROUTINE orb_estimator(orbref, veqZarray, veqParray, orbobs, Xmatrix, Wmatrix,
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: AmatrixZ
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: AmatrixP
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Amatrix_T
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Vmatrix_T
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: NEQn, NEQu, NEQn_inv
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: ObsEpochs
       INTEGER (KIND = prec_int2) :: AllocateStatus, DeAllocateStatus  
@@ -82,7 +89,8 @@ SUBROUTINE orb_estimator(orbref, veqZarray, veqParray, orbobs, Xmatrix, Wmatrix,
       !REAL (KIND = prec_q) :: Nmatrix_inv(An,An)
       REAL (KIND = prec_q) :: Nmatrix(3,3)
       REAL (KIND = prec_q) :: Nmatrix_inv(3,3)
-
+      REAL (KIND = prec_q) :: sigma, VTV(1,1)
+      
 
 	  
 ! ----------------------------------------------------------------------
@@ -136,6 +144,9 @@ Ncommon = Nepochs
 ! TODO: check the alloc status for each of the below
 ALLOCATE (Xmatrix(6+Nparam,1), STAT = AllocateStatus)
 ALLOCATE (Wmatrix(3*Ncommon,1), STAT = AllocateStatus)
+ALLOCATE (Vmatrix(3*Ncommon,1), STAT = AllocateStatus)
+ALLOCATE (Vmatrix_T(1,3*Ncommon), STAT = AllocateStatus)
+
 
 ALLOCATE (Amatrix(3*Ncommon,6+Nparam), STAT = AllocateStatus)
 ALLOCATE (AmatrixZ(3*Ncommon,6), STAT = AllocateStatus)
@@ -147,6 +158,8 @@ ALLOCATE (Amatrix_T(6+Nparam,3*Ncommon), STAT = AllocateStatus)
 ALLOCATE (NEQn(6+Nparam,6+Nparam), STAT = AllocateStatus)
 ALLOCATE (NEQu(6+Nparam,1), STAT = AllocateStatus)
 ALLOCATE (NEQn_inv(6+Nparam,6+Nparam), STAT = AllocateStatus)
+
+ALLOCATE (Xsigma(6+Nparam,6+Nparam), STAT = AllocateStatus)
 
 ALLOCATE (ObsEpochs(Ncommon,2), STAT = AllocateStatus)
 ObsEpochs = 0.d0
@@ -271,6 +284,21 @@ Call matrixinv (NEQn, NEQn_inv, n_NEQn)
 ! Parameters Estimation
 Xmatrix = MATMUL(NEQn_inv , NEQu) 
 ! ----------------------------------------------------------------------
+
+! Residuals of psudo observations 
+Vmatrix = MATMUL(Amatrix , Xmatrix) - Wmatrix
+Vmatrix_T = TRANSPOSE(Vmatrix)
+
+! Posteriori Sigma
+VTV   = MATMUL(Vmatrix_T, Vmatrix)
+sigma = VTV(1,1)/(Nobs-6-Nparam)
+
+!PRINT*,'Posteriori sigma =', SQRT(sigma)
+
+! Sigma of unknow parameters
+Xsigma = SQRT(sigma*NEQn_inv)
+
+!PRINT*,'Xsigma =', Xsigma(7,7), Xsigma(8,8),Xsigma(9,9)
 
 
 END SUBROUTINE

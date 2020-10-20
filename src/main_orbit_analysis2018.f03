@@ -33,7 +33,7 @@
       CHARACTER (LEN=100) :: filename, EQMfname, VEQfname				
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb_icrf, orb_itrf  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Vres  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Vres, Xsigma
       REAL (KIND = prec_d), DIMENSION(3) :: Vrms 	    
 	  REAL (KIND = prec_d), DIMENSION(5,6) :: stat_XYZ_extC, stat_RTN_extC, stat_Kepler_extC, stat_XYZ_extT
 ! ----------------------------------------------------------------------
@@ -173,7 +173,7 @@ print *,"Orbit configuration files ", VEQfname
 
 ! ----------------------------------------------------------------------
 ! Precise Orbit Determination or Orbit Prediction
-CALL orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms)
+CALL orbdet (EQMfname, VEQfname, orb_icrf, orb_itrf, veqSmatrix, veqPmatrix, Vres, Vrms, Xsigma)
 ! ----------------------------------------------------------------------
 print *,"Orbit residuals in ICRF : RMS(XYZ)", Vrms
 !PRINT *,"Orbit Determination: Completed"
