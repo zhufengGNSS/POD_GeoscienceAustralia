@@ -77,6 +77,16 @@ write (param_value, *) ECOM_0_coef
 CALL write_prmfile_init0 (fname, param_id, param_value)
 END IF
 
+
+IF (srp_i == 12) THEN
+fname = 'ECOM12_srp.in'
+param_id = 'ECOM12'
+write (param_value, *) ECOM_0_coef
+!Call write_prmfile (fname, fname_id, param_id, param_value)
+CALL write_prmfile_init0 (fname, param_id, param_value)
+END IF
+
+
 IF (srp_i == 3) THEN
 fname = 'SBOXW_srp.in'
 param_id = 'SBOXW'

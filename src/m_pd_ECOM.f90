@@ -58,6 +58,7 @@ SUBROUTINE pd_ECOM (lambda, eBX_ecl, eclipsf, GM, GNSSid, r, v, r_sun, Asrp)
 !           03-09-2019 Tzupang Tseng: use a simple box-wing model as a priori SRP value where the ECOM is
 !                                     used to adjust the box-wing model(BOX-WING + ECOM)
 !           03-12-2019 Tzupang Tseng: add a function of estimating the parameters in the simple box wing model
+!           20-07-2020 Tzupang Tseng: enable a hybrid ECOM1+ECOM2 model estimation
 ! 
 ! Copyright:  GEOSCIENCE AUSTRALIA
 ! ----------------------------------------------------------------------
@@ -334,86 +335,36 @@ solarmul = 1.7
 
 ! Partial derivatives w.r.t. unknown parameters
 
-IF (ECOM_param_glb == 1 .or. ECOM_param_glb == 2) THEN
-! Bias partial derivatives matrix allocation
-    PD_Param_ID = 0
-    If (ECOM_Bias_glb(1) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-    End IF
-    If (ECOM_Bias_glb(2) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-    End IF
-    If (ECOM_Bias_glb(3) == 1) Then
-        PD_Param_ID = PD_Param_ID + 1
-    End IF
-
-! CPR partial derivatives matrix allocation
-
-    If (ECOM_CPR_glb(1) == 1) THEN
-        PD_Param_ID = PD_Param_ID + 2
-    End IF
-    If (ECOM_CPR_glb(2) == 1) THEN
-        PD_Param_ID = PD_Param_ID + 2
-    End IF
-    If (ECOM_CPR_glb(3) == 1) THEN
-        PD_Param_ID = PD_Param_ID + 2
-    End If
-
-
-ELSEIF (ECOM_param_glb == 3) THEN
-    PD_Param_ID = 7
-
-END IF
-
-
-IF (ECOMNUM /= PD_Param_ID) THEN
-    PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
-    PRINT*,           'ECOMNUM     =', ECOMNUM
-    PRINT*,           'PD_Param_ID =', PD_Param_ID
-    PRINT*, 'PROGRAM STOP AT m_pd_ECOM.f90'
-    STOP
-END IF
-
-
-
-ALLOCATE (Asrp(3,PD_Param_ID), STAT = AllocateStatus)
-
+ALLOCATE (Asrp(3,ECOMNUM), STAT = AllocateStatus)
 Asrp(:,:) = 0.d0
 
-! ECOM1 model
 
-
-     IF (ECOM_param_glb == 1) THEN
+IF(ECOM_param_glb/= 0 .AND. ECOM_param_glb <= 2 .OR. ECOM_param_glb == 12) THEN
 !print*,'ECOM1 partials'
-PD_Param_ID = 0
-If (ECOM_Bias_glb(1) == 1) Then
+        PD_Param_ID = 0
+        If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ed(1)*alpha
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)*alpha
+        IF (lambda .lt. 1) Asrp(1:3,PD_Param_ID) = lambda*Asrp(1:3,PD_Param_ID)
 !print*,'D0=',PD_Param_ID
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(2) == 1) Then
+        End IF
+        If (ECOM_Bias_glb(2) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ey(1)*alpha
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ey(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ey(3)*alpha
 !print*,'Y0=',PD_Param_ID
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(3) == 1) Then
+        End IF
+        If (ECOM_Bias_glb(3) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*1.0d0*eb(1)*alpha
         Asrp (2,PD_Param_ID) = -sclfa*1.0d0*eb(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*1.0d0*eb(3)*alpha
 !print*,'B0=',PD_Param_ID
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(1) == 1) THEN
+        End IF
+        If (ECOM_CPR_glb(1) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*DCOS(del_u)*ed(1)*alpha
@@ -426,10 +377,8 @@ If (ECOM_CPR_glb(1) == 1) THEN
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ed(3)*alpha
 !print*,'DS=',PD_Param_ID
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(2) == 1) THEN
+        End IF
+        If (ECOM_CPR_glb(2) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*DCOS(del_u)*ey(1)*alpha
@@ -442,10 +391,8 @@ If (ECOM_CPR_glb(2) == 1) THEN
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(del_u)*ey(3)*alpha
 !print*,'YS=',PD_Param_ID
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(3) == 1) THEN
+        End IF
+        If (ECOM_CPR_glb(3) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         Asrp(1,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(1)*alpha
@@ -458,44 +405,9 @@ If (ECOM_CPR_glb(3) == 1) THEN
         Asrp(2,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(2)*alpha
         Asrp(3,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(3)*alpha
 !print*,'BS=',PD_Param_ID
-Else
-        PD_Param_ID = PD_Param_ID
-End If
+        End If
 
-
-! ECOM2 model
-! ***************************************
-     ELSE IF (ECOM_param_glb == 2) THEN
-
-PD_Param_ID = 0
-If (ECOM_Bias_glb(1) == 1) Then
-
-        PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ed(1)*alpha
-        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ed(2)*alpha
-        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ed(3)*alpha
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(2) == 1) Then
-
-        PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*ey(1)*alpha
-        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*ey(2)*alpha
-        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*ey(3)*alpha
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_Bias_glb(3) == 1) Then
-
-        PD_Param_ID = PD_Param_ID + 1
-        Asrp (1,PD_Param_ID) = -sclfa*1.0d0*eb(1)*alpha
-        Asrp (2,PD_Param_ID) = -sclfa*1.0d0*eb(2)*alpha
-        Asrp (3,PD_Param_ID) = -sclfa*1.0d0*eb(3)*alpha
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(1) == 1) THEN
+        If (ECOM_CPR_glb(4) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*DCOS(2*del_u)*ed(1)*alpha
@@ -506,10 +418,8 @@ If (ECOM_CPR_glb(1) == 1) THEN
         Asrp (1,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(1)*alpha
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(2*del_u)*ed(3)*alpha
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(2) == 1) THEN
+        End IF
+        If (ECOM_CPR_glb(5) == 1) THEN
 ! C term
         PD_Param_ID = PD_Param_ID + 1
         Asrp (1,PD_Param_ID) = -sclfa*DCOS(4*del_u)*ed(1)*alpha
@@ -520,40 +430,35 @@ If (ECOM_CPR_glb(2) == 1) THEN
         Asrp (1,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(1)*alpha
         Asrp (2,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(2)*alpha
         Asrp (3,PD_Param_ID) = -sclfa*DSIN(4*del_u)*ed(3)*alpha
-Else
-        PD_Param_ID = PD_Param_ID
-End IF
-If (ECOM_CPR_glb(3) == 1) THEN
-! C term
-        PD_Param_ID = PD_Param_ID + 1
-        Asrp(1,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(1)*alpha
-        Asrp(2,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(2)*alpha
-        Asrp(3,PD_Param_ID) = -sclfa*DCOS(del_u)*eb(3)*alpha
-! S term
-        PD_Param_ID = PD_Param_ID + 1
-        Asrp(1,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(1)*alpha
-        Asrp(2,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(2)*alpha
-        Asrp(3,PD_Param_ID) = -sclfa*DSIN(del_u)*eb(3)*alpha
-Else
-        PD_Param_ID = PD_Param_ID
-End If
-! SIMPLE BOX-WING
-! ****************
+        End IF
 
-     ELSE IF (ECOM_param_glb == 3) THEN
+        IF (ECOMNUM /= PD_Param_ID) THEN
+            PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
+            PRINT*,           'ECOMNUM     =', ECOMNUM
+            PRINT*,           'PD_Param_ID =', PD_Param_ID
+            PRINT*, 'PROGRAM STOP AT m_pd_ECOM.f90'
+            STOP
+        END IF
+
+
+
+ELSE IF (ECOM_param_glb == 3) THEN
      DO PD_Param_ID = 1, 7
         IF (PD_Param_ID == 1) THEN
            DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*ex(i)
            END DO
+           IF (lambda .lt. 1) Asrp(1:3,PD_Param_ID) = lambda*Asrp(1:3,PD_Param_ID)
         ELSE IF (PD_Param_ID == 2) THEN
            DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*ez(i)
            END DO
+           IF (lambda .lt. 1) Asrp(1:3,PD_Param_ID) = lambda*Asrp(1:3,PD_Param_ID)
         ELSE IF (PD_Param_ID == 3) THEN
            DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*ed(i)
            END DO
+           IF (lambda .lt. 1) Asrp(1:3,PD_Param_ID) = lambda*Asrp(1:3,PD_Param_ID)
         ELSE IF (PD_Param_ID == 4) THEN
            DO i = 1, 3
            Asrp (i,PD_Param_ID) = -sclfa*ey(i)
@@ -572,18 +477,18 @@ End If
            END DO
         END IF
      END DO
-     END IF 
+END IF 
 ! ==================================================================
 ! use the shadow coefficient for scaling the SRP effect
 !-------------------------------------------------------
-IF (lambda .lt. 1) THEN
-   IF(ECOM_param_glb == 1 .or. ECOM_param_glb == 2) Asrp(1:3,1) = lambda*Asrp(1:3,1)
-   IF(ECOM_param_glb == 3) THEN
-   Asrp(1:3,1) = lambda*Asrp(1:3,1)
-   Asrp(1:3,2) = lambda*Asrp(1:3,2)
-   Asrp(1:3,3) = lambda*Asrp(1:3,3)
-   END IF
-END IF
+!IF (lambda .lt. 1) THEN
+!   IF(ECOM_param_glb/=0 .and.ECOM_param_glb <= 2 .or. ECOM_param_glb == 12) Asrp(1:3,1) = lambda*Asrp(1:3,1)
+!   IF(ECOM_param_glb == 3) THEN
+!   Asrp(1:3,1) = lambda*Asrp(1:3,1)
+!   Asrp(1:3,2) = lambda*Asrp(1:3,2)
+!   Asrp(1:3,3) = lambda*Asrp(1:3,3)
+!   END IF
+!END IF
 !-------------------------------------------------------
 END SUBROUTINE
 

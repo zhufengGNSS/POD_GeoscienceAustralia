@@ -185,7 +185,7 @@ do
           print*,'      -q --icmode  = Initial condition from parameter estimation procedure'
 		  print*,'				0 - Do not write Velocity vector to sp3 orbit'
 		  print*,'				1 - Write Velocity vector to sp3 orbit'  
-          print*,'      -k --srpmodel= 1: ECOM1, 2:ECOM2, 3:SBOX'
+          print*,'      -k --srpmodel= 1: ECOM1, 2:ECOM2, 12:ECOM12, 3:SBOX'
           print*,'      -w --empmodel= 1: activated, 0: no estimation'
           print*,'      -d --verbosity = output verbosity level [Default: 0]'
           print*,'      -h --help.   = Print program help'

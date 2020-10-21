@@ -20,7 +20,7 @@ MODULE m_orbdet
 Contains
 	  
 	  
-SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatrix_final, veqPmatrix_final, Vres, Vrms)
+SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatrix_final, veqPmatrix_final, Vres, Vrms, Xsigma)
 
 
 ! ----------------------------------------------------------------------
@@ -109,7 +109,7 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
 ! OUT
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: orb_icrf_final, orb_itrf_final  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: veqSmatrix_final, veqPmatrix_final  
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Vres  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: Vres, Xsigma 
       REAL (KIND = prec_d), DIMENSION(3), INTENT(OUT) :: Vrms 
 ! ----------------------------------------------------------------------
 
@@ -126,7 +126,8 @@ SUBROUTINE orbdet (EQMfname, VEQfname, orb_icrf_final, orb_itrf_final, veqSmatri
       INTEGER (KIND = prec_int8) :: sz1, sz2 
       INTEGER (KIND = prec_int8) :: Nepochs	  
       !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqSmatrix, veqPmatrix  
-      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Xmatrix, Wmatrix, Amatrix  
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Xmatrix, Wmatrix, Amatrix
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: Vmatrix
       !REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: veqC, veqT  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: orb0, veq0, veq1  
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: dorb, dorb_icrf, dorb_itrf 
@@ -266,7 +267,8 @@ END IF
 IF(ECOM_param_glb == 1) PRINT*,'ECOM1 SRP MODEL IS ACTIVATED'
 IF(ECOM_param_glb == 2) PRINT*,'ECOM2 SRP MODEL IS ACTIVATED'
 IF(ECOM_param_glb == 3) PRINT*,'SIMPLE BOX WING IS ACTIVATED'
-IF(ECOM_param_glb > 3)  PRINT*,'UNKNOWN SRP MODEL IS ACTIVATED :-('
+IF(ECOM_param_glb ==12) PRINT*,'ECOM1+ECOM2 HYBRID MODEL IS ACTIVATED'
+!IF(ECOM_param_glb > 3)  PRINT*,'UNKNOWN SRP MODEL IS ACTIVATED :-('
 !   ALLOCATE (ECOM_coef(NPARAM_glb), STAT = AllocateStatus)
    ALLOCATE (ECOM_coef(ECOMNUM), STAT = AllocateStatus)
    if (AllocateStatus .ne. 0) then
@@ -331,14 +333,14 @@ Call statdelta(pseudobs_ICRF, orb_icrf, dorb_icrf, RMSdsr, Sigmadsr, MEANdsr, MI
 ! ----------------------------------------------------------------------
 IF (VEQ_refsys == 1) THEN
 	! Orbit parameter estimator
-	Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix)			! ----------------------------------------------------------------------
+	Call orb_estimator(orb_icrf, veqSmatrix, veqPmatrix, pseudobs_ICRF, Xmatrix, Wmatrix, Amatrix, Vmatrix, Xsigma)			! ----------------------------------------------------------------------
 ELSE IF (VEQ_refsys == 2) THEN
 	! Time System according to global variable TIME_Scale (Module mdl_param.f03)
 	time_sys = TIME_SCALE
 	! Orbit transformation to terrestrial frame: ICRF to ITRF
 	CALL orbC2T (orb_icrf, time_sys, orb_itrf)
 	! Orbit parameter estimator
-	Call orb_estimator(orb_itrf, veqSmatrix, veqPmatrix, pseudobs_ITRF, Xmatrix, Wmatrix, Amatrix)		
+	Call orb_estimator(orb_itrf, veqSmatrix, veqPmatrix, pseudobs_ITRF, Xmatrix, Wmatrix, Amatrix, Vmatrix, Xsigma)		
 END IF
 
 !filename = "Amatrix.out"
@@ -411,8 +413,7 @@ End If  ! End of empirical model
 ! ----------------------------------------------------------------------
 ! ECOM-based SRP model
 ! **********************************************************************
-! added by Dr. Tzupang Tseng 11-12-2018
-If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2 .and. EMP_param_glb == 0) Then
+If(ECOM_param_glb/=0 .and. ECOM_param_glb <= 2 .or. ECOM_param_glb == 12 .and. EMP_param_glb == 0) Then
         PD_Param_ID = 0
         If (ECOM_Bias_glb(1) == 1) Then
         PD_Param_ID = PD_Param_ID + 1
@@ -450,6 +451,23 @@ If (ECOM_param_glb == 1 .or. ECOM_param_glb == 2 .and. EMP_param_glb == 0) Then
         PD_Param_ID = PD_Param_ID + 1
         ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
         End If
+        If (ECOM_CPR_glb(4) == 1) THEN
+        ! C term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        ! S term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        End IF
+        If (ECOM_CPR_glb(5) == 1) THEN
+        ! C term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        ! S term
+        PD_Param_ID = PD_Param_ID + 1
+        ECOM_coef (PD_Param_ID) = Xmatrix(6+PD_Param_ID,1)
+        End If
+
 
         IF (ECOMNUM /= PD_Param_ID) THEN
         PRINT*, 'THE NUMBER OF ECOM PARAMETERS IS NOT CONSISTENT'
@@ -544,6 +562,23 @@ IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 1) THEN
                         PD_Param_ID = PD_Param_ID + 1
                         ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
                         End If
+                        If (ECOM_CPR_glb(4) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(5) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(15+PD_Param_ID,1)
+                        End If
+
 
                         IF (NPARAM_glb /= PD_Param_ID + 9) THEN
                         PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
@@ -590,6 +625,23 @@ IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 1) THEN
                         PD_Param_ID = PD_Param_ID + 1
                         ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
                         End If
+                        If (ECOM_CPR_glb(4) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(5) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(12+PD_Param_ID,1)
+                        End If
+
 
                         IF (NPARAM_glb /= PD_Param_ID + 6) THEN
                         PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
@@ -636,6 +688,23 @@ IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 1) THEN
                         PD_Param_ID = PD_Param_ID + 1
                         ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
                         End If
+                        If (ECOM_CPR_glb(4) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        End IF
+                        If (ECOM_CPR_glb(5) == 1) THEN
+                        ! C term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        ! S term
+                        PD_Param_ID = PD_Param_ID + 1
+                        ECOM_coef (PD_Param_ID) = Xmatrix(9+PD_Param_ID,1)
+                        End If
+
 
                         IF (NPARAM_glb /= PD_Param_ID + 3) THEN
                         PRINT*, 'THE NUMBER OF FORCE PARAMETERS IS NOT CONSISTENT'
@@ -692,7 +761,6 @@ IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 1) THEN
                 END IF
         END IF
 
-
 END IF
 
 IF (ECOM_param_glb /= 0) THEN
@@ -725,6 +793,13 @@ IF (ECOM_param_glb /= 0) THEN
    IF (ECOM_param_glb == 3) THEN
    fname = 'SBOXW_srp.in'
    param_id = 'SBOXW'
+   write (param_value, *) ECOM_0_coef
+   Call write_prmfile (fname, fname_id, param_id, param_value)
+   END IF
+
+   IF (ECOM_param_glb == 12) THEN
+   fname = 'ECOM12_srp.in'
+   param_id = 'ECOM12'
    write (param_value, *) ECOM_0_coef
    Call write_prmfile (fname, fname_id, param_id, param_value)
    END IF

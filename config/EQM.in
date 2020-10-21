@@ -101,10 +101,12 @@
  bias_Y                                    1
  bias_B                                    1
  ! Cycle-per-revolution accelerations in D, Y and B directions
- cpr_D                                     1                             ! If ECOM2 is applied, cpr_D becomes cpr_D2
- cpr_Y                                     1                             ! If ECOM2 is applied, cpr_Y becomes cpr_D4
+ cpr_D                                     1  
+ cpr_Y                                     1  
  cpr_B                                     1
- 
+ cpr_D2                                    0
+ cpr_D4                                    0
+
  ---------------------------------------------------------------------------
  %% Empirical parameters
  ! Bias accelerations per radial, along-track and cross-track directions

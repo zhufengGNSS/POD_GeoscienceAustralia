@@ -21,7 +21,8 @@ MODULE m_writeorbit_multi
 Contains
 
 
-SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf,orbits_ics_icrf,PRN_array,filename,EQMfname,VEQfname,POD_version)
+SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf,orbits_ics_icrf,PRN_array,orbpara_sigma,&
+                             filename,EQMfname,VEQfname,POD_version)
 
 ! ----------------------------------------------------------------------
 ! SUBROUTINE: writeorbit_multi 
@@ -63,6 +64,7 @@ SUBROUTINE writeorbit_multi (orbitsmatrix_crf,orbitsmatrix_trf,orbits_ics_icrf,P
       REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:,:), ALLOCATABLE :: orbitsmatrix_crf
       REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:,:), ALLOCATABLE :: orbitsmatrix_trf
       REAL (KIND = prec_q), INTENT(IN), DIMENSION(:,:), ALLOCATABLE :: orbits_ics_icrf
+      REAL (KIND = prec_d), INTENT(IN), DIMENSION(:,:), ALLOCATABLE :: orbpara_sigma
       CHARACTER (LEN=3), ALLOCATABLE :: PRN_array(:)
       CHARACTER (LEN=100), INTENT(IN) :: filename
       CHARACTER (LEN=100), INTENT(IN) :: EQMfname, VEQfname
@@ -297,15 +299,19 @@ DO i_sat = 1 , Nsat
    IF (ECOM_param_glb /= 0 .AND. EMP_param_glb == 0) THEN
      IF      (ECOM_param_glb == 1) THEN
        srp_model = 'ECOM1  '
-       ic_param_list =  'X Y Z XV YV ZV DR YR BR C1DR S1DR C1YR S1YR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV D0 Y0 B0 DC DS YC YS BC BS'
        
      ELSE IF (ECOM_param_glb == 2) THEN
        srp_model = 'ECOM2  '   
-       ic_param_list =  'X Y Z XV YV ZV DR YR BR C2DR S2DR C4DR S4DR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV D0 Y0 B0 BC BS D2C D2S D4C D4S'
+
+     ELSE IF (ECOM_param_glb == 12) THEN
+       srp_model = 'ECOM12  '
+       ic_param_list =  'X Y Z XV YV ZV D0 Y0 B0 DC DS YC YS BC BS D2C D2S D4C D4S'
        
      ELSE IF (ECOM_param_glb == 3) THEN
        srp_model = 'SBOXW  '
-       ic_param_list =  'X Y Z XV YV ZV DXR DZR DSPR YR BR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV DX DZ DSP Y0 B0 BC BS'
      END IF
    END IF
       
@@ -319,13 +325,16 @@ DO i_sat = 1 , Nsat
    IF (ECOM_param_glb /= 0 .AND. EMP_param_glb /= 0) THEN
       srp_model = 'ECOM + EMPRCL'
       IF      (ECOM_param_glb == 1) THEN
-       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DR YR BR C1DR S1DR C1YR S1YR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N D0 Y0 B0 DC DS YC YS BC BS'
 
      ELSE IF (ECOM_param_glb == 2) THEN
-       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DR YR BR C2DR S2DR C4DR S4DR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N D0 Y0 B0 BC BS D2C D2S D4C D4S'
+
+     ELSE IF (ECOM_param_glb == 12) THEN
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N D0 Y0 B0 DC DS YC YS BC BS D2C D2S D4C D4S'
 
      ELSE IF (ECOM_param_glb == 3) THEN
-       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DXR DZR DSPR YR BR C1BR S1BR'
+       ic_param_list =  'X Y Z XV YV ZV RB TB NB C1R S1R C1T S1T C1N S1N DX DZ DSPR Y0 B0 BC BS'
      END IF
 
    END IF
@@ -336,12 +345,19 @@ DO i_sat = 1 , Nsat
    WRITE (UNIT=UNIT_IN,FMT='(a,a,1x,a3,1x,a,1x,i3,1x,a,1x,a,1x,a,1x,F10.5,1x,a,1x,a,1x,a,1x,a,1x,i3,1x,a,1x,a)',IOSTAT=ios_ith) & 
           &'#IC_INFO ','PRN:',PRN_array(i_sat),'SVN:',SVNID,'BLK_TYP:',TRIM(BLKTYP),' MASS:',MASS, &
           &'SRP:', TRIM(apr_srp_model), TRIM(srp_model), 'Nparam:', NPARAM_glb+6, '-', trim(ic_param_list)
+
 ! IC 
    WRITE (UNIT=UNIT_IN,FMT='(a,a3,1x,I3,1x,a,1x,a,2x)',ADVANCE="no",IOSTAT=ios_ith) &
           &'#IC_XYZ  ',PRN_array(i_sat),SVNID,TRIM(BLKTYP),'ICRF'
    WRITE (UNIT=UNIT_IN,FMT='(I5,F19.10)',ADVANCE="no",IOSTAT=ios_ith) INT(orbits_ics_icrf(1,i_sat)), orbits_ics_icrf(2,i_sat)
    WRITE (UNIT=UNIT_IN,FMT= * ,IOSTAT=ios_ith) orbits_ics_icrf(3:Norbits_ics_icrf,i_sat)
 ! orbitsmatrix_crf(1,3:8,i_sat), ' DR YR BR DC DS YC YS BC BS''(a3,1x,f14.4,f14.6,1x,15(d17.10,1x))'
+
+! IC PARAMETER SIGMA
+   WRITE (UNIT=UNIT_IN,FMT='(a,1x,a3,1x,I3,1x,a,2x)',ADVANCE="no",IOSTAT=ios_ith)'#IC_XYZ_SIGMA',PRN_array(i_sat),SVNID,TRIM(BLKTYP)
+   WRITE (UNIT=UNIT_IN,FMT='(I5,F19.10)',ADVANCE="no",IOSTAT=ios_ith)INT(orbits_ics_icrf(1,i_sat)), orbits_ics_icrf(2,i_sat)       
+   WRITE (UNIT=UNIT_IN,FMT=* ,IOSTAT=ios_ith) orbpara_sigma(i_sat,:)
+
 ! IC Kepler
    r_ic = orbits_ics_icrf(3:5,i_sat)
    v_ic = orbits_ics_icrf(6:8,i_sat)
