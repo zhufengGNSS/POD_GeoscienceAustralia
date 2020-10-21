@@ -306,8 +306,10 @@ src/eclipse_integstep.f03
 
 add_library(yaml
 src/yaml_types.F90
+src/yaml_version.F90
 src/yaml_settings.F90
 src/yaml.F90
+src/m_pod_yaml.F90
 )
 
 add_executable(pod
@@ -386,7 +388,6 @@ src/main_time.f03
 )
 
 add_executable(test_yaml
-src/yaml_version.F90
 src/test_yaml.F90
 )
 
@@ -398,22 +399,21 @@ target_include_directories(pod PUBLIC
         ${LAPACK_INCLUDE_DIRS}
         ${BLAS_INCLUDE_DIRS})
 
-#must get all the modules built first to build all the other libraries - so make everything depend on pod_lib ...
-target_link_libraries(rw_param pod_lib)
-target_link_libraries(force pod_lib)
-target_link_libraries(eop pod_lib)
-target_link_libraries(yaw pod_lib)
-target_link_libraries(tides pod_lib)
-target_link_libraries(ga_tz pod_lib)
-target_link_libraries(rk pod_lib)
-target_link_libraries(ga_math pod_lib)
-target_link_libraries(iau_math pod_lib)
-target_link_libraries(ga_gen pod_lib)
-target_link_libraries(boxwing pod_lib)
-target_link_libraries(kepler pod_lib)
-target_link_libraries(rel pod_lib)
-target_link_libraries(eclipse pod_lib)
-target_link_libraries(yaml pod_lib)
+#must get all the modules built first to build all the other libraries - so make everything depend on pod_lib & yaml ...
+target_link_libraries(rw_param pod_lib yaml)
+target_link_libraries(force pod_lib yaml)
+target_link_libraries(eop pod_lib yaml)
+target_link_libraries(yaw pod_lib yaml)
+target_link_libraries(tides pod_lib yaml)
+target_link_libraries(ga_tz pod_lib yaml)
+target_link_libraries(rk pod_lib yaml)
+target_link_libraries(ga_math pod_lib yaml)
+target_link_libraries(iau_math pod_lib yaml)
+target_link_libraries(ga_gen pod_lib yaml)
+target_link_libraries(boxwing pod_lib yaml)
+target_link_libraries(kepler pod_lib yaml)
+target_link_libraries(rel pod_lib yaml)
+target_link_libraries(eclipse pod_lib yaml)
 
 # must have pod_lib first to get all the modules. As rw_param requires pod_lib it must be listed again after that. 
 # rk and force depend on eop and boxwing and must precede them in the list, likewise yaw must precede eclipse
