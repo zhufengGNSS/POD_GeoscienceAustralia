@@ -156,7 +156,8 @@ call apr_srp(GNSSid, BLKTYP, X_SIDE, Z_SIDE, A_SOLAR, F0)
       ed(2)=((r_sun(2)-r(2))/Ds)
       ed(3)=((r_sun(3)-r(3))/Ds)
 ! The unit vector ey = ez x ed/|ez x ed|, parallel to the rotation axis of solar panel
-
+! If the Y-axis is reversed for IIR satellites, the result is identical to the
+! IGS-defined. We have done the test (14/10/2020, Tzupang Tseng)
       CALL productcross (ez,ed,yy)
       ey(1)=yy(1)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
       ey(2)=yy(2)/sqrt(yy(1)**2+yy(2)**2+yy(3)**2)
