@@ -33,44 +33,45 @@ module pod_yaml
    type (type_dictionary), pointer :: srp_dict, srp_parameters_dict, integ_dict
    type (type_dictionary), pointer :: gravity_dict, gravity_model_dict, planets_dict, tides_dict, rel_dict, non_grav_dict
    type (type_dictionary), pointer :: overrides_dict
-   logical pod_data_enabled, ext_orbit_enabled, estimate_params, write_sp3_velocities, write_partial_velocities
-   logical veq_integration
-   integer*2 pod_mode
-   integer*2 ic_input_format
-   integer*2 ic_input_refsys
-   integer*2 ext_orbit_opt
-   integer*2 ext_orbit_frame
-   integer*2 iau_model
-   integer*2 eqm_integrate_method, veq_integrate_method
-   integer*2 ECOM_estimator
-   integer*2 apriori_srp
-   integer*2 eqm_gravity_model, veq_gravity_model
+   logical yml_pod_data_enabled, yml_ext_orbit_enabled, yml_estimate_params, yml_write_sp3_velocities, yml_write_partial_velocities
+   logical yml_veq_integration
+   integer*2 yml_pod_mode
+   integer*2 yml_ic_input_format
+   integer*2 yml_ic_input_refsys
+   integer*2 yml_ext_orbit_opt
+   integer*2 yml_ext_orbit_frame
+   integer*2 yml_iau_model
+   integer*2 yml_eqm_integrate_method, yml_veq_integrate_method
+   integer*2 yml_ECOM_estimator
+   integer*2 yml_apriori_srp
+   integer*2 yml_eqm_gravity_model, yml_veq_gravity_model
    ! srp_parameters are a bitfield type for all variables, 6 (DYB,RTN) ECOM biases, 8 (DYB,RTN,D2,D4) ECOM cprs, 3 (RTN) EMP biases, 
    ! 3 (RTN) EMP cprs.
    ! NB EMP bits are 17-22
-   integer*4 default_srp_parameters, srp_parameters_defined
+   integer*4 yml_default_srp_parameters, yml_srp_parameters_defined
    ! tidal effects are a bitfield type, 1 = solid_nonfreq, 2 = solid_freq, 3 = ocean, 4 = solid_pole, 5 = ocean_pole
-   integer*2 eqm_tidal_effects, veq_tidal_effects
-   integer*2 eqm_gravity_max_degree, eqm_gravity_time_max_degree, eqm_tides_max_degree
-   integer*2 veq_gravity_max_degree, veq_gravity_time_max_degree, veq_tides_max_degree
+   integer*2 yml_eqm_tidal_effects, yml_veq_tidal_effects
+   integer*2 yml_eqm_gravity_max_degree, yml_eqm_gravity_time_max_degree, yml_eqm_tides_max_degree
+   integer*2 yml_veq_gravity_max_degree, yml_veq_gravity_time_max_degree, yml_veq_tides_max_degree
    ! non grav effects are a bitfield type, 1 = thrust, 2 = earth, 3 = solar
-   integer*2 eqm_non_grav_effects, veq_non_grav_effects
-   logical   eqm_planetary_perturbations_enabled, eqm_tidal_effects_enabled, eqm_rel_effects_enabled, eqm_non_grav_effects_enabled
-   logical   veq_planetary_perturbations_enabled, veq_tidal_effects_enabled, veq_rel_effects_enabled, veq_non_grav_effects_enabled
-   logical   eqm_gravity_enabled, veq_gravity_enabled
+   integer*2 yml_eqm_non_grav_effects, yml_veq_non_grav_effects
+   logical   yml_eqm_planetary_perturbations_enabled, yml_eqm_tidal_effects_enabled, yml_eqm_rel_effects_enabled
+   logical   yml_eqm_non_grav_effects_enabled, yml_veq_non_grav_effects_enabled
+   logical   yml_veq_planetary_perturbations_enabled, yml_veq_tidal_effects_enabled, yml_veq_rel_effects_enabled
+   logical   yml_eqm_gravity_enabled, yml_veq_gravity_enabled
 
-   character(4) pod_data_prn
-   character(8) pod_data_ref_frame
-   character(8) pod_data_time_scale
-   integer*8    pod_data_orbit_arc_seconds
-   character(20) pod_data_initial_epoch
-   character(512) pod_data_state_vector
-   character(128) orbit_filename, ext_orbit_filename, satsinex_filename, leapsecond_filename, eop_filename
-   character(128) gravity_filename, ephemeris_header, ephemeris_data_file, ocean_tides_file
+   character(4) yml_pod_data_prn
+   character(8) yml_pod_data_ref_frame
+   character(8) yml_pod_data_time_scale
+   integer*8    yml_pod_data_orbit_arc_seconds
+   character(20) yml_pod_data_initial_epoch
+   character(512) yml_pod_data_state_vector
+   character(128) yml_orbit_filename, yml_ext_orbit_filename, yml_satsinex_filename, yml_leapsecond_filename, yml_eop_filename
+   character(128) yml_gravity_filename, yml_ephemeris_header, yml_ephemeris_data_file, yml_ocean_tides_file
 
-   integer*4 orbit_step, orbit_points, orbit_arc_determination, orbit_arc_prediction, orbit_arc_backwards
-   integer*4 ext_orbit_steps, ext_orbit_points, eop_option, eop_int_points, eqm_integ_stepsize
-   integer*4 estimator_iterations, estimator_procedure, veq_integ_stepsize
+   integer*4 yml_orbit_step, yml_orbit_points, yml_orbit_arc_determination, yml_orbit_arc_prediction, yml_orbit_arc_backwards
+   integer*4 yml_ext_orbit_steps, yml_ext_orbit_points, yml_eop_option, yml_eop_int_points, yml_eqm_integ_stepsize
+   integer*4 yml_estimator_iterations, yml_estimator_procedure, yml_veq_integ_stepsize
 
    type :: srp_override
       integer*4 parameters, parameters_defined
@@ -96,7 +97,8 @@ module pod_yaml
 
    integer*4 sys_override_count, block_override_count, prn_override_count
 
-   type (override) :: sys_overrides(max_sys_overrides), block_overrides (max_block_overrides), prn_overrides (max_prn_overrides)
+   type (override) :: yml_sys_overrides (max_sys_overrides), yml_block_overrides (max_block_overrides)
+   type (override) :: yml_prn_overrides (max_prn_overrides)
 
    contains
 
@@ -119,9 +121,9 @@ subroutine get_yaml()
    nullify(integ_dict)
 
    my_error_p => my_error
-   pod_mode = -1
-   ic_input_format = -1
-   ic_input_refsys = -1
+   yml_pod_mode = -1
+   yml_ic_input_format = -1
+   yml_ic_input_refsys = -1
 
    sys_override_count = 0
    block_override_count = 0
@@ -162,8 +164,9 @@ subroutine get_yaml()
       write(*,*) "could not find pod_data label in YAML config"
       STOP
    else
-      call get_pod_data(pod_data_dict, my_error, pod_data_enabled, pod_data_prn, pod_data_ref_frame, pod_data_time_scale,&
-                pod_data_orbit_arc_seconds, pod_data_initial_epoch, pod_data_state_vector)  
+      call get_pod_data(pod_data_dict, my_error, yml_pod_data_enabled, yml_pod_data_prn, yml_pod_data_ref_frame,&
+              yml_pod_data_time_scale, yml_pod_data_orbit_arc_seconds, yml_pod_data_initial_epoch,&
+              yml_pod_data_state_vector)  
    end if
 
    pod_options_dict = root_dict%get_dictionary("pod_options", .true., my_error_p);
@@ -171,50 +174,52 @@ subroutine get_yaml()
       write(*,*) "could not find pod_options label in YAML config"
       STOP
    else
-      pod_mode = get_pod_mode(pod_options_dict, my_error)
-      ic_input_format = get_input_format(pod_options_dict, my_error)
-      ic_input_refsys = get_input_refsys(pod_options_dict, my_error)
-      call get_pseudoobs(pod_options_dict, my_error, orbit_filename, orbit_step, orbit_points);
-      call get_orbitarcs(pod_options_dict, my_error, orbit_arc_determination, orbit_arc_prediction, orbit_arc_backwards)
-      ext_orbit_enabled = pod_options_dict%get_logical("ext_orbit_enabled", .false., my_error_p)
-      if (ext_orbit_enabled) then
-         ext_orbit_opt = get_ext_orbit_opt(pod_options_dict, my_error)
-         ext_orbit_frame = get_ext_orbit_frame(pod_options_dict, my_error)
-         call get_extorbit_comp(pod_options_dict, my_error, ext_orbit_filename, ext_orbit_steps, ext_orbit_points)
+      yml_pod_mode = get_pod_mode(pod_options_dict, my_error)
+      yml_ic_input_format = get_input_format(pod_options_dict, my_error)
+      yml_ic_input_refsys = get_input_refsys(pod_options_dict, my_error)
+      call get_pseudoobs(pod_options_dict, my_error, yml_orbit_filename, yml_orbit_step, yml_orbit_points);
+      call get_orbitarcs(pod_options_dict, my_error, yml_orbit_arc_determination, yml_orbit_arc_prediction,&
+              yml_orbit_arc_backwards)
+      yml_ext_orbit_enabled = pod_options_dict%get_logical("ext_orbit_enabled", .false., my_error_p)
+      if (yml_ext_orbit_enabled) then
+         yml_ext_orbit_opt = get_ext_orbit_opt(pod_options_dict, my_error)
+         yml_ext_orbit_frame = get_ext_orbit_frame(pod_options_dict, my_error)
+         call get_extorbit_comp(pod_options_dict, my_error, yml_ext_orbit_filename, yml_ext_orbit_steps,&
+                 yml_ext_orbit_points)
       end if
-      iau_model = get_iau_model(pod_options_dict, my_error)
-      call get_earth_orientation_params(pod_options_dict, my_error, eop_option, eop_filename, eop_int_points)
-      satsinex_filename = pod_options_dict%get_string("satsinex_filename", "", my_error_p)
-      leapsecond_filename = pod_options_dict%get_string("leapsecond_filename", "", my_error_p)
-      gravity_filename = pod_options_dict%get_string("gravity_model_file", "", my_error_p)
-      ephemeris_header = pod_options_dict%get_string("DE_fname_header", "", my_error_p)
-      ephemeris_data_file = pod_options_dict%get_string("DE_fname_data", "", my_error_p)
-      ocean_tides_file = pod_options_dict%get_string("ocean_tides_model_file", "", my_error_p)
-      write_sp3_velocities = pod_options_dict%get_logical("sp3_velocity", .false., my_error_p)
-      write_partial_velocities = pod_options_dict%get_logical("partials_velocity", .false., my_error_p)
-      estimator_iterations = pod_options_dict%get_integer("estimator_iterations", -1, my_error_p)
+      yml_iau_model = get_iau_model(pod_options_dict, my_error)
+      call get_earth_orientation_params(pod_options_dict, my_error, yml_eop_option, yml_eop_filename, yml_eop_int_points)
+      yml_satsinex_filename = pod_options_dict%get_string("satsinex_filename", "", my_error_p)
+      yml_leapsecond_filename = pod_options_dict%get_string("leapsecond_filename", "", my_error_p)
+      yml_gravity_filename = pod_options_dict%get_string("gravity_model_file", "", my_error_p)
+      yml_ephemeris_header = pod_options_dict%get_string("DE_fname_header", "", my_error_p)
+      yml_ephemeris_data_file = pod_options_dict%get_string("DE_fname_data", "", my_error_p)
+      yml_ocean_tides_file = pod_options_dict%get_string("ocean_tides_model_file", "", my_error_p)
+      yml_write_sp3_velocities = pod_options_dict%get_logical("sp3_velocity", .false., my_error_p)
+      yml_write_partial_velocities = pod_options_dict%get_logical("partials_velocity", .false., my_error_p)
+      yml_estimator_iterations = pod_options_dict%get_integer("estimator_iterations", -1, my_error_p)
       srp_dict = pod_options_dict%get_dictionary("srp_apriori_model", .true., my_error_p)
       if (.not.associated(srp_dict)) then
          write (*,*) "cannot find srp_apriori_model label in pod_options"
          STOP
       endif
-      apriori_srp = get_apriori_srp(srp_dict, my_error)
+      yml_apriori_srp = get_apriori_srp(srp_dict, my_error)
       srp_parameters_dict = pod_options_dict%get_dictionary("srp_parameters", .true., my_error_p)
       if (.not.associated(srp_parameters_dict)) then
          write (*,*) "cannot find srp_parameters label in pod_options"
          STOP
       end if
-      default_srp_parameters = get_srp_parameters(srp_parameters_dict, .true., srp_parameters_defined, my_error)
+      yml_default_srp_parameters = get_srp_parameters(srp_parameters_dict, .true., yml_srp_parameters_defined, my_error)
       ! do we actually need this?
-      ECOM_estimator = get_ECOM_estimator(pod_options_dict, my_error)
-      if (ECOM_estimator .ge. 3) then
-         estimate_params = .true.
+      yml_ECOM_estimator = get_ECOM_estimator(pod_options_dict, my_error)
+      if (yml_ECOM_estimator .ge. 3) then
+         yml_estimate_params = .true.
       else
-         estimate_params = .false.
+         yml_estimate_params = .false.
       endif
       ! what is estimator_procedure???
-      estimator_procedure = pod_options_dict%get_integer("estimatr_procedure", -1, my_error_p)
-      veq_integration = pod_options_dict%get_logical("veq_integration", .false., my_error_p)
+      yml_estimator_procedure = pod_options_dict%get_integer("estimatr_procedure", -1, my_error_p)
+      yml_veq_integration = pod_options_dict%get_logical("veq_integration", .false., my_error_p)
    end if
 
    eqm_options_dict = root_dict%get_dictionary("eqm_options", .true., my_error_p)
@@ -258,18 +263,18 @@ subroutine get_yaml()
          STOP
       end if
 
-      eqm_gravity_enabled = gravity_dict%get_logical("enabled", .false., my_error_p)
-      eqm_gravity_model = get_gravity_model(gravity_model_dict, my_error, "eqm")
-      eqm_gravity_max_degree = gravity_dict%get_integer("gravity_degree_max", -1, my_error_p)
-      eqm_gravity_time_max_degree = gravity_dict%get_integer("timevar_degree_max", -1, my_error_p)
-      eqm_planetary_perturbations_enabled = planets_dict%get_logical("perturbations_enabled", .false., my_error_p)
-      eqm_tidal_effects_enabled = tides_dict%get_logical("enabled", .false., my_error_p)
-      eqm_tidal_effects = get_tidal_effects(tides_dict, my_error, "eqm")
-      eqm_tides_max_degree = tides_dict%get_integer("ocean_tides_degree_max", -1, my_error_p)
-      eqm_rel_effects_enabled = rel_dict%get_logical("enabled", .false., my_error_p)
-      eqm_non_grav_effects_enabled = non_grav_dict%get_logical("enabled", .false., my_error_p)
-      eqm_non_grav_effects = get_non_grav_effects(non_grav_dict, my_error, "eqm")
-      eqm_integrate_method = get_integrator_method(integ_dict, my_error, eqm_integ_stepsize)
+      yml_eqm_gravity_enabled = gravity_dict%get_logical("enabled", .false., my_error_p)
+      yml_eqm_gravity_model = get_gravity_model(gravity_model_dict, my_error, "eqm")
+      yml_eqm_gravity_max_degree = gravity_dict%get_integer("gravity_degree_max", -1, my_error_p)
+      yml_eqm_gravity_time_max_degree = gravity_dict%get_integer("timevar_degree_max", -1, my_error_p)
+      yml_eqm_planetary_perturbations_enabled = planets_dict%get_logical("perturbations_enabled", .false., my_error_p)
+      yml_eqm_tidal_effects_enabled = tides_dict%get_logical("enabled", .false., my_error_p)
+      yml_eqm_tidal_effects = get_tidal_effects(tides_dict, my_error, "eqm")
+      yml_eqm_tides_max_degree = tides_dict%get_integer("ocean_tides_degree_max", -1, my_error_p)
+      yml_eqm_rel_effects_enabled = rel_dict%get_logical("enabled", .false., my_error_p)
+      yml_eqm_non_grav_effects_enabled = non_grav_dict%get_logical("enabled", .false., my_error_p)
+      yml_eqm_non_grav_effects = get_non_grav_effects(non_grav_dict, my_error, "eqm")
+      yml_eqm_integrate_method = get_integrator_method(integ_dict, my_error, yml_eqm_integ_stepsize)
    end if
 
    veq_options_dict = root_dict%get_dictionary("veq_options", .true., my_error_p)
@@ -312,18 +317,18 @@ subroutine get_yaml()
          write (*,*) "could not find integration_options label in veq_options"
          STOP
       end if
-      veq_gravity_enabled = gravity_dict%get_logical("enabled", .false., my_error_p)
-      veq_gravity_model = get_gravity_model(gravity_model_dict, my_error, "veq")
-      veq_gravity_max_degree = gravity_dict%get_integer("gravity_degree_max", -1, my_error_p)
-      veq_gravity_time_max_degree = gravity_dict%get_integer("timevar_degree_max", -1, my_error_p)
-      veq_planetary_perturbations_enabled = planets_dict%get_logical("perturbations_enabled", .false., my_error_p)
-      veq_tidal_effects_enabled = tides_dict%get_logical("enabled", .false., my_error_p)
-      veq_tidal_effects = get_tidal_effects(tides_dict, my_error, "veq")
-      veq_tides_max_degree = tides_dict%get_integer("ocean_tides_degree_max", -1, my_error_p)
-      veq_rel_effects_enabled = rel_dict%get_logical("enabled", .false., my_error_p)
-      veq_non_grav_effects_enabled = non_grav_dict%get_logical("enabled", .false., my_error_p)
-      veq_non_grav_effects = get_non_grav_effects(non_grav_dict, my_error, "veq")
-      veq_integrate_method = get_integrator_method(integ_dict, my_error, veq_integ_stepsize)
+      yml_veq_gravity_enabled = gravity_dict%get_logical("enabled", .false., my_error_p)
+      yml_veq_gravity_model = get_gravity_model(gravity_model_dict, my_error, "veq")
+      yml_veq_gravity_max_degree = gravity_dict%get_integer("gravity_degree_max", -1, my_error_p)
+      yml_veq_gravity_time_max_degree = gravity_dict%get_integer("timevar_degree_max", -1, my_error_p)
+      yml_veq_planetary_perturbations_enabled = planets_dict%get_logical("perturbations_enabled", .false., my_error_p)
+      yml_veq_tidal_effects_enabled = tides_dict%get_logical("enabled", .false., my_error_p)
+      yml_veq_tidal_effects = get_tidal_effects(tides_dict, my_error, "veq")
+      yml_veq_tides_max_degree = tides_dict%get_integer("ocean_tides_degree_max", -1, my_error_p)
+      yml_veq_rel_effects_enabled = rel_dict%get_logical("enabled", .false., my_error_p)
+      yml_veq_non_grav_effects_enabled = non_grav_dict%get_logical("enabled", .false., my_error_p)
+      yml_veq_non_grav_effects = get_non_grav_effects(non_grav_dict, my_error, "veq")
+      yml_veq_integrate_method = get_integrator_method(integ_dict, my_error, yml_veq_integ_stepsize)
    end if
 
 end subroutine get_yaml
