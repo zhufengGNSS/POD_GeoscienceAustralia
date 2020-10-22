@@ -383,6 +383,15 @@ CALL orbitmain (EQMfname_PRN, VEQfname_PRN, orb_icrf, orb_itrf, veqSmatrix, veqP
 ! ----------------------------------------------------------------------
 print *," "
 print *," "
+PRINT*,'Parameter correlation matrix'
+! Parameter correlation matrix
+sz1 = size(corrl, DIM = 1)
+
+DO i=1,sz1
+PRINT*,'corrl  ',BLKTYP,PRN,i,corrl(i,:)
+END DO
+print *," "
+print *," "
 
 
 ! ----------------------------------------------------------------------
@@ -598,7 +607,6 @@ orbit_resN(:,isat+2) = dorb_RTN(:,5)
 End Do
 ! ----------------------------------------------------------------------
 End Do
-
 
 End SUBROUTINE
 

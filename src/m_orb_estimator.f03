@@ -74,7 +74,8 @@ SUBROUTINE orb_estimator(orbref, veqZarray, veqParray, orbobs, Xmatrix, Wmatrix,
       INTEGER (KIND = prec_int8) :: sz1, sz2, sz3, sz4, sz5, sz6, sz7, sz8 
       INTEGER (KIND = prec_int8) :: Norb, Nobs, Nparam, n_NEQn 
       INTEGER (KIND = prec_int8) :: Nepochs, Ncommon, iobs0, iobs, iref, iepoch, jepoch   
-      INTEGER (KIND = prec_int2) :: Nobsset   
+      INTEGER (KIND = prec_int2) :: Nobsset
+      INTEGER (KIND = prec_int2) :: i, j, k
       REAL (KIND = prec_d) :: tiref, tiobs, dt_limit
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: AmatrixZ
       REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: AmatrixP
@@ -159,6 +160,7 @@ ALLOCATE (NEQn(6+Nparam,6+Nparam), STAT = AllocateStatus)
 ALLOCATE (NEQu(6+Nparam,1), STAT = AllocateStatus)
 ALLOCATE (NEQn_inv(6+Nparam,6+Nparam), STAT = AllocateStatus)
 
+ALLOCATE (corrl(6+Nparam,6+Nparam), STAT = AllocateStatus)
 ALLOCATE (Xsigma(6+Nparam,6+Nparam), STAT = AllocateStatus)
 
 ALLOCATE (ObsEpochs(Ncommon,2), STAT = AllocateStatus)
@@ -299,6 +301,13 @@ sigma = VTV(1,1)/(Nobs-6-Nparam)
 Xsigma = SQRT(sigma*NEQn_inv)
 
 !PRINT*,'Xsigma =', Xsigma(7,7), Xsigma(8,8),Xsigma(9,9)
+
+! Parameter correlation matrix
+DO i = 1, 6+Nparam
+   DO j = 1, 6+Nparam
+      corrl(i,j)=NEQn_inv(i,j)/sqrt(NEQn_inv(i,i))/sqrt(NEQn_inv(j,j))
+   END DO
+END DO
 
 
 END SUBROUTINE

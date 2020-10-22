@@ -32,7 +32,8 @@ MODULE mdl_param
       INTEGER :: DOY, YR ! Day of year
 
 ! ---------------------------------------------------------------------------
-
+! Parameter corrleation matrix
+      REAL (KIND = prec_d), DIMENSION(:,:), ALLOCATABLE :: corrl
 ! ---------------------------------------------------------------------------
 ! Satellite information file
       CHARACTER(LEN=20) :: BLKTYP     ! block type
